@@ -1,0 +1,384 @@
+run number,run class,title,start date/time,stop date/time,config name,Gas,Pressure,Cathode,Micromegas,E-trans,MTHGEM,Ring,smartZAP,Field,Mesh Threshold,Comments
+0,PULS,Testing electronics and DAQ,2021-06-22 20:03:18,2021-06-22 20:03:43,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+1,PULS,Testing electronics and DAQ,2021-06-24 13:02:58,2021-06-24 13:03:22,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+2,PULS,Testing electronics and DAQ,2021-06-24 14:01:29,2021-06-24 14:01:49,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+3,PULS,Testing electronics and DAQ,2021-06-24 14:06:49,2021-06-24 14:07:09,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+4,PULS,Testing electronics and DAQ,2021-06-24 14:18:49,2021-06-24 14:19:05,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+5,PULS,Testing electronics and DAQ,2021-06-24 14:28:30,2021-06-24 14:28:51,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+6,PULS,Testing electronics and DAQ,2021-06-24 15:41:40,2021-06-24 15:42:04,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+7,PULS,Testing electronics and DAQ - zero suppression on with threshold at 600 for all channels,2021-06-24 20:50:36,2021-06-24 20:50:50,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+8,JUNK,,2021-06-24 21:11:33,2021-06-24 21:11:56,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+9,JUNK,,2021-06-24 21:21:11,2021-06-24 21:21:51,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+10,JUNK,,2021-06-24 21:27:46,2021-06-24 21:28:07,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+11,,,2021-06-24 21:35:46.662710,2021-06-24 21:36:02.196031,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+12,,,2021-06-24 21:44:33.028559,2021-06-24 21:44:52.854868,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+13,,,2021-06-25 21:18:15.466672,2021-06-25 21:18:35.389771,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+14,,,2021-06-25 21:50:31.992748,2021-06-25 21:50:46.799672,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+15,,,2021-06-25 21:54:47.842104,2021-06-25 21:55:12.634070,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+16,,,2021-06-29 13:40:29.491938,2021-06-29 13:41:03.960243,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+17,,,2021-06-29 18:14:28.663663,2021-06-29 18:14:43.808925,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+18,,,2021-06-29 18:24:08.007160,2021-06-29 18:24:28.296125,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+19,,,2021-06-29 19:00:45.630441,2021-06-29 19:01:05.866680,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+20,,,2021-06-29 19:07:00.985739,2021-06-29 19:07:21.042261,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+21,,,2021-06-29 19:10:05.907855,2021-06-29 19:10:21.543956,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+22,,,2021-06-29 19:12:57.109571,2021-06-29 19:13:16.024982,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+23,TEST,Alphas in AT-TPC with 300 Torr He,2021-06-29 20:06:32,2021-06-29 20:08:53,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+24,,,2021-06-30 17:44:35.975474,2021-06-30 17:45:11.237673,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+25,,,2021-06-30 17:48:40.841419,2021-06-30 17:49:01.179387,e20009,,,,,,,,,,,
+26,,,2021-06-30 17:52:41.395852,2021-06-30 17:52:56.826790,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+27,,,2021-06-30 18:01:37.248403,2021-06-30 18:01:54.342847,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+28,,,2021-06-30 18:23:33.748113,2021-06-30 18:23:48.524884,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+29,,,2021-06-30 18:26:54.737096,2021-06-30 18:27:09.078881,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+30,PULS,Good pulser run,2021-06-30 18:30:49,2021-06-30 18:31:03,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+31,TEST,Alphas in AT-TPC with 300 Torr He,2021-06-30 18:51:24,2021-06-30 18:52:04,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+32,TEST,Alphas in AT-TPC with 300 Torr He - smartZAPs ON,2021-06-30 19:00:24,2021-06-30 19:52:18,e20009,He,300.0,25.0,120.0,50.0,150.0,100.0,-40.0,Missing,Missing,Missing
+33,TEST,Alphas in AT-TPC with 300 Torr He - smartZAPs ON,2021-06-30 20:29:38,2021-06-30 21:06:36.110211,e20009,He,300.0,25.0,120.0,50.0,130.0,100.0,-80.0,Missing,Missing,Missing
+34,TEST,Alphas in AT-TPC with 300 Torr He - smartZAPs ON after reprogramming CoBo1AsAd0,2021-07-01 01:06:23,2021-07-01 01:26:10,e20009,He,300.0,25.0,120.0,50.0,130.0,100.0,-80.0,Missing,Missing,Missing
+35,,,2021-07-01 13:27:10.954864,2021-07-01 13:27:26.340772,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+36,,,2021-07-01 13:31:10.931927,2021-07-01 13:31:26.362304,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+37,,,2021-07-01 13:36:52.006834,2021-07-01 13:51:13.171460,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+38,,,2021-07-01 19:54:13.295230,2021-07-01 19:54:38.676768,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+39,,,2021-07-01 20:02:29.016464,2021-07-01 20:02:44.137836,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+40,,,2021-07-01 20:04:44.695807,2021-07-01 20:05:00.152249,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+41,TEST,Alphas in AT-TPC with 300 Torr He - smartZAPs ON after changing Arduino,2021-07-01 20:09:00,2021-07-01 20:23:19,e20009,He,300.0,25.0,120.0,50.0,150.0,100.0,70.0,Missing,Missing,Missing
+42,PULS,Good pulser run with 700 mV,2021-07-01 21:14:11,2021-07-01 21:14:55,e20009,,,,,,,,,Missing,Missing,Missing
+43,JUNK,,2021-07-02 03:42:49,2021-07-02 03:47:49,e20009,,,,,,,,,Missing,Missing,Missing
+44,,,2021-07-02 20:18:29.756660,2021-07-02 20:20:55.937092,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+45,BEAM,Boron10 (and others),2021-07-02 20:30:35,2021-07-02 20:31:05,e20009,He,300.0,25.0,100.0,50.0,160.0,100.0,0.0,Missing,Missing,Missing
+46,TEST,Alphas in AT-TPC with 300 Torr H2,2021-07-07 19:25:27,2021-07-07 19:26:22,e20009,H2,300.0,30.0,300.0,50.0,500.0,100.0,0.0,Missing,Missing,Missing
+47,TEST,Alphas in AT-TPC with 300 Torr H2,2021-07-07 19:44:23,2021-07-07 19:45:08,e20009,H2,300.0,30.0,300.0,50.0,550.0,100.0,0.0,Missing,Missing,Missing
+48,TEST,Alphas in AT-TPC with 300 Torr H2,2021-07-07 20:14:14,2021-07-07 20:15:39,e20009,H2,300.0,30.0,300.0,50.0,550.0,100.0,0.0,Missing,Missing,Missing
+49,TEST,Alphas in AT-TPC with 300 Torr H2,2021-07-07 20:22:23,2021-07-07 20:23:42,e20009,H2,300.0,30.0,300.0,50.0,550.0,100.0,0.0,Missing,Missing,Missing
+50,JUNK,,2021-07-08 15:36:04,2021-07-08 15:40:40,e20009,,,,,,,,,Missing,Missing,Missing
+51,JUNK,,2021-07-08 15:41:34,2021-07-08 15:42:10,e20009,,,,,,,,,Missing,Missing,Missing
+52,PULS,,2021-07-08 15:45:50,2021-07-08 15:46:10,e20009,,,,,,,,,Missing,Missing,Missing
+53,,,2021-07-08 15:52:49.998673,2021-07-08 15:53:10.486871,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+54,,,2021-07-08 15:56:00.155693,2021-07-08 15:56:19.890692,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+55,,,2021-07-08 16:00:25.191338,2021-07-08 16:00:44.961144,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+56,,,2021-07-08 16:32:05.268281,2021-07-08 16:32:20.337595,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+57,TEST,Alphas in AT-TPC with 740 Torr H2,2021-07-09 17:58:09,2021-07-09 18:00:45.575449,e20009,H2,740.0,60.0,420.0,50.0,1000.0,300.0,0.0,Missing,Missing,Missing
+58,TEST,Alphas in AT-TPC with 740 Torr H2,2021-07-09 18:24:35,2021-07-09 18:45:00.294799,e20009,H2,740.0,60.0,600.0,50.0,1000.0,300.0,0.0,Missing,Missing,Missing
+59,TEST,Alphas in AT-TPC with 300 Torr H2,2021-07-09 20:42:31,2021-07-09 20:45:07,e20009,H2,300.0,30.0,320.0,50.0,550.0,100.0,0.0,Missing,Missing,After realizing there was no bias on the MM in the previous runs 57-58. H2 gas bottle changed.
+60,TEST,Alphas in AT-TPC with 530 Torr H2,2021-07-09 21:31:57,2021-07-09 21:34:17.255967,e20009,H2,530.0,50.0,370.0,50.0,650.0,100.0,0.0,Missing,Missing,Changed voltage supplies to external for Ring and MTHGEM1 (to be able to go to 5 kV)
+61,TEST,Alphas in AT-TPC with 530 Torr H2,2021-07-09 21:44:02,2021-07-09 21:45:32.940637,e20009,H2,530.0,50.0,420.0,50.0,750.0,300.0,0.0,Missing,Missing,Changed voltage supplies to external for Ring and MTHGEM1 (to be able to go to 5 kV)
+62,TEST,Alphas in AT-TPC with 740 Torr H2,2021-07-09 22:53:13,2021-07-09 22:55:03.375411,e20009,H2,740.0,70.0,500.0,50.0,850.0,400.0,0.0,Missing,Missing,Changed voltage supplies to external for Ring and MTHGEM1 (to be able to go to 5 kV)
+63,,,2021-07-10 21:18:24.203257,2021-07-10 21:19:08.804106,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+64,BEAM,Ne20 beam testing,2021-07-11 15:10:10,2021-07-11 15:10:40,e20009,H2,600.0,60.0,400.0,50.0,800.0,100.0,0.0,,Missing,First Ne20 beam in AT-TPC
+65,TEST,Alphas in AT-TPC with 600 Torr H2,2021-07-11 16:23:31,2021-07-11 16:25:26.715133,e20009,H2,600.0,60.0,400.0,50.0,800.0,100.0,0.0,2.99,Missing,
+66,,,2021-07-11 21:02:18.972062,2021-07-11 21:05:12.743816,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+67,BEAM,Be10 beam at low rate,2021-07-12 03:13:19,2021-07-12 03:13:54,e20009,D2,600.0,60.0,440.0,50.0,800.0,100.0,0.0,2.991,Missing,First Be10 in AT-TPC! Coincidence Mesh+IC trigger. Delay in Mutant 20 us.
+68,BEAM,Be10 beam at low rate,2021-07-12 03:20:40,2021-07-12 03:21:19,e20009,D2,600.0,60.0,440.0,50.0,800.0,100.0,0.0,2.991,Missing,First Be10 in AT-TPC! Coincidence Mesh+IC trigger. Delay in Mutant 5 us.
+69,BEAM,Be10 beam at low rate,2021-07-12 03:24:00,2021-07-12 03:25:20.121434,e20009,D2,600.0,60.0,440.0,50.0,800.0,100.0,0.0,2.991,Missing,First Be10 in AT-TPC! Coincidence Mesh+IC trigger. Delay in Mutant 40 us.
+70,BEAM,Be10 beam at low rate,2021-07-12 03:53:35,2021-07-12 03:55:25,e20009,D2,600.0,60.0,440.0,50.0,800.0,100.0,0.0,2.991,Missing,First Be10 in AT-TPC! Coincidence Mesh+IC trigger. Fixed IC patch to LEMO channel 4.
+71,BEAM,Be10 beam at low rate,2021-07-12 16:59:30,2021-07-12 17:00:09,e20009,D2,600.0,60.0,460.0,50.0,820.0,100.0,0.0,2.991,Missing,After fixing IC position and removing vertical steering
+72,BEAM,Be10 beam at low rate,2021-07-12 20:01:43,2021-07-12 20:02:39,e20009,D2,600.0,60.0,460.0,50.0,820.0,100.0,100.0,2.991,Missing,SmartZAPs on checking why still counting too much beam
+73,,,2021-07-12 20:54:38.732754,2021-07-12 20:55:28.957569,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+74,,,2021-07-12 21:43:14.519325,2021-07-12 21:44:34.264625,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+75,,,2021-07-12 21:49:44.627594,2021-07-12 21:49:59.957081,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+76,,,2021-07-12 22:24:00.289070,2021-07-12 22:24:20.551598,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+77,,,2021-07-12 22:35:50.722295,2021-07-12 22:38:04.834705,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+78,,,2021-07-12 23:03:46.119986,2021-07-12 23:04:42.100269,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+79,,,2021-07-12 23:53:51.543732,2021-07-12 23:54:36.953591,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+80,,,2021-07-13 00:01:36.312663,2021-07-13 00:02:41.939803,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+81,,,2021-07-13 01:04:03.065518,2021-07-13 01:05:02.456337,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+82,,,2021-07-13 01:26:42.516968,2021-07-13 01:27:48.081638,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+83,PULS,Multiplicity baselines,2021-07-13 02:13:18,2021-07-13 02:14:17,e20009,,,,,,,,,,Missing,
+84,PULS,Multiplicity baselines,2021-07-13 02:30:53,2021-07-13 02:31:18,e20009,,,,,,,,,,Missing,
+85,,,2021-07-13 02:58:53.879170,2021-07-13 02:59:18.726827,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+86,JUNK,,2021-07-13 03:13:24,2021-07-13 03:14:04,e20009,,,,,,,,,,Missing,
+87,PULS,Multiplicity baselines (good this time),2021-07-13 03:20:48,2021-07-13 03:21:29,e20009,,,,,,,,,,Missing,
+88,,,2021-07-13 03:39:44.049346,2021-07-13 03:40:04.734796,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+89,,,2021-07-13 03:50:00.833166,2021-07-13 03:54:24.775330,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+90,PULS,Multiplicity baselines in full readout mode,2021-07-13 04:00:05,2021-07-13 04:01:10,e20009,,,,,,,,,,Missing,
+91,,,2021-07-13 04:03:34.758805,2021-07-13 04:03:54.885452,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+92,,,2021-07-13 04:05:54.809404,2021-07-13 04:06:20.214112,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+93,,,2021-07-13 04:10:25.375829,2021-07-13 04:10:52.323814,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+94,,,2021-07-13 04:30:12.607586,2021-07-13 04:46:28.553859,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+95,,,2021-07-13 04:48:23.699412,2021-07-13 05:04:49.742069,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+96,,,2021-07-13 05:29:24.460346,2021-07-13 05:33:39.456076,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+97,,,2021-07-13 05:48:50.395392,2021-07-13 05:49:59.751277,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+98,,,2021-07-13 05:52:05.308295,2021-07-13 06:11:25.678066,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+99,,,2021-07-13 06:45:56.093116,2021-07-13 06:56:31.050566,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+100,,,2021-07-13 07:04:00.970846,2021-07-13 07:04:46.061729,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+101,,,2021-07-13 08:22:02.801562,2021-07-13 08:23:58.054439,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+102,,,2021-07-13 08:24:56.958499,2021-07-13 08:25:57.778045,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+103,,,2021-07-13 08:30:17.367855,2021-07-13 08:30:52.225485,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+104,,,2021-07-13 08:37:06.987296,2021-07-13 08:37:32.181394,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+105,,,2021-07-13 09:51:48.446432,2021-07-13 09:53:09.942840,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+106,,,2021-07-13 09:53:55.266766,2021-07-13 09:54:13.775727,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+107,,,2021-07-13 09:57:08.519235,2021-07-13 09:57:44.008075,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+108,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-13 09:58:08,2021-07-13 10:55:34.387633,e20009,D2,600.0,60.0,400.0,50.0,850.0,100.0,100.0,2.991,Missing,Finally our first production run after fixing many issues with the smartZAPs.
+109,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-13 10:55:59,2021-07-13 11:59:09.873879,e20009,D2,600.0,60.0,400.0,50.0,850.0,100.0,100.0,2.991,Missing,Continue production on this setting.
+110,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-13 11:59:34,2021-07-13 13:23:25,e20009,D2,600.0,60.0,400.0,50.0,850.0,100.0,100.0,2.991,Missing,Continue production on this setting. Lost beam due to pressure increase
+111,TEST,Be10 9.6 MeV/u on D2 600 Torr,2021-07-13 13:25:11,2021-07-13 13:30:50,e20009,D2,600.0,60.0,400.0,50.0,850.0,100.0,100.0,2.991,Missing,Test with different beam contamination - stripper foil removed in beam line
+112,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-13 13:33:10,2021-07-13 14:33:31,e20009,D2,600.0,60.0,400.0,50.0,850.0,100.0,100.0,2.991,Missing,Normal production run
+113,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-13 14:33:51,2021-07-13 15:34:04,e20009,D2,600.0,60.0,400.0,50.0,850.0,100.0,100.0,2.991,Missing,At beginning of run count rate would fluctuate to 0 and back. Count rate 1400 afterwards
+114,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-13 15:34:44,2021-07-13 16:35:00,e20009,D2,600.0,60.0,400.0,50.0,850.0,100.0,100.0,2.991,Missing,Count rate 1800 at start
+115,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-13 16:35:35,2021-07-13 17:41:06,e20009,D2,600.0,60.0,400.0,50.0,850.0,100.0,100.0,2.991,Missing,Count rate 1500 at start
+116,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-13 17:41:36,2021-07-13 18:29:32,e20009,D2,600.0,60.0,400.0,50.0,850.0,100.0,100.0,2.991,Missing,Count rate 1400 at start
+117,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-13 18:29:56,2021-07-13 19:03:17.034722,e20009,D2,600.0,60.0,400.0,50.0,850.0,100.0,100.0,2.991,Missing,Count rate 2100 at start
+118,PROD,"Be10 9.6 MeV/u on D2 600 Torr, change the higher TH on IC to remove N15",2021-07-13 19:32:37,2021-07-13 20:07:12,e20009,D2,600.0,60.0,400.0,50.0,850.0,100.0,100.0,2.991,200.0,Count rate 1700 at start
+119,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-13 20:28:07,2021-07-13 20:41:10.444655,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+120,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-13 21:07:28,2021-07-13 22:09:13,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,"Changed gain on MM and lowered threshold on mesh, slightly increased the beam rate"
+121,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-13 22:09:44,2021-07-13 23:12:49,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+122,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-13 23:13:14,2021-07-14 00:13:55,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+123,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 00:14:19,2021-07-14 01:18:30,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+124,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 01:19:00,2021-07-14 02:19:16,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+125,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 02:19:41,2021-07-14 03:24:52,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+126,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 03:25:46,2021-07-14 04:33:07,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+127,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 04:33:42,2021-07-14 04:35:52,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+128,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 04:37:03,2021-07-14 04:38:58,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+129,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 04:40:18,2021-07-14 04:43:32,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+130,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 04:55:17,2021-07-14 04:56:07,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+131,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 04:59:02,2021-07-14 05:00:02,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+132,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 05:01:12,2021-07-14 05:02:02,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+133,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 05:04:03,2021-07-14 05:05:15,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+134,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 05:12:58,2021-07-14 05:13:58,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+135,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 05:14:23,2021-07-14 05:35:58,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+136,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 05:38:53,2021-07-14 05:39:54,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+137,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 05:40:48,2021-07-14 05:41:39,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+138,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 06:27:29,2021-07-14 06:28:39,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+139,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 06:29:24,2021-07-14 06:30:24,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+140,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 06:35:44,2021-07-14 06:43:59,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+141,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 06:44:34,2021-07-14 06:48:34,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+142,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 06:49:19,2021-07-14 06:50:54,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+143,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 06:52:04,2021-07-14 06:52:59,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+144,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 06:58:34,2021-07-14 07:00:24,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+145,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 07:01:04,2021-07-14 07:01:40,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+146,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 07:02:34,2021-07-14 07:03:40,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+147,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 07:07:09,2021-07-14 07:09:49,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+148,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 07:10:30,2021-07-14 07:11:05,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+149,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 07:11:54,2021-07-14 07:12:34,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+150,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 07:15:14,2021-07-14 07:23:40,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+151,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 07:24:00,2021-07-14 07:24:35,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+152,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 07:25:34,2021-07-14 07:26:10,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+153,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 07:29:40,2021-07-14 07:35:15,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+154,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 07:35:50,2021-07-14 07:36:14,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+155,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 07:36:55,2021-07-14 07:37:44,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+156,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 07:50:05,2021-07-14 08:04:00,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh - CoBo 5 AsAd1 at least bad config
+157,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 08:04:20,2021-07-14 08:08:25,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+158,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 08:08:55,2021-07-14 08:09:15,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+159,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 08:10:05,2021-07-14 08:10:20,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+160,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 08:14:05,2021-07-14 08:14:15,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+161,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 08:15:30,2021-07-14 08:21:15,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Changed gain on MM and lowered threshold on mesh
+162,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 08:36:26,2021-07-14 08:54:11,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Good run ? Stopped taking triggers after 16 min
+163,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 09:06:26,2021-07-14 09:23:56,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Good run ? Stopped taking triggers after 16 min
+164,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 09:26:50,2021-07-14 09:34:52,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Good run ? Stopped taking triggers after 6 min
+165,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 09:45:02,2021-07-14 09:48:11,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Good run ? Stopped taking triggers after 55s...
+166,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 09:49:46,2021-07-14 09:50:01,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,No events
+167,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 10:00:42,2021-07-14 11:02:22,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Back to production runs - MuTant reboot seemed to do the trick ?
+168,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 11:02:47,2021-07-14 11:14:52.425409,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Back to production run - DAQ seems stable for now?
+169,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 11:17:07,2021-07-14 11:21:38,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Back to production run - DAQ seems stable for now?
+170,TEST,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 11:21:58,2021-07-14 11:23:38,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Back to production run - DAQ seems stable for now?
+171,TEST,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 11:30:32,2021-07-14 11:31:22,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Back to production run - DAQ seems stable for now?
+172,TEST,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 11:31:42,2021-07-14 11:35:13,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Back to production run - DAQ seems stable for now?
+173,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 11:45:23,2021-07-14 12:31:23.778422,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Back to production run
+174,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 12:31:49,2021-07-14 12:36:28,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Back to production run
+175,TEST,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 12:38:28,2021-07-14 12:38:53,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Back to production run
+176,TEST,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 13:15:19,2021-07-14 13:16:51,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Back to production run
+177,TEST,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 13:26:14,2021-07-14 13:27:54,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Back to production run
+178,TEST,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 13:30:34,2021-07-14 13:31:24,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Back to production run
+179,TEST,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 13:35:38,2021-07-14 13:36:14,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Back to production run
+180,TEST,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 13:39:19,2021-07-14 13:39:40,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Back to production run
+181,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 13:41:14,2021-07-14 14:40:29.764560,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Back to production run
+182,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 14:40:45,2021-07-14 15:48:36.424116,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Back to production run
+183,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 15:49:06,2021-07-14 16:58:17,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Back to production run
+184,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 16:58:36,2021-07-14 17:58:12,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Back to production run
+185,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-14 17:59:32,2021-07-14 18:29:47,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,150.0,Back to production run
+186,TEST,Dummy run to test multiplicity trigger,2021-07-14 18:38:53,2021-07-14 18:53:43.617515,e20009,,,,,,,,,,,
+187,,,2021-07-14 18:54:13.484411,2021-07-14 19:09:38.018964,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+188,,,2021-07-14 19:20:23.211404,2021-07-14 19:21:18.229350,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+189,,,2021-07-14 19:26:43.087014,2021-07-14 19:42:24.293804,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+190,,,2021-07-14 19:50:48.736683,2021-07-14 19:51:09.554650,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+191,,,2021-07-14 19:53:23.857899,2021-07-14 19:54:04.131902,e20009,,,,,,,,,,,
+192,PULS,Multiplicity baselines in full readout mode,2021-07-14 19:56:19,2021-07-14 19:56:54,e20009,,,,,,,,,,,
+193,PULS,Full readout mode with baselines set,2021-07-14 20:01:53,2021-07-14 20:02:19,e20009,,,,,,,,,,,
+194,,,2021-07-14 20:19:09.328080,2021-07-14 20:23:44.296485,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+195,,,2021-07-14 20:24:19.047890,2021-07-14 20:30:00.095675,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+196,,,2021-07-14 20:34:59.127245,2021-07-14 20:35:24.424926,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+197,TEST,Testing with Mutant readout turned on,2021-07-14 20:37:54,2021-07-14 20:38:44,e20009,,,,,,,,,,,
+198,,,2021-07-14 20:52:34.337317,2021-07-14 20:53:49.819075,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+199,,,2021-07-14 20:54:20.455927,2021-07-14 21:13:25.074030,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+200,,,2021-07-14 21:13:59.574704,2021-07-14 21:16:59.996433,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+201,,,2021-07-14 21:17:50.358017,2021-07-14 21:25:49.944594,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+202,,,2021-07-14 21:26:44.874964,2021-07-14 21:28:06.257634,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+203,,,2021-07-14 21:28:24.962777,2021-07-14 21:36:20.707061,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+204,,,2021-07-14 21:47:50.004339,2021-07-14 21:48:20.239078,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+205,,,2021-07-14 21:53:47.910077,2021-07-14 22:05:05.477961,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+206,,,2021-07-14 22:16:00.908933,2021-07-14 22:16:36.127680,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+207,PROD,Back to production on Be10 beam,2021-07-14 22:21:30,2021-07-14 23:40:51.431821,e20009,D2,599.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Added multiplicity trigger with signal in LEMO6. Mesh threshold back to 200 mV
+208,PROD,Back to production on Be10 beam,2021-07-14 23:41:11,2021-07-15 00:37:13,e20009,D2,599.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Added multiplicity trigger with signal in LEMO6. Mesh threshold back to 200 mV
+209,PROD,Back to production on Be10 beam,2021-07-15 00:38:57,2021-07-15 01:39:23,e20009,D2,599.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Added multiplicity trigger with signal in LEMO6. Mesh threshold back to 200 mV
+210,PROD,Back to production on Be10 beam,2021-07-15 01:40:12,2021-07-15 02:39:33,e20009,D2,599.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Added multiplicity trigger with signal in LEMO6. Mesh threshold back to 200 mV
+211,PROD,Back to production on Be10 beam,2021-07-15 02:51:34,2021-07-15 03:19:59.419172,e20009,D2,599.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Added multiplicity trigger with signal in LEMO6. Mesh threshold back to 200 mV
+212,JUNK,,2021-07-15 03:20:54,2021-07-15 03:21:59,e20009,,,,,,,,,,,
+213,JUNK,,2021-07-15 03:23:09,2021-07-15 03:23:49,e20009,,,,,,,,,,,
+214,JUNK,,2021-07-15 03:34:44,2021-07-15 03:35:04,e20009,,,,,,,,,,,
+215,,,2021-07-15 03:50:51.833732,2021-07-15 03:51:51.924797,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+216,,,2021-07-15 03:57:24.773890,2021-07-15 03:57:54.247717,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+217,,,2021-07-15 04:00:50.322252,2021-07-15 04:01:14.973178,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+218,,,2021-07-15 04:04:20.856909,2021-07-15 04:04:45.651586,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+219,,,2021-07-15 04:07:46.059113,2021-07-15 04:08:21.281363,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+220,,,2021-07-15 04:18:12.214893,2021-07-15 04:18:56.363658,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+221,,,2021-07-15 04:19:41.658124,2021-07-15 04:20:51.576762,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+222,,,2021-07-15 04:22:52.197657,2021-07-15 04:23:36.957724,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+223,,,2021-07-15 04:25:07.108521,2021-07-15 04:25:42.263232,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+224,,,2021-07-15 04:37:01.985294,2021-07-15 04:37:52.341590,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+225,,,2021-07-15 04:40:12.546059,2021-07-15 05:13:56.963536,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+226,,,2021-07-15 10:18:03.540429,2021-07-15 10:18:29.181195,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+227,,,2021-07-15 12:23:15.408557,2021-07-15 12:23:34.434598,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+228,,,2021-07-15 12:24:30.224020,2021-07-15 12:24:54.905973,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+229,,,2021-07-15 12:37:25.717839,2021-07-15 12:40:20.090450,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+230,PROD,10Be production run with only mesh trigger,2021-07-15 12:41:00,2021-07-15 12:42:30,e20009,D2,600.0,60.0,100.0,50.0,850.0,420.0,150.0,2.99,200.0,
+231,PROD,10Be production run with only mesh trigger,2021-07-15 12:42:50,2021-07-15 13:05:46.021385,e20009,D2,600.0,60.0,100.0,50.0,850.0,420.0,150.0,2.99,200.0,
+232,,,2021-07-15 13:09:10.513945,2021-07-15 13:09:31.001705,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+233,,,2021-07-15 13:12:15.610804,2021-07-15 13:12:31.128373,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+234,,,2021-07-15 13:13:11.181169,2021-07-15 13:13:35.633006,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+235,,,2021-07-15 13:27:16.498069,2021-07-15 13:28:06.488107,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+236,,,2021-07-15 13:29:16.555589,2021-07-15 13:29:52.030054,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+237,,,2021-07-15 13:40:41.355428,2021-07-15 13:41:36.745591,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+238,,,2021-07-15 13:44:01.477201,2021-07-15 13:45:46.098116,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+239,,,2021-07-15 13:55:51.133767,2021-07-15 13:56:56.645502,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+240,,,2021-07-15 13:59:31.752969,2021-07-15 13:59:51.264305,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+241,,,2021-07-15 14:05:06.254872,2021-07-15 14:05:38.355437,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+242,,,2021-07-15 14:08:37.040431,2021-07-15 14:08:57.797508,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+243,,,2021-07-15 14:11:46.779896,2021-07-15 14:12:12.295231,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+244,,,2021-07-15 14:17:12.186614,2021-07-15 14:17:31.596285,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+245,,,2021-07-15 14:20:52.262757,2021-07-15 14:21:17.122105,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+246,,,2021-07-15 14:23:22.066598,2021-07-15 14:23:47.293588,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+247,,,2021-07-15 14:25:27.600779,2021-07-15 14:25:47.545617,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+248,,,2021-07-15 14:30:08.003545,2021-07-15 14:30:32.462514,e20009,,,,,,,,,,,
+249,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-15 14:31:27,2021-07-15 15:27:42.696407,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+250,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-15 15:28:22,2021-07-15 16:28:28.031986,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+251,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-15 16:28:48,2021-07-15 17:29:03.757070,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+252,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-15 17:29:29,2021-07-15 18:29:39.995849,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+253,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-15 18:30:00,2021-07-15 19:34:25.735194,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+254,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-15 19:34:40,2021-07-15 20:02:35,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+255,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-15 20:02:56,2021-07-15 20:59:27,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+256,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-15 20:59:52,2021-07-15 22:00:02.467846,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+257,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-15 22:00:22,2021-07-15 22:06:17,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+258,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-15 22:07:12,2021-07-15 22:09:12,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+259,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-15 22:09:32,2021-07-15 23:09:48.219097,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+260,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-15 23:10:22,2021-07-16 00:10:28.873500,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+261,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 00:11:09,2021-07-16 01:11:22.429831,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+262,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 01:12:17,2021-07-16 02:03:03.295443,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+263,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 02:18:13,2021-07-16 03:18:24.354637,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+264,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 03:19:03,2021-07-16 04:19:14.381245,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+265,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 04:19:44,2021-07-16 04:44:40.101294,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+266,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 04:45:39,2021-07-16 05:46:05.357667,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+267,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 05:46:34,2021-07-16 06:46:40.678498,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+268,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 06:47:36,2021-07-16 07:03:55.681353,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+269,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 07:04:36,2021-07-16 08:04:01.040736,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+270,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 08:04:30,2021-07-16 09:04:18.746703,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+271,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 09:04:46,2021-07-16 10:04:47.145314,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+272,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 10:05:27,2021-07-16 11:05:22.721762,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+273,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 11:06:12,2021-07-16 12:06:06,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+274,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 12:06:51,2021-07-16 13:12:32,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+275,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 13:13:12,2021-07-16 14:11:12,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+276,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 14:11:47,2021-07-16 14:53:28,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Still have CoBo8 AsAd1 AGET1&3 bad. Only mesh trigger.
+277,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 14:59:13,2021-07-16 16:05:49,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+278,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 16:06:24,2021-07-16 17:06:52,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+279,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 17:07:24,2021-07-16 17:48:37,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+280,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 18:14:35,2021-07-16 19:15:50,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+281,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 19:16:25,2021-07-16 19:44:26,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+282,TEST,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 20:21:55,2021-07-16 20:24:16,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+283,TEST,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 20:26:41,2021-07-16 20:35:31,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+284,TEST,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 20:42:26,2021-07-16 20:43:22,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+285,TEST,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 20:49:46,2021-07-16 20:50:31,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+286,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 21:02:07,2021-07-16 22:02:52.935392,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+287,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 22:03:33,2021-07-16 23:05:29.443633,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+288,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-16 23:06:39,2021-07-17 00:05:40.690164,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+289,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-17 00:07:20,2021-07-17 01:13:07,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+290,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-17 01:14:47,2021-07-17 02:11:50,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+291,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-17 02:13:10,2021-07-17 03:11:21,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+292,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-17 03:12:31,2021-07-17 04:12:14,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+293,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-17 04:12:38,2021-07-17 05:15:02,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+294,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-17 05:15:25,2021-07-17 06:08:55,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Beam rate fluctuated wildly about 40 minutes in.
+295,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-17 06:12:06,2021-07-17 07:11:22.324337,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+296,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-17 07:11:57,2021-07-17 08:12:25.854036,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+297,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-17 08:12:45,2021-07-17 09:12:57.436843,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+298,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-17 09:13:17,2021-07-17 10:14:18.072390,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+299,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-17 10:14:43,2021-07-17 11:16:09.394187,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+300,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-17 11:17:24,2021-07-17 12:17:20.770028,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+301,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-17 12:17:54,2021-07-17 13:17:57.096232,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+302,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-17 13:18:46,2021-07-17 14:19:55.295299,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+303,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-17 14:20:34,2021-07-17 15:19:56.891210,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+304,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-17 15:20:36,2021-07-17 16:21:47.356292,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+305,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-17 16:22:27,2021-07-17 17:22:22.730618,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+306,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-17 17:22:48,2021-07-17 18:22:53.331374,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+307,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-17 18:23:28,2021-07-17 19:23:34.909231,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+308,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-17 19:24:04,2021-07-17 20:24:26,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+309,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-17 20:24:46,2021-07-17 21:25:31,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+310,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-17 21:26:11,2021-07-17 22:26:59,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+311,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-17 22:27:19,2021-07-17 23:27:30,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+312,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-17 23:28:00,2021-07-18 00:28:06,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+313,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-18 00:28:30,2021-07-18 01:29:07,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+314,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-18 01:30:17,2021-07-18 02:31:07,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+315,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-18 02:31:33,2021-07-18 03:32:33,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+316,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-18 03:33:43,2021-07-18 04:32:15,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+317,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-18 04:32:38,2021-07-18 05:32:34,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+318,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-18 05:32:59,2021-07-18 06:33:50,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+320,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-18 07:36:05,2021-07-18 08:39:26,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+320,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-18 06:34:09,2021-07-18 07:35:45,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,
+321,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-18 08:40:06,2021-07-18 09:40:07,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Voltage tripped - only DS beam triggers
+322,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-18 09:40:32,2021-07-18 10:41:50,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Voltage tripped - only DS beam triggers
+323,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-18 10:42:08,2021-07-18 11:44:04,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Voltage tripped - only DS beam triggers
+324,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-18 11:44:24,2021-07-18 12:11:59,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Voltage tripped - only DS beam triggers
+325,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-18 12:23:39,2021-07-18 12:28:44,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Voltage back on - run OK
+326,TEST,Be10 9.6 MeV/u on D2 600 Torr,2021-07-18 12:37:04,2021-07-18 12:48:10.261321,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Without stripper foils
+327,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-18 12:49:00,2021-07-18 12:51:44,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,"Stripper foils back in, normal conditions"
+328,TEST,Be10 9.6 MeV/u on D2 600 Torr,2021-07-18 13:03:25,2021-07-18 13:08:20.608452,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,"Chandana testing - different mass, 29, BeF"
+329,TEST,Be10 9.6 MeV/u on D2 600 Torr,2021-07-18 13:24:24,2021-07-18 13:28:25.802762,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,"Chandana testing - different mass, 26, BeO"
+330,TEST,Be10 9.6 MeV/u on D2 600 Torr,2021-07-18 13:43:29,2021-07-18 13:47:00,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Chandana testing -  back to 48 mass
+331,TEST,Be10 9.6 MeV/u on D2 600 Torr,2021-07-18 13:58:04,2021-07-18 14:03:36.743389,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Chandana testing -  back to 48 mass
+332,JUNK,Be10 9.6 MeV/u on D2 600 Torr,2021-07-18 14:08:10,2021-07-18 14:12:40,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,No Beam
+333,TEST,Be10 9.6 MeV/u on D2 600 Torr,2021-07-18 14:23:57,2021-07-18 14:26:05.804530,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,Source testing - Different mass 10 Be - only see Boron though
+334,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-18 14:32:27,2021-07-18 15:32:02.033607,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,"Source testing - same mass as experiment, try to crank up the intensity"
+335,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-18 15:32:31,2021-07-18 16:21:16.959642,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,"Source testing - same mass as experiment, source material is nearly gone"
+336,PROD,Be10 9.6 MeV/u on D2 600 Torr,2021-07-18 17:10:58,2021-07-18 17:54:20.740424,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,"Source is being shut off, intensity dwindling off for this run"
+337,PROD,Background measurement with alphas,2021-07-18 18:06:20,2021-07-19 04:14:40.365388,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,200.0,"No beam, only background measurement"
+338,,,2021-07-19 04:23:21.974945,2021-07-19 04:23:52.018660,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+339,,,2021-07-19 04:26:52.164565,2021-07-19 04:27:21.911564,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+340,,,2021-07-19 15:22:00.353854,2021-07-19 15:23:06.545222,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+341,TEST,After rebooting uTCA crate,2021-07-19 15:27:05,2021-07-19 15:27:30,e20009,,,,,,,,,,,Finally recovered CoBo8-AsAd1-AGET1&3!
+342,,,2021-07-19 16:54:27.126071,2021-07-19 16:55:41.597682,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+343,,,2021-07-19 16:56:11.085855,2021-07-19 16:57:31.954195,e20009,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing,Missing
+344,PROD,Back to Be10 beam on 600 Torr D2 - Almost Pure Be10 beam!,2021-07-19 16:57:57,2021-07-19 17:18:52.050059,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,170.0,Be10 beam from new ion source does not contain any B10!
+345,PROD,Back to Be10 beam on 600 Torr D2 - Almost Pure Be10 beam!,2021-07-19 17:54:38,2021-07-19 18:39:28.994136,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,170.0,Be10 beam from new ion source does not contain any B10!
+346,PROD,Back to Be10 beam on 600 Torr D2 - Almost Pure Be10 beam!,2021-07-19 18:45:18,2021-07-19 19:51:40.429548,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,170.0,Be10 beam from new ion source does not contain any B10!
+347,PROD,Back to Be10 beam on 600 Torr D2 - Almost Pure Be10 beam!,2021-07-19 19:52:10,2021-07-19 20:53:14.340286,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,170.0,Be10 beam from new ion source does not contain any B10!
+348,PROD,Back to Be10 beam on 600 Torr D2 - Almost Pure Be10 beam!,2021-07-19 20:54:06,2021-07-19 22:17:41.653819,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,170.0,Be10 beam from new ion source does not contain any B10!
+349,PROD,Back to Be10 beam on 600 Torr D2 - Almost Pure Be10 beam!,2021-07-19 22:18:36,2021-07-19 23:04:53.020200,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,170.0,Be10 beam from new ion source does not contain any B10!
+350,PROD,Back to Be10 beam on 600 Torr D2 - Almost Pure Be10 beam!,2021-07-19 23:05:27,2021-07-19 23:58:43.928893,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,170.0,Be10 beam from new ion source does not contain any B10!
+351,PROD,Back to Be10 beam on 600 Torr D2 - Almost Pure Be10 beam!,2021-07-20 00:02:18,2021-07-20 00:49:09.348843,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,170.0,Be10 beam from new ion source does not contain any B10!
+352,PROD,Back to Be10 beam on 600 Torr D2 - Almost Pure Be10 beam!,2021-07-20 00:49:43,2021-07-20 01:44:54.300508,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,170.0,Be10 beam from new ion source does not contain any B10!
+353,PROD,Back to Be10 beam on 600 Torr D2 - Almost Pure Be10 beam!,2021-07-20 01:45:39,2021-07-20 02:43:40.641731,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,170.0,Be10 beam from new ion source does not contain any B10!
+354,PROD,Back to Be10 beam on 600 Torr D2 - Almost Pure Be10 beam!,2021-07-20 02:44:15,2021-07-20 03:25:05,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,170.0,Be10 beam from new ion source does not contain any B10!
+355,PROD,Back to Be10 beam on 600 Torr D2 - Almost Pure Be10 beam!,2021-07-20 03:25:25,2021-07-20 04:02:01.805432,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,170.0,Be10 beam from new ion source does not contain any B10!
+356,PROD,Back to Be10 beam on 600 Torr D2 - Almost Pure Be10 beam!,2021-07-20 04:03:21,2021-07-20 04:53:57,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,170.0,Be10 beam from new ion source does not contain any B10!
+357,PROD,Back to Be10 beam on 600 Torr D2 - Almost Pure Be10 beam!,2021-07-20 04:55:58,2021-07-20 05:20:07,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,170.0,"Be10 beam from new ion source does not contain any B10!  , count rate went up from 3000-13000"
+358,PROD,Back to Be10 beam on 600 Torr D2 - Almost Pure Be10 beam!,2021-07-20 05:22:57,2021-07-20 05:33:42,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,170.0,"Be10 beam from new ion source does not contain any B10!  , beam stopped from 1:38-1:54 am"
+359,PROD,Back to Be10 beam on 600 Torr D2 - Almost Pure Be10 beam!,2021-07-20 05:52:53,2021-07-20 06:53:41,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,170.0,Be10 beam from new ion source does not contain any B10! 10 first minutes count rate was 250
+360,PROD,Back to Be10 beam on 600 Torr D2 - Almost Pure Be10 beam!,2021-07-20 06:54:35,2021-07-20 07:03:27,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,170.0,This run was very short due to daq stoped taking data and I stopped and re-start all
+361,PROD,Back to Be10 beam on 600 Torr D2 - Almost Pure Be10 beam!,2021-07-20 07:04:30,2021-07-20 07:36:32,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,170.0,Count rate start at 2200 and run ended at 900; trigger rate was 17 to 7 respectively
+362,PROD,Back to Be10 beam on 600 Torr D2 - Almost Pure Be10 beam!,2021-07-20 07:37:03,2021-07-20 08:41:09,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,170.0,Be10 beam from new ion source does not contain any B10!
+363,PROD,Back to Be10 beam on 600 Torr D2 - Almost Pure Be10 beam!,2021-07-20 08:42:04,2021-07-20 09:38:30,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,170.0,Be10 beam from new ion source does not contain any B10!
+364,PROD,Back to Be10 beam on 600 Torr D2 - Almost Pure Be10 beam!,2021-07-20 09:39:40,2021-07-20 10:07:35,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,170.0,Be10 beam from new ion source does not contain any B10!
+365,PROD,Back to Be10 beam on 600 Torr D2 - Almost Pure Be10 beam!,2021-07-20 10:08:05,2021-07-20 11:04:06,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,170.0,Be10 beam from new ion source does not contain any B10!
+366,PROD,Back to Be10 beam on 600 Torr D2 - Almost Pure Be10 beam!,2021-07-20 11:04:37,2021-07-20 11:48:23,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,170.0,Count rate is about 3000 and trigger rate is about 20
+367,PROD,Back to Be10 beam on 600 Torr D2 - Almost Pure Be10 beam!,2021-07-20 11:48:53,2021-07-20 12:00:07,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,170.0,Count rate is about 3000 and trigger rate is about 20
+368,PROD,Back to Be10 beam on 600 Torr D2 - Almost Pure Be10 beam!,2021-07-20 12:00:47,2021-07-20 12:04:03,e20009,D2,600.0,60.0,420.0,50.0,850.0,100.0,130.0,2.991,170.0,Count rate is about 3000 and trigger rate is about 20
+369,JUNK,Pulser run 200 mV,2021-07-20 13:45:52,2021-07-20 13:47:42,e20009,,,,,,,,,,,Pulser was not set correctly
+370,JUNK,Pulser run 400 mV,2021-07-20 14:22:22,2021-07-20 14:24:03,e20009,,,,,,,,,,,Pulser was not set correctly
+371,JUNK,Pulser run 100 mV,2021-07-20 14:43:28,2021-07-20 14:45:17,e20009,,,,,,,,,,,Pulser was not set correctly
+372,PULS,Pulser run 100 mV,2021-07-20 14:56:52,2021-07-20 14:58:38.051347,e20009,,,,,,,,,,,
+373,PULS,Pulser run 200 mV,2021-07-20 15:08:12,2021-07-20 15:10:12.969573,e20009,,,,,,,,,,,
+374,PULS,Pulser run 300 mV,2021-07-20 15:31:48,2021-07-20 15:33:53.451461,e20009,,,,,,,,,,,
+375,PULS,Pulser run 400 mV,2021-07-20 15:34:23,2021-07-20 15:36:13.436244,e20009,,,,,,,,,,,
+376,PULS,Pulser run 500 mV,2021-07-20 15:36:33,2021-07-20 15:38:14.047882,e20009,,,,,,,,,,,
+377,PULS,Pulser run 750 mV,2021-07-20 15:39:43,2021-07-20 15:42:18.647368,e20009,,,,,,,,,,,
+378,PULS,Pulser run 1000 mV,2021-07-20 15:42:48,2021-07-20 15:44:53.625190,e20009,,,,,,,,,,,
+379,PULS,Pulser run 1250 mV,2021-07-20 15:49:58,2021-07-20 15:51:49.300330,e20009,,,,,,,,,,,
+380,PULS,Pulser run 1500 mV,2021-07-20 16:14:08,2021-07-20 16:15:53,e20009,,,,,,,,,,,
+381,PULS,Pulser run 1750 mV,2021-07-20 16:16:38,2021-07-20 16:18:18,e20009,,,,,,,,,,,
+382,PULS,Pulser run 2000 mV,2021-07-20 16:19:08,2021-07-20 16:21:09.014835,e20009,,,,,,,,,,,
