@@ -52,10 +52,10 @@ def make_pc(event_num_array):
         all_traces[:, 0] = all_traces[:, 1]
         all_traces[:, -1] = all_traces[:, -2]
 
-        trim_ct = False
+        #trim_ct = False
 
-        if trim_ct == True:
-                all_traces, meta = remove_ct(all_traces, meta, threshold1 = 2000, threshold2 = 1600, channel_width = 3, tb_range = 7)
+        #if trim_ct == True:
+                #all_traces, meta = remove_ct(all_traces, meta, threshold1 = 2000, threshold2 = 1600, channel_width = 3, tb_range = 7)
 
         all_peaks = np.array([])
         all_energies = np.array([])
@@ -142,7 +142,6 @@ if __name__ == '__main__':
     #evt_cores = 4
 
     #PATH = '/mnt/research/attpc/e20009/h5/run_0231.h5'
-    #PATH = '/mnt/daqtesting/e20009_attpc_transfer/h5/run_0231.h5'
     #PATH = '/mnt/analysis/e20009/h5new/run_0231.h5'
     PATH = '/mnt/analysis/e20009/e20009_Turi/run_0231.h5'
 
