@@ -6,11 +6,14 @@ import pandas as pd
 import plotly.graph_objects as go
 import time
 from multiprocessing import Pool, cpu_count
+import multiprocessing
+import multiprocessing.pool
 from tqdm import tqdm
 import sys
 sys.path.insert(0, 'TPC-utils')
 from tpc_utils import background, search_high_res
 from TPCH5_utils import get_first_last_event_num, load_trace
+import h5py
 
 # Daemon workaround found from: https://stackoverflow.com/questions/6974695/python-process-pool-non-daemonic
 
@@ -37,8 +40,9 @@ def deconv(traces):
     return search_high_res(traces, sigma = 4, threshold = 60, remove_bkg = True, number_it = 200, markov = True, aver_window = 5)[0]
 
 def make_pc(event_num_array):
-    for event_num in event_num_array:
-        event_ind = event_num
+    all_clouds_seg = []
+    for event_num_i in tqdm(range(len(event_num_array))):
+        event_ind = event_num_array[event_num_i]
 
         # Picks out the traces from the first event.
         meta, all_traces = load_trace(PATH, event_ind)
@@ -124,16 +128,23 @@ def make_pc(event_num_array):
 
         # Recombine point cloud
         pc = np.vstack((pc_br, pc_nbr))
+
+        all_clouds_seg.append([event_ind, pc])
+
+    return all_clouds_seg
         
-def main():
+if __name__ == '__main__':
     start = time.time()
     
     all_cores = cpu_count()
     deconv_cores = 10
     evt_cores = int(np.floor(all_cores/deconv_cores))
-    #evt_cores = 2
+    #evt_cores = 4
 
-    PATH = '/mnt/research/attpc/e20009/h5/run_0231.h5'
+    #PATH = '/mnt/research/attpc/e20009/h5/run_0231.h5'
+    #PATH = '/mnt/daqtesting/e20009_attpc_transfer/h5/run_0231.h5'
+    #PATH = '/mnt/analysis/e20009/h5new/run_0231.h5'
+    PATH = '/mnt/analysis/e20009/e20009_Turi/run_0231.h5'
 
     first_event_num, last_event_num = get_first_last_event_num(PATH)
 
@@ -149,11 +160,29 @@ def main():
 
     with NoDaemonProcessPool(evt_cores) as evt_p:
         run_parts = evt_p.map(make_pc, evt_parts)
+    
+    #print(sys.getsizeof(run_parts))
         
     print('It takes', time.time()-start, 'seconds to process all', last_event_num-first_event_num, 'events.')
 
-if __name__ == '__main__':
-    main()
+    #print(len(run_parts[0][0]))
 
+    #f = h5py.File('TestClouds.h5', 'r+')
+    f = h5py.File(PATH, 'r+')
+    try:
+        clouds = f.create_group('clouds')
+    except ValueError:
+        print('Cloud group already exists')
+        clouds = f['clouds']
+
+    for part in run_parts:
+        for evt in part:
+            try:            
+                clouds.create_dataset('evt'+str(evt[0])+'_cloud', data = evt[1])
+            except OSError:
+                del clouds['evt'+str(evt[0])+'_cloud']
+                clouds.create_dataset('evt'+str(evt[0])+'_cloud', data = evt[1])
+
+    f.close()
 
 
