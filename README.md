@@ -1,6 +1,7 @@
 # PointCloud-utils
 
-Code for creating point clouds from HDF5 run files.
+Code for creating point clouds from HDF5 run files. (Recommended to run on the N103 machine in the NSCL computer 
+system for best performance)
 
 ## Installation
 
