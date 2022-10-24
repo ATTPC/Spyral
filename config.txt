@@ -1,5 +1,5 @@
 # Lists the parameters for the point cloud construction code.
 # 1. Integrated charge threshold for the beam region pads (Default is 500)
-# 2. Integrated charge threshold for the non-beam region small pads (Default is 4000)
-# 3. Integrated charge threshold for the non-beam region large pads (Default is 4000)
+# 2. Integrated charge threshold for the non-beam region large pads (Default is 4000)
+# 3. Integrated charge threshold for the non-beam region small pads (Default is 4000)
 500 4000 4000

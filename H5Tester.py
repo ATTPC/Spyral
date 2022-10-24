@@ -7,7 +7,7 @@ if __name__ == '__main__':
 	f = h5py.File(PATH, 'r+')
 	#print(list(f['clouds'].keys()))
 	clouds = f['clouds']
-	print(np.shape(clouds.get('evt9999_cloud')))
+	print(np.shape(clouds.get('evt999_cloud')))
 	print(list(clouds.keys()))
 	'''
 	try:

@@ -96,14 +96,14 @@ def make_pc(event_num_array):
                     all_peaks = np.append(all_peaks, peaks)
                     all_energies = np.append(all_energies, energies)
 
-        drift_vel = 333.076 # In time bucket difference
-        #all_z = all_peaks / np.shape(all_traces)[1] * drift_vel
-        all_z = all_peaks / np.shape(all_traces)[1] * 1000
+        #all_z = all_peaks / np.shape(all_traces)[1] * 1000
+        all_z = all_peaks
 
         pc = np.stack((all_x, all_y, all_z, all_energies, all_pad_nums)).T
 
         # Beam region
-        energy_thresh_br = 500
+        #energy_thresh_br = 500
+        energy_thresh_br = charge_thresh_params[0]
 
         #pc_br = pc[np.isin(all_pad_nums, zap_pads['pad num'])]
         pc_br = pc[np.isin(all_pad_nums, zap_pads[:,4])]
@@ -111,8 +111,10 @@ def make_pc(event_num_array):
 
         # Not beam region
         #energy_thresh_nbr = 1000
-        energy_thresh_nbr_big = 4000
-        energy_thresh_nbr_small = 4000
+        #energy_thresh_nbr_big = 4000
+        #energy_thresh_nbr_small = 4000
+        energy_thresh_nbr_big = charge_thresh_params[1]
+        energy_thresh_nbr_small = charge_thresh_params[2]
 
         #pc_nbr = pc[~np.isin(all_pad_nums, zap_pads['pad num'])]
         pc_nbr = pc[~np.isin(all_pad_nums, zap_pads[:,4])]
@@ -135,6 +137,8 @@ def make_pc(event_num_array):
         
 if __name__ == '__main__':
     start = time.time()
+
+    charge_thresh_params = np.loadtxt('config.txt')
     
     all_cores = cpu_count()
     deconv_cores = 10
@@ -142,7 +146,6 @@ if __name__ == '__main__':
     #evt_cores = 4
 
     #PATH = '/mnt/research/attpc/e20009/h5/run_0231.h5'
-    #PATH = '/mnt/analysis/e20009/h5new/run_0231.h5'
     PATH = '/mnt/analysis/e20009/e20009_Turi/run_0231.h5'
 
     first_event_num, last_event_num = get_first_last_event_num(PATH)
