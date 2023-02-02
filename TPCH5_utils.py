@@ -59,6 +59,18 @@ def load_trace(PATH, event_num = 0):
 	
 	return meta.astype(np.int64), trace.astype(np.int64)
 
+def HDF5_LoadClouds(PATH, event_ind):
+    f = h5py.File(PATH, 'r')
+    meta = f['meta/meta']
+    #print('First event: ', int(meta[0]), '\n Last event: ', int(meta[2]))
+    if ((int(event_ind) >= int(meta[0])) and (int(event_ind) <= int(meta[2]))):
+        cloud = f['/clouds'].get('evt'+str(int(event_ind))+'_cloud')[:,:]
+    else:
+        print('Invalid event number.', event_ind, ' must be between ', int(meta[0]), ' and ', int(meta[2]))
+        cloud = 0
+    f.close()
+    return cloud
+
 def main():
 	PATH = '/mnt/research/attpc/e20009/h5/run_0231.h5'
 	

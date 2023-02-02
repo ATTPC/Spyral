@@ -2,13 +2,13 @@ import numpy as np
 import h5py
 
 if __name__ == '__main__':
-	PATH = '/mnt/analysis/e20009/e20009_Turi/run_0231.h5'
+	PATH = '/mnt/analysis/e20009/e20009_Turi/run_0348.h5'
 
 	f = h5py.File(PATH, 'r+')
 	#print(list(f['clouds'].keys()))
 	clouds = f['clouds']
 	print(np.shape(clouds.get('evt999_cloud')))
-	print(list(clouds.keys()))
+	print(list(clouds.keys())[:10])
 	'''
 	try:
 		f.create_group('bingbong')

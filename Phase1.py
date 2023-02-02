@@ -15,6 +15,8 @@ from tpc_utils import background, search_high_res
 from TPCH5_utils import get_first_last_event_num, load_trace
 import h5py
 
+# PHASE 1 (Constructing point clouds from trace data)
+
 # Daemon workaround found from: https://stackoverflow.com/questions/6974695/python-process-pool-non-daemonic
 
 class NoDaemonProcess(multiprocessing.Process):
@@ -51,11 +53,6 @@ def make_pc(event_num_array):
         # Replaces the first and last values in each trace.
         all_traces[:, 0] = all_traces[:, 1]
         all_traces[:, -1] = all_traces[:, -2]
-
-        #trim_ct = False
-
-        #if trim_ct == True:
-                #all_traces, meta = remove_ct(all_traces, meta, threshold1 = 2000, threshold2 = 1600, channel_width = 3, tb_range = 7)
 
         all_peaks = np.array([])
         all_energies = np.array([])
@@ -101,36 +98,6 @@ def make_pc(event_num_array):
 
         pc = np.stack((all_x, all_y, all_z, all_energies, all_pad_nums)).T
 
-        # Beam region
-        #energy_thresh_br = 500
-        energy_thresh_br = charge_thresh_params[0]
-
-        #pc_br = pc[np.isin(all_pad_nums, zap_pads['pad num'])]
-        pc_br = pc[np.isin(all_pad_nums, zap_pads[:,4])]
-        pc_br = pc_br[np.where(pc_br[:,3] >= energy_thresh_br)]
-
-        # Not beam region
-        #energy_thresh_nbr = 1000
-        #energy_thresh_nbr_big = 4000
-        #energy_thresh_nbr_small = 4000
-        energy_thresh_nbr_big = charge_thresh_params[1]
-        energy_thresh_nbr_small = charge_thresh_params[2]
-
-        #pc_nbr = pc[~np.isin(all_pad_nums, zap_pads['pad num'])]
-        pc_nbr = pc[~np.isin(all_pad_nums, zap_pads[:,4])]
-        #pc_nbr = pc_nbr[np.where(pc_nbr[:,3] >= energy_thresh_nbr)]
-        pc_nbr_big = pc_nbr[np.where(np.isin(pc_nbr[:,4], pad_big))]
-        pc_nbr_big = pc_nbr_big[np.where(pc_nbr_big[:,3] >= energy_thresh_nbr_big)]     
-        pc_nbr_small = pc_nbr[np.where(np.isin(pc_nbr[:,4], pad_small))]
-        pc_nbr_small = pc_nbr_small[np.where(pc_nbr_small[:,3] >= energy_thresh_nbr_small)]
-        pc_nbr = np.vstack((pc_nbr_big, pc_nbr_small))
-        # Drops pads where there are more than 4 points. Consider them "noisy"
-        pads_to_drop = np.unique(pc_nbr[:,4])[np.where(np.array([list(pc_nbr[:,4]).count(i) for i in np.unique(pc_nbr[:,4])]) >= 5)]
-        pc_nbr = pc_nbr[~np.isin(pc_nbr[:,4], pads_to_drop)]
-
-        # Recombine point cloud
-        pc = np.vstack((pc_br, pc_nbr))
-
         all_clouds_seg.append([event_ind, pc])
 
     return all_clouds_seg
@@ -138,7 +105,7 @@ def make_pc(event_num_array):
 if __name__ == '__main__':
     start = time.time()
 
-    charge_thresh_params = np.loadtxt('config.txt')
+    #charge_thresh_params = np.loadtxt('config.txt')
     
     all_cores = cpu_count()
     deconv_cores = 10
@@ -146,7 +113,7 @@ if __name__ == '__main__':
     #evt_cores = 4
 
     #PATH = '/mnt/research/attpc/e20009/h5/run_0231.h5'
-    PATH = '/mnt/analysis/e20009/e20009_Turi/run_0231.h5'
+    PATH = '/mnt/analysis/e20009/e20009_Turi/run_0348.h5'
 
     first_event_num, last_event_num = get_first_last_event_num(PATH)
 
