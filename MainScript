@@ -1,0 +1,13 @@
+#!/bin/bash
+
+echo "Starting Phase 1"
+python Phase1.py > ScriptOutputs/Phase1OUT.out
+echo "Phase 1 finished"
+echo "Starting Phase 2"
+python -W ignore Phase2.py > ScriptOutputs/Phase2OUT.out
+echo "Phase 2 finished"
+echo "Starting Phase3"
+python -W ignore Phase3.py > ScriptOutputs/Phase3OUT.out
+echo "Phase 3 finished"
+echo "All done!"
+

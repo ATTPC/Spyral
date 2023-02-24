@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 from TPCH5_utils import HDF5_LoadClouds, get_first_last_event_num
 from sklearn.cluster import DBSCAN
 import h5py
@@ -12,7 +11,16 @@ import time
 
 # PHASE 2 (Noise removal, clustering, and recombining broken tracks)
 
-def RemoveNoiseAndCluster(data, eps1 = 0.25, eps2 = 0.125):
+def RemoveNoiseAndCluster(data, eps1 = 0.1, eps2 = 0.05):
+    '''
+    Parameters:
+        data           : A point cloud where the first 3 columns are the x, y, and z positions (x and y are in mm, z is in timebuckets).
+        eps1           : The maximum distance between two samples for one to be considered as in the neighborhood of the other in first clustering attempt.
+        eps2           : The maximum distance between two samples for one to be considered as in the neighborhood of the other in second clustering attempt.
+
+    Returns:
+        data_no_noise2 : The point cloud after two rounds of noise removal.
+    '''
     # Scale data down
 
     data[:,0] /= 292
@@ -60,20 +68,39 @@ def RemoveNoiseAndCluster(data, eps1 = 0.25, eps2 = 0.125):
     return data_no_noise2
 
 def make_circle(xc, yc, R):
+    '''
+    Parameters:
+        xc : x-coordinate of the center of the circle to be drawn.
+        yc : y-coordinate of the center of the circle to be drawn.
+        R  : Radius of the circle to be drawn.
+    
+    Returns:
+        rx : Array of the x-coordinates of the circle.
+        ry : Array of the y-coordinates of the circle.
+    '''
     theta = np.linspace(0, 2*np.pi, 1000)
     rx = R * np.cos(theta) + xc
     ry = R * np.sin(theta) + yc
     return rx, ry
 
 def RecombineTracks(data):
+    '''
+    Parameters:
+        data       : Point cloud where you want broken tracks to be recombined.
+
+    Returns:
+        data_recom : Point cloud after broken tracks are recombined.
+    '''
     data_recom = np.copy(data)
 
     track_centers = []
 
+    # Fits a circle to each of the clustered tracks and records their respective centers.
     for label in np.unique(data_recom[:,5]):
         xc, yc, R, _ = circle_fit.least_squares_circle(data_recom[data_recom[:,5] == label, :2])
         track_centers.append([xc, yc])
 
+    # If there is only one track, exit.
     if len(track_centers) == 1:
         return data_recom
 
@@ -87,25 +114,47 @@ def RecombineTracks(data):
         cluster_labels = np.where(tc_clusters.labels_ == i)[0]    
         data_recom[np.isin(data_recom[:,5], cluster_labels), 5] = i
     
+    # Sorts the array by track_id and then by z-coordinate.
     data_recom = data_recom[np.lexsort((data_recom[:,2], data_recom[:,5]))]
     
     return data_recom
 
 def Phase2(evt_num_array):
+    '''
+    Parameters:
+        evt_num_array  : Array of event numbers of which you want to analyze.
+
+    Returns:
+        all_clouds_seg : 2D list where, for each entry, the first element is the event number, and the second element is the updated point cloud.
+    '''
     all_clouds_seg = []
     for event_num_i in tqdm(range(len(evt_num_array))):
         event_ind = int(evt_num_array[event_num_i])
 
         data = HDF5_LoadClouds(PATH, event_ind)
-        data = RemoveNoiseAndCluster(data, eps1 = 0.1, eps2 = 0.05)
+
+        # If point cloud has less than 50 points, do no data removal and give all points the same track_id.
         if len(data) < 50:
-            data[:,2] = (data[:,2] - window) / (micromegas - window) * length
+            data[:,2] = (data[:,2] - window) / (micromegas - window) * length # Converts third column from timebuckets to z-coordinate.
+            data = np.hstack((data, np.zeros((len(data), 1))))
             all_clouds_seg.append([event_ind, data])
             continue
+
+        # Round one of clustering.
+        data = RemoveNoiseAndCluster(data, eps1 = 0.1, eps2 = 0.05)
+
+        # If point cloud has less than 50 points after clustering once, do no more data removal and give all points the same track_id.
+        if len(data) < 50:
+            data[:,2] = (data[:,2] - window) / (micromegas - window) * length # Converts third column from timebuckets to z-coordinate.
+            data = np.hstack((data, np.zeros((len(data), 1))))
+            all_clouds_seg.append([event_ind, data])
+            continue
+
+        # After two rounds of noise removal, compile results into total list.
         data = RecombineTracks(data)
-        data[:,2] = (data[:,2] - window) / (micromegas - window) * length
-        data = data[np.lexsort((data[:,2], data[:,5]))]
-        all_clouds_seg.append([event_ind, data])       
+        data[:,2] = (data[:,2] - window) / (micromegas - window) * length # Converts third column from timebuckets to z-coordinate.
+        data = data[np.lexsort((data[:,2], data[:,5]))] # Sorts point cloud by track_id and then by z-coordinate.
+        all_clouds_seg.append([event_ind, data])
     return all_clouds_seg
 
 if __name__ == '__main__':
@@ -116,7 +165,7 @@ if __name__ == '__main__':
     length = 1000 # Length of the detector in mm
 
     #all_cores = int(cpu_count() / 4)
-    all_cores = 4
+    all_cores = 5
 
     PATH = '/mnt/analysis/e20009/e20009_Turi/run_0348.h5'
     first_event_num, last_event_num = get_first_last_event_num(PATH)
@@ -141,4 +190,4 @@ if __name__ == '__main__':
     
     f.close()
 
-
+    print('Phase 2 finished successfully')

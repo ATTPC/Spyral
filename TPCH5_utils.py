@@ -5,7 +5,7 @@ import pandas as pd
 
 def get_first_last_event_num(PATH):
 	'''
-	Inputs:
+	Parameters:
 		PATH            : Path to a specific HDF5 file.
 	
 	Returns:
@@ -24,20 +24,17 @@ def get_first_last_event_num(PATH):
 
 def load_trace(PATH, event_num = 0):
 	'''
-	Inputs:
+	Parameters:
 		PATH      : Path to a specified HDF5 file.
 		event_num : The event number that you want to look at.
 
 	Returns:
-        meta      : A 2D array that contains the metadata for each trace (CoBo, AsAd, AGET, channel, pad number)
-		trace     : A 2D array that contains the every trace for the specified event.
+       		meta      : A 2D array that contains the metadata for each trace (CoBo, AsAd, AGET, channel, pad number)
+		trace     : A 2D array that contains every trace for the specified event.
 	'''
 	f = h5py.File(PATH, 'r')
 	
 	events = f['/get']
-	
-	#first_event_num, last_event_num = get_first_last_event_num(PATH)
-	#event_num = np.random.randint(low = first_event_num, high = last_event_num+1)
 
 	dataset = events.get('evt'+str(event_num)+'_data')
 	header = events.get('evt'+str(event_num)+'_header')
@@ -59,17 +56,26 @@ def load_trace(PATH, event_num = 0):
 	
 	return meta.astype(np.int64), trace.astype(np.int64)
 
-def HDF5_LoadClouds(PATH, event_ind):
-    f = h5py.File(PATH, 'r')
-    meta = f['meta/meta']
-    #print('First event: ', int(meta[0]), '\n Last event: ', int(meta[2]))
-    if ((int(event_ind) >= int(meta[0])) and (int(event_ind) <= int(meta[2]))):
-        cloud = f['/clouds'].get('evt'+str(int(event_ind))+'_cloud')[:,:]
-    else:
-        print('Invalid event number.', event_ind, ' must be between ', int(meta[0]), ' and ', int(meta[2]))
-        cloud = 0
-    f.close()
-    return cloud
+def HDF5_LoadClouds(PATH, event_num):
+	'''
+	Parameters:
+		PATH      : Path to a specified HDF5 file.
+		event_num : The event number that you want to look at.
+
+	Returns:
+		cloud     : A 2D array that contains the point cloud information contained in the HDF5 file.
+	'''
+	f = h5py.File(PATH, 'r')
+	meta = f['meta/meta']
+	
+	if ((int(event_num) >= int(meta[0])) and (int(event_num) <= int(meta[2]))):
+		cloud = f['/clouds'].get('evt'+str(int(event_num))+'_cloud')[:,:]
+	else:
+		print('Invalid event number.', event_num, ' must be between ', int(meta[0]), ' and ', int(meta[2]))
+		cloud = 0
+
+	f.close()
+	return cloud
 
 def main():
 	PATH = '/mnt/research/attpc/e20009/h5/run_0231.h5'

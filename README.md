@@ -26,4 +26,7 @@ want to construct point clouds for.
 3. Use a text editor to set the integrated charge thresholds in config.txt
 
 4. Run:
-	python PCMP.py
+	python Phase1.py
+
+5. Once that is finished running, run:
+        python Phase2.py

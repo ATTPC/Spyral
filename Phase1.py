@@ -39,9 +39,23 @@ class NoDaemonProcessPool(multiprocessing.pool.Pool):
         return proc
 
 def deconv(traces):
+    '''
+    Parameters:
+        traces : A 2D array with N entries of traces, each with a width of 512 entries for each time bucket.
+
+    Returns:
+        out    : A deconvolution of each of the traces that were fed in. Has the same Nx512 dimensions as the input.
+    '''
     return search_high_res(traces, sigma = 4, threshold = 60, remove_bkg = True, number_it = 200, markov = True, aver_window = 5)[0]
 
-def make_pc(event_num_array):
+def Phase1(event_num_array):
+    '''
+    Parameters:
+    	event_num_array : Array of event numbers of which you want to make point clouds.
+
+    Returns:
+    	all_clouds_seg  : 2D list where, for each entry, the first element is the event number, and the second element is the constructed point cloud.
+    '''
     all_clouds_seg = []
     for event_num_i in tqdm(range(len(event_num_array))):
         event_ind = event_num_array[event_num_i]
@@ -78,7 +92,7 @@ def make_pc(event_num_array):
 
                     energies = np.array([])
 
-                    # Loop calculates the energy for each peak
+                    # Loop calculates the integrated charge for each peak
                     for peak in peaks:
                             if (((peak+num_pts) < len(response[0])) and ((peak-num_pts) > 0)):
                                 extra_pts = np.arange(peak-num_pts, peak+num_pts, dtype = int)
@@ -97,6 +111,10 @@ def make_pc(event_num_array):
         all_z = all_peaks
 
         pc = np.stack((all_x, all_y, all_z, all_energies, all_pad_nums)).T
+        
+        # Drops pads where there are more than 4 points. Consider them "noisy"
+        pads_to_drop = np.unique(pc[:,4])[np.where(np.array([list(pc[:,4]).count(i) for i in np.unique(pc[:,4])]) >= 10)]
+        pc = pc[~np.isin(pc[:,4], pads_to_drop)]
 
         all_clouds_seg.append([event_ind, pc])
 
@@ -117,18 +135,18 @@ if __name__ == '__main__':
 
     first_event_num, last_event_num = get_first_last_event_num(PATH)
 
-    zap_pads = np.loadtxt('Zap_pads.csv', skiprows = 2, delimiter = ',')
+    #zap_pads = np.loadtxt('Zap_pads.csv', skiprows = 2, delimiter = ',')
 
     padxy = np.loadtxt('padxy.csv', delimiter = ',', skiprows = 1)
 
-    pad_loc = pd.read_csv('flutsize.csv')
-    pad_big = pad_loc[pad_loc['size'] == 1]
-    pad_small = pad_loc[pad_loc['size'] == 0]
+    #pad_loc = pd.read_csv('flutsize.csv')
+    #pad_big = pad_loc[pad_loc['size'] == 1]
+    #pad_small = pad_loc[pad_loc['size'] == 0]
 
     evt_parts = np.array_split(np.arange(first_event_num, last_event_num+1), evt_cores)
 
     with NoDaemonProcessPool(evt_cores) as evt_p:
-        run_parts = evt_p.map(make_pc, evt_parts)
+        run_parts = evt_p.map(Phase1, evt_parts)
     
     #print(sys.getsizeof(run_parts))
         
@@ -154,4 +172,4 @@ if __name__ == '__main__':
 
     f.close()
 
-
+    print('Phase 1 finished successfully')
