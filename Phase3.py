@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 from scipy.optimize import curve_fit
+from scipy.signal import find_peaks
+from statsmodels.nonparametric.smoothers_lowess import lowess
 from TPCH5_utils import get_first_last_event_num, HDF5_LoadClouds
 import h5py
 import circle_fit
@@ -51,18 +53,40 @@ def SimpleAnalysis(data, track_id):
     subset = data[data[:,5] == track_id]
     if len(subset) < 50:
         return np.array([np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan])
+
     dists = np.sqrt((subset[:,0])**2 + (subset[:,1])**2)
+    smoothed = lowess(endog = dists, exog = np.arange(len(dists)), frac = 0.05)
+    peaks = find_peaks(smoothed[:,1], distance = 50, prominence = 7)[0]
+    valleys = find_peaks(-1*smoothed[:,1], distance = 50, prominence = 7)[0]
+    n_peaks = len(peaks)
+    n_valleys = len(valleys)
+    
     farthest_pt = np.argsort(dists)[::-1][0]
 
-    # Fits a circle on the points from the start of the track to the farthest point (should be a half circle)
-    if np.abs(len(subset) - farthest_pt+1) <= 2: # If the farthest point is the last point (i.e. track goes forward but not a full circle)
-        farthest_pt -= 2
-    elif farthest_pt <= 2: # If the farthest point is the first point (i.e. track goes backward but not a full circle)
-        farthest_pt += 2
+    if ((farthest_pt <= 2) or (farthest_pt >= (len(subset)-2))):
+        farthest_pt = np.argsort(dists)[::-1][1]
     
-    if (farthest_pt / len(subset)) < 0.5: # If the farthest point is towards the end of track (i.e. track goes backward)
+    # Fits a circle on the points from the start of the track to the farthest point (should be a half circle)
+        
+    # Incomplete rotation (hits the wall)
+    if (((farthest_pt / len(subset)) < 0.5) and (n_peaks <= 1) and (n_valleys == 0)):
+        direction = -1
+    elif (((farthest_pt / len(subset)) >= 0.5) and (n_peaks <= 1) and (n_valleys == 0)):
         direction = 1
-    elif (farthest_pt / len(subset)) >= 0.5: # If the farthest point is towards start of track (i.e. track goes forwards)
+    # Weird case. 1 valley, no peak
+    elif (((farthest_pt / len(subset)) < 0.5) and (n_peaks == 0) and (n_valleys > 0)):
+        direction = -1
+    elif (((farthest_pt / len(subset)) >= 0.5) and (n_peaks == 0) and (n_valleys > 0)):
+        direction = 1
+    # Exactly one rotation
+    elif (((farthest_pt / len(subset)) < 0.5) and (n_peaks == 1) and (n_valleys == 1)):
+        direction = 1
+    elif (((farthest_pt / len(subset)) >= 0.5) and (n_peaks == 1) and (n_valleys == 1)):
+        direction = -1
+    # Multi-rotation
+    elif (((farthest_pt / len(subset)) < 0.5) and (n_peaks >= 1) and (n_valleys >= 1)):
+        direction = 1
+    elif (((farthest_pt / len(subset)) >= 0.5) and (n_peaks >= 1) and (n_valleys >= 1)):
         direction = -1
 
     if direction == -1:
@@ -123,7 +147,11 @@ def Phase3(evt_num_array):
     for event_num_i in tqdm(range(len(evt_num_array))):
         event_num = evt_num_array[event_num_i]
         
-        data = HDF5_LoadClouds(PATH, event_num)
+        try:
+            data = HDF5_LoadClouds(PATH, event_num)
+        except TypeError:
+            continue
+
         # If the point cloud has fewer than 100 points, skip it.
         if len(data) < 100:
             continue
@@ -145,9 +173,10 @@ if __name__ == '__main__':
     Bmag = 2.991 # B field in T
 
     #all_cores = cpu_count()
-    all_cores = 5
+    all_cores = 1
 
-    PATH = '/mnt/analysis/e20009/e20009_Turi/run_0348.h5'
+    #PATH = '/mnt/analysis/e20009/e20009_Turi/run_0348.h5'
+    PATH = '/mnt/analysis/e20009/e20009_Turi/Be10dp178.h5'
     first_event_num, last_event_num = get_first_last_event_num(PATH)
 
     evt_parts = np.array_split(np.arange(first_event_num, last_event_num+1), all_cores)
@@ -157,14 +186,14 @@ if __name__ == '__main__':
 
     all_results = np.vstack(run_parts)
 
-    ntuple_additions = pd.DataFrame(all_results, columns = ['evt', 'track_id', 'xvert', 'yvert', 'zvert', 'polar', 'azimuth', 'brho', 'direction'])
+    ntuple_additions = pd.DataFrame(all_results, columns = ['evt', 'track_id', 'gxvert', 'gyvert', 'gzvert', 'gpolar', 'gazimuth', 'gbrho', 'direction'])
 
     try:
-        old_ntuple = pd.read_csv('allntuple_Turi.txt', delimiter = ',')
+        old_ntuple = pd.read_csv('all_ntuple_Be10dp178_Turi.txt', delimiter = ',')
         new_ntuple = pd.concat([old_ntuple, ntuple_additions])
         new_ntuple.reset_index(inplace = True, drop = True)
-        new_ntuple.to_csv('all_ntuple_Turi.txt', ',', index = False)
+        new_ntuple.to_csv('all_ntuple_Be10dp178_Turi.txt', ',', index = False)
     except FileNotFoundError:
-        ntuple_additions.to_csv('all_ntuple_Turi.txt', ',', index = False)
+        ntuple_additions.to_csv('all_ntuple_Be10dp178_Turi.txt', ',', index = False)
 
     print('Phase 3 finished successfully')

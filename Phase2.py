@@ -44,7 +44,8 @@ def RemoveNoiseAndCluster(data, eps1 = 0.1, eps2 = 0.05):
     # Add the clustering labels as a column in the dataset
     
     data_no_noise2 = np.hstack((data_no_noise2, np.array([clustering2.labels_[clustering2.labels_ != -1]]).T))
-    
+    #data_no_noise2 = np.hstack((data_no_noise2, np.array([np.ones(len(data_no_noise2))]).T))    
+
     # Gets rid of clusters where the number of points is below a threshold
     
     min_pts = 20
@@ -64,6 +65,17 @@ def RemoveNoiseAndCluster(data, eps1 = 0.1, eps2 = 0.05):
     data_no_noise2[:,0] *= 292
     data_no_noise2[:,1] *= 292
     data_no_noise2[:,2] *= 512
+    
+    return data_no_noise2
+
+def Cluster(data, eps1 = 0.25, eps2 = 0.125):
+    # Scale data down
+    
+    data_no_noise2 = data
+    
+    # Add the clustering labels as a column in the dataset
+    
+    data_no_noise2 = np.hstack((data_no_noise2, np.zeros((len(data_no_noise2), 1))))
     
     return data_no_noise2
 
@@ -131,7 +143,10 @@ def Phase2(evt_num_array):
     for event_num_i in tqdm(range(len(evt_num_array))):
         event_ind = int(evt_num_array[event_num_i])
 
-        data = HDF5_LoadClouds(PATH, event_ind)
+        try:
+            data = HDF5_LoadClouds(PATH, event_ind)
+        except TypeError:
+            continue
 
         # If point cloud has less than 50 points, do no data removal and give all points the same track_id.
         if len(data) < 50:
@@ -141,7 +156,8 @@ def Phase2(evt_num_array):
             continue
 
         # Round one of clustering.
-        data = RemoveNoiseAndCluster(data, eps1 = 0.1, eps2 = 0.05)
+        #data = RemoveNoiseAndCluster(data, eps1 = 0.1, eps2 = 0.05)
+        data = Cluster(data, eps1 = 0.1, eps2 = 0.05)
 
         # If point cloud has less than 50 points after clustering once, do no more data removal and give all points the same track_id.
         if len(data) < 50:
@@ -151,7 +167,7 @@ def Phase2(evt_num_array):
             continue
 
         # After two rounds of noise removal, compile results into total list.
-        data = RecombineTracks(data)
+        #data = RecombineTracks(data)
         data[:,2] = (data[:,2] - window) / (micromegas - window) * length # Converts third column from timebuckets to z-coordinate.
         data = data[np.lexsort((data[:,2], data[:,5]))] # Sorts point cloud by track_id and then by z-coordinate.
         all_clouds_seg.append([event_ind, data])
@@ -167,11 +183,12 @@ if __name__ == '__main__':
     #all_cores = int(cpu_count() / 4)
     all_cores = 5
 
-    PATH = '/mnt/analysis/e20009/e20009_Turi/run_0348.h5'
+    #PATH = '/mnt/analysis/e20009/e20009_Turi/run_0348.h5'
+    PATH = '/mnt/analysis/e20009/e20009_Turi/Be10dp178.h5'
     first_event_num, last_event_num = get_first_last_event_num(PATH)
     #evt_ind = 147472
     
-    evt_parts = np.array_split(np.arange(first_event_num, last_event_num+1), all_cores)
+    evt_parts = np.array_split(np.arange(first_event_num+1, last_event_num+1), all_cores)
 
     with Pool(all_cores) as evt_p:
         run_parts = evt_p.map(Phase2, evt_parts)

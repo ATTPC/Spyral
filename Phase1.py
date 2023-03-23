@@ -62,6 +62,8 @@ def Phase1(event_num_array):
 
         # Picks out the traces from the first event.
         meta, all_traces = load_trace(PATH, event_ind)
+        if len(all_traces) < 10:
+            continue
         all_traces = all_traces.astype(np.float64)
 
         # Replaces the first and last values in each trace.
@@ -127,23 +129,20 @@ if __name__ == '__main__':
     
     all_cores = cpu_count()
     deconv_cores = 10
-    evt_cores = int(np.floor(all_cores/deconv_cores))
-    #evt_cores = 4
+    #evt_cores = int(np.floor(all_cores/deconv_cores))
+    evt_cores = 4
 
     #PATH = '/mnt/research/attpc/e20009/h5/run_0231.h5'
-    PATH = '/mnt/analysis/e20009/e20009_Turi/run_0348.h5'
+    #PATH = '/mnt/analysis/e20009/e20009_Turi/run_0348.h5'
+    PATH = '/mnt/analysis/e20009/e20009_Turi/Be10dp178.h5'
 
     first_event_num, last_event_num = get_first_last_event_num(PATH)
-
-    #zap_pads = np.loadtxt('Zap_pads.csv', skiprows = 2, delimiter = ',')
+    print('First event number: ', first_event_num, '\nLast event number: ', last_event_num)
 
     padxy = np.loadtxt('padxy.csv', delimiter = ',', skiprows = 1)
 
-    #pad_loc = pd.read_csv('flutsize.csv')
-    #pad_big = pad_loc[pad_loc['size'] == 1]
-    #pad_small = pad_loc[pad_loc['size'] == 0]
-
-    evt_parts = np.array_split(np.arange(first_event_num, last_event_num+1), evt_cores)
+    evt_parts = np.array_split(np.arange(first_event_num+1, last_event_num+1), evt_cores)
+    #evt_parts = np.array_split(np.array([476]), 1)
 
     with NoDaemonProcessPool(evt_cores) as evt_p:
         run_parts = evt_p.map(Phase1, evt_parts)
