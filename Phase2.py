@@ -50,14 +50,14 @@ def RemoveNoiseAndCluster(data, eps1 = 0.1, eps2 = 0.05):
     
     min_pts = 20
     
-    for i in np.unique(data_no_noise2[:,5]):
-        if len(data_no_noise2[data_no_noise2[:,5] == i]) < min_pts:
-            data_no_noise2 = data_no_noise2[data_no_noise2[:,5] != i]
+    for i in np.unique(data_no_noise2[:,6]):
+        if len(data_no_noise2[data_no_noise2[:,6] == i]) < min_pts:
+            data_no_noise2 = data_no_noise2[data_no_noise2[:,6] != i]
             
     # Renormalizes the cluster labels to increment from 0 to number_of_clusters-1 by 1
     
-    for i in range(len(np.unique(data_no_noise2[:,5]))):
-        data_no_noise2[data_no_noise2[:,5] == np.unique(data_no_noise2[:,5])[i], 5] = i
+    for i in range(len(np.unique(data_no_noise2[:,6]))):
+        data_no_noise2[data_no_noise2[:,6] == np.unique(data_no_noise2[:,6])[i], 6] = i
             
     
     # Rescale data up
@@ -108,8 +108,8 @@ def RecombineTracks(data):
     track_centers = []
 
     # Fits a circle to each of the clustered tracks and records their respective centers.
-    for label in np.unique(data_recom[:,5]):
-        xc, yc, R, _ = circle_fit.least_squares_circle(data_recom[data_recom[:,5] == label, :2])
+    for label in np.unique(data_recom[:,6]):
+        xc, yc, R, _ = circle_fit.least_squares_circle(data_recom[data_recom[:,6] == label, :2])
         track_centers.append([xc, yc])
 
     # If there is only one track, exit.
@@ -124,12 +124,39 @@ def RecombineTracks(data):
     for i in np.unique(tc_clusters.labels_):
         # Grabs the cluster id of the tracks that are going to be recombined
         cluster_labels = np.where(tc_clusters.labels_ == i)[0]    
-        data_recom[np.isin(data_recom[:,5], cluster_labels), 5] = i
+        data_recom[np.isin(data_recom[:,6], cluster_labels), 6] = i
     
     # Sorts the array by track_id and then by z-coordinate.
-    data_recom = data_recom[np.lexsort((data_recom[:,2], data_recom[:,5]))]
+    data_recom = data_recom[np.lexsort((data_recom[:,2], data_recom[:,6]))]
     
     return data_recom
+
+def SmoothPC(pc, r = 10):
+    '''
+    Parameters:
+        pc          : Point cloud.
+        r           : Maximum distance between points to classify them as neighbors.
+
+    Returns:
+        smoothed_pc : Smoothed point cloud where a weighted average was taken.
+    ''' 
+    smoothed_pc = []
+    for i in range(len(pc)):
+        neighbors = pc[np.sqrt((pc[:,0]-pc[i,0])**2+(pc[:,1]-pc[i,1])**2+(pc[:,2]-pc[i,2])**2) <= r]
+        # Weight points
+        xs = sum(neighbors[:,0] * neighbors[:,4])
+        ys = sum(neighbors[:,1] * neighbors[:,4])
+        zs = sum(neighbors[:,2] * neighbors[:,4])
+        cs = sum(neighbors[:,3])
+        ics = sum(neighbors[:,4])
+        #smoothed_pc.append(np.average(neighbors, axis = 0))
+        smoothed_pc.append(np.array([xs/ics, ys/ics, zs/ics, cs/len(neighbors), ics/len(neighbors), pc[i,5]]))
+    smoothed_pc = np.vstack(smoothed_pc)
+    # Removes duplicate points
+    smoothed_pc = smoothed_pc[sorted(np.unique(smoothed_pc, axis = 0, return_index = True)[1])]
+    # Removes NaNs
+    smoothed_pc = smoothed_pc[~np.isnan(smoothed_pc).any(axis = 1)]
+    return smoothed_pc
 
 def Phase2(evt_num_array):
     '''
@@ -155,9 +182,11 @@ def Phase2(evt_num_array):
             all_clouds_seg.append([event_ind, data])
             continue
 
-        # Round one of clustering.
-        #data = RemoveNoiseAndCluster(data, eps1 = 0.1, eps2 = 0.05)
-        data = Cluster(data, eps1 = 0.1, eps2 = 0.05)
+        data = SmoothPC(data, r = 10)
+
+        # Noise removal and clustering.
+        data = RemoveNoiseAndCluster(data, eps1 = 0.1, eps2 = 0.05)
+        #data = Cluster(data, eps1 = 0.1, eps2 = 0.05)
 
         # If point cloud has less than 50 points after clustering once, do no more data removal and give all points the same track_id.
         if len(data) < 50:
@@ -166,27 +195,32 @@ def Phase2(evt_num_array):
             all_clouds_seg.append([event_ind, data])
             continue
 
-        # After two rounds of noise removal, compile results into total list.
-        #data = RecombineTracks(data)
+        data = RecombineTracks(data)
         data[:,2] = (data[:,2] - window) / (micromegas - window) * length # Converts third column from timebuckets to z-coordinate.
-        data = data[np.lexsort((data[:,2], data[:,5]))] # Sorts point cloud by track_id and then by z-coordinate.
+        data = data[np.lexsort((data[:,2], data[:,6]))] # Sorts point cloud by track_id and then by z-coordinate.
         all_clouds_seg.append([event_ind, data])
     return all_clouds_seg
 
 if __name__ == '__main__':
     start = time.time()
     # Constants for converting from timebucket (tb) to position (mm)
-    micromegas = 66.0045 # Time bucket of the micromega edge
-    window = 399.455 # Time bucket of the window edge
+    micromegas = 66.0045 # Timebucket of the micromega edge for Be10
+    window = 399.455 # Timebucket of the window edge for Be10
     length = 1000 # Length of the detector in mm
+    #micromegas = 15 # Timebucket of the the micromega edge for C14
+    #window = 500 # Timebucket of the window edge for C14
 
     #all_cores = int(cpu_count() / 4)
     all_cores = 5
 
-    #PATH = '/mnt/analysis/e20009/e20009_Turi/run_0348.h5'
-    PATH = '/mnt/analysis/e20009/e20009_Turi/Be10dp178.h5'
+    params = np.loadtxt('params.txt', dtype = str, delimiter = ':')
+    PATH = params[0, 1]
+
+    #PATH = '/mnt/analysis/e20009/a1954_Turi/run_0055.h5'
+    #PATH = '/mnt/analysis/e20009/e20009_Turi/run_0347.h5'
+    #PATH = '/mnt/analysis/e20009/e20009_Turi/Be10dp178.h5'
     first_event_num, last_event_num = get_first_last_event_num(PATH)
-    #evt_ind = 147472
+    print('First event number: ', first_event_num, '\nLast event num: ', last_event_num)
     
     evt_parts = np.array_split(np.arange(first_event_num+1, last_event_num+1), all_cores)
 

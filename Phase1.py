@@ -72,6 +72,7 @@ def Phase1(event_num_array):
 
         all_peaks = np.array([])
         all_energies = np.array([])
+        all_energies_int = np.array([])
         all_x = np.array([])
         all_y = np.array([])
         all_pad_nums = np.array([])
@@ -93,30 +94,30 @@ def Phase1(event_num_array):
                     num_pts = int(np.round(sig))
 
                     energies = np.array([])
+                    energies_int = np.array([])
 
                     # Loop calculates the integrated charge for each peak
                     for peak in peaks:
                             if (((peak+num_pts) < len(response[0])) and ((peak-num_pts) > 0)):
                                 extra_pts = np.arange(peak-num_pts, peak+num_pts, dtype = int)
 
-                            energies = np.append(energies, trapezoid(response[trace_num][extra_pts], extra_pts))
-                            #all_x = np.append(all_x, padxy['x'][meta[:,4][trace_num]])
+                            energies = np.append(energies, response[trace_num][peak])
+                            energies_int = np.append(energies_int, trapezoid(response[trace_num][extra_pts], extra_pts))
                             all_x = np.append(all_x, padxy[:,0][meta[:,4][trace_num]])
-                            #all_y = np.append(all_y, padxy['y'][meta[:,4][trace_num]])
                             all_y = np.append(all_y, padxy[:,1][meta[:,4][trace_num]])
                             all_pad_nums = np.append(all_pad_nums, meta[:,4][trace_num])
 
                     all_peaks = np.append(all_peaks, peaks)
                     all_energies = np.append(all_energies, energies)
+                    all_energies_int = np.append(all_energies_int, energies_int)
 
-        #all_z = all_peaks / np.shape(all_traces)[1] * 1000
         all_z = all_peaks
 
-        pc = np.stack((all_x, all_y, all_z, all_energies, all_pad_nums)).T
+        pc = np.stack((all_x, all_y, all_z, all_energies, all_energies_int, all_pad_nums)).T
         
         # Drops pads where there are more than 4 points. Consider them "noisy"
-        pads_to_drop = np.unique(pc[:,4])[np.where(np.array([list(pc[:,4]).count(i) for i in np.unique(pc[:,4])]) >= 10)]
-        pc = pc[~np.isin(pc[:,4], pads_to_drop)]
+        pads_to_drop = np.unique(pc[:,5])[np.where(np.array([list(pc[:,5]).count(i) for i in np.unique(pc[:,5])]) >= 10)]
+        pc = pc[~np.isin(pc[:,5], pads_to_drop)]
 
         all_clouds_seg.append([event_ind, pc])
 
@@ -129,12 +130,10 @@ if __name__ == '__main__':
     
     all_cores = cpu_count()
     deconv_cores = 10
-    #evt_cores = int(np.floor(all_cores/deconv_cores))
     evt_cores = 4
 
-    #PATH = '/mnt/research/attpc/e20009/h5/run_0231.h5'
-    #PATH = '/mnt/analysis/e20009/e20009_Turi/run_0348.h5'
-    PATH = '/mnt/analysis/e20009/e20009_Turi/Be10dp178.h5'
+    params = np.loadtxt('params.txt', dtype = str, delimiter = ':')
+    PATH = params[0, 1]
 
     first_event_num, last_event_num = get_first_last_event_num(PATH)
     print('First event number: ', first_event_num, '\nLast event number: ', last_event_num)
@@ -142,18 +141,12 @@ if __name__ == '__main__':
     padxy = np.loadtxt('padxy.csv', delimiter = ',', skiprows = 1)
 
     evt_parts = np.array_split(np.arange(first_event_num+1, last_event_num+1), evt_cores)
-    #evt_parts = np.array_split(np.array([476]), 1)
 
     with NoDaemonProcessPool(evt_cores) as evt_p:
         run_parts = evt_p.map(Phase1, evt_parts)
     
-    #print(sys.getsizeof(run_parts))
-        
     print('It takes', time.time()-start, 'seconds to process all', last_event_num-first_event_num, 'events.')
 
-    #print(len(run_parts[0][0]))
-
-    #f = h5py.File('TestClouds.h5', 'r+')
     f = h5py.File(PATH, 'r+')
     try:
         clouds = f.create_group('clouds')

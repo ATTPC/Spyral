@@ -69,7 +69,10 @@ def HDF5_LoadClouds(PATH, event_num):
 	meta = f['meta/meta']
 	
 	if ((int(event_num) >= int(meta[0])) and (int(event_num) <= int(meta[2]))):
+		#try:
 		cloud = f['/clouds'].get('evt'+str(int(event_num))+'_cloud')[:,:]
+		#except TypeError:
+			#cloud = 0
 	else:
 		print('Invalid event number.', event_num, ' must be between ', int(meta[0]), ' and ', int(meta[2]))
 		cloud = 0

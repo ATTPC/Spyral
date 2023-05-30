@@ -1,26 +1,37 @@
 import matplotlib.pyplot as plt
-import numpy
+import numpy as np
 import h5py
+import sys
+sys.path.append('..')
+from TPCH5_utils import HDF5_LoadClouds
+from Phase2 import SmoothPC
 
-f = h5py.File('/mnt/analysis/e20009/e20009_Turi/run_0348.h5', 'r')
-clouds = f['clouds']
-event = clouds['evt147472_cloud']
+if __name__ == '__main__':
 
-#plt.scatter(event[:,0], event[:,1])
-#plt.xlim([-292, 292])
-#plt.ylim([-292, 292])
-#plt.show()
+    PATH = '/mnt/analysis/e20009/e20009_Turi/run_0348.h5'
 
-fig = plt.figure(figsize = (8, 8))
-ax = fig.add_subplot(projection='3d')
+    evt_ind = 147472
 
-ax.scatter(event[:,0], 
-           event[:,1], 
-           event[:,2], 
-           c = event[:,5], s = 10)
+    smoothed = HDF5_LoadClouds(PATH, evt_ind)
 
-ax.set_xlim([-292, 292])
-ax.set_ylim([-292, 292])
-ax.set_zlim([0, 1000])
+    for i in np.unique(smoothed[:,6]):
+        print(len(smoothed[smoothed[:,6] == i]))
 
-plt.show()
+    #for evt_ind in range(93947, 93948):
+
+        #smoothed = HDF5_LoadClouds(PATH, evt_ind)
+
+        #smoothed = SmoothPC(pc)
+        #print(smoothed[np.isnan(smoothed).any(axis = 1)])
+        #print(evt_ind, np.isnan(smoothed).any(axis = 0))
+
+    fig = plt.figure(figsize = (8, 8))
+    ax = fig.add_subplot(projection='3d')
+
+    ax.scatter(smoothed[:,0], smoothed[:,1], smoothed[:,2], c = smoothed[:,6], s = 10)
+
+    ax.set_xlim([-292, 292])
+    ax.set_ylim([-292, 292])
+    ax.set_zlim([0, 1000])
+
+    plt.show()

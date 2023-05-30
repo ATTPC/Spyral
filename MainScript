@@ -12,5 +12,8 @@ echo "Phase 3 finished"
 echo "Starting Phase 4"
 python -W ignore Phase4.py > ScriptOutputs/Phase4OUT.out
 echo "Phase 4 finished"
+#echo "Starting Phase 5"
+#python -W ignore Phase5.py > ScriptOutputs/Phase5OUT.out
+#echo "Phase 5 finished"
 echo "All done!"
 
