@@ -10,7 +10,7 @@ import multiprocessing
 import multiprocessing.pool
 from multiprocessing import Pool, cpu_count
 
-# PHASE 4 (Track fitting)
+# PHASE 5 (Track fitting)
 
 def motionIVP(t, vec):
     '''
@@ -110,56 +110,57 @@ def FunkyKongODE(params, subset):
     
     return obj
 
-def Phase4(evt_num_array):
+def Phase5(evt_num_array):
+
+    params = np.loadtxt('/user/turi/PointCloud-utils/params.txt', dtype = str, delimiter = ':')
+    PATH = params[0, 1]
+    ntuple_PATH = params[1, 1]
+
     all_results_seg = []
-
+    ntuple = pd.read_csv(ntuple_PATH, delimiter = ',')
+    global t
     for event_num_i in tqdm(range(len(evt_num_array))):
-        event_num = evt_num_array[event_num_i]
+        data = HDF5_LoadClouds(PATH, event_num_i)
+        ntuple_i = ntuple[ntuple['evt'] == evt_num_array[event_num_i]]
+        results = np.hstack(np.array([ntuple_i['gpolar'],
+                                      ntuple_i['gazimuth'],
+                                      ntuple_i['gbrho'],
+                                      ntuple_i['gxvert'],
+                                      ntuple_i['gyvert'],
+                                      ntuple_i['gzvert'],
+                                      ntuple_i['direction']]))
 
-        ntuple_sub = ntuple[ntuple['evt'] == event_num].reset_index(drop = True)
+        ch = int(ntuple_i['charge'])
+        ma = int(ntuple_i['mass'])
+        q = ch * 1.6021773349e-19
+        m = ma * 1.660538782e-27
 
-        data = HDF5_LoadClouds(PATH, event_num)
+        print(int(ntuple_i['track_id']))
 
-        for track_id_i in range(len(ntuple_sub['track_id'])):
+        subset = data[data[:,6] == int(ntuple_i['track_id'])]
 
-            if (ntuple_sub['gpolar'][track_id_i] != max(ntuple_sub['gpolar'])):
-                all_results_seg.append([np.nan, np.nan, np.nan, np.nan, np.nan, np.nan])
-                continue
+        t = np.arange(0, 1e-6, 1e-10)[:len(subset)]
 
-            track_id = ntuple_sub['track_id'][track_id_i]
-            results = np.array([ntuple_sub['gpolar'][track_id_i],
-                                ntuple_sub['gazimuth'][track_id_i],
-                                ntuple_sub['gbrho'][track_id_i],
-                                ntuple_sub['gxvert'][track_id_i],
-                                ntuple_sub['gyvert'][track_id_i],
-                                ntuple_sub['gzvert'][track_id_i],
-                                ntuple_sub['direction'][track_id_i]])
+        res = minimize(FunkyKongODE,
+                       x0 = results[:6],
+                       method = 'Nelder-Mead',
+                       args = (subset),
+                       bounds = ((0, 180),
+                                 (0, 360),
+                                 (0, 5),
+                                 (results[3], results[3]),
+                                 (results[4], results[4]),
+                                 (results[5], results[5])),
+                       options = {'maxiter':2000},
+                       tol = 1e-3)
 
-            subset = data[data[:,5] == track_id]
-            global t
-            t = np.arange(0, 1e-6, 1e-10)
-            t = t[:len(subset)]
-
-            res = minimize(FunkyKongODE, 
-               x0 = results[:-1], 
-               method = 'Nelder-Mead',
-               args = (subset),
-               bounds = ((0, 180),
-                         (0, 360),
-                         (0, 5),
-                         (results[3], results[3]),
-                         (results[4], results[4]),
-                         (results[5], results[5])),
-               options = {'maxiter':2000},
-               tol = 1e-3)
-
-            all_results_seg.append(res.x)
+        all_results_seg.append(res.x)
 
     return all_results_seg
 
 if __name__ == '__main__':
     # Constants and conversions
-    C = 2.99792E8 # Speed of light in m/s
+    C = 2.99792e8 # Speed of light in m/s
     amuev = 931.494028 # Conversion from amu to eV
 
     # Experiment set-up specific info
@@ -174,21 +175,15 @@ if __name__ == '__main__':
     window = 399.455 # Time bucket of the window edge
     length = 1000 # Length of the detector in mm
 
-    ch = -1
-    ma = 1
-    q = ch * 1.6021773349e-19
-    m = ma * 1.660538782e-27
-
     all_cores = cpu_count()
     evt_cores = 40
 
     if evt_cores > all_cores:
         raise ValueError('Number of cores used cannot exceed ', str(all_cores))
 
-    PATH = '/mnt/analysis/e20009/e20009_Turi/run_0348.h5'
-    ntuple_PATH = 'all_ntuple_run0348_Turi.txt'
-    #PATH = '/mnt/analysis/e20009/e20009_Turi/Be10dp178.h5'
-    #ntuple_PATH = 'all_ntuple_Be10dp178_Turi.txt'
+    params = np.loadtxt('params.txt', dtype = str, delimiter = ':')
+    PATH = params[0, 1]
+    ntuple_PATH = params[1, 1]
 
     dEdxSRIM = pd.read_csv('dEdx/Be10dpSRIM_Proton.txt', delimiter = ',')
     dEdx_interp = interp1d(dEdxSRIM['Ion Energy (MeV)'], dEdxSRIM['dE/dx (MeV/(mg/cm2))'])
@@ -198,7 +193,7 @@ if __name__ == '__main__':
     evt_parts = np.array_split(np.unique(ntuple['evt']), evt_cores)
 
     with Pool(evt_cores)as evt_p:
-        run_parts = evt_p.map(Phase4, evt_parts)
+        run_parts = evt_p.map(Phase5, evt_parts)
 
     all_results = np.vstack(run_parts)
 

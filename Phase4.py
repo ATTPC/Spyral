@@ -64,25 +64,40 @@ def DrawGate(xdata, ydata, xlim = [0, 3000], ylim = [0, 3], gates = None):
     return poly
 
 def PID(ntuple):
-    m1 = 1
-    m2 = 2
-    m3 = 3
-    m4 = 4
+    mp = 1
+    md = 2
+    mt = 3
+    mHe = 4
 
-    vert1 = np.array([[3000, 0.1], [0, 0.1], [5 , 2], [100, 1.5], [250, 1], [500, 0.6], [1000, 0.45], [1500, 0.35], [3000, 0.1]])
+    z1 = 1
+    z2 = 2
 
+    vert1 = np.loadtxt('Gates/pGate.txt', delimiter = ',')
     poly1 = Path(vert1)
-    yesno1 = poly1.contains_points(np.array(trimmed_ntuple[['dEdx', 'gbrho']])).astype(int) * m1
+    mass_gatep = poly1.contains_points(np.array(ntuple[['dEdx', 'gbrho']])).astype(int) * mp
+    charge_gatep = poly1.contains_points(np.array(ntuple[['dEdx', 'gbrho']])).astype(int) * z1
 
-    vert2 = np.array([[2500, 0.5], [1000, 0.55], [500, 0.7], [300, 1], [200, 1.2], [100, 1.7], [50, 2], [5, 4], [300, 2.5], [500, 1.75], [1000, 1.2], [1500, 1], [2500, 0.6]])
-
+    vert2 = np.loadtxt('Gates/dGate.txt', delimiter = ',')
     poly2 = Path(vert2)
-    yesno2 = poly2.contains_points(np.array(trimmed_ntuple[['dEdx', 'gbrho']])).astype(int) * m2
+    mass_gated = poly2.contains_points(np.array(ntuple[['dEdx', 'gbrho']])).astype(int) * md
+    charge_gated = poly2.contains_points(np.array(ntuple[['dEdx', 'gbrho']])).astype(int) * z1
 
-    yesno = yesno1 + yesno2
+    vert3 = np.loadtxt('Gates/tGate.txt', delimiter = ',')
+    poly3 = Path(vert3)
+    mass_gatet = poly3.contains_points(np.array(ntuple[['dEdx', 'gbrho']])).astype(int) * mt
+    charge_gatet = poly3.contains_points(np.array(ntuple[['dEdx', 'gbrho']])).astype(int) * z1
 
-    if len(yesno) == len(ntuple):
-        ntuple['mass'] = yesno
+    vert4 = np.loadtxt('Gates/HeGate.txt', delimiter = ',')
+    poly4 = Path(vert4)
+    mass_gateHe = poly4.contains_points(np.array(ntuple[['dEdx', 'gbrho']])).astype(int) * mHe
+    charge_gateHe = poly4.contains_points(np.array(ntuple[['dEdx', 'gbrho']])).astype(int) * z2
+
+    mass_gate = mass_gatep + mass_gated + mass_gatet + mass_gateHe
+    charge_gate = charge_gatep + charge_gated + charge_gatet + charge_gateHe
+
+    if (len(mass_gate) == len(ntuple)) and (len(charge_gate) == len(ntuple)):
+        ntuple['mass'] = mass_gate
+        ntuple['charge'] = charge_gate
     else:
         raise Exception('Error occurred with PID')
 
@@ -95,14 +110,14 @@ if __name__ == '__main__':
 
     ntuple = pd.read_csv(ntuple_PATH, delimiter = ',')
 
-    print(len(ntuple))
+    #print(len(ntuple))
 
-    all_ntuples = [ntuple]
-    trimmed_ntuple = compile_ntuple(all_ntuples)
-    #PID(trimmed_ntuple)
+    #all_ntuples = [ntuple]
+    #trimmed_ntuple = compile_ntuple(all_ntuples)
+    PID(ntuple)
 
-    print(len(trimmed_ntuple))
+    #print(len(trimmed_ntuple))
  
-    trimmed_ntuple.to_csv(ntuple_PATH, sep = ',', index = False)
+    ntuple.to_csv(ntuple_PATH, sep = ',', index = False)
 
     print('Phase 4 finished successfully')

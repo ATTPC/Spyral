@@ -1,2 +1,2 @@
-PATH:/mnt/analysis/e20009/e20009_Turi/run_0350.h5
-ntuple_PATH:/user/turi/PointCloud-utils/all_ntuple_run0350_Turi.txt
+PATH:/mnt/analysis/e20009/e20009_Turi/run_0347.h5
+ntuple_PATH:/user/turi/PointCloud-utils/ntuple_testing/Be10dp_10/all_ntuple_run0347_Turi.txt
