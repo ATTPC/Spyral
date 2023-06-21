@@ -10,7 +10,7 @@ if __name__ == '__main__':
 
     PATH = '/mnt/analysis/e20009/e20009_Turi/run_0348.h5'
 
-    evt_ind = 147472
+    evt_ind = 147050
 
     smoothed = HDF5_LoadClouds(PATH, evt_ind)
 
@@ -25,13 +25,18 @@ if __name__ == '__main__':
         #print(smoothed[np.isnan(smoothed).any(axis = 1)])
         #print(evt_ind, np.isnan(smoothed).any(axis = 0))
 
-    fig = plt.figure(figsize = (8, 8))
+    fig = plt.figure(figsize = (12, 6))
     ax = fig.add_subplot(projection='3d')
+    
+    ax.scatter(smoothed[:,2], smoothed[:,1], smoothed[:,0], c = smoothed[:,6], s = 10)
 
-    ax.scatter(smoothed[:,0], smoothed[:,1], smoothed[:,2], c = smoothed[:,6], s = 10)
-
-    ax.set_xlim([-292, 292])
+    ax.set_box_aspect((1000/584, 1, 1))
+    ax.set_xlim([0, 1000])
     ax.set_ylim([-292, 292])
-    ax.set_zlim([0, 1000])
+    ax.set_zlim([-292, 292])
+    ax.set_xlabel('Z')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('X')
+    ax.legend()
 
     plt.show()

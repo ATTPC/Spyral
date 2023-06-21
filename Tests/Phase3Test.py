@@ -37,6 +37,6 @@ if __name__ == '__main__':
         #print(np.unique(data[:,5]))
         for track_id in np.unique(data[:,6]):
             subset = data[data[:,6] == track_id]
-            results = SimpleAnalysis(data, track_id)
-            print(event_num, track_id, results)
+            #results = SimpleAnalysis(data, track_id)
+            print(event_num, track_id)
     print('Simple analysis successful')

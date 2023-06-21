@@ -1,18 +1,26 @@
 import pandas as pd
 import numpy as np
-from TPCH5_utils import load_trace, get_first_last_event_num
+from TPCH5_utils import load_trace, get_first_last_event_num, HDF5_LoadClouds
 import time
 from matplotlib.widgets import PolygonSelector
 from matplotlib.path import Path
 from tqdm import tqdm
 from scipy.signal import find_peaks
 
-def FindBeamEvent(PATH, evt_ind):
+def FindBeamEventTrace(PATH, evt_ind):
     meta, traces = load_trace(PATH, evt_ind)
     # Checks CoBo 10, AGET 3, channel 34 for a peak. If there is a peak, it is a beam event.
     trace = traces[np.logical_and(np.logical_and(meta[:,0] == 10, meta[:,2] == 3), meta[:,3] == 34)][0]
     if len(find_peaks(np.gradient(trace[1:-1]), height = 50)[0]) != 0:
-        return True # Bem event
+        return True # Beam event
+    else:
+        return False
+
+def FindBeamEventPC(PATH, evt_ind):
+    data = HDF5_LoadClouds(PATH, evt_ind)
+    br_R = 25
+    if len(data[np.sqrt(data[:,0]**2+data[:,1]**2) > br_R])/len(data) < 0.1:
+        return True # Beam event
     else:
         return False
 
@@ -21,7 +29,7 @@ def compile_ntuple(all_ntuples):
     
     for ntuple_i in all_ntuples:
         for evt_i in tqdm(np.unique(ntuple_i['evt'])):
-            if FindBeamEvent(PATH, int(evt_i)):
+            if FindBeamEventTrace(PATH, int(evt_i)) or FindBeamEventPC(PATH, int(evt_i)):
                 continue
             sub = ntuple_i[ntuple_i['evt'] == evt_i]
             trimmed_ntuple = trimmed_ntuple.append(sub.loc[abs(90-sub['gbrho']) == min(abs(90-sub['gbrho']))])
@@ -108,12 +116,15 @@ if __name__ == '__main__':
     PATH = params[0, 1]
     ntuple_PATH = params[1, 1]
 
+    first_event_num, last_event_num = get_first_last_event_num(PATH)
+    print('First event number: ', first_event_num, '\nLast event num: ', last_event_num)
+
     ntuple = pd.read_csv(ntuple_PATH, delimiter = ',')
 
     #print(len(ntuple))
 
-    #all_ntuples = [ntuple]
-    #trimmed_ntuple = compile_ntuple(all_ntuples)
+    all_ntuples = [ntuple]
+    ntuple = compile_ntuple(all_ntuples)
     PID(ntuple)
 
     #print(len(trimmed_ntuple))

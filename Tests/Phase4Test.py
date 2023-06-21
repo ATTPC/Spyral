@@ -26,10 +26,15 @@ if __name__ == '__main__':
     PATH = params[0, 1]
     ntuple_PATH = params[1, 1]
 
-    ntuple = pd.read_csv(ntuple_PATH, delimiter = ',')
+    #ntuple = pd.read_csv(ntuple_PATH, delimiter = ',')
 
-    evt_i = np.unique(ntuple['evt'])[0]
+    #evt_i = np.unique(ntuple['evt'])[0]
 
-    print(evt_i)
+    #print(evt_i)
 
-    meta, traces = load_trace(PATH, int(evt_i))
+    meta, traces = load_trace(PATH, 147050)
+
+    trace = traces[np.logical_and(np.logical_and(meta[:,0] == 10, meta[:,2] == 3), meta[:,3] == 34)][0]
+
+    plt.plot(np.gradient(trace[1:-1]))
+    plt.show()

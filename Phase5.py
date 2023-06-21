@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import h5py
 from tqdm import tqdm
-from TPCH5_utils import HDF5_LoadClouds
+from TPCH5_utils import get_first_last_event_num, HDF5_LoadClouds
 from scipy.optimize import minimize
 from scipy.integrate import solve_ivp
 from scipy.interpolate import interp1d
@@ -11,6 +11,11 @@ import multiprocessing.pool
 from multiprocessing import Pool, cpu_count
 
 # PHASE 5 (Track fitting)
+
+# Define constants
+global C, amuev
+C = 2.99792e8
+amuev = 931.494028
 
 def motionIVP(t, vec):
     '''
@@ -21,7 +26,10 @@ def motionIVP(t, vec):
     Returns:
         dvecdt : Output vector that contains the next step for the ODE (has structure [vx, vy, vz, dvx/dt, dvy/dt, dvz/dt]).
     '''
-    
+ 
+    #C = 2.99792e8
+    #amuev = 931.494028
+   
     x, y, z, vx, vy, vz = vec
     rr = np.sqrt(vx**2 + vy**2 + vz**2)
     azi = np.arctan2(vy, vx)
@@ -59,6 +67,9 @@ def SolveIVP(t, polar, azimuth, brho, xvert, yvert, zvert):
         sol.y.T[:,:3] : Solution to the IVP where each column corresponds to the x-y-z positions of the particle respectively.
     '''
 
+    #C = 2.99792e8
+    #amuev = 931.494028
+
     if np.isnan(polar) or np.isnan(azimuth) or np.isnan(brho) or np.isnan(xvert) or np.isnan(yvert) or np.isnan(zvert):
         return 0
     energy = amuev * (np.sqrt((brho / 3.107 * ch / ma)**2 + 1) - 1) # Calculates the energy of the track in eV
@@ -93,11 +104,11 @@ def objective(guess, subset):
         obj    : The value of the objective function between the data and fit.
     '''
   
-    obj = np.sum(np.array([np.min(np.linalg.norm(guess[:,:3]-subset[i, :3], axis = 1)) for i in range(len(subset))]))
+    obj = np.sum(np.array([np.min(np.linalg.norm(guess[:,:3]-subset[i,:3], axis = 1)) for i in range(len(subset))]))
     obj /= np.shape(subset)[0]
     return obj
 
-def FunkyKongODE(params, subset):
+def FunkyKongODE(params, subset, t):
     '''
     Parameters:
         params : The current estimate of each fit parameter.
@@ -118,9 +129,9 @@ def Phase5(evt_num_array):
 
     all_results_seg = []
     ntuple = pd.read_csv(ntuple_PATH, delimiter = ',')
-    global t
+
     for event_num_i in tqdm(range(len(evt_num_array))):
-        data = HDF5_LoadClouds(PATH, event_num_i)
+        data = HDF5_LoadClouds(PATH, evt_num_array[event_num_i])
         ntuple_i = ntuple[ntuple['evt'] == evt_num_array[event_num_i]]
         results = np.hstack(np.array([ntuple_i['gpolar'],
                                       ntuple_i['gazimuth'],
@@ -130,21 +141,25 @@ def Phase5(evt_num_array):
                                       ntuple_i['gzvert'],
                                       ntuple_i['direction']]))
 
+        global ch, ma, q, m
         ch = int(ntuple_i['charge'])
         ma = int(ntuple_i['mass'])
         q = ch * 1.6021773349e-19
         m = ma * 1.660538782e-27
 
-        print(int(ntuple_i['track_id']))
+        if (ma == 0) or (ch == 0):
+            all_results_seg.append(np.array([np.nan, np.nan, np.nan, np.nan, np.nan, np.nan]))
+            continue
 
         subset = data[data[:,6] == int(ntuple_i['track_id'])]
 
+        global t
         t = np.arange(0, 1e-6, 1e-10)[:len(subset)]
 
         res = minimize(FunkyKongODE,
                        x0 = results[:6],
                        method = 'Nelder-Mead',
-                       args = (subset),
+                       args = (subset, t),
                        bounds = ((0, 180),
                                  (0, 360),
                                  (0, 5),
@@ -176,7 +191,7 @@ if __name__ == '__main__':
     length = 1000 # Length of the detector in mm
 
     all_cores = cpu_count()
-    evt_cores = 40
+    evt_cores = 20
 
     if evt_cores > all_cores:
         raise ValueError('Number of cores used cannot exceed ', str(all_cores))
@@ -184,6 +199,9 @@ if __name__ == '__main__':
     params = np.loadtxt('params.txt', dtype = str, delimiter = ':')
     PATH = params[0, 1]
     ntuple_PATH = params[1, 1]
+
+    first_event_num, last_event_num = get_first_last_event_num(PATH)
+    print('First event number: ', first_event_num, '\nLast event num: ', last_event_num)
 
     dEdxSRIM = pd.read_csv('dEdx/Be10dpSRIM_Proton.txt', delimiter = ',')
     dEdx_interp = interp1d(dEdxSRIM['Ion Energy (MeV)'], dEdxSRIM['dE/dx (MeV/(mg/cm2))'])
@@ -209,4 +227,4 @@ if __name__ == '__main__':
 
     ntuple.to_csv(ntuple_PATH, ',', index = False)
    
-    print('Phase 4 finished successfully')
+    print('Phase 5 finished successfully')
