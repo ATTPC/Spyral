@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import plotly.graph_objects as go
 import time
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Pool, cpu_count, set_start_method
 import multiprocessing
 import multiprocessing.pool
 from tqdm import tqdm
@@ -14,6 +14,7 @@ sys.path.insert(0, 'TPC-utils')
 from tpc_utils import background, search_high_res
 from TPCH5_utils import get_first_last_event_num, load_trace
 import h5py
+import os
 
 # PHASE 1 (Constructing point clouds from trace data)
 
@@ -56,7 +57,10 @@ def Phase1(event_num_array):
     Returns:
     	all_clouds_seg  : 2D list where, for each entry, the first element is the event number, and the second element is the constructed point cloud.
     '''
-    all_clouds_seg = []
+    process_id = os.getpid()
+    ftmp = h5py.File(parent_PATH+'tmp/test_'+str(process_id)+'.h5', 'w')
+
+    #all_clouds_seg = []
     for event_num_i in tqdm(range(len(event_num_array))):
         event_ind = event_num_array[event_num_i]
 
@@ -119,34 +123,72 @@ def Phase1(event_num_array):
         pads_to_drop = np.unique(pc[:,5])[np.where(np.array([list(pc[:,5]).count(i) for i in np.unique(pc[:,5])]) >= 10)]
         pc = pc[~np.isin(pc[:,5], pads_to_drop)]
 
-        all_clouds_seg.append([event_ind, pc])
+        ftmp.create_dataset('evt'+str(event_ind)+'_cloud', data = pc)
+        #all_clouds_seg.append([event_ind, pc])
 
-    return all_clouds_seg
+    ftmp.close()
+
+    #return all_clouds_seg
         
 if __name__ == '__main__':
-    start = time.time()
+    start = time.time()    
 
-    #charge_thresh_params = np.loadtxt('config.txt')
-    
     all_cores = cpu_count()
     deconv_cores = 10
-    evt_cores = 4
+    evt_cores = 2
 
     params = np.loadtxt('params.txt', dtype = str, delimiter = ':')
+    global PATH
     PATH = params[0, 1]
+    global parent_PATH
+    parent_PATH = params[2, 1]
+
+    padxy = np.loadtxt('padxy.csv', delimiter = ',', skiprows = 1)
+
+    try:
+        os.mkdir(parent_PATH+'tmp')
+    except FileExistsError:
+        pass
 
     first_event_num, last_event_num = get_first_last_event_num(PATH)
     print('First event number: ', first_event_num, '\nLast event number: ', last_event_num)
 
-    padxy = np.loadtxt('padxy.csv', delimiter = ',', skiprows = 1)
-
     evt_parts = np.array_split(np.arange(first_event_num+1, last_event_num+1), evt_cores)
 
     with NoDaemonProcessPool(evt_cores) as evt_p:
-        run_parts = evt_p.map(Phase1, evt_parts)
+        evt_p.map(Phase1, evt_parts)
+        #run_parts = evt_p.map(Phase1, evt_parts)
     
     print('It takes', time.time()-start, 'seconds to process all', last_event_num-first_event_num, 'events.')
 
+    files = os.listdir(parent_PATH+'tmp/')
+
+    fout = h5py.File(PATH, 'a')
+
+    try:
+        clouds = fout.create_group('clouds')
+    except ValueError:
+        print('Cloud group already exists')
+        clouds = fout['clouds']
+
+    for file_i in files:
+        fsrc = h5py.File(parent_PATH+'tmp/'+str(file_i), 'r')
+
+        for dataset_i in list(fsrc.keys()):
+            try:
+                clouds.create_dataset(str(dataset_i), data = fsrc.get(str(dataset_i)))
+            except OSError:
+                del clouds[str(dataset_i)]
+                clouds.create_dataset(str(dataset_i), data = fsrc.get(str(dataset_i)))
+
+        fsrc.close()
+
+    fout.close()
+
+    for file_i in files:
+        os.remove(parent_PATH+'tmp/'+str(file_i))
+            
+    '''
     f = h5py.File(PATH, 'r+')
     try:
         clouds = f.create_group('clouds')
@@ -163,5 +205,6 @@ if __name__ == '__main__':
                 clouds.create_dataset('evt'+str(evt[0])+'_cloud', data = evt[1])
 
     f.close()
+    '''
 
     print('Phase 1 finished successfully')

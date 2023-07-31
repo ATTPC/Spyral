@@ -13,6 +13,7 @@ if __name__ == '__main__':
     evt_ind = 147050
 
     smoothed = HDF5_LoadClouds(PATH, evt_ind)
+    print(np.shape(smoothed))
 
     for i in np.unique(smoothed[:,6]):
         print(len(smoothed[smoothed[:,6] == i]))

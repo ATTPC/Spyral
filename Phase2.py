@@ -211,7 +211,7 @@ if __name__ == '__main__':
     #window = 500 # Timebucket of the window edge for C14
 
     #all_cores = int(cpu_count() / 4)
-    all_cores = 5
+    all_cores = 2
 
     params = np.loadtxt('params.txt', dtype = str, delimiter = ':')
     PATH = params[0, 1]

@@ -25,16 +25,16 @@ def FindBeamEventPC(PATH, evt_ind):
         return False
 
 def compile_ntuple(all_ntuples):
-    trimmed_ntuple = pd.DataFrame(columns = ['evt', 'track_id', 'gxvert', 'gyvert', 'gzvert', 'gpolar', 'gazimuth', 'gbrho', 'direction', 'dEdx', 'deavg'])
+    trimmed_ntuple = pd.DataFrame(columns = ['evt', 'track_id', 'gxvert', 'gyvert', 'gzvert', 'gpolar', 'gazimuth', 'gbrho', 'direction', 'dEdx', 'deavg', 'track_len'])
     
     for ntuple_i in all_ntuples:
         for evt_i in tqdm(np.unique(ntuple_i['evt'])):
             if FindBeamEventTrace(PATH, int(evt_i)) or FindBeamEventPC(PATH, int(evt_i)):
                 continue
             sub = ntuple_i[ntuple_i['evt'] == evt_i]
-            trimmed_ntuple = trimmed_ntuple.append(sub.loc[abs(90-sub['gbrho']) == min(abs(90-sub['gbrho']))])
-    trimmed_ntuple.reset_index(inplace = True, drop = True)
-    #trimmed_ntuple = trimmed_ntuple[np.logical_and(trimmed_ntuple['gpolar'] >= 5, trimmed_ntuple['gpolar'] <= 175)]
+            sub = sub.dropna().reset_index(drop = True)
+            trimmed_ntuple = trimmed_ntuple.append(sub.loc[abs(90-sub['gpolar']) == min(abs(90-sub['gpolar']))])
+    
     trimmed_ntuple.reset_index(inplace = True, drop = True)
     return trimmed_ntuple
 
@@ -90,18 +90,18 @@ def PID(ntuple):
     mass_gated = poly2.contains_points(np.array(ntuple[['dEdx', 'gbrho']])).astype(int) * md
     charge_gated = poly2.contains_points(np.array(ntuple[['dEdx', 'gbrho']])).astype(int) * z1
 
-    vert3 = np.loadtxt('Gates/tGate.txt', delimiter = ',')
-    poly3 = Path(vert3)
-    mass_gatet = poly3.contains_points(np.array(ntuple[['dEdx', 'gbrho']])).astype(int) * mt
-    charge_gatet = poly3.contains_points(np.array(ntuple[['dEdx', 'gbrho']])).astype(int) * z1
+    #vert3 = np.loadtxt('Gates/tGate.txt', delimiter = ',')
+    #poly3 = Path(vert3)
+    #mass_gatet = poly3.contains_points(np.array(ntuple[['dEdx', 'gbrho']])).astype(int) * mt
+    #charge_gatet = poly3.contains_points(np.array(ntuple[['dEdx', 'gbrho']])).astype(int) * z1
 
     vert4 = np.loadtxt('Gates/HeGate.txt', delimiter = ',')
     poly4 = Path(vert4)
     mass_gateHe = poly4.contains_points(np.array(ntuple[['dEdx', 'gbrho']])).astype(int) * mHe
     charge_gateHe = poly4.contains_points(np.array(ntuple[['dEdx', 'gbrho']])).astype(int) * z2
 
-    mass_gate = mass_gatep + mass_gated + mass_gatet + mass_gateHe
-    charge_gate = charge_gatep + charge_gated + charge_gatet + charge_gateHe
+    mass_gate = mass_gatep + mass_gated + mass_gateHe
+    charge_gate = charge_gatep + charge_gated + charge_gateHe
 
     if (len(mass_gate) == len(ntuple)) and (len(charge_gate) == len(ntuple)):
         ntuple['mass'] = mass_gate

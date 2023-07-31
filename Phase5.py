@@ -148,7 +148,7 @@ def Phase5(evt_num_array):
         m = ma * 1.660538782e-27
 
         if (ma == 0) or (ch == 0):
-            all_results_seg.append(np.array([np.nan, np.nan, np.nan, np.nan, np.nan, np.nan]))
+            all_results_seg.append(np.array([np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan]))
             continue
 
         subset = data[data[:,6] == int(ntuple_i['track_id'])]
@@ -169,7 +169,7 @@ def Phase5(evt_num_array):
                        options = {'maxiter':2000},
                        tol = 1e-3)
 
-        all_results_seg.append(res.x)
+        all_results_seg.append(np.append(res.x, objective(SolveIVP(t, *res.x), subset)))
 
     return all_results_seg
 
@@ -224,6 +224,8 @@ if __name__ == '__main__':
     ntuple['fpolar'] = all_results[:,0]
     ntuple['fazimuth'] = all_results[:,1]
     ntuple['fbrho'] = all_results[:,2]
+    ntuple['fenergy'] = amuev * (np.sqrt((ntuple['fbrho'] / 3.107 * ntuple['charge'] / ntuple['mass'])**2 + 1) - 1)
+    ntuple['fobj'] = all_results[:,6]    
 
     ntuple.to_csv(ntuple_PATH, ',', index = False)
    
