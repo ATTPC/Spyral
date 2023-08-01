@@ -200,7 +200,7 @@ if __name__ == '__main__':
     first_event_num, last_event_num = get_first_last_event_num(PATH)
     print('First event number: ', first_event_num, '\nLast event num: ', last_event_num)
 
-    dEdxSRIM = pd.read_csv('dEdx/Be10dpSRIM_Proton.txt', delimiter = ',')
+    dEdxSRIM = pd.read_csv('etc/dEdx/Be10dpSRIM_Proton.txt', delimiter = ',')
     dEdx_interp = interp1d(dEdxSRIM['Ion Energy (MeV)'], dEdxSRIM['dE/dx (MeV/(mg/cm2))'])
  
     ntuple = pd.read_csv(ntuple_PATH, delimiter = ',')

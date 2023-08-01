@@ -80,22 +80,22 @@ def PID(ntuple):
     z1 = 1
     z2 = 2
 
-    vert1 = np.loadtxt('Gates/pGate.txt', delimiter = ',')
+    vert1 = np.loadtxt('etc/Gates/pGate.txt', delimiter = ',')
     poly1 = Path(vert1)
     mass_gatep = poly1.contains_points(np.array(ntuple[['dEdx', 'gbrho']])).astype(int) * mp
     charge_gatep = poly1.contains_points(np.array(ntuple[['dEdx', 'gbrho']])).astype(int) * z1
 
-    vert2 = np.loadtxt('Gates/dGate.txt', delimiter = ',')
+    vert2 = np.loadtxt('etc/Gates/dGate.txt', delimiter = ',')
     poly2 = Path(vert2)
     mass_gated = poly2.contains_points(np.array(ntuple[['dEdx', 'gbrho']])).astype(int) * md
     charge_gated = poly2.contains_points(np.array(ntuple[['dEdx', 'gbrho']])).astype(int) * z1
 
-    #vert3 = np.loadtxt('Gates/tGate.txt', delimiter = ',')
+    #vert3 = np.loadtxt('etc/Gates/tGate.txt', delimiter = ',')
     #poly3 = Path(vert3)
     #mass_gatet = poly3.contains_points(np.array(ntuple[['dEdx', 'gbrho']])).astype(int) * mt
     #charge_gatet = poly3.contains_points(np.array(ntuple[['dEdx', 'gbrho']])).astype(int) * z1
 
-    vert4 = np.loadtxt('Gates/HeGate.txt', delimiter = ',')
+    vert4 = np.loadtxt('etc/Gates/HeGate.txt', delimiter = ',')
     poly4 = Path(vert4)
     mass_gateHe = poly4.contains_points(np.array(ntuple[['dEdx', 'gbrho']])).astype(int) * mHe
     charge_gateHe = poly4.contains_points(np.array(ntuple[['dEdx', 'gbrho']])).astype(int) * z2

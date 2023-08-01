@@ -140,7 +140,7 @@ if __name__ == '__main__':
     global parent_PATH
     parent_PATH = params[2, 1]
 
-    padxy = np.loadtxt('padxy.csv', delimiter = ',', skiprows = 1)
+    padxy = np.loadtxt('etc/padxy.csv', delimiter = ',', skiprows = 1)
 
     try:
         os.mkdir(parent_PATH+'tmp')
