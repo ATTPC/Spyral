@@ -4,8 +4,8 @@ import pandas as pd
 from matplotlib.colors import LinearSegmentedColormap, rgb2hex
 import sys
 sys.path.append('..')
-from Phase4 import *
-from TPCH5_utils import load_trace
+from pcutils.phases.Phase4 import *
+from pcutils.hdf.TPCH5_utils import load_trace
 
 # PHASE 4 (PID)
 

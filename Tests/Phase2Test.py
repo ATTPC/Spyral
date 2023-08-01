@@ -3,8 +3,8 @@ import numpy as np
 import h5py
 import sys
 sys.path.append('..')
-from TPCH5_utils import HDF5_LoadClouds
-from Phase2 import SmoothPC
+from pcutils.hdf.TPCH5_utils import HDF5_LoadClouds
+from pcutils.phases.Phase2 import SmoothPC
 
 if __name__ == '__main__':
 
