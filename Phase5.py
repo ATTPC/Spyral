@@ -1,13 +1,10 @@
 import numpy as np
 import pandas as pd
-import h5py
 from tqdm import tqdm
 from TPCH5_utils import get_first_last_event_num, HDF5_LoadClouds
 from scipy.optimize import minimize
 from scipy.integrate import solve_ivp
 from scipy.interpolate import interp1d
-import multiprocessing
-import multiprocessing.pool
 from multiprocessing import Pool, cpu_count
 
 # PHASE 5 (Track fitting)
