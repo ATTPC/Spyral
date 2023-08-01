@@ -9,7 +9,7 @@ from tqdm import tqdm
 import sys
 sys.path.insert(0, 'TPC-utils')
 from tpc_utils import search_high_res
-from TPCH5_utils import get_first_last_event_num, load_trace
+from hdf.TPCH5_utils import get_first_last_event_num, load_trace
 import h5py
 import os
 
@@ -46,10 +46,12 @@ def deconv(traces):
     '''
     return search_high_res(traces, sigma = 4, threshold = 60, remove_bkg = True, number_it = 200, markov = True, aver_window = 5)[0]
 
-def Phase1(event_num_array):
+def Phase1(event_num_array, deconv_cores, padxy):
     '''
     Parameters:
     	event_num_array : Array of event numbers of which you want to make point clouds.
+        deconv_cores: Number of processes which will be allocated for deconvolution
+        padxy: Map of pad number to x-y geometry
 
     Returns:
     	all_clouds_seg  : 2D list where, for each entry, the first element is the event number, and the second element is the constructed point cloud.
@@ -126,8 +128,9 @@ def Phase1(event_num_array):
     ftmp.close()
 
     #return all_clouds_seg
-        
-if __name__ == '__main__':
+
+#GWM -- Best practice to have a main function; probably rename this later
+def main():
     start = time.time()    
 
     all_cores = cpu_count()
@@ -153,7 +156,7 @@ if __name__ == '__main__':
     evt_parts = np.array_split(np.arange(first_event_num+1, last_event_num+1), evt_cores)
 
     with NoDaemonProcessPool(evt_cores) as evt_p:
-        evt_p.map(Phase1, evt_parts)
+        evt_p.map(Phase1, evt_parts, deconv_cores, padxy)
         #run_parts = evt_p.map(Phase1, evt_parts)
     
     print('It takes', time.time()-start, 'seconds to process all', last_event_num-first_event_num, 'events.')
@@ -205,3 +208,6 @@ if __name__ == '__main__':
     '''
 
     print('Phase 1 finished successfully')
+
+if __name__ == "__main__":
+    main()

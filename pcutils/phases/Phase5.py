@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-from TPCH5_utils import get_first_last_event_num, HDF5_LoadClouds
+from hdf.TPCH5_utils import get_first_last_event_num, HDF5_LoadClouds
 from scipy.optimize import minimize
 from scipy.integrate import solve_ivp
 from scipy.interpolate import interp1d
@@ -14,7 +14,7 @@ global C, amuev
 C = 2.99792e8
 amuev = 931.494028
 
-def motionIVP(t, vec):
+def motionIVP(t, vec, Efield, Bfield, dens, dEdx_interp, q, m):
     '''
     Parameters:
         t      : Timesteps to evaluate the motion on.
@@ -49,7 +49,7 @@ def motionIVP(t, vec):
               (q/m)*(Efield[2] + vx*Bfield[1] - vy*Bfield[0]) - st*np.cos(pol)]
     return dvecdt
 
-def SolveIVP(t, polar, azimuth, brho, xvert, yvert, zvert):
+def SolveIVP(t, polar, azimuth, brho, xvert, yvert, zvert, Efield, Bfield, dens, dEdx_interp, ch, ma, q, m):
     '''
     Parameters:
         t             : Timesteps to evaluate the motion on.
@@ -85,7 +85,8 @@ def SolveIVP(t, polar, azimuth, brho, xvert, yvert, zvert):
                     y0 = y0, 
                     t_eval = t, 
                     method='RK45', 
-                    max_step=0.1)
+                    max_step=0.1,
+                    args=(Efield, Bfield, dens, dEdx_interp, q, m))
     
     sol.y[:3] *= 1000 # Converts positions to mm
     
@@ -105,7 +106,7 @@ def objective(guess, subset):
     obj /= np.shape(subset)[0]
     return obj
 
-def FunkyKongODE(params, subset, t):
+def FunkyKongODE(params, subset, t, Efield, Bfield, dens, dEdx_interp, ch, ma, q, m):
     '''
     Parameters:
         params : The current estimate of each fit parameter.
@@ -114,21 +115,17 @@ def FunkyKongODE(params, subset, t):
     Returns:
         obj    : The value fo the objective function between the data and the fit.
     '''
-    obj = objective(SolveIVP(t, *params), subset)
+    obj = objective(SolveIVP(t, *params, Efield, Bfield, dens, dEdx_interp, ch, ma, q, m), subset)
     
     return obj
 
-def Phase5(evt_num_array):
-
-    params = np.loadtxt('/user/turi/PointCloud-utils/params.txt', dtype = str, delimiter = ':')
-    PATH = params[0, 1]
-    ntuple_PATH = params[1, 1]
+def Phase5(evt_num_array, hdf5_path, ntuple_path, Efield, Bfield, dens, dEdx_interp):
 
     all_results_seg = []
-    ntuple = pd.read_csv(ntuple_PATH, delimiter = ',')
+    ntuple = pd.read_csv(ntuple_path, delimiter = ',')
 
     for event_num_i in tqdm(range(len(evt_num_array))):
-        data = HDF5_LoadClouds(PATH, evt_num_array[event_num_i])
+        data = HDF5_LoadClouds(hdf5_path, evt_num_array[event_num_i])
         ntuple_i = ntuple[ntuple['evt'] == evt_num_array[event_num_i]]
         results = np.hstack(np.array([ntuple_i['gpolar'],
                                       ntuple_i['gazimuth'],
@@ -138,7 +135,6 @@ def Phase5(evt_num_array):
                                       ntuple_i['gzvert'],
                                       ntuple_i['direction']]))
 
-        global ch, ma, q, m
         ch = int(ntuple_i['charge'])
         ma = int(ntuple_i['mass'])
         q = ch * 1.6021773349e-19
@@ -150,13 +146,12 @@ def Phase5(evt_num_array):
 
         subset = data[data[:,6] == int(ntuple_i['track_id'])]
 
-        global t
         t = np.arange(0, 1e-6, 1e-10)[:len(subset)]
 
         res = minimize(FunkyKongODE,
                        x0 = results[:6],
                        method = 'Nelder-Mead',
-                       args = (subset, t),
+                       args = (subset, t, Efield, Bfield, dens, dEdx_interp, ch, ma, q, m),
                        bounds = ((0, 180),
                                  (0, 360),
                                  (0, 5),
@@ -170,7 +165,7 @@ def Phase5(evt_num_array):
 
     return all_results_seg
 
-if __name__ == '__main__':
+def main():
     # Constants and conversions
     C = 2.99792e8 # Speed of light in m/s
     amuev = 931.494028 # Conversion from amu to eV
@@ -183,10 +178,6 @@ if __name__ == '__main__':
     Bfield = [0, -Bmag*np.sin(tilt*np.pi/180), -Bmag*np.cos(tilt*np.pi/180)]
     dens = 0.00013136 # Density of the gas in g/cm^3
 
-    micromegas = 66.0045 # Time bucket of the micromega edge
-    window = 399.455 # Time bucket of the window edge
-    length = 1000 # Length of the detector in mm
-
     all_cores = cpu_count()
     evt_cores = 20
 
@@ -194,10 +185,10 @@ if __name__ == '__main__':
         raise ValueError('Number of cores used cannot exceed ', str(all_cores))
 
     params = np.loadtxt('params.txt', dtype = str, delimiter = ':')
-    PATH = params[0, 1]
+    hdf5_path = params[0, 1]
     ntuple_PATH = params[1, 1]
 
-    first_event_num, last_event_num = get_first_last_event_num(PATH)
+    first_event_num, last_event_num = get_first_last_event_num(hdf5_path)
     print('First event number: ', first_event_num, '\nLast event num: ', last_event_num)
 
     dEdxSRIM = pd.read_csv('etc/dEdx/Be10dpSRIM_Proton.txt', delimiter = ',')
@@ -208,7 +199,7 @@ if __name__ == '__main__':
     evt_parts = np.array_split(np.unique(ntuple['evt']), evt_cores)
 
     with Pool(evt_cores)as evt_p:
-        run_parts = evt_p.map(Phase5, evt_parts)
+        run_parts = evt_p.map(Phase5, evt_parts, hdf5_path, ntuple_PATH, Efield, Bfield, dens, dEdx_interp)
 
     all_results = np.vstack(run_parts)
 
@@ -227,3 +218,7 @@ if __name__ == '__main__':
     ntuple.to_csv(ntuple_PATH, ',', index = False)
    
     print('Phase 5 finished successfully')
+
+
+if __name__ == "__main__":
+    main()

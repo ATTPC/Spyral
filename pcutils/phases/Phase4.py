@@ -1,14 +1,14 @@
 import pandas as pd
 import numpy as np
-from TPCH5_utils import load_trace, get_first_last_event_num, HDF5_LoadClouds
+from hdf.TPCH5_utils import load_trace, get_first_last_event_num, HDF5_LoadClouds
 from matplotlib.widgets import PolygonSelector
 from matplotlib.path import Path
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from scipy.signal import find_peaks
 
-def FindBeamEventTrace(PATH, evt_ind):
-    meta, traces = load_trace(PATH, evt_ind)
+def FindBeamEventTrace(hdf5_path, evt_ind):
+    meta, traces = load_trace(hdf5_path, evt_ind)
     # Checks CoBo 10, AGET 3, channel 34 for a peak. If there is a peak, it is a beam event.
     trace = traces[np.logical_and(np.logical_and(meta[:,0] == 10, meta[:,2] == 3), meta[:,3] == 34)][0]
     if len(find_peaks(np.gradient(trace[1:-1]), height = 50)[0]) != 0:
@@ -16,20 +16,20 @@ def FindBeamEventTrace(PATH, evt_ind):
     else:
         return False
 
-def FindBeamEventPC(PATH, evt_ind):
-    data = HDF5_LoadClouds(PATH, evt_ind)
+def FindBeamEventPC(hdf5_path, evt_ind):
+    data = HDF5_LoadClouds(hdf5_path, evt_ind)
     br_R = 25
     if len(data[np.sqrt(data[:,0]**2+data[:,1]**2) > br_R])/len(data) < 0.1:
         return True # Beam event
     else:
         return False
 
-def compile_ntuple(all_ntuples):
+def compile_ntuple(all_ntuples, hdf5_path):
     trimmed_ntuple = pd.DataFrame(columns = ['evt', 'track_id', 'gxvert', 'gyvert', 'gzvert', 'gpolar', 'gazimuth', 'gbrho', 'direction', 'dEdx', 'deavg', 'track_len'])
     
     for ntuple_i in all_ntuples:
         for evt_i in tqdm(np.unique(ntuple_i['evt'])):
-            if FindBeamEventTrace(PATH, int(evt_i)) or FindBeamEventPC(PATH, int(evt_i)):
+            if FindBeamEventTrace(hdf5_path, int(evt_i)) or FindBeamEventPC(hdf5_path, int(evt_i)):
                 continue
             sub = ntuple_i[ntuple_i['evt'] == evt_i]
             sub = sub.dropna().reset_index(drop = True)
@@ -109,14 +109,13 @@ def PID(ntuple):
     else:
         raise Exception('Error occurred with PID')
 
-if __name__ == '__main__':
-    global PATH, ntuple_PATH
+def main():
 
     params = np.loadtxt('params.txt', dtype = str, delimiter = ':')
-    PATH = params[0, 1]
+    hdf5_path = params[0, 1]
     ntuple_PATH = params[1, 1]
 
-    first_event_num, last_event_num = get_first_last_event_num(PATH)
+    first_event_num, last_event_num = get_first_last_event_num(hdf5_path)
     print('First event number: ', first_event_num, '\nLast event num: ', last_event_num)
 
     ntuple = pd.read_csv(ntuple_PATH, delimiter = ',')
@@ -124,7 +123,7 @@ if __name__ == '__main__':
     #print(len(ntuple))
 
     all_ntuples = [ntuple]
-    ntuple = compile_ntuple(all_ntuples)
+    ntuple = compile_ntuple(all_ntuples, hdf5_path)
     PID(ntuple)
 
     #print(len(trimmed_ntuple))
@@ -132,3 +131,6 @@ if __name__ == '__main__':
     ntuple.to_csv(ntuple_PATH, sep = ',', index = False)
 
     print('Phase 4 finished successfully')
+
+if __name__ == "__main__":
+    main()

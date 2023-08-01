@@ -1,5 +1,5 @@
 import numpy as np
-from TPCH5_utils import HDF5_LoadClouds, get_first_last_event_num
+from hdf.TPCH5_utils import HDF5_LoadClouds, get_first_last_event_num
 from sklearn.cluster import DBSCAN
 import h5py
 import circle_fit # circle_fit found from: https://www.sciencedirect.com/science/article/pii/S0167947310004809?via%3Dihub
@@ -156,10 +156,14 @@ def SmoothPC(pc, r = 10):
     smoothed_pc = smoothed_pc[~np.isnan(smoothed_pc).any(axis = 1)]
     return smoothed_pc
 
-def Phase2(evt_num_array):
+def Phase2(evt_num_array, micromegas, window, length, hdf5_path):
     '''
     Parameters:
         evt_num_array  : Array of event numbers of which you want to analyze.
+        micromegas: Timebucket of the micromegas edge
+        window: Timebucket of the window edge
+        length: Length of the detector in mm
+        hdf5_path: Path to hdf5 file containing point cloud data
 
     Returns:
         all_clouds_seg : 2D list where, for each entry, the first element is the event number, and the second element is the updated point cloud.
@@ -169,7 +173,7 @@ def Phase2(evt_num_array):
         event_ind = int(evt_num_array[event_num_i])
 
         try:
-            data = HDF5_LoadClouds(PATH, event_ind)
+            data = HDF5_LoadClouds(hdf5_path, event_ind)
         except TypeError:
             continue
 
@@ -199,7 +203,8 @@ def Phase2(evt_num_array):
         all_clouds_seg.append([event_ind, data])
     return all_clouds_seg
 
-if __name__ == '__main__':
+#GWM -- Best practice to have a main function; probably rename this later
+def main():
     start = time.time()
     # Constants for converting from timebucket (tb) to position (mm)
     micromegas = 66.0045 # Timebucket of the micromega edge for Be10
@@ -212,22 +217,22 @@ if __name__ == '__main__':
     all_cores = 2
 
     params = np.loadtxt('params.txt', dtype = str, delimiter = ':')
-    PATH = params[0, 1]
+    hdf5_path = params[0, 1]
 
     #PATH = '/mnt/analysis/e20009/a1954_Turi/run_0055.h5'
     #PATH = '/mnt/analysis/e20009/e20009_Turi/run_0347.h5'
     #PATH = '/mnt/analysis/e20009/e20009_Turi/Be10dp178.h5'
-    first_event_num, last_event_num = get_first_last_event_num(PATH)
+    first_event_num, last_event_num = get_first_last_event_num(hdf5_path)
     print('First event number: ', first_event_num, '\nLast event num: ', last_event_num)
     
     evt_parts = np.array_split(np.arange(first_event_num+1, last_event_num+1), all_cores)
 
     with Pool(all_cores) as evt_p:
-        run_parts = evt_p.map(Phase2, evt_parts)
+        run_parts = evt_p.map(Phase2, evt_parts, micromegas, window, length, hdf5_path)
 
     print('It takes: ', time.time()-start, ' seconds to process ', last_event_num-first_event_num+1, ' events.')
 
-    f = h5py.File(PATH, 'r+')
+    f = h5py.File(hdf5_path, 'r+')
     clouds = f['clouds']
     for part in run_parts:
         for evt in part:
@@ -240,3 +245,6 @@ if __name__ == '__main__':
     f.close()
 
     print('Phase 2 finished successfully')
+
+if __name__ == "__main__":
+    main()

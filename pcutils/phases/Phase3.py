@@ -3,7 +3,7 @@ import pandas as pd
 from scipy.optimize import curve_fit
 from scipy.interpolate import splrep, splev
 from iteration_utilities import duplicates
-from TPCH5_utils import get_first_last_event_num, HDF5_LoadClouds
+from hdf.TPCH5_utils import get_first_last_event_num, HDF5_LoadClouds
 from multiprocessing import Pool
 from tqdm import tqdm
 
@@ -111,11 +111,13 @@ def CircleBoi(data):
     
     return results
 
-def SimpleAnalysis(data, track_id):
+def SimpleAnalysis(data, track_id, Bmag):
     '''
     Parameters:
         data     : Total point cloud
         track_id : Track id number that you want to analyze.
+        Bmag: Magnetic field in Tesla
+
     Returns:
         results  : Array of simple analysis results (polar angle, azimuth angle, brho, xyz-vertices direction, dEdx, deavg)
     '''
@@ -226,10 +228,12 @@ def SimpleAnalysis(data, track_id):
 
     return results
 
-def Phase3(evt_num_array):
+def Phase3(evt_num_array, hdf5_path, Bmag):
     '''
     Parameters:
         evt_num_array   : An array of event numbers of which you want to analyze.
+        hdf5_path: Path to a file containing point cloud data
+        Bmag: Magnetic field in Tesla
 
     Returns:
         all_results_seg : 2D list of the compiled results from the simple analysis (event number, track id, xyz-vertices, polar angle, azimuth angle, brho, direction, deavg, dEdx.
@@ -241,7 +245,7 @@ def Phase3(evt_num_array):
         event_num = evt_num_array[event_num_i]
         
         try:
-            data = HDF5_LoadClouds(PATH, event_num)
+            data = HDF5_LoadClouds(hdf5_path, event_num)
         except TypeError:
             continue
 
@@ -255,14 +259,14 @@ def Phase3(evt_num_array):
                 #results = SimpleAnalysis(data, track_id)
             #except TypeError:
                 #print('Error with event: ', event_num, '\nTrack ID: ', track_id)
-            results = SimpleAnalysis(data, track_id)
+            results = SimpleAnalysis(data, track_id, Bmag)
             if ~np.all(np.isnan(results)):
 
                 all_results_seg.append([event_num, track_id, *results[3:6], *results[:3], results[6], results[7], results[8], results[9]])
 
     return all_results_seg
 
-if __name__ == '__main__':
+def main():
     # Constants and conversions
     C = 2.99792E8 # Speed of light in m/s
     amuev = 931.494028 # Conversion from amu to eV
@@ -274,16 +278,16 @@ if __name__ == '__main__':
     all_cores = 20
 
     params = np.loadtxt('params.txt', dtype = str, delimiter = ':')
-    PATH = params[0, 1]
+    hdf5_path = params[0, 1]
     ntuple_PATH = params[1, 1]
 
-    first_event_num, last_event_num = get_first_last_event_num(PATH)
+    first_event_num, last_event_num = get_first_last_event_num(hdf5_path)
     print('First event number: ', first_event_num, '\nLast event num: ', last_event_num)
 
     evt_parts = np.array_split(np.arange(first_event_num, last_event_num+1), all_cores)
 
     with Pool(all_cores) as evt_p:
-        run_parts = evt_p.map(Phase3, evt_parts)
+        run_parts = evt_p.map(Phase3, evt_parts, hdf5_path, Bmag)
 
     all_results = np.vstack(run_parts)
 
@@ -298,3 +302,6 @@ if __name__ == '__main__':
         ntuple_additions.to_csv(ntuple_PATH, ',', index = False)
 
     print('Phase 3 finished successfully')
+
+if __name__ == "__main__":
+    main()
