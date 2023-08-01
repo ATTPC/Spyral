@@ -1,18 +1,11 @@
 import numpy as np
 import pandas as pd
 from scipy.optimize import curve_fit
-from scipy.signal import find_peaks
-from scipy.interpolate import interp1d, splrep, splev
-from statsmodels.nonparametric.smoothers_lowess import lowess
+from scipy.interpolate import splrep, splev
 from iteration_utilities import duplicates
 from TPCH5_utils import get_first_last_event_num, HDF5_LoadClouds
-import h5py
-import circle_fit
-import multiprocessing
-import multiprocessing.pool
-from multiprocessing import Pool, cpu_count
+from multiprocessing import Pool
 from tqdm import tqdm
-import time
 
 # PHASE 3 (simple track analysis)
 

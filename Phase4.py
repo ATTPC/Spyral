@@ -1,9 +1,9 @@
 import pandas as pd
 import numpy as np
 from TPCH5_utils import load_trace, get_first_last_event_num, HDF5_LoadClouds
-import time
 from matplotlib.widgets import PolygonSelector
 from matplotlib.path import Path
+import matplotlib.pyplot as plt
 from tqdm import tqdm
 from scipy.signal import find_peaks
 

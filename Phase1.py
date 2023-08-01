@@ -1,17 +1,14 @@
 import numpy as np
 from scipy.signal import find_peaks
 from scipy.integrate import trapezoid
-import matplotlib.pyplot as plt
-import pandas as pd
-import plotly.graph_objects as go
 import time
-from multiprocessing import Pool, cpu_count, set_start_method
+from multiprocessing import Pool, cpu_count
 import multiprocessing
 import multiprocessing.pool
 from tqdm import tqdm
 import sys
 sys.path.insert(0, 'TPC-utils')
-from tpc_utils import background, search_high_res
+from tpc_utils import search_high_res
 from TPCH5_utils import get_first_last_event_num, load_trace
 import h5py
 import os
