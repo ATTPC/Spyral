@@ -1,3 +1,4 @@
+INVALID_PEAK = -1.0
 
 INVALID_PAD_ID: int = -1
 
