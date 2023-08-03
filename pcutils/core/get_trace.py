@@ -119,7 +119,7 @@ class GetTrace:
                         self.peaks.append(peak)
                     break
 
-        if len(self.peaks) > 0 and len(self.peaks) < 2:
+        if len(self.peaks) > 0:
             return True
         else:
             self.peaks.clear()
