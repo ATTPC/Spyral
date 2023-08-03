@@ -47,6 +47,26 @@ class Trace:
         return self.pad_id
     
     def find_peak(self) -> bool:
+        '''
+            Find the broad signal in a Trace. 
+            The goal is to determine the centroid location of a signal peak within a given pad trace. This is accomplished by
+            taking a smoothed raw trace, differentiating it and finding the inflection points of the trace as well as the roots of the differentiated trace.
+            The peak is then taken as the root which lies between a positive and negative inflection point (in that order). The height of the peak is then taken as
+            the height of the timebucket which the identified peak lies in for the raw signal minus the height of the positive inflection point in the raw signal. This method
+            is roughly equivalent to the methods used in the IgorPro AT-TPC analysis.
+
+            ## Notes
+            This method identifies *only* one peak. Signals can contain more than one postive or negative inflection point. Currently this algorithim only keeps one of each 
+            (the inflection points which correspond to the greatest change in slope).
+
+            ## ToDo
+            GWM: Handle multiple peaks? Use inflection points which correspond to largest raw signal instead of largest derivative?
+            GWM: Baseline correction - probably better to do linear interpolation of positive and negative inflection over range of peak rather than single value. Looking at the traces
+            the baseline restoration seems slow on the period of the peaks.
+
+            ## Returns
+            bool: Indicating whether or not a signal peak was found (True for found, False for not found). The peak data can be retrieved using get_peak().
+        '''
         if self.is_valid() == False:
             return
         
@@ -61,27 +81,26 @@ class Trace:
         smoothed_roots = deriv.roots()
 
         #Edge case: peak is positioned such that only one inflection point is present in the signal
-        #Take whatever root lies past one of the inflection points (in the case of multples, take the one that occurs latest in the signal)
+        #This will cause another negative inflection point to be found, and the order will be wrong. 
+        #In this case, we check to see if there is a root past the positive inflection point
         if negative_inflection < positive_inflection:
             for root in smoothed_roots:
                 if root > positive_inflection:
                     self.peak = root
                     peak_bucket = int(self.peak)
-                    self.peak_height = self.raw_data[peak_bucket]
-                    self.peak_energy = np.sum(self.raw_data[int(positive_inflection):])
-                elif root < negative_inflection:
-                    self.peak = root
-                    peak_bucket = int(self.peak)
-                    self.peak_height = self.raw_data[peak_bucket]
-                    self.peak_energy = np.sum(self.raw_data[:int(negative_inflection)])
+                    pi_bucket = int(positive_inflection[0])
+                    self.peak_height = self.raw_data[peak_bucket] - self.raw_data[pi_bucket]
+                    self.peak_energy = np.sum(self.raw_data[pi_bucket:] - self.raw_data[pi_bucket])
         else:
             # Normal case: look for a root of the derivative which lies between a positive and negative inflection point
             for root in smoothed_roots:
                 if root > positive_inflection and root < negative_inflection:
                     self.peak = root
                     peak_bucket = int(self.peak)
-                    self.peak_height = self.raw_data[peak_bucket]
-                    self.peak_energy = self.raw_data[int(positive_inflection):int(negative_inflection)]
+                    pi_bucket = int(positive_inflection[0])
+                    ni_bucket = int(negative_inflection[0])
+                    self.peak_height = self.raw_data[peak_bucket] - self.raw_data[pi_bucket]
+                    self.peak_energy = np.sum(self.raw_data[pi_bucket:(ni_bucket+1)] - self.raw_data[pi_bucket])
                     break
 
         if self.peak != INVALID_PEAK:
