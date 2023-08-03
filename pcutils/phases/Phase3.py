@@ -3,7 +3,7 @@ import pandas as pd
 from scipy.optimize import curve_fit
 from scipy.interpolate import splrep, splev
 from iteration_utilities import duplicates
-from hdf.TPCH5_utils import get_first_last_event_num, HDF5_LoadClouds
+from ..hdf.TPCH5_utils import get_first_last_event_num, HDF5_LoadClouds
 from multiprocessing import Pool
 from tqdm import tqdm
 

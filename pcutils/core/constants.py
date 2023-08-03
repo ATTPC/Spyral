@@ -1,4 +1,8 @@
-INVALID_PEAK = -1.0
+INVALID_PEAK_CENTROID: int = -1.0
+
+INVALID_EVENT_NAME: str = "InvalidEvent"
+
+INVALID_EVENT_NUMBER: int = -1
 
 INVALID_PAD_ID: int = -1
 
