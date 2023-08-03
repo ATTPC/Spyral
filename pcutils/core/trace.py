@@ -3,6 +3,21 @@ from constants import INVALID_PAD_ID, NUMBER_OF_TIME_BUCKETS, INVALID_PEAK
 from typing import Optional
 from scipy.signal import find_peaks
 from scipy.interpolate import UnivariateSpline
+from dataclasses import dataclass
+
+@dataclass
+class Peak:
+    '''
+    Dataclass representing a singal peak in a raw pad trace
+
+    ## Fields
+    centroid: float - the peak location in time buckets
+    amplitude: float - the basline corrected amplitude of the peak
+    integral: float - the basline corrected integral of the peak from the postive inflection point to negative inflection point (where possible)
+    '''
+    centroid: float = INVALID_PEAK
+    amplitude: float = 0.0
+    integral: float = 0.0
 
 
 class Trace:
@@ -11,9 +26,6 @@ class Trace:
         self.smoothing_spline: Optional[UnivariateSpline] = None
         self.smoothed_output: Optional[np.ndarray] = None
         self.pad_id: int = INVALID_PAD_ID
-        self.peak: float = INVALID_PEAK
-        self.peak_height: float = 0.0 #Amplitude
-        self.peak_energy: float = 0.0 #Integral
         if (data is not None) and (pad_id != INVALID_PAD_ID):
             self.set_trace_data(data, pad_id)
 
@@ -22,9 +34,6 @@ class Trace:
         self.smoothing_spline = None
         self.smoothed_output = None
         self.pad_id: int = INVALID_PAD_ID
-        self.peaks = INVALID_PEAK
-        self.peak_height = 0.0
-        self.peak_energy = 0.0
 
     def set_trace_data(self, data: np.ndarray, pad_id: int):
         data_shape = np.shape(data)
@@ -46,7 +55,7 @@ class Trace:
     def get_pad_id(self) -> int:
         return self.pad_id
     
-    def find_peak(self) -> bool:
+    def find_peak(self) -> Optional[Peak]:
         '''
             Find the broad signal in a Trace. 
             The goal is to determine the centroid location of a signal peak within a given pad trace. This is accomplished by
@@ -65,10 +74,12 @@ class Trace:
             the baseline restoration seems slow on the period of the peaks.
 
             ## Returns
-            bool: Indicating whether or not a signal peak was found (True for found, False for not found). The peak data can be retrieved using get_peak().
+            Optional[Peak]: Returns None if no peak is found, or a Peak type if a peak is found. The Peak dataclass contains three fields, centroid (peak location), amplitude, and integral
         '''
+
+        peak = Peak()
         if self.is_valid() == False:
-            return
+            return None
         
         deriv = self.smoothing_spline.derivative()
         deriv_array = deriv(np.arange(1, len(self.raw_data)-1, 1))
@@ -86,24 +97,24 @@ class Trace:
         if negative_inflection < positive_inflection:
             for root in smoothed_roots:
                 if root > positive_inflection:
-                    self.peak = root
+                    peak.centroid = root
                     peak_bucket = int(self.peak)
                     pi_bucket = int(positive_inflection[0])
-                    self.peak_height = self.raw_data[peak_bucket] - self.raw_data[pi_bucket]
-                    self.peak_energy = np.sum(self.raw_data[pi_bucket:] - self.raw_data[pi_bucket])
+                    peak.amplitude = self.raw_data[peak_bucket] - self.raw_data[pi_bucket]
+                    peak.integral = np.sum(self.raw_data[pi_bucket:] - self.raw_data[pi_bucket])
         else:
             # Normal case: look for a root of the derivative which lies between a positive and negative inflection point
             for root in smoothed_roots:
                 if root > positive_inflection and root < negative_inflection:
-                    self.peak = root
+                    peak.centroid = root
                     peak_bucket = int(self.peak)
                     pi_bucket = int(positive_inflection[0])
                     ni_bucket = int(negative_inflection[0])
-                    self.peak_height = self.raw_data[peak_bucket] - self.raw_data[pi_bucket]
-                    self.peak_energy = np.sum(self.raw_data[pi_bucket:(ni_bucket+1)] - self.raw_data[pi_bucket])
+                    peak.amplitude = self.raw_data[peak_bucket] - self.raw_data[pi_bucket]
+                    peak.integral = np.sum(self.raw_data[pi_bucket:(ni_bucket+1)] - self.raw_data[pi_bucket])
                     break
 
-        if self.peak != INVALID_PEAK:
-            return True
+        if peak.centroid != INVALID_PEAK:
+            return peak
         else:
-            return False
+            return None
