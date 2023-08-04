@@ -9,7 +9,7 @@ from tqdm import tqdm
 import sys
 sys.path.insert(0, 'TPC-utils')
 from tpc_utils import search_high_res
-from hdf.TPCH5_utils import get_first_last_event_num, load_trace
+from ..hdf.TPCH5_utils import get_first_last_event_num, load_trace
 import h5py
 import os
 

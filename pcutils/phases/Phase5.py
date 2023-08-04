@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-from hdf.TPCH5_utils import get_first_last_event_num, HDF5_LoadClouds
+from ..hdf.TPCH5_utils import get_first_last_event_num, HDF5_LoadClouds
 from scipy.optimize import minimize
 from scipy.integrate import solve_ivp
 from scipy.interpolate import interp1d

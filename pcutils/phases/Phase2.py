@@ -1,5 +1,5 @@
 import numpy as np
-from hdf.TPCH5_utils import HDF5_LoadClouds, get_first_last_event_num
+from ..hdf.TPCH5_utils import HDF5_LoadClouds, get_first_last_event_num
 from sklearn.cluster import DBSCAN
 import h5py
 import circle_fit # circle_fit found from: https://www.sciencedirect.com/science/article/pii/S0167947310004809?via%3Dihub

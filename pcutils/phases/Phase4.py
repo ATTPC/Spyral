@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from hdf.TPCH5_utils import load_trace, get_first_last_event_num, HDF5_LoadClouds
+from ..hdf.TPCH5_utils import load_trace, get_first_last_event_num, HDF5_LoadClouds
 from matplotlib.widgets import PolygonSelector
 from matplotlib.path import Path
 import matplotlib.pyplot as plt
