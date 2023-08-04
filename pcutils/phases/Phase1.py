@@ -6,8 +6,6 @@ from multiprocessing import Pool, cpu_count
 import multiprocessing
 import multiprocessing.pool
 from tqdm import tqdm
-import sys
-sys.path.insert(0, 'TPC-utils')
 from ..hdf.TPCH5_utils import get_first_last_event_num, load_trace
 import h5py
 import os

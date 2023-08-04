@@ -1,0 +1,27 @@
+{
+    
+    "trace_data_path": "/path/to/some/traces.h5",
+    "point_cloud_data_path": "/path/to/some/point/clouds.h5",
+    "ntuple_data_path": "/path/to/some/ntuple.h5",
+    "pad_geometry_path": "/path/to/some/pad/geometry.csv",
+    "pad_gain_path": "/path/to/some/pad/gain.csv",
+
+    "magnetic_field(T)": 2.9,
+    "electric_field(V/m)": 6000.0,
+    "tilt_angle(degrees)": 5.0,
+    "detector_length(mm)": 1000.0,
+    "beam_region_radius(mm)": 25.0,
+    "micromegas_time_bucket": 60.0,
+    "window_time_bucket": 300.0,
+
+    "gas_density(g/cm^3)": 0.00625,
+    "gas_energy_loss_path": "/path/to/some/energy/loss.txt",
+
+    "trace_peak_threshold": 15.0,
+    "trace_peak_count_limit": 4,
+    "trace_smoothing_factor": 11.0,
+
+    "cluster_smoothing_neighbor_distance(mm)": 10.0,
+    "cluster_minimum_points": 50,
+    "cluster_max_neighbor_distance(fractional)": 0.05
+}
