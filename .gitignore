@@ -1,12 +1,8 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-# Files to ignore in the github repo
-=======
-# File types to omit from the github repo
->>>>>>> e115a2cbed0378939a5ac28def168faa754c47a8
-=======
-# File types to omit from the github repo
->>>>>>> e115a2cbed0378939a5ac28def168faa754c47a8
-
+__pycache__/
+.venv/
+.vscode/
+.vs/
+*.csv
 *.h5
-ntuple_testing/
+*.json
+*.yaml

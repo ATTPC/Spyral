@@ -1,4 +1,4 @@
-name: python3
+name: pcutil-env
 channels:
   - defaults
 dependencies:
