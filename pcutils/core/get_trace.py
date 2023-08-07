@@ -1,8 +1,10 @@
 import numpy as np
 from .constants import INVALID_PAD_ID, NUMBER_OF_TIME_BUCKETS, INVALID_PEAK_CENTROID
+from .hardware_id import HardwareID
 from typing import Optional
-from scipy.signal import find_peaks
+from scipy.signal import find_peaks, filtfilt
 from scipy.interpolate import UnivariateSpline
+from scipy.fft import fft, ifft, ifftshift
 from dataclasses import dataclass
 
 @dataclass
@@ -23,14 +25,15 @@ class Peak:
 
 
 class GetTrace:
-    def __init__(self, data: Optional[np.ndarray], pad_id: int = INVALID_PAD_ID):
+    def __init__(self, data: Optional[np.ndarray], id = HardwareID):
         self.raw_data: Optional[np.ndarray] = None
+        self.corrected_data: Optional[np.ndarray] = None
         self.smoothing_spline: Optional[UnivariateSpline] = None
         self.smoothed_output: Optional[np.ndarray] = None
         self.peaks: list[Peak] = []
-        self.pad_id: int = INVALID_PAD_ID
-        if  isinstance(data, np.ndarray) and pad_id != INVALID_PAD_ID:
-            self.set_trace_data(data, pad_id)
+        self.hw_id: HardwareID = HardwareID()
+        if  isinstance(data, np.ndarray) and id.pad_id != INVALID_PAD_ID:
+            self.set_trace_data(data, id)
 
     def invalidate(self):
         self.raw_data = None
@@ -38,7 +41,7 @@ class GetTrace:
         self.smoothed_output = None
         self.pad_id: int = INVALID_PAD_ID
 
-    def set_trace_data(self, data: np.ndarray, pad_id: int):
+    def set_trace_data(self, data: np.ndarray, id: HardwareID, smoothing: float = 3.0, baseline_window_scale: float = 20.0):
         data_shape = np.shape(data)
         if data_shape[0] != NUMBER_OF_TIME_BUCKETS:
             print(data_shape[0])
@@ -46,19 +49,46 @@ class GetTrace:
             return
         
         self.raw_data = data.astype(np.int32) #Widen the type and sign it
-        self.pad_id = pad_id
-        smoothness = len(self.raw_data) * 11.0 #ICK bad, tested on GWM data but should be input parameter
-        self.smoothing_spline = UnivariateSpline(np.arange(1, NUMBER_OF_TIME_BUCKETS - 1, 1), self.raw_data[1:NUMBER_OF_TIME_BUCKETS-1], k=4, s=smoothness) #Need min order 4 spline; deriv -> 3 order, min needed for roots
+        #Edges can be strange, so smooth them a bit
+        self.raw_data[0] = self.raw_data[1]
+        self.raw_data[511] = self.raw_data[510]
+        self.corrected_data = self.raw_data - self.evaluate_baseline(baseline_window_scale) #remove the baseline
+        self.hw_id = id
+        smoothness = len(self.corrected_data) * smoothing #ICK bad, tested on GWM data but should be input parameter
+        self.smoothing_spline = UnivariateSpline(np.arange(0, NUMBER_OF_TIME_BUCKETS, 1), self.corrected_data, k=4, s=smoothness) #Need min order 4 spline; deriv -> 3 order, min needed for roots
         self.smoothed_output = self.smoothing_spline(np.arange(0, NUMBER_OF_TIME_BUCKETS, 1))
         
 
     def is_valid(self) -> bool:
-        return self.pad_id != INVALID_PAD_ID and isinstance(self.raw_data, np.ndarray)
+        return self.hw_id.pad_id != INVALID_PAD_ID and isinstance(self.raw_data, np.ndarray)
 
     def get_pad_id(self) -> int:
-        return self.pad_id
+        return self.hw_id.pad_id
     
-    def find_peaks(self) -> bool:
+    def evaluate_baseline(self, window_scale: float) -> np.ndarray:
+        '''
+            Calculate the baseline of a trace using Fast Fourier Transforms
+            Create a moving average of the baseline, after removing peaks from the signal.
+            A peak here is defined as any region which is 1.5 std. deviations above the mean of the signal.
+            Algorithm taken from pytpc by Josh Bradt, et al.
+
+            ## Parameters
+            window_scale: float, sets the scale of the averaging window. Larger values correspond to smaller windows. Default is 20
+            ## Returns
+            ndarray: the baseline array
+        '''
+        base = self.raw_data.copy()
+        sigma = base.std()
+        mask = base - np.mean(base) > sigma * 1.5
+        base[mask] = base[~mask].mean()
+
+        window_range = np.arange(-256, 256, 1)
+        filter = ifftshift(np.sinc(window_range/window_scale))
+        transformed = fft(base)
+        self.untransformed = ifft(transformed * filter)
+        return self.untransformed.real
+    
+    def find_peaks(self, separation: float = 50.0, threshold = 250.0) -> bool:
         '''
             Find the signals in a Trace. 
             The goal is to determine the centroid location of a signal peak within a given pad trace. This is accomplished by
@@ -68,12 +98,7 @@ class GetTrace:
             is roughly equivalent to the methods used in the IgorPro AT-TPC analysis.
 
             ## Notes
-            This method identifies any peaks within the signal. 
-
-            ## ToDo
-            GWM: Threshold is hard coded, needs to be user input
-            GWM: Baseline correction - probably better to do linear interpolation of positive and negative inflection over range of peak rather than single value. Looking at the traces
-            the baseline restoration seems slow on the period of the peaks.
+            This method identifies any peaks within the signal.
 
             ## Returns
             bool: Returns False if no peak is found, or True if any peak is found. Use get_peaks() to retrieve the peak data.
@@ -82,11 +107,13 @@ class GetTrace:
         if self.is_valid() == False:
             return None
         
+        self.peaks.clear()
+        
         deriv = self.smoothing_spline.derivative()
         deriv_array = deriv(np.arange(0, NUMBER_OF_TIME_BUCKETS, 1))
         smoothed_roots = self.smoothing_spline.derivative().roots()
-        positive_inflection, _ = find_peaks(deriv_array, distance=50) # only the largest is kept
-        negative_inflection, _ = find_peaks(-1.0 * deriv_array, distance=50) # only the largest is kept
+        positive_inflection, _ = find_peaks(deriv_array, distance=separation)
+        negative_inflection, _ = find_peaks(-1.0 * deriv_array, distance=separation)
         positive_inflection.sort()
         negative_inflection.sort()
         searches: list[tuple[float, float]] = []
@@ -112,10 +139,9 @@ class GetTrace:
                     peak_bucket = int(peak.centroid)
                     pi_bucket = int(region[0])
                     ni_bucket = int(region[1])
-                    offset = self.raw_data[pi_bucket]
-                    peak.amplitude = self.smoothed_output[peak_bucket] - self.raw_data[pi_bucket]
-                    peak.integral = np.sum(self.smoothed_output[pi_bucket:(ni_bucket+1)] - offset, dtype=np.float64)
-                    if (peak.amplitude > 15.0):
+                    peak.amplitude = self.corrected_data[peak_bucket]
+                    peak.integral = np.sum(self.corrected_data[pi_bucket:(ni_bucket+1)], dtype=np.float64)
+                    if (peak.amplitude > threshold):
                         self.peaks.append(peak)
                     break
 
