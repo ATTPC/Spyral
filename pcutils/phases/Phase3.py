@@ -267,10 +267,6 @@ def Phase3(evt_num_array, hdf5_path, Bmag):
     return all_results_seg
 
 def main():
-    # Constants and conversions
-    C = 2.99792E8 # Speed of light in m/s
-    amuev = 931.494028 # Conversion from amu to eV
-
     # Experiment set-up specific info
     Bmag = 2.991 # B field in T
 

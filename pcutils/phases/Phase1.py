@@ -6,9 +6,6 @@ from multiprocessing import Pool, cpu_count
 import multiprocessing
 import multiprocessing.pool
 from tqdm import tqdm
-import sys
-sys.path.insert(0, 'TPC-utils')
-from tpc_utils import search_high_res
 from ..hdf.TPCH5_utils import get_first_last_event_num, load_trace
 import h5py
 import os
@@ -44,7 +41,9 @@ def deconv(traces):
     Returns:
         out    : A deconvolution of each of the traces that were fed in. Has the same Nx512 dimensions as the input.
     '''
-    return search_high_res(traces, sigma = 4, threshold = 60, remove_bkg = True, number_it = 200, markov = True, aver_window = 5)[0]
+    #return search_high_res(traces, sigma = 4, threshold = 60, remove_bkg = True, number_it = 200, markov = True, aver_window = 5)[0]
+    # GWM: Temp
+    return None
 
 def Phase1(event_num_array, deconv_cores, padxy):
     '''

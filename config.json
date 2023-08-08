@@ -1,0 +1,34 @@
+{
+    
+    "trace_data_path": "/Volumes/Pattern/a1975/h5/run_0004.h5",
+    "point_cloud_data_path": "/path/to/some/point/clouds.h5",
+    "ntuple_data_path": "/path/to/some/ntuple.h5",
+    "pad_geometry_path": "etc/padxy_igor.csv",
+    "pad_gain_path": "etc/pad_gain_map.csv",
+    "pad_time_path": "etc/pad_time_correction.csv",
+
+    "magnetic_field(T)": 2.9,
+    "electric_field(V/m)": 6000.0,
+    "tilt_angle(degrees)": 5.0,
+    "detector_length(mm)": 1000.0,
+    "beam_region_radius(mm)": 25.0,
+    "micromegas_time_bucket": 17.0,
+    "window_time_bucket": 500.0,
+
+    "gas_density(g/cm^3)": 0.00625,
+    "gas_energy_loss_path": "/path/to/some/energy/loss.txt",
+
+    "trace_peak_threshold": 250.0,
+    "trace_baseline_window_scale": 20.0,
+    "trace_peak_separation": 50.0,
+    "trace_smoothing_factor": 3.0,
+
+    "cross_talk_saturation_threshold": 2000.0,
+    "cross_talk_peak_threshold": 1000.0,
+    "cross_talk_search_range(mm)": 5.0,
+    "cross_talk_time_range(bucket)": 10.0,
+
+    "cluster_smoothing_neighbor_distance(mm)": 10.0,
+    "cluster_minimum_points": 50,
+    "cluster_max_neighbor_distance(fractional)": 0.05
+}
