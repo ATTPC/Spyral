@@ -2,9 +2,8 @@ import numpy as np
 from .constants import INVALID_PAD_ID, NUMBER_OF_TIME_BUCKETS, INVALID_PEAK_CENTROID
 from .hardware_id import HardwareID
 from typing import Optional
-from scipy.signal import find_peaks, filtfilt
+from scipy.signal import find_peaks
 from scipy.interpolate import UnivariateSpline
-from scipy.fft import fft, ifft, ifftshift
 from dataclasses import dataclass
 
 @dataclass
@@ -27,7 +26,6 @@ class Peak:
 class GetTrace:
     def __init__(self, data: Optional[np.ndarray], id = HardwareID):
         self.raw_data: Optional[np.ndarray] = None
-        self.corrected_data: Optional[np.ndarray] = None
         self.smoothing_spline: Optional[UnivariateSpline] = None
         self.smoothed_output: Optional[np.ndarray] = None
         self.peaks: list[Peak] = []
@@ -41,7 +39,7 @@ class GetTrace:
         self.smoothed_output = None
         self.pad_id: int = INVALID_PAD_ID
 
-    def set_trace_data(self, data: np.ndarray, id: HardwareID, smoothing: float = 3.0, baseline_window_scale: float = 20.0):
+    def set_trace_data(self, data: np.ndarray, id: HardwareID, smoothing: float = 7.0):
         data_shape = np.shape(data)
         if data_shape[0] != NUMBER_OF_TIME_BUCKETS:
             print(data_shape[0])
@@ -49,13 +47,9 @@ class GetTrace:
             return
         
         self.raw_data = data.astype(np.int32) #Widen the type and sign it
-        #Edges can be strange, so smooth them a bit
-        self.raw_data[0] = self.raw_data[1]
-        self.raw_data[511] = self.raw_data[510]
-        self.corrected_data = self.raw_data - self.evaluate_baseline(baseline_window_scale) #remove the baseline
         self.hw_id = id
-        smoothness = len(self.corrected_data) * smoothing #ICK bad, tested on GWM data but should be input parameter
-        self.smoothing_spline = UnivariateSpline(np.arange(0, NUMBER_OF_TIME_BUCKETS, 1), self.corrected_data, k=4, s=smoothness) #Need min order 4 spline; deriv -> 3 order, min needed for roots
+        smoothness = len(self.raw_data) * smoothing
+        self.smoothing_spline = UnivariateSpline(np.arange(0, NUMBER_OF_TIME_BUCKETS, 1), self.raw_data, k=4, s=smoothness) #Need min order 4 spline; deriv -> 3 order, min needed for roots
         self.smoothed_output = self.smoothing_spline(np.arange(0, NUMBER_OF_TIME_BUCKETS, 1))
         
 
@@ -64,29 +58,6 @@ class GetTrace:
 
     def get_pad_id(self) -> int:
         return self.hw_id.pad_id
-    
-    def evaluate_baseline(self, window_scale: float) -> np.ndarray:
-        '''
-            Calculate the baseline of a trace using Fast Fourier Transforms
-            Create a moving average of the baseline, after removing peaks from the signal.
-            A peak here is defined as any region which is 1.5 std. deviations above the mean of the signal.
-            Algorithm taken from pytpc by Josh Bradt, et al.
-
-            ## Parameters
-            window_scale: float, sets the scale of the averaging window. Larger values correspond to smaller windows. Default is 20
-            ## Returns
-            ndarray: the baseline array
-        '''
-        base = self.raw_data.copy()
-        sigma = base.std()
-        mask = base - np.mean(base) > sigma * 1.5
-        base[mask] = base[~mask].mean()
-
-        window_range = np.arange(-256, 256, 1)
-        filter = ifftshift(np.sinc(window_range/window_scale))
-        transformed = fft(base)
-        self.untransformed = ifft(transformed * filter)
-        return self.untransformed.real
     
     def find_peaks(self, separation: float = 50.0, threshold = 250.0) -> bool:
         '''
@@ -108,7 +79,22 @@ class GetTrace:
             return None
         
         self.peaks.clear()
-        
+
+        ## GWM 08/08/23 -- This method is way faster cause we don't need to make splines in set_trace_data, but is way more impacted
+        ## by user input parameters
+        ## Tested with fake data, this seems to work well. Needs validation with real data
+        # pks, props = find_peaks(self.raw_data, distance=separation, prominence=10, width=0, rel_height=0.1)
+        # for idx, p in enumerate(pks):
+        #     peak = Peak()
+        #     peak.centroid = p
+        #     peak.amplitude = self.raw_data[p]
+        #     peak.positive_inflection = int(props['left_ips'][idx])
+        #     peak.negative_inflection = int(props['right_ips'][idx])
+        #     peak.integral = np.sum(self.raw_data[peak.positive_inflection:peak.negative_inflection])
+        #     if peak.integral > threshold:
+        #         self.peaks.append(peak)
+
+        ## This method is too slow; or rather, the requirement of having created a smoothing spline is too slow (factor of 4 at worst, factor of 6-7 at best)
         deriv = self.smoothing_spline.derivative()
         deriv_array = deriv(np.arange(0, NUMBER_OF_TIME_BUCKETS, 1))
         smoothed_roots = self.smoothing_spline.derivative().roots()
@@ -139,16 +125,16 @@ class GetTrace:
                     peak_bucket = int(peak.centroid)
                     pi_bucket = int(region[0])
                     ni_bucket = int(region[1])
-                    peak.amplitude = self.corrected_data[peak_bucket]
-                    peak.integral = np.sum(self.corrected_data[pi_bucket:(ni_bucket+1)], dtype=np.float64)
-                    if (peak.amplitude > threshold):
+                    peak.amplitude = self.raw_data[peak_bucket]
+                    peak.integral = np.sum(self.raw_data[pi_bucket:(ni_bucket+1)], dtype=np.float64)
+                    if (peak.integral > threshold):
                         self.peaks.append(peak)
                     break
 
         if len(self.peaks) > 0:
             return True
         else:
-            self.peaks.clear()
+            #self.peaks.clear()
             return False
         
     def get_number_of_peaks(self) -> int:
