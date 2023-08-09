@@ -21,6 +21,7 @@ class Peak:
     positive_inflection: float = 0.0
     negative_inflection: float = 0.0
     amplitude: float = 0.0
+    uncorrected_amplitude: float = 0.0
     integral: float = 0.0
 
 
@@ -140,10 +141,17 @@ class GetTrace:
                     pi_bucket = int(region[0])
                     ni_bucket = int(region[1])
                     peak.amplitude = self.corrected_data[peak_bucket]
+                    peak.uncorrected_amplitude = self.raw_data[peak_bucket]
                     peak.integral = np.sum(self.corrected_data[pi_bucket:(ni_bucket+1)], dtype=np.float64)
                     if (peak.amplitude > threshold):
                         self.peaks.append(peak)
                     break
+
+        #Get rid of peaks from saturated trace (NMT)
+        temp_arr = np.array([[Peak.positive_inflection, Peak.negative_inflection, Peak.uncorrected_amplitude] for Peak in self.peaks])
+        unique, counts = np.unique(temp_arr, axis = 0, return_counts = True)
+        duplicates = unique[counts > 1].tolist()
+        self.peaks = [Peak for Peak in self.peaks if np.logical_and(~(np.isin([Peak.positive_inflection, Peak.negative_inflection, Peak.uncorrected_amplitude], duplicates).all()), Peak.uncorrected_amplitude < 4095)]
 
         if len(self.peaks) > 0:
             return True

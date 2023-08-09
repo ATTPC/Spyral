@@ -14,18 +14,21 @@ def main():
     for i in range(100):
 
         trace_num = np.random.randint(low = 0, high = len(traces)-1)
-        trace_num = 378
+        #trace_num = 183
 
         Trace = GetTrace(data = traces[trace_num], id = hardware_id_from_array(metas[trace_num]))
         Trace.find_peaks()
 
-        if Trace.get_number_of_peaks() > 1:
+        if Trace.get_number_of_peaks() >= 1:
             break
 
     print(trace_num)
     #print(traces[trace_num])
 
     print(Trace.get_number_of_peaks())
+
+    for Peak in Trace.peaks:
+        print(Peak.positive_inflection, Peak.negative_inflection, Peak.uncorrected_amplitude)
 
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize = (8, 6))
     ax1.set_title(trace_num)
