@@ -1,26 +1,27 @@
 from .get_trace import GetTrace
-import h5py
-from pathlib import Path
+from .config import Config, TraceParameters
 from .constants import INVALID_EVENT_NAME, INVALID_EVENT_NUMBER
 from .hardware_id import hardware_id_from_array
 import numpy as np
+import h5py
+from pathlib import Path
 
 GET_DATA_TRACE_START: int = 5
 GET_DATA_TRACE_STOP: int = 512+5
 
 class GetEvent:
 
-    def __init__(self, raw_data: h5py.Dataset, event_number: int):
+    def __init__(self, raw_data: h5py.Dataset, event_number: int, trace_params: TraceParameters):
         self.traces: list[GetTrace] = []
         self.name: str = INVALID_EVENT_NAME
         self.number: int = INVALID_EVENT_NUMBER
-        self.load_traces(raw_data, event_number)
+        self.load_traces(raw_data, event_number, trace_params)
 
-    def load_traces(self, raw_data: h5py.Dataset, event_number: int, baseline_window_scale: float = 20.0):
+    def load_traces(self, raw_data: h5py.Dataset, event_number: int, trace_params: TraceParameters):
         self.name = str(raw_data.name)
         self.number = event_number
-        trace_matrix = preprocess_traces(raw_data[:, GET_DATA_TRACE_START:GET_DATA_TRACE_STOP].copy(), baseline_window_scale)
-        self.traces = [GetTrace(trace_matrix[idx], hardware_id_from_array(row[0:5])) for idx, row in enumerate(raw_data)]
+        trace_matrix = preprocess_traces(raw_data[:, GET_DATA_TRACE_START:GET_DATA_TRACE_STOP].copy(), trace_params.baseline_window_scale)
+        self.traces = [GetTrace(trace_matrix[idx], hardware_id_from_array(row[0:5]), trace_params) for idx, row in enumerate(raw_data)]
 
     def is_valid(self) -> bool:
         return self.name != INVALID_EVENT_NAME and self.number != INVALID_EVENT_NUMBER
@@ -66,29 +67,29 @@ def preprocess_traces(traces: np.ndarray, baseline_window_scale: float) -> np.nd
 
 #GWM: test speed up between reading chunks of events vs. single event at a time
 
-def read_get_event_chunk(filepath: Path, start_event: int, stop_event: int) -> list[GetEvent]:
+def read_get_event_chunk(config: Config, start_event: int, stop_event: int) -> list[GetEvent]:
     try:
-        with h5py.File(filepath, 'r') as hfile:
+        with h5py.File(config.workspace.trace_data_path, 'r') as hfile:
             get_group = hfile['get']
             event_list: list[GetEvent] = []
             for evt in range(start_event, stop_event+1):
                 evt_name = f'evt{evt}_data'
-                event_list.append(GetEvent(get_group[evt_name], evt))
+                event_list.append(GetEvent(get_group[evt_name], evt, config.trace))
             return event_list
     except Exception as e:
-        print(f'While reading file {filepath} for events {start_event} to {stop_event} recieved the following exception:')
+        print(f'While reading file {config.workspace.trace_data_path} for events {start_event} to {stop_event} recieved the following exception:')
         print(f'\t{type(e)}: {e}')
         print(f'No events will have been read.')
         return list()
     
-def read_get_event(filepath: Path, event: int) -> GetEvent:
+def read_get_event(config: Config, event: int) -> GetEvent:
     try:
-        with h5py.File(filepath, 'r') as hfile:
+        with h5py.File(config.workspace.trace_data_path, 'r') as hfile:
             get_group = hfile['get']
             event_name = f'evt{event}_data'
-            return GetEvent(get_group[event_name], event)
+            return GetEvent(get_group[event_name], event, config.trace)
     except Exception as e:
-        print(f'While reading file {filepath} for event {event} recieved the following exception:')
+        print(f'While reading file {config.workspace.trace_data_path} for event {event} recieved the following exception:')
         print(f'\t{type(e)}: {e}')
         print(f'No event will have been read.')
         return None

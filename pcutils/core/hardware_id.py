@@ -17,6 +17,9 @@ class HardwareID:
     aget_id: int = INVALID_PAD_ID
     aget_channel: int = INVALID_PAD_ID
 
+    def __str__(self):
+        return f'HardwareID -> pad: {self.pad_id} cobo: {self.cobo_id} asad: {self.asad_id} aget: {self.aget_id} channel: {self.aget_channel}'
+
 
 def hardware_id_from_array(array: np.ndarray) -> HardwareID:
     hw_id = HardwareID()
@@ -26,3 +29,7 @@ def hardware_id_from_array(array: np.ndarray) -> HardwareID:
     hw_id.aget_id = array[GET_DATA_AGET_INDEX]
     hw_id.aget_channel = array[GET_DATA_CHANNEL_INDEX]
     return hw_id
+
+
+def generate_electronics_id(hardware: HardwareID) -> int:
+    return hardware.aget_channel + hardware.aget_id * 100 + hardware.asad_id * 10000 + hardware.cobo_id * 1000000

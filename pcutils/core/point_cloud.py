@@ -1,7 +1,7 @@
 from .get_event import GetEvent
-from .get_trace import Peak
-from .pad_map import PadMap, PadData
-from .constants import INVALID_EVENT_NUMBER, INVALID_PEAK_CENTROID
+from .pad_map import PadMap
+from .constants import INVALID_EVENT_NUMBER
+from .config import CrossTalkParameters
 import numpy as np
 from typing import Optional
 
@@ -11,18 +11,19 @@ class PointCloud:
         self.event_number: int = INVALID_EVENT_NUMBER
         self.cloud: Optional[np.ndarray] = None
 
-    def load_cloud_from_get_event(self, event: GetEvent, pad_geometry: PadMap, peak_separation: float, peak_threshold: float):
+    def load_cloud_from_get_event(self, event: GetEvent, pmap: PadMap):
+        self.event_number = event.number
         self.cloud = np.empty((0,5)) # point elements are x, y, z, height, integral
         count = 0
         for trace in event.traces:
-            if trace.find_peaks(peak_separation, peak_threshold):
+            if trace.hw_id.cobo_id != 10:
                 count += trace.get_number_of_peaks()
         self.cloud = np.zeros((count, 6))
         idx = 0
         for trace in event.traces:
             if trace.get_number_of_peaks() == 0 or trace.hw_id.cobo_id == 10:
                 continue
-            pad = pad_geometry.get_pad_data(trace.hw_id.pad_id)
+            pad = pmap.get_pad_data(trace.hw_id.pad_id)
             for peak in trace.get_peaks():
                 self.cloud[idx, 0] = pad.x # X-coordinate, geometry
                 self.cloud[idx, 1] = pad.y # Y-coordinate, geometry
@@ -42,34 +43,59 @@ class PointCloud:
     def retrieve_spatial_coordinates(self) -> np.ndarray:
         return self.cloud[:, 0:3]
     
-    def eliminate_cross_talk(self, saturation_threshold: float =2000.0, cross_talk_threshold: float = 1000.0, physical_range: int =5, bucket_range: int =10):
+    def eliminate_cross_talk(self, pmap: PadMap, params: CrossTalkParameters):
         points_to_keep: np.ndarray = np.full(len(self.cloud), fill_value=True, dtype=bool)
         average_neighbor_amplitude = 0.0
-        n_neighbors = 1
+        n_neighbors = 0
+        #First find a saturated pad
         for idx, point in enumerate(self.cloud):
-            average_neighbor_amplitude = 0.0
-            n_neighbors = 0.0
-            if point[3] < saturation_threshold:
+            
+            if point[3] < params.saturation_threshold:
                 continue
 
-            for comp_idx, comp_point in enumerate(self.cloud):
-                if comp_idx == idx: #dont include self
-                    continue
-                elif (comp_point[0] < point[0] - physical_range) or (comp_point[0] > point[0] + physical_range): #xbounds
-                    continue
-                elif (comp_point[1] < point[1] - physical_range) or (comp_point[1] > point[1] + physical_range): #ybounds
-                    continue
-                elif (comp_point[2] < point[2] or comp_point[2] > point[2] + bucket_range): #zbounds
-                    continue
+            point_hardware = pmap.get_pad_data(point[5]).hardware
+            channel_max = point_hardware.aget_channel + params.channel_range
+            if channel_max > 67:
+                channel_max = 67
+            channel_min = point_hardware.aget_channel - params.channel_range
+            if channel_min < 0:
+                channel_min = 0
 
-                average_neighbor_amplitude += comp_point[3]
-                n_neighbors += 1
-            if n_neighbors > 0:
-                average_neighbor_amplitude  /= float(n_neighbors)
-                if (average_neighbor_amplitude < cross_talk_threshold):
-                    points_to_keep[idx] = False
-            else:
-                points_to_keep[idx] = False
+            saturator_time_bucket = point[2]
+
+            #Now look for pads that are in the electronic neighborhood
+            for channel in range(channel_min, channel_max+1, 1):
+                point_hardware.aget_channel = channel
+                suspect_pad = pmap.get_pad_from_hardware(point_hardware)
+                if suspect_pad is None:
+                    continue
+                suspect_point_indicies = np.where(self.cloud[:, 5] == suspect_pad)[0]
+                #For each pad in the electronic neighborhood, see if they are cross-talk like
+                for suspect_index in suspect_point_indicies:
+                    suspect_point = self.cloud[suspect_index]
+                    if suspect_point[3] > params.cross_talk_threshold or suspect_point[2] > (saturator_time_bucket + params.time_range) or suspect_point[2] < (saturator_time_bucket - params.time_range):
+                        continue
+                    average_neighbor_amplitude = 0.0
+                    n_neighbors = 0
+                    #To ensure cross-talk behavior, check the physical neighborhood. If the neighbors see some signficant signal, probably not cross-talk
+                    for comp_idx, comp_point in enumerate(self.cloud):
+                        if comp_idx == idx: #dont include self
+                            continue
+                        elif (comp_point[0] < suspect_point[0] - params.distance_range) or (comp_point[0] > suspect_point[0] + params.distance_range): #xbounds
+                            continue
+                        elif (comp_point[1] < suspect_point[1] - params.distance_range) or (comp_point[1] > suspect_point[1] + params.distance_range): #ybounds
+                            continue
+                        elif (comp_point[2] < suspect_point[2] or comp_point[2] > suspect_point[2] + params.time_range): #zbounds
+                            continue
+
+                        average_neighbor_amplitude += comp_point[3]
+                        n_neighbors += 1
+                    if n_neighbors > 0:
+                        average_neighbor_amplitude  /= float(n_neighbors)
+                        if average_neighbor_amplitude < params.neighborhood_threshold:
+                            points_to_keep[suspect_index] = False
+                    else:
+                        points_to_keep[suspect_index] = False
 
         self.cloud = self.cloud[points_to_keep]
 
