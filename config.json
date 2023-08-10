@@ -1,12 +1,18 @@
 {
-    
-    "trace_data_path": "/Volumes/Pattern/a1975/h5/run_0004.h5",
-    "point_cloud_data_path": "/Volumes/Pattern/a1975/run_0004_clouds_test.h5",
-    "ntuple_data_path": "/path/to/some/ntuple.h5",
+    "trace_data_path": "/Volumes/Pattern/a1975/h5/",
+    "workspace_path": "/Volumes/Pattern/Analysis/a1975/",
     "pad_geometry_path": "etc/padxy_igor.csv",
     "pad_gain_path": "etc/pad_gain_map.csv",
     "pad_time_path": "etc/pad_time_correction.csv",
     "pad_electronics_path": "etc/pad_electronics.csv",
+
+    "run_min": 4,
+    "run_max": 4,
+    "phase1": true,
+    "phase2": false,
+    "phase3": false,
+    "phase4": false,
+    "phase5": false,
 
     "magnetic_field(T)": 2.9,
     "electric_field(V/m)": 6000.0,

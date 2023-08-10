@@ -6,12 +6,21 @@ from typing import Any
 @dataclass
 class WorkspaceParameters:
     trace_data_path: str = ''
-    point_cloud_data_path: str = ''
-    ntuple_data_path: str = ''
+    workspace_path: str = ''
     pad_geometry_path: str = ''
     pad_gain_path: str = ''
     pad_time_path: str = ''
     pad_electronics_path: str = ''
+
+@dataclass
+class RunParameters:
+    run_min: int = -1
+    run_max: int = -1
+    do_phase1: bool = False
+    do_phase2: bool = False
+    do_phase3: bool = False
+    do_phase4: bool = False
+    do_phase5: bool = False
 
 @dataclass
 class DetectorParameters:
@@ -56,6 +65,9 @@ class Config:
     #Workspace
     workspace: WorkspaceParameters = field(default_factory=WorkspaceParameters)
 
+    #Run
+    run: RunParameters = field(default_factory=RunParameters)
+
     #Detector
     detector: DetectorParameters = field(default_factory=DetectorParameters)
 
@@ -74,12 +86,19 @@ class Config:
 def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
     config = Config()
     config.workspace.trace_data_path = json_data['trace_data_path']
-    config.workspace.point_cloud_data_path = json_data['point_cloud_data_path']
-    config.workspace.ntuple_data_path = json_data['ntuple_data_path']
+    config.workspace.workspace_path = json_data['workspace_path']
     config.workspace.pad_geometry_path = json_data['pad_geometry_path']
     config.workspace.pad_gain_path = json_data['pad_gain_path']
     config.workspace.pad_time_path = json_data['pad_time_path']
     config.workspace.pad_electronics_path = json_data['pad_electronics_path']
+
+    config.run.run_min = json_data['run_min']
+    config.run.run_max = json_data['run_max']
+    config.run.do_phase1 = json_data['phase1']
+    config.run.do_phase2 = json_data['phase2']
+    config.run.do_phase3 = json_data['phase3']
+    config.run.do_phase4 = json_data['phase4']
+    config.run.do_phase5 = json_data['phase5']
 
     config.detector.magnetic_field = json_data['magnetic_field(T)']
     config.detector.electric_field = json_data['electric_field(V/m)']

@@ -45,13 +45,18 @@ Python >= 3.10
 
 ### Configuration
 
-User configuration parameters are passed through the params.txt file located at the top level of the repository. Current user parameters are:
+User configuration parameters are passed through JSON files. Currently hardcoded to accept a file named config.json at the top level of the repository, but this will change to accept configuration files from the command line.
 
-- PATH: The path to the HDF5 data file containing all trace data
-- ntuple_PATH: The path to which output physics data will be written (CSV format regardless of specified extension)
-- parent_PATH: The path to which temporary files will be written during the execution of the analysis. Temporary files will be removed upon completion.
+Configurations contain many parameters. These can be seen in the config.json example given with the repo. These parameters are grouped by the use case:
 
-All parameters must be specified to execute the analysis.
+- Workspace parameters: These are file paths to either raw data, the workspace, or various AT-TPC pad data files.
+- Run parameters: Run numbers over which the data should be processed, as well as indications of which types of analysis to run
+- Detector parameters: detector conditions and configuration
+- Gas parameters: energy loss parameters
+- Trace parameters: parameters which are used in the peak identification and baseline removal analysis
+- Cross-talk parameters: parameters used in cross-talk removal, after peaks have been identified
+- Clustering parameters: point cloud clustering parameters
+- More to come...
 
 ### Running
 
