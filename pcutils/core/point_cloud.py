@@ -12,7 +12,7 @@ class PointCloud:
         self.cloud: Optional[np.ndarray] = None
 
     def load_cloud_from_get_event(self, event: GetEvent, pad_geometry: PadMap, peak_separation: float, peak_threshold: float):
-        self.cloud = np.empty((0,5)) # point elements are x, y, z, height, integral
+        #self.cloud = np.empty((0,5)) # point elements are x, y, z, height, integral
         count = 0
         for trace in event.traces:
             if trace.find_peaks(peak_separation, peak_threshold):
