@@ -148,10 +148,10 @@ class GetTrace:
                     break
 
         #Get rid of peaks from saturated trace (NMT)
-        temp_arr = np.array([[Peak.positive_inflection, Peak.negative_inflection, Peak.uncorrected_amplitude] for Peak in self.peaks])
-        unique, counts = np.unique(temp_arr, axis = 0, return_counts = True)
-        duplicates = unique[counts > 1].tolist()
-        self.peaks = [Peak for Peak in self.peaks if np.logical_and(~(np.isin([Peak.positive_inflection, Peak.negative_inflection, Peak.uncorrected_amplitude], duplicates).all()), Peak.uncorrected_amplitude < 4095)]
+        #temp_arr = np.array([[Peak.positive_inflection, Peak.negative_inflection, Peak.uncorrected_amplitude] for Peak in self.peaks])
+        #unique, counts = np.unique(temp_arr, axis = 0, return_counts = True)
+        #duplicates = unique[counts > 1].tolist()
+        #self.peaks = [Peak for Peak in self.peaks if np.logical_and(~(np.isin([Peak.positive_inflection, Peak.negative_inflection, Peak.uncorrected_amplitude], duplicates).all()), Peak.uncorrected_amplitude < 4095)]
 
         if len(self.peaks) > 0:
             return True

@@ -42,8 +42,8 @@ class PointCloud:
     def retrieve_spatial_coordinates(self) -> np.ndarray:
         return self.cloud[:, 0:3]
     
-    def eliminate_cross_talk(self, saturation_threshold: float =2000.0, cross_talk_threshold: float = 1000.0, physical_range: int =5, bucket_range: int =10):
-        points_to_keep: np.ndarray = np.full(len(self.cloud), fill_value=True, dtype=bool)
+    def eliminate_cross_talk(self, saturation_threshold: float = 2000.0, cross_talk_threshold: float = 1000.0, physical_range: int = 5, bucket_range: int = 10):
+        points_to_keep: np.ndarray = np.full(len(self.cloud), fill_value = True, dtype = bool)
         average_neighbor_amplitude = 0.0
         n_neighbors = 1
         for idx, point in enumerate(self.cloud):
@@ -74,5 +74,6 @@ class PointCloud:
         self.cloud = self.cloud[points_to_keep]
 
     def calibrate_z_position(self, micromegas_tb: float, window_tb: float, detector_length: float):
-        for idx, point in enumerate(self.cloud):
-            self.cloud[idx][2] = (window_tb - point[2]) / (window_tb - micromegas_tb) * detector_length
+        #for idx, point in enumerate(self.cloud):
+            #self.cloud[idx][2] = (window_tb - point[2]) / (window_tb - micromegas_tb) * detector_length
+        self.cloud[:,2] = (window_tb - self.cloud[:,2]) / (window_tb - micromegas_tb) * detector_length
