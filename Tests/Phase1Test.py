@@ -69,12 +69,18 @@ def PointCloudTest(h5_Path, event_num):
     pc.eliminate_cross_talk()
     pc.calibrate_z_position(micromegas_tb = 17, window_tb = 500, detector_length = 1000)
 
-    plt.figure(figsize = (8, 8))
-    plt.scatter(pc.cloud[:,0], pc.cloud[:,1], s = 1)
-    plt.xlim([-292, 292])
-    plt.ylim([-292, 292])
-    plt.title('After CT Removal')
-    plt.grid()
+    fig = plt.figure(figsize = (8, 6))
+    ax = fig.add_subplot(projection = '3d')
+    
+    ax.scatter(pc.cloud[:,2], pc.cloud[:,0], pc.cloud[:,1], s = 5)
+    ax.set_box_aspect((1000/584, 1, 1))
+    ax.set_xlim([0, 1000])
+    ax.set_ylim([-292, 292])
+    ax.set_zlim([-292, 292])
+    ax.set_xlabel('Z')
+    ax.set_ylabel('X')
+    ax.set_zlabel('Y')
+    
     plt.show()
 
 def main():
