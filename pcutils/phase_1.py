@@ -11,12 +11,18 @@ def get_event_range(trace_file: File) -> tuple[int, int]:
     meta_data = meta_group.get('meta')
     return (int(meta_data[0]), int(meta_data[2]))
 
+def write_cloud_metadata(point_file: File, event_range: tuple[int, int]):
+    meta_group = point_file.create_group('meta')
+    meta_group.create_dataset('min_event', data=event_range[0])
+    meta_group.create_dataset('max_event', data=event_range[1])
+
 def phase_1(trace_path: Path, point_path: Path, pad_map: PadMap, trace_params: TraceParameters, cross_params: CrossTalkParameters, detector_params: DetectorParameters):
     start = time()
     trace_file = File(trace_path, 'r')
     point_file = File(point_path, 'w')
 
     min_event, max_event = get_event_range(trace_file)
+    write_cloud_metadata(point_file, (min_event, max_event))
 
     print(f'Running phase 1 on file {trace_path} for events {min_event} to {max_event}')
 
@@ -39,7 +45,6 @@ def phase_1(trace_path: Path, point_path: Path, pad_map: PadMap, trace_params: T
         try:
             event_data = event_group[f'evt{idx}_data']
         except:
-            print(f'\rSkipping event {idx}', end='')
             continue
 
         event = GetEvent(event_data, idx, trace_params)

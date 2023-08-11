@@ -23,6 +23,10 @@ class Workspace:
         if not self.point_cloud_path.exists():
             self.point_cloud_path.mkdir()
 
+        self.cluster_path = self.workspace_path / 'clusters'
+        if not self.cluster_path.exists():
+            self.cluster_path.mkdir()
+
         self.ntuple_path = self.workspace_path / 'ntuple'
         if not self.ntuple_path.exists():
             self.ntuple_path.mkdir()
@@ -52,6 +56,10 @@ class Workspace:
     def get_point_cloud_file_path(self, run_number: int) -> Path:
         runstr = form_run_string(run_number)
         return self.point_cloud_path / f'{runstr}.h5'
+    
+    def get_cluster_file_path(self, run_number: int) -> Path:
+        runstr = form_run_string(run_number)
+        return self.cluster_path / f'{runstr}.h5'
     
     def get_ntuple_file_path_csv(self, run_number: int) -> Path:
         runstr = form_run_string(run_number)

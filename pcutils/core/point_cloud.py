@@ -35,7 +35,7 @@ class PointCloud:
 
     def load_cloud_from_hdf5_data(self, data: np.ndarray, event_number: int):
         self.event_number: int = event_number
-        self.cloud = data
+        self.cloud = data.copy()
 
     def is_valid(self) -> bool:
         return self.event_number != INVALID_EVENT_NUMBER
@@ -102,3 +102,23 @@ class PointCloud:
     def calibrate_z_position(self, micromegas_tb: float, window_tb: float, detector_length: float):
         for idx, point in enumerate(self.cloud):
             self.cloud[idx][2] = (window_tb - point[2]) / (window_tb - micromegas_tb) * detector_length
+
+
+    def smooth_cloud(self, max_distance: float = 10.0):
+        smoothed_cloud = np.zeros(self.cloud.shape)
+        for idx, point in enumerate(self.cloud):
+            mask = np.sqrt((self.cloud[:,0]-point[0])**2.0+(self.cloud[:,1]-point[1])**2.0+(self.cloud[:,2]-point[2])**2.0) <= max_distance
+            neighbors = self.cloud[mask]
+            if len(neighbors) == 0:
+                continue
+            # Weight points
+            xs = sum(neighbors[:,0] * neighbors[:,4])
+            ys = sum(neighbors[:,1] * neighbors[:,4])
+            zs = sum(neighbors[:,2] * neighbors[:,4])
+            cs = sum(neighbors[:,3])
+            ics = sum(neighbors[:,4])
+            #smoothed_pc.append(np.average(neighbors, axis = 0))
+            smoothed_cloud[idx] = np.array([xs/ics, ys/ics, zs/ics, cs/len(neighbors), ics/len(neighbors), point[5]])
+        # Removes duplicate points
+        smoothed_cloud = smoothed_cloud[smoothed_cloud[:, 3] != 0.0]
+        self.cloud = np.unique(smoothed_cloud, axis = 0)

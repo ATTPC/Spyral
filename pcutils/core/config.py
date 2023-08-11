@@ -58,7 +58,8 @@ class CrossTalkParameters:
 class ClusterParameters:
     smoothing_neighbor_distance: float = 0.0 #mm
     min_points: int = 0
-    max_neighbor_distance_fractional: float = 0.0
+    min_size: int = 0
+    max_center_distance: float = 0.0
 
 @dataclass
 class Config:
@@ -125,8 +126,9 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
     config.cross.time_range = json_data['cross_talk_time_range(bucket)']
 
     config.cluster.smoothing_neighbor_distance = json_data['cluster_smoothing_neighbor_distance(mm)']
+    config.cluster.min_size = json_data['cluster_minimum_size']
     config.cluster.min_points = json_data['cluster_minimum_points']
-    config.cluster.max_neighbor_distance_fractional = json_data['cluster_max_neighbor_distance(fractional)']
+    config.cluster.max_center_distance = json_data['cluster_max_center_distance(mm)']
     
     return config
 
