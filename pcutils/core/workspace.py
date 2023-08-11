@@ -10,15 +10,18 @@ class Workspace:
     def __init__(self, params: WorkspaceParameters):
         self.trace_data_path = Path(params.trace_data_path)
         self.workspace_path = Path(params.workspace_path)
+
+        if not self.workspace_path.exists():
+            self.workspace_path.mkdir()
+
         if not self.workspace_path.is_dir() or not self.trace_data_path.is_dir():
+            print(self.workspace_path)
+            print(self.trace_data_path)
             raise Exception('Workspace encountered an error! Trace data path and workspace path should point to directories not files!')
         
         if not self.trace_data_path.exists():
             raise Exception('Workspace encountered an error! The trace data path must exist!')
             
-        if not self.workspace_path.exists():
-            self.workspace_path.mkdir()
-
         self.point_cloud_path = self.workspace_path / 'clouds'
         if not self.point_cloud_path.exists():
             self.point_cloud_path.mkdir()

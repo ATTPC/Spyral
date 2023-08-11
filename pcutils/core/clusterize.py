@@ -32,7 +32,11 @@ def least_squares_circle(x: np.ndarray, y: np.ndarray) -> tuple[float, float, fl
 
     matrix_a = np.array([[Suu, Suv], [Suv, Svv]])
     matrix_b = np.array([(Suuu + Suvv)*0.5, (Suuv + Svvv)*0.5])
-    c = np.linalg.solve(matrix_a, matrix_b)
+    c = None
+    try:
+        c = np.linalg.solve(matrix_a, matrix_b)
+    except:
+        return (np.nan, np.nan, np.nan, np.nan)
 
     xc = c[0] + mean_x
     yc = c[1] + mean_y
@@ -51,27 +55,46 @@ def join_clusters(clusters: list[ClusteredCloud], params: ClusterParameters) -> 
     centers = np.zeros((len(clusters), 2))
     for idx, cluster in enumerate(clusters):
         centers[idx, 0], centers[idx, 1], _, _ = least_squares_circle(cluster.point_cloud.cloud[:, 0], cluster.point_cloud.cloud[:, 1])
-        print(f"label {cluster.label} center {centers[idx, 0]} {centers[idx, 0]}")
-    
-    joiner = skcluster.DBSCAN(eps=params.max_center_distance, min_samples=1)
-    joined_centers = joiner.fit(centers)
 
-    labels = np.unique(joined_centers.labels_)
-    print(f'joined labels: {labels}')
-    new_clusters: list[ClusteredCloud] = []
-    for label in labels:
-        mask = joined_centers.labels_ == label
-        new_cluster = ClusteredCloud(label, PointCloud())
-        new_cluster.point_cloud.event_number = event_number
-        new_cluster.point_cloud.cloud = np.zeros((0, 6))
-        for idx, cluster in enumerate(clusters):
-            if not mask[idx] or cluster.label == -1:
+    #Make a dictionary of center groups
+    #First everyone is in their own group
+    groups: dict[int, list[int]] = {}
+    for idx, cluster in enumerate(clusters):
+        groups[cluster.label] = [idx]
+
+    #Now regroup, searching for clusters which match centers
+    for idx, center in enumerate(centers):
+        cluster = clusters[idx]
+        if cluster.label == -1 or np.isnan(center[0]):
+            continue
+
+        for cidx, comp_cluster in enumerate(clusters):
+            comp_center = centers[cidx]
+            if comp_cluster.label == -1 or np.isnan(comp_center[0]):
                 continue
-            new_cluster.point_cloud.cloud = np.concatenate((new_cluster.point_cloud.cloud, cluster.point_cloud.cloud), axis=0)
-        if len(new_cluster.point_cloud.cloud) > 0:
-            new_clusters.append(new_cluster)
-    return new_clusters
+            center_distance = np.sqrt((center[0] - comp_center[0])**2.0 + (center[1] - comp_center[1])**2.0)
+            #If we find matching centers (that havent already been matched) take all of the clouds in both groups and merge them
+            if center_distance < params.max_center_distance and cidx not in groups[cluster.label]:
+                comp_group = groups.pop(comp_cluster.label)
+                for subs in comp_group:
+                    clusters[subs].label = cluster.label
+                groups[cluster.label].extend(comp_group)
+    
+    #Now reform the clouds such that there is one cloud per group
+    new_clusters: list[ClusteredCloud] = []
+    for g in groups.keys():
+        if g == -1:
+            continue
 
+        new_cluster = ClusteredCloud(g, PointCloud())
+        new_cluster.point_cloud.event_number = event_number
+        new_cluster.point_cloud.cloud = np.zeros((0,6))
+        for idx in groups[g]:
+            new_cluster.point_cloud.cloud = np.concatenate((new_cluster.point_cloud.cloud, clusters[idx].point_cloud.cloud), axis=0)
+        new_clusters.append(new_cluster)
+    
+    return new_clusters
+    
 def clusterize(pc: PointCloud, cluster_params: ClusterParameters, detector_params: DetectorParameters) -> list[ClusteredCloud]:
     clusterizer = skcluster.HDBSCAN(min_cluster_size=cluster_params.min_size, min_samples=cluster_params.min_points)
 
