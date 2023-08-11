@@ -39,6 +39,7 @@
     "cross_talk_time_range(bucket)": 10,
 
     "cluster_smoothing_neighbor_distance(mm)": 10.0,
-    "cluster_minimum_points": 50,
-    "cluster_max_neighbor_distance(fractional)": 0.05
+    "cluster_minimum_size": 50,
+    "cluster_minimum_points": 5,
+    "cluster_max_center_distance(mm)": 31.0
 }
