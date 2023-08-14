@@ -59,6 +59,7 @@ class ClusterParameters:
     smoothing_neighbor_distance: float = 0.0 #mm
     min_points: int = 0
     min_size: int = 0
+    fractional_distance_min: float = 0.0
     max_center_distance: float = 0.0
 
 @dataclass
@@ -129,6 +130,7 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
     config.cluster.min_size = json_data['cluster_minimum_size']
     config.cluster.min_points = json_data['cluster_minimum_points']
     config.cluster.max_center_distance = json_data['cluster_max_center_distance(mm)']
+    config.cluster.fractional_distance_min = json_data['cluster_fractional_distance_min']
     
     return config
 

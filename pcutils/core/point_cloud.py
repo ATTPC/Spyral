@@ -4,6 +4,7 @@ from .constants import INVALID_EVENT_NUMBER
 from .config import CrossTalkParameters
 import numpy as np
 from typing import Optional
+import warnings
 
 class PointCloud:
 
@@ -35,7 +36,7 @@ class PointCloud:
 
     def load_cloud_from_hdf5_data(self, data: np.ndarray, event_number: int):
         self.event_number: int = event_number
-        self.cloud = data.copy()
+        self.cloud = data
 
     def is_valid(self) -> bool:
         return self.event_number != INVALID_EVENT_NUMBER
@@ -112,11 +113,13 @@ class PointCloud:
             if len(neighbors) == 0:
                 continue
             # Weight points
-            xs = sum(neighbors[:,0] * neighbors[:,4])
-            ys = sum(neighbors[:,1] * neighbors[:,4])
-            zs = sum(neighbors[:,2] * neighbors[:,4])
-            cs = sum(neighbors[:,3])
-            ics = sum(neighbors[:,4])
+            xs = np.sum(neighbors[:,0] * neighbors[:,4])
+            ys = np.sum(neighbors[:,1] * neighbors[:,4])
+            zs = np.sum(neighbors[:,2] * neighbors[:,4])
+            cs = np.sum(neighbors[:,3])
+            ics = np.sum(neighbors[:,4])
+            if np.isclose(ics, 0.0):
+                continue
             #smoothed_pc.append(np.average(neighbors, axis = 0))
             smoothed_cloud[idx] = np.array([xs/ics, ys/ics, zs/ics, cs/len(neighbors), ics/len(neighbors), point[5]])
         # Removes duplicate points

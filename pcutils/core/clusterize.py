@@ -96,7 +96,7 @@ def join_clusters(clusters: list[ClusteredCloud], params: ClusterParameters) -> 
     return new_clusters
     
 def clusterize(pc: PointCloud, cluster_params: ClusterParameters, detector_params: DetectorParameters) -> list[ClusteredCloud]:
-    clusterizer = skcluster.HDBSCAN(min_cluster_size=cluster_params.min_size, min_samples=cluster_params.min_points)
+    clusterizer = skcluster.HDBSCAN(min_cluster_size=cluster_params.min_size, min_samples=cluster_params.min_points, cluster_selection_epsilon=cluster_params.fractional_distance_min)
 
     #Smooth out the point cloud by averaging over neighboring points within a distance
     pc.smooth_cloud(cluster_params.smoothing_neighbor_distance)
@@ -111,7 +111,7 @@ def clusterize(pc: PointCloud, cluster_params: ClusterParameters, detector_param
     pc.cloud[:, 3] /= max_amplitude
     pc.cloud[:, 4] /= max_charge
 
-    fitted_clusters = clusterizer.fit(pc.cloud[:, :3])
+    fitted_clusters = clusterizer.fit(pc.cloud[:, :5])
     labels = np.unique(fitted_clusters.labels_)
 
     #Re-scale

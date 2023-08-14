@@ -1,6 +1,6 @@
 {
-    "trace_data_path": "/media/gordon/ThesisData/NewData/a1975/h5/",
-    "workspace_path": "/media/gordon/ThesisData/NewData/Analyzed/a1975/",
+    "trace_data_path": "/Volumes/Pattern/a1975/h5/",
+    "workspace_path": "/Volumes/Pattern/Analysis/a1975/",
     "pad_geometry_path": "etc/padxy.csv",
     "pad_gain_path": "etc/pad_gain_map.csv",
     "pad_time_path": "etc/pad_time_correction.csv",
@@ -8,8 +8,8 @@
 
     "run_min": 4,
     "run_max": 4,
-    "phase1": true,
-    "phase2": false,
+    "phase1": false,
+    "phase2": true,
     "phase3": false,
     "phase4": false,
     "phase5": false,
@@ -38,8 +38,9 @@
     "cross_talk_distance_range(mm)": 5.0,
     "cross_talk_time_range(bucket)": 10,
 
-    "cluster_smoothing_neighbor_distance(mm)": 20.0,
-    "cluster_minimum_size": 20,
-    "cluster_minimum_points": 20,
-    "cluster_max_center_distance(mm)": 35.0
+    "cluster_smoothing_neighbor_distance(mm)": 10.0,
+    "cluster_minimum_size": 10,
+    "cluster_minimum_points": 5,
+    "cluster_max_center_distance(mm)": 30.0,
+    "cluster_fractional_distance_min": 0.1
 }
