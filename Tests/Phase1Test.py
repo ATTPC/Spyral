@@ -71,7 +71,11 @@ def PointCloudTest(h5_Path, event_num):
     fig = plt.figure(figsize = (8, 6))
     ax = fig.add_subplot(projection = '3d')
     
-    ax.scatter(pc.cloud[:,2], pc.cloud[:,0], pc.cloud[:,1], s = 5)
+    ax.scatter(pc.cloud[:,2], pc.cloud[:,0], pc.cloud[:,1], s = 5, label = 'Raw Data Cloud')
+
+    #pc.smooth_cloud(max_distance = 10)
+    #ax.scatter(pc.cloud[:,2], pc.cloud[:,0], pc.cloud[:,1], s = 5, label = 'Smoothed Data Cloud')
+
     ax.set_box_aspect((1000/584, 1, 1))
     ax.set_xlim([0, 1000])
     ax.set_ylim([-292, 292])
@@ -79,16 +83,17 @@ def PointCloudTest(h5_Path, event_num):
     ax.set_xlabel('Z')
     ax.set_ylabel('X')
     ax.set_zlabel('Y')
-    
+    ax.legend()
+
     plt.show()
 
 def main():
     h5_Path = '/mnt/analysis/e20009/e20009_Turi/run_0348.h5'
     event_num = 146674
 
-    #GetTraceTest(h5_Path, event_num)
+    GetTraceTest(h5_Path, event_num)
     #GetEventTest(h5_Path, event_num)
-    PointCloudTest(h5_Path, event_num)
+    #PointCloudTest(h5_Path, event_num)
 
 if __name__ == '__main__':
     main()
