@@ -53,7 +53,7 @@ class GetTrace:
         #Edges can be strange, so smooth them a bit
         self.raw_data[0] = self.raw_data[1]
         self.raw_data[511] = self.raw_data[510]
-        self.corrected_data = self.raw_data - self.evaluate_baseline(baseline_window_scale) #remove the baseline
+        self.corrected_data = (self.raw_data - self.evaluate_baseline(baseline_window_scale)).clip(min = 0) #remove the baseline
         self.hw_id = id
         smoothness = len(self.corrected_data) * smoothing #ICK bad, tested on GWM data but should be input parameter
         self.smoothing_spline = UnivariateSpline(np.arange(0, NUMBER_OF_TIME_BUCKETS, 1), self.corrected_data, k=4, s=smoothness) #Need min order 4 spline; deriv -> 3 order, min needed for roots
