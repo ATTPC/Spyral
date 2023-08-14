@@ -6,7 +6,11 @@ def form_run_string(run_number: int) -> str:
         return f'run_{run_number:04d}'
 
 class Workspace:
-
+    '''
+    The Workspace class represents the disk location to which data can be written/retrieved.
+    The workspace can create directories as needed for writting data. Note, that the workspace cannot
+    access directories with restricted permissions.
+    '''
     def __init__(self, params: WorkspaceParameters):
         self.trace_data_path = Path(params.trace_data_path)
         self.workspace_path = Path(params.workspace_path)

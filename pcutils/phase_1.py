@@ -7,6 +7,15 @@ from h5py import File, Group, Dataset
 from time import time
 
 def get_event_range(trace_file: File) -> tuple[int, int]:
+    '''
+    The old merger didn't seem to use attributes, so everything was stored in datasets. Use this to retrieve the min and max event numbers.
+
+    ## Parameters
+    trace_file: h5py.File, file handle to a file with traces
+
+    ## Returns
+    tuple[int, int]: a pair of integers (min_event, max_event)
+    '''
     meta_group = trace_file.get('meta')
     meta_data = meta_group.get('meta')
     return (int(meta_data[0]), int(meta_data[2]))

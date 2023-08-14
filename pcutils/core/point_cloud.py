@@ -45,6 +45,17 @@ class PointCloud:
         return self.cloud[:, 0:3]
     
     def eliminate_cross_talk(self, pmap: PadMap, params: CrossTalkParameters):
+        '''
+        Routine to attempt to eliminate cross talk. Adapted from the IgorPro analysis routine written by Z. Serikow.
+        First, find traces which were estimated to saturate. Then check the neighboring channels in the electronics to see if they
+        had a signal which occured at the same sample time. If the neighbor has such a signal, it is said to be a cross talk suspect. Check the pad neighborhood of the
+        suspect to see if these other proximal pads saw a signal as well. If they did, the suspect is not cross talk. If they did not, the suspect is considered
+        cross talk and rejected.
+
+        ## Parameters
+        pmap: PadMap, the pad information
+        params: CrossTalkParameters, the parameters for the cross talk algorithm
+        '''
         points_to_keep: np.ndarray = np.full(len(self.cloud), fill_value=True, dtype=bool)
         average_neighbor_amplitude = 0.0
         n_neighbors = 0
@@ -101,11 +112,20 @@ class PointCloud:
         self.cloud = self.cloud[points_to_keep]
 
     def calibrate_z_position(self, micromegas_tb: float, window_tb: float, detector_length: float):
+        '''
+        Calibrate the point cloud z-poisition using a known time calibration for the window and micromegas
+        '''
         for idx, point in enumerate(self.cloud):
             self.cloud[idx][2] = (window_tb - point[2]) / (window_tb - micromegas_tb) * detector_length
 
 
     def smooth_cloud(self, max_distance: float = 10.0):
+        '''
+        Smooth the point cloud by averaging over nearest neighbors, weighted by the integrated charge.
+
+        ## Parameters
+        max_distance: float, the maximum distance between two neighboring points
+        '''
         smoothed_cloud = np.zeros(self.cloud.shape)
         for idx, point in enumerate(self.cloud):
             mask = np.sqrt((self.cloud[:,0]-point[0])**2.0+(self.cloud[:,1]-point[1])**2.0+(self.cloud[:,2]-point[2])**2.0) <= max_distance
@@ -120,8 +140,6 @@ class PointCloud:
             ics = np.sum(neighbors[:,4])
             if np.isclose(ics, 0.0):
                 continue
-            #smoothed_pc.append(np.average(neighbors, axis = 0))
             smoothed_cloud[idx] = np.array([xs/ics, ys/ics, zs/ics, cs/len(neighbors), ics/len(neighbors), point[5]])
         # Removes duplicate points
         smoothed_cloud = smoothed_cloud[smoothed_cloud[:, 3] != 0.0]
-        self.cloud = np.unique(smoothed_cloud, axis = 0)

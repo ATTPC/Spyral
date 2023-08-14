@@ -11,6 +11,17 @@ class ClusteredCloud:
     point_cloud: PointCloud = field(default_factory=PointCloud)
 
 def least_squares_circle(x: np.ndarray, y: np.ndarray) -> tuple[float, float, float, float]:
+    '''
+    Implementation of analytic least squares circle fit. Taken from the scipy cookbooks.
+
+    ## Parameters
+    x: ndarray, list of all x position coordinates to be fit
+    y: ndarray, list of all y position coordinates to be fit
+
+    ## Returns
+    tuple[float, float, float, float]: A four member tuple containing the center x-coordinate, the center y-coordinate, the radius, and the RMSE (in that order)
+    These are NaN if the matrix is singular
+    '''
     mean_x = x.mean()
     mean_y = y.mean()
 
@@ -47,11 +58,24 @@ def least_squares_circle(x: np.ndarray, y: np.ndarray) -> tuple[float, float, fl
 
 
 def join_clusters(clusters: list[ClusteredCloud], params: ClusterParameters) -> list[ClusteredCloud]:
+    '''
+    Combine clusters based on the center around which they orbit. This is necessary because often times tracks are
+    fractured or contain regions of varying density which causes clustering algorithms to separate them.
+
+    ## Paramters
+    clusters: list[ClusteredCloud], the set of clusters to examine
+    params: ClusterParameters, contains the parameters controlling the joining algorithm (max_center_distance)
+
+    ## Returns
+    list[ClusteredCloud]: the set of joined clusters
+    '''
+    #Can't join 1 or 0 clusters
     if len(clusters) < 2:
         return clusters
     
     event_number = clusters[0].point_cloud.event_number
 
+    #Fit the clusters with circles
     centers = np.zeros((len(clusters), 2))
     for idx, cluster in enumerate(clusters):
         centers[idx, 0], centers[idx, 1], _, _ = least_squares_circle(cluster.point_cloud.cloud[:, 0], cluster.point_cloud.cloud[:, 1])
@@ -65,6 +89,7 @@ def join_clusters(clusters: list[ClusteredCloud], params: ClusterParameters) -> 
     #Now regroup, searching for clusters which match centers
     for idx, center in enumerate(centers):
         cluster = clusters[idx]
+        #Reject noise
         if cluster.label == -1 or np.isnan(center[0]):
             continue
 
@@ -96,6 +121,11 @@ def join_clusters(clusters: list[ClusteredCloud], params: ClusterParameters) -> 
     return new_clusters
     
 def clusterize(pc: PointCloud, cluster_params: ClusterParameters, detector_params: DetectorParameters) -> list[ClusteredCloud]:
+    '''
+    Analyze a point cloud, and group the points into clusters which in principle should correspond to particle trajectories. This analysis contains several steps,
+    and revolves around the HDBSCAN clustering algorithm implemented in scikit-learn (see [their description](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html) for details)
+    First the point cloud is smoothed by averaging over nearest neighbors (defined by the smoothing_neighbor_distance parameter) to remove small deviations. The geometric and electronic scales are then unified 
+    '''
     clusterizer = skcluster.HDBSCAN(min_cluster_size=cluster_params.min_size, min_samples=cluster_params.min_points, cluster_selection_epsilon=cluster_params.fractional_distance_min)
 
     #Smooth out the point cloud by averaging over neighboring points within a distance
@@ -105,9 +135,14 @@ def clusterize(pc: PointCloud, cluster_params: ClusterParameters, detector_param
     max_amplitude = pc.cloud[:, 3].max()
     max_charge = pc.cloud[:, 4].max()
 
-    pc.cloud[:, 0] /= 292.0
-    pc.cloud[:, 1] /= 292.0
+    #XY: (-300,300) -> add 300 -> (0, 600) -> divide by 600 -> (0,1)
+    pc.cloud[:, 0] += 300.0
+    pc.cloud[:, 1] += 300.0
+    pc.cloud[:, 0] /= 600.0
+    pc.cloud[:, 1] /= 600.0
+    #Z: (0, detector_length) -> divide by detector length -> (0,1)
     pc.cloud[:, 2] /= detector_params.detector_length
+    #Charge: (0, max?) -> divide by max -> (0, 1) ... this is not precise and may lead to weird artifacts
     pc.cloud[:, 3] /= max_amplitude
     pc.cloud[:, 4] /= max_charge
 
@@ -115,11 +150,13 @@ def clusterize(pc: PointCloud, cluster_params: ClusterParameters, detector_param
     labels = np.unique(fitted_clusters.labels_)
 
     #Re-scale
-    pc.cloud[:, 0] *= 292.0
-    pc.cloud[:, 1] *= 292.0
+    pc.cloud[:, 0] *= 600.0
+    pc.cloud[:, 1] *= 600.0
+    pc.cloud[:, 0] -= 300.0
+    pc.cloud[:, 1] -= 300.0
     pc.cloud[:, 2] *= detector_params.detector_length
     pc.cloud[:, 3] *= max_amplitude
-    pc.cloud[:, 3] *= max_charge
+    pc.cloud[:, 4] *= max_charge
 
     #Select out data into clusters
     clusters: list[ClusteredCloud] = []
