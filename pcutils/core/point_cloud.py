@@ -140,6 +140,8 @@ class PointCloud:
             ics = np.sum(neighbors[:,4])
             if np.isclose(ics, 0.0):
                 continue
+            #smoothed_pc.append(np.average(neighbors, axis = 0))
             smoothed_cloud[idx] = np.array([xs/ics, ys/ics, zs/ics, cs/len(neighbors), ics/len(neighbors), point[5]])
         # Removes duplicate points
         smoothed_cloud = smoothed_cloud[smoothed_cloud[:, 3] != 0.0]
+        self.cloud = np.unique(smoothed_cloud, axis = 0)
