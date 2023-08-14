@@ -77,3 +77,24 @@ class PointCloud:
         #for idx, point in enumerate(self.cloud):
             #self.cloud[idx][2] = (window_tb - point[2]) / (window_tb - micromegas_tb) * detector_length
         self.cloud[:,2] = (window_tb - self.cloud[:,2]) / (window_tb - micromegas_tb) * detector_length
+
+    def smooth_cloud(self, max_distance = 10):
+        smoothed_pc = []
+        for i in range(len(self.cloud)):
+            # Create mask that determines all points within max_distance of the ith point in the cloud
+            mask = np.sqrt((self.cloud[:,0]-self.cloud[i,0])**2 + (self.cloud[:,1]-self.cloud[i,1])**2 + (self.cloud[:,2]-self.cloud[i,2])**2) <= max_distance
+            neighbors = self.cloud[mask]
+            # Weight points
+            xs = sum(neighbors[:,0] * neighbors[:,4])
+            ys = sum(neighbors[:,1] * neighbors[:,4])
+            zs = sum(neighbors[:,2] * neighbors[:,4])
+            cs = sum(neighbors[:,3])
+            ics = sum(neighbors[:,4])
+
+            smoothed_pc.append(np.array([xs/ics, ys/ics, zs/ics, cs/len(neighbors), ics/len(neighbors)]))
+        smoothed_pc = np.vstack(smoothed_pc)
+        # Removes duplicate points
+        smoothed_pc = smoothed_pc[sorted(np.unique(smoothed_pc.round(decimals = 8), axis = 0, return_index = True)[1])]
+        # Removes NaNs
+        smoothed_pc = smoothed_pc[~np.isnan(smoothed_pc).any(axis = 1)]
+        self.cloud = smoothed_pc
