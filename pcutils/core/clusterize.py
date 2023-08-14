@@ -99,7 +99,11 @@ def join_clusters(clusters: list[ClusteredCloud], params: ClusterParameters) -> 
                 continue
             center_distance = np.sqrt((center[0] - comp_center[0])**2.0 + (center[1] - comp_center[1])**2.0)
             #If we find matching centers (that havent already been matched) take all of the clouds in both groups and merge them
-            if center_distance < params.max_center_distance and cidx not in groups[cluster.label]:
+            comp_mean_charge = np.mean(comp_cluster.point_cloud.cloud[:, 3], axis=0)
+            mean_charge = np.mean(cluster.point_cloud.cloud[:, 3], axis=0)
+            charge_diff = np.abs(mean_charge - comp_mean_charge)
+            threshold = params.fractional_charge_threshold * np.max([comp_mean_charge, mean_charge])
+            if center_distance < params.max_center_distance and cidx not in groups[cluster.label] and (charge_diff) < threshold:
                 comp_group = groups.pop(comp_cluster.label)
                 for subs in comp_group:
                     clusters[subs].label = cluster.label

@@ -61,6 +61,7 @@ class ClusterParameters:
     min_size: int = 0
     fractional_distance_min: float = 0.0
     max_center_distance: float = 0.0
+    fractional_charge_threshold: float = 0.0
 
 @dataclass
 class Config:
@@ -131,6 +132,7 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
     config.cluster.min_points = json_data['cluster_minimum_points']
     config.cluster.max_center_distance = json_data['cluster_max_center_distance(mm)']
     config.cluster.fractional_distance_min = json_data['cluster_fractional_distance_min']
+    config.cluster.fractional_charge_threshold = json_data['cluster_fractional_charge_threshold']
     
     return config
 

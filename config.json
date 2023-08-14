@@ -42,5 +42,6 @@
     "cluster_minimum_size": 10,
     "cluster_minimum_points": 5,
     "cluster_max_center_distance(mm)": 30.0,
-    "cluster_fractional_distance_min": 0.1
+    "cluster_fractional_distance_min": 0.1,
+    "cluster_fractional_charge_threshold": 0.5
 }
