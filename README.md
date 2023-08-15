@@ -45,7 +45,7 @@ Python >= 3.10
 
 ### Configuration
 
-User configuration parameters are passed through JSON files. Currently hardcoded to accept a file named config.json at the top level of the repository, but this will change to accept configuration files from the command line.
+User configuration parameters are passed through JSON files. Configuration files are passed at runtime to the script.
 
 Configurations contain many parameters. These can be seen in the config.json example given with the repo. These parameters are grouped by the use case:
 
@@ -60,4 +60,8 @@ Configurations contain many parameters. These can be seen in the config.json exa
 
 ### Running
 
-To use PointCloud-utils, run the main.py script located at the top level of the repository (i.e. `python3 main.py`) with the virtual environment activated.
+To use PointCloud-utils, run the main.py script located at the top level of the repository (i.e. `python3 main.py`) with the virtual environment activated. Example:
+
+```[bash]
+python main.py my_config.json
+```

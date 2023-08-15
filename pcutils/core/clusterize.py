@@ -1,7 +1,8 @@
 from .point_cloud import PointCloud
 from .config import ClusterParameters, DetectorParameters
 import sklearn.cluster as skcluster
-from circle_fit import least_squares_circle
+from sklearn.preprocessing import StandardScaler
+from scipy.stats import iqr
 from dataclasses import dataclass, field
 import numpy as np
 
@@ -99,11 +100,11 @@ def join_clusters(clusters: list[ClusteredCloud], params: ClusterParameters) -> 
                 continue
             center_distance = np.sqrt((center[0] - comp_center[0])**2.0 + (center[1] - comp_center[1])**2.0)
             #If we find matching centers (that havent already been matched) take all of the clouds in both groups and merge them
-            comp_mean_charge = np.mean(comp_cluster.point_cloud.cloud[:, 3], axis=0)
-            mean_charge = np.mean(cluster.point_cloud.cloud[:, 3], axis=0)
+            comp_mean_charge = np.mean(comp_cluster.point_cloud.cloud[:, 4], axis=0)
+            mean_charge = np.mean(cluster.point_cloud.cloud[:, 4], axis=0)
             charge_diff = np.abs(mean_charge - comp_mean_charge)
             threshold = params.fractional_charge_threshold * np.max([comp_mean_charge, mean_charge])
-            if center_distance < params.max_center_distance and cidx not in groups[cluster.label] and (charge_diff) < threshold:
+            if (center_distance < params.max_center_distance) and (cidx not in groups[cluster.label]) and (charge_diff < threshold):
                 comp_group = groups.pop(comp_cluster.label)
                 for subs in comp_group:
                     clusters[subs].label = cluster.label
@@ -124,43 +125,36 @@ def join_clusters(clusters: list[ClusteredCloud], params: ClusterParameters) -> 
     
     return new_clusters
     
-def clusterize(pc: PointCloud, cluster_params: ClusterParameters, detector_params: DetectorParameters) -> list[ClusteredCloud]:
+def clusterize(pc: PointCloud, cluster_params: ClusterParameters) -> list[ClusteredCloud]:
     '''
     Analyze a point cloud, and group the points into clusters which in principle should correspond to particle trajectories. This analysis contains several steps,
     and revolves around the HDBSCAN clustering algorithm implemented in scikit-learn (see [their description](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html) for details)
-    First the point cloud is smoothed by averaging over nearest neighbors (defined by the smoothing_neighbor_distance parameter) to remove small deviations. The geometric and electronic scales are then unified 
+    First the point cloud is smoothed by averaging over nearest neighbors (defined by the smoothing_neighbor_distance parameter) to remove small deviations. 
+    The data is then scaled where each coordinate (x,y,z,int) is centered to its mean and then scaled to its std deviation using the scikit-learn StandardScaler. This data is then
+    clustered by HDBSCAN and the clusters are returned.
+
+    ## Parameters
+    pc: PointCloud, the cloud to be clustered
+    cluster_params: ClusterParameters, parameters controlling the clustering algorithms
+
+    ## Returns
+    list[ClusteredCloud]: list of clusters found by the algorithm
     '''
     clusterizer = skcluster.HDBSCAN(min_cluster_size=cluster_params.min_size, min_samples=cluster_params.min_points, cluster_selection_epsilon=cluster_params.fractional_distance_min)
 
-    #Smooth out the point cloud by averaging over neighboring points within a distance
+    #Smooth out the point cloud by averaging over neighboring points within a distance, droping any duplicate points
     pc.smooth_cloud(cluster_params.smoothing_neighbor_distance)
 
-    #Unfiy spatial ranges to be over same scale. Otherwise, scales with greater total range can have differing impact on the clustering algorithm
-    max_amplitude = pc.cloud[:, 3].max()
-    max_charge = pc.cloud[:, 4].max()
+    #Use spatial dimensions and integrated charge
+    cluster_data = np.empty(shape=(len(pc.cloud), 4))
+    cluster_data[:, :3] = pc.cloud[:, :3]
+    cluster_data[:, 3] = pc.cloud[:, 4]
+    
+    #Unfiy feature ranges to their means and std deviations. StandardScaler calculates mean, and std for each feature 
+    cluster_data = StandardScaler().fit(cluster_data).transform(cluster_data)
 
-    #XY: (-300,300) -> add 300 -> (0, 600) -> divide by 600 -> (0,1)
-    pc.cloud[:, 0] += 300.0
-    pc.cloud[:, 1] += 300.0
-    pc.cloud[:, 0] /= 600.0
-    pc.cloud[:, 1] /= 600.0
-    #Z: (0, detector_length) -> divide by detector length -> (0,1)
-    pc.cloud[:, 2] /= detector_params.detector_length
-    #Charge: (0, max?) -> divide by max -> (0, 1) ... this is not precise and may lead to weird artifacts
-    pc.cloud[:, 3] /= max_amplitude
-    pc.cloud[:, 4] /= max_charge
-
-    fitted_clusters = clusterizer.fit(pc.cloud[:, :5])
+    fitted_clusters = clusterizer.fit(cluster_data)
     labels = np.unique(fitted_clusters.labels_)
-
-    #Re-scale
-    pc.cloud[:, 0] *= 600.0
-    pc.cloud[:, 1] *= 600.0
-    pc.cloud[:, 0] -= 300.0
-    pc.cloud[:, 1] -= 300.0
-    pc.cloud[:, 2] *= detector_params.detector_length
-    pc.cloud[:, 3] *= max_amplitude
-    pc.cloud[:, 4] *= max_charge
 
     #Select out data into clusters
     clusters: list[ClusteredCloud] = []

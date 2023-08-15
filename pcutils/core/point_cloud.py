@@ -144,4 +144,5 @@ class PointCloud:
             smoothed_cloud[idx] = np.array([xs/ics, ys/ics, zs/ics, cs/len(neighbors), ics/len(neighbors), point[5]])
         # Removes duplicate points
         smoothed_cloud = smoothed_cloud[smoothed_cloud[:, 3] != 0.0]
-        self.cloud = np.unique(smoothed_cloud, axis = 0)
+        _, indicies = np.unique(np.round(smoothed_cloud[:, :3], decimals=2), axis=0, return_index=True)
+        self.cloud = smoothed_cloud[indicies]
