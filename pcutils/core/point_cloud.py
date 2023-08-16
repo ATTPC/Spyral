@@ -91,8 +91,10 @@ class PointCloud:
             cs = sum(neighbors[:,3])
             ics = sum(neighbors[:,4])
 
-            if len(neighbors) > 0 and ics != 0:
-                smoothed_pc.append(np.array([xs/ics, ys/ics, zs/ics, cs/len(neighbors), ics/len(neighbors)]))
+            if len(neighbors) == 0 or np.isclose(ics, 0.0):
+                 continue            
+    
+            smoothed_pc.append(np.array([xs/ics, ys/ics, zs/ics, cs/len(neighbors), ics/len(neighbors)]))
 
         smoothed_pc = np.vstack(smoothed_pc)
         # Removes duplicate points
