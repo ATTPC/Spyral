@@ -1,9 +1,10 @@
 from .get_event import GetEvent
-from .get_trace import Peak
-from .pad_map import PadMap, PadData
-from .constants import INVALID_EVENT_NUMBER, INVALID_PEAK_CENTROID
+from .pad_map import PadMap
+from .constants import INVALID_EVENT_NUMBER
+from .config import CrossTalkParameters
 import numpy as np
 from typing import Optional
+import warnings
 
 class PointCloud:
 
@@ -11,18 +12,18 @@ class PointCloud:
         self.event_number: int = INVALID_EVENT_NUMBER
         self.cloud: Optional[np.ndarray] = None
 
-    def load_cloud_from_get_event(self, event: GetEvent, pad_geometry: PadMap, peak_separation: float, peak_threshold: float):
-        #self.cloud = np.empty((0,5)) # point elements are x, y, z, height, integral
+    def load_cloud_from_get_event(self, event: GetEvent, pmap: PadMap):
+        self.event_number = event.number
         count = 0
         for trace in event.traces:
-            if trace.find_peaks(peak_separation, peak_threshold):
+            if trace.hw_id.cobo_id != 10:
                 count += trace.get_number_of_peaks()
         self.cloud = np.zeros((count, 6))
         idx = 0
         for trace in event.traces:
             if trace.get_number_of_peaks() == 0 or trace.hw_id.cobo_id == 10:
                 continue
-            pad = pad_geometry.get_pad_data(trace.hw_id.pad_id)
+            pad = pmap.get_pad_data(trace.hw_id.pad_id)
             for peak in trace.get_peaks():
                 self.cloud[idx, 0] = pad.x # X-coordinate, geometry
                 self.cloud[idx, 1] = pad.y # Y-coordinate, geometry
@@ -42,63 +43,104 @@ class PointCloud:
     def retrieve_spatial_coordinates(self) -> np.ndarray:
         return self.cloud[:, 0:3]
     
-    def eliminate_cross_talk(self, saturation_threshold: float = 2000.0, cross_talk_threshold: float = 1000.0, physical_range: int = 5, bucket_range: int = 10):
-        points_to_keep: np.ndarray = np.full(len(self.cloud), fill_value = True, dtype = bool)
+    def eliminate_cross_talk(self, pmap: PadMap, params: CrossTalkParameters):
+        '''
+        Routine to attempt to eliminate cross talk. Adapted from the IgorPro analysis routine written by Z. Serikow.
+        First, find traces which were estimated to saturate. Then check the neighboring channels in the electronics to see if they
+        had a signal which occured at the same sample time. If the neighbor has such a signal, it is said to be a cross talk suspect. Check the pad neighborhood of the
+        suspect to see if these other proximal pads saw a signal as well. If they did, the suspect is not cross talk. If they did not, the suspect is considered
+        cross talk and rejected.
+
+        ## Parameters
+        pmap: PadMap, the pad information
+        params: CrossTalkParameters, the parameters for the cross talk algorithm
+        '''
+        points_to_keep: np.ndarray = np.full(len(self.cloud), fill_value=True, dtype=bool)
         average_neighbor_amplitude = 0.0
-        n_neighbors = 1
+        n_neighbors = 0
+        #First find a saturated pad
         for idx, point in enumerate(self.cloud):
-            average_neighbor_amplitude = 0.0
-            n_neighbors = 0.0
-            if point[3] < saturation_threshold:
+            
+            if point[3] < params.saturation_threshold:
                 continue
 
-            for comp_idx, comp_point in enumerate(self.cloud):
-                if comp_idx == idx: #dont include self
-                    continue
-                elif (comp_point[0] < point[0] - physical_range) or (comp_point[0] > point[0] + physical_range): #xbounds
-                    continue
-                elif (comp_point[1] < point[1] - physical_range) or (comp_point[1] > point[1] + physical_range): #ybounds
-                    continue
-                elif (comp_point[2] < point[2] or comp_point[2] > point[2] + bucket_range): #zbounds
-                    continue
+            point_hardware = pmap.get_pad_data(point[5]).hardware
+            channel_max = point_hardware.aget_channel + params.channel_range
+            if channel_max > 67:
+                channel_max = 67
+            channel_min = point_hardware.aget_channel - params.channel_range
+            if channel_min < 0:
+                channel_min = 0
 
-                average_neighbor_amplitude += comp_point[3]
-                n_neighbors += 1
-            if n_neighbors > 0:
-                average_neighbor_amplitude  /= float(n_neighbors)
-                if (average_neighbor_amplitude < cross_talk_threshold):
-                    points_to_keep[idx] = False
-            else:
-                points_to_keep[idx] = False
+            saturator_time_bucket = point[2]
+
+            #Now look for pads that are in the electronic neighborhood
+            for channel in range(channel_min, channel_max+1, 1):
+                point_hardware.aget_channel = channel
+                suspect_pad = pmap.get_pad_from_hardware(point_hardware)
+                if suspect_pad is None:
+                    continue
+                suspect_point_indicies = np.where(self.cloud[:, 5] == suspect_pad)[0]
+                #For each pad in the electronic neighborhood, see if they are cross-talk like
+                for suspect_index in suspect_point_indicies:
+                    suspect_point = self.cloud[suspect_index]
+                    if suspect_point[3] > params.cross_talk_threshold or suspect_point[2] > (saturator_time_bucket + params.time_range) or suspect_point[2] < (saturator_time_bucket - params.time_range):
+                        continue
+                    average_neighbor_amplitude = 0.0
+                    n_neighbors = 0
+                    #To ensure cross-talk behavior, check the physical neighborhood. If the neighbors see some signficant signal, probably not cross-talk
+                    for comp_idx, comp_point in enumerate(self.cloud):
+                        if comp_idx == idx: #dont include self
+                            continue
+                        elif (comp_point[0] < suspect_point[0] - params.distance_range) or (comp_point[0] > suspect_point[0] + params.distance_range): #xbounds
+                            continue
+                        elif (comp_point[1] < suspect_point[1] - params.distance_range) or (comp_point[1] > suspect_point[1] + params.distance_range): #ybounds
+                            continue
+                        elif (comp_point[2] < suspect_point[2] or comp_point[2] > suspect_point[2] + params.time_range): #zbounds
+                            continue
+
+                        average_neighbor_amplitude += comp_point[3]
+                        n_neighbors += 1
+                    if n_neighbors > 0:
+                        average_neighbor_amplitude  /= float(n_neighbors)
+                        if average_neighbor_amplitude < params.neighborhood_threshold:
+                            points_to_keep[suspect_index] = False
+                    else:
+                        points_to_keep[suspect_index] = False
 
         self.cloud = self.cloud[points_to_keep]
 
     def calibrate_z_position(self, micromegas_tb: float, window_tb: float, detector_length: float):
-        #for idx, point in enumerate(self.cloud):
-            #self.cloud[idx][2] = (window_tb - point[2]) / (window_tb - micromegas_tb) * detector_length
-        self.cloud[:,2] = (window_tb - self.cloud[:,2]) / (window_tb - micromegas_tb) * detector_length
+        '''
+        Calibrate the point cloud z-poisition using a known time calibration for the window and micromegas
+        '''
+        for idx, point in enumerate(self.cloud):
+            self.cloud[idx][2] = (window_tb - point[2]) / (window_tb - micromegas_tb) * detector_length
 
-    def smooth_cloud(self, max_distance:float = 10.0):
-        smoothed_pc = []
-        for i in range(len(self.cloud)):
-            # Create mask that determines all points within max_distance of the ith point in the cloud
-            mask = np.sqrt((self.cloud[:,0]-self.cloud[i,0])**2 + (self.cloud[:,1]-self.cloud[i,1])**2 + (self.cloud[:,2]-self.cloud[i,2])**2) <= max_distance
+    def smooth_cloud(self, max_distance: float = 10.0):
+        '''
+        Smooth the point cloud by averaging over nearest neighbors, weighted by the integrated charge.
+
+        ## Parameters
+        max_distance: float, the maximum distance between two neighboring points
+        '''
+        smoothed_cloud = np.zeros(self.cloud.shape)
+        for idx, point in enumerate(self.cloud):
+            mask = np.sqrt((self.cloud[:,0]-point[0])**2.0+(self.cloud[:,1]-point[1])**2.0+(self.cloud[:,2]-point[2])**2.0) <= max_distance
             neighbors = self.cloud[mask]
+            if len(neighbors) == 0:
+                continue
             # Weight points
-            xs = sum(neighbors[:,0] * neighbors[:,4])
-            ys = sum(neighbors[:,1] * neighbors[:,4])
-            zs = sum(neighbors[:,2] * neighbors[:,4])
-            cs = sum(neighbors[:,3])
-            ics = sum(neighbors[:,4])
-
-            if len(neighbors) == 0 or np.isclose(ics, 0.0):
-                 continue            
-    
-            smoothed_pc.append(np.array([xs/ics, ys/ics, zs/ics, cs/len(neighbors), ics/len(neighbors)]))
-
-        smoothed_pc = np.vstack(smoothed_pc)
+            xs = np.sum(neighbors[:,0] * neighbors[:,4])
+            ys = np.sum(neighbors[:,1] * neighbors[:,4])
+            zs = np.sum(neighbors[:,2] * neighbors[:,4])
+            cs = np.sum(neighbors[:,3])
+            ics = np.sum(neighbors[:,4])
+            if np.isclose(ics, 0.0):
+                continue
+            #smoothed_pc.append(np.average(neighbors, axis = 0))
+            smoothed_cloud[idx] = np.array([xs/ics, ys/ics, zs/ics, cs/len(neighbors), ics/len(neighbors), point[5]])
         # Removes duplicate points
-        smoothed_pc = smoothed_pc[sorted(np.unique(smoothed_pc.round(decimals = 8), axis = 0, return_index = True)[1])]
-        # Removes NaNs
-        smoothed_pc = smoothed_pc[~np.isnan(smoothed_pc).any(axis = 1)]
-        self.cloud = smoothed_pc
+        smoothed_cloud = smoothed_cloud[smoothed_cloud[:, 3] != 0.0]
+        _, indicies = np.unique(np.round(smoothed_cloud[:, :3], decimals=2), axis=0, return_index=True)
+        self.cloud = smoothed_cloud[indicies]

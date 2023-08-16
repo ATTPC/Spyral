@@ -1,26 +1,13 @@
-from pcutils import phases
+from pcutils.core.config import load_config
+from pcutils.run import run_pcutils
+import sys
 
-def main():
-
-    print("Starting Phase 1...")
-    phases.Phase1.main()
-    print("Phase 1 complete.")
-
-    print("Starting Phase 2...")
-    phases.Phase2.main()
-    print("Phase 2 complete.")
-
-    print("Starting Phase 3...")
-    phases.Phase3.main()
-    print("Phase 3 complete.")
-
-    print("Starting Phase 4...")
-    phases.Phase4.main()
-    print("Phase 4 complete.")
-
-    print("Starting Phase 5...")
-    phases.Phase5.main()
-    print("Phase 5 complete.")
+def main(config_path: str):
+    config = load_config(config_path)
+    run_pcutils(config)
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) < 2:
+        print('pcutils requires a configuration file!')
+    else:
+        main(sys.argv[1])
