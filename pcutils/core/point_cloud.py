@@ -78,7 +78,7 @@ class PointCloud:
             #self.cloud[idx][2] = (window_tb - point[2]) / (window_tb - micromegas_tb) * detector_length
         self.cloud[:,2] = (window_tb - self.cloud[:,2]) / (window_tb - micromegas_tb) * detector_length
 
-    def smooth_cloud(self, max_distance = 10):
+    def smooth_cloud(self, max_distance:float = 10.0):
         smoothed_pc = []
         for i in range(len(self.cloud)):
             # Create mask that determines all points within max_distance of the ith point in the cloud
@@ -91,7 +91,9 @@ class PointCloud:
             cs = sum(neighbors[:,3])
             ics = sum(neighbors[:,4])
 
-            smoothed_pc.append(np.array([xs/ics, ys/ics, zs/ics, cs/len(neighbors), ics/len(neighbors)]))
+            if len(neighbors) > 0 and ics != 0:
+                smoothed_pc.append(np.array([xs/ics, ys/ics, zs/ics, cs/len(neighbors), ics/len(neighbors)]))
+
         smoothed_pc = np.vstack(smoothed_pc)
         # Removes duplicate points
         smoothed_pc = smoothed_pc[sorted(np.unique(smoothed_pc.round(decimals = 8), axis = 0, return_index = True)[1])]
