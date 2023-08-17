@@ -11,21 +11,27 @@ class Direction(Enum):
     FORWARD: int = 0
     BACKWARD: int = 1
 
-def estimate_physics(cluster: ClusteredCloud, params: DetectorParameters, results: dict[str, list]):
+def generate_circle_points(center_x: float, center_y: float, radius: float) -> np.ndarray:
+    theta = np.linspace(0., 2.0 * np.pi, 100000)
+    array = np.zeros(shape=(len(theta), 2))
+    array[:, 0] = center_x + np.sin(theta) * radius
+    array[:, 1] = center_y + np.sin(theta) * radius
+    return array
 
-    #Reject beam like trajectories
-    n_out_of_beam = len(np.sqrt(cluster.point_cloud.cloud[:, 0]**2.0 + cluster.point_cloud.cloud[:, 1]**2.0) < params.beam_region_radius)
-    if n_out_of_beam < 0.1 * len(cluster.point_cloud.cloud):
+def estimate_physics(cluster: ClusteredCloud, params: DetectorParameters, results: dict[str, list]):
+    #Reject any clusters that were labeled as noise by the clustering algorithm
+    if cluster.label == -1:
         return
-    
+
     #Drop any points which do not have a minimum number of neighbors
-    #cluster.point_cloud.drop_isolated_points()
+    cluster.point_cloud.drop_isolated_points()
+    #Re-smooth to remove jitter in the trajectory
     cluster.point_cloud.smooth_cloud()
-    if len(cluster.point_cloud.cloud) < 10:
-        return
     #Sort our cloud to be ordered in z
     cluster.point_cloud.sort_in_z()
     #Smooth the cloud out again; this is safe as we operate on a single cluster
+    if len(cluster.point_cloud.cloud) < 50:
+        return
     
     rhos = np.linalg.norm(cluster.point_cloud.cloud[:, :2], axis=1) #cylindrical coordinates rho
     direction = Direction.NONE
@@ -38,6 +44,7 @@ def estimate_physics(cluster: ClusteredCloud, params: DetectorParameters, result
     center = np.array([0., 0., 0.]) #spiral center
 
     #See if in-spiraling to the window or microgmegas, sets the direction and guess of z-vertex
+    #If backward, flip the ordering of the cloud to simplify algorithm
     if average_window_rho > average_micromegas_rho:
         direction = Direction.BACKWARD
         rhos = np.flip(rhos, axis=0)
@@ -51,6 +58,7 @@ def estimate_physics(cluster: ClusteredCloud, params: DetectorParameters, result
     #Guess that the vertex is the first point
     vertex = cluster.point_cloud.cloud[0, :3]
     
+    
     #Find the first point that is furthest from the vertex in rho (local maximum) to get the first arc of the trajectory
     rho_to_vertex = np.linalg.norm(cluster.point_cloud.cloud[1:, :2] - vertex[:2], axis=1)
     maxima = argrelmax(rho_to_vertex, order=10)[0]
@@ -63,9 +71,24 @@ def estimate_physics(cluster: ClusteredCloud, params: DetectorParameters, result
 
     #Fit a circle to the first arc and extract some physics
     center[0], center[1], radius, _ = least_squares_circle(first_arc[:, 0], first_arc[:, 1])
-    center[2] = vertex[2]
+    circle = generate_circle_points(center[0], center[1], radius)
+    #Re-estimate vertex using the fitted circle. Extrapolate back to point closest to beam axis
+    vertex_estimate_index = np.argsort(np.linalg.norm(circle, axis=1))[0]
+    vertex[:2] = circle[vertex_estimate_index]
+    #Re-calculate distance to vertex
+    rho_to_vertex = np.linalg.norm((cluster.point_cloud.cloud[:, :2] - vertex[:2]), axis=1)
+
+    #Do a linear fit to small segment of trajectory to extract rho vs. z and extrapolate vertex z
     test_index = max(10, int(maximum * 0.5))
     fit = linregress(cluster.point_cloud.cloud[:test_index, 2], rho_to_vertex[:test_index])
+    vertex_rho = np.linalg.norm(vertex[:2])
+    vertex[2] = (vertex_rho - fit.intercept) / fit.slope
+    center[2] = vertex[2]
+
+    #Toss tracks whose verticies are not close to the origin in x,y
+    if vertex_rho > 30.0:
+        return
+
     polar = math.atan(fit.slope)
     if direction is Direction.BACKWARD:
         polar += math.pi
@@ -75,6 +98,8 @@ def estimate_physics(cluster: ClusteredCloud, params: DetectorParameters, result
         azimuthal += 2.0 * math.pi
 
     brho = params.magnetic_field * radius * 0.001 / (math.sin(polar))
+    if np.isnan(brho):
+        brho = 0.0
     arclength = 0.0
     for idx in range(len(first_arc)-1):
         arclength += np.linalg.norm(first_arc[idx+1, :3] - first_arc[idx, :3])

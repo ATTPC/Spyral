@@ -152,6 +152,6 @@ class PointCloud:
     def drop_isolated_points(self, neighborhood_radius: float = 15.0, min_neighbors: int = 5):
         mask = np.full(shape=(len(self.cloud)), fill_value=False)
         for idx, point in enumerate(self.cloud):
-            neighbors = np.linalg.norm((self.cloud[:, :3] - point[:3])) < neighborhood_radius
+            neighbors = np.linalg.norm((self.cloud[:, :3] - point[:3]), axis=1) < neighborhood_radius
             mask[idx] = len(self.cloud[neighbors]) >= min_neighbors
         self.cloud = self.cloud[mask] 

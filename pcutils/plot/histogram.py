@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Optional
 from matplotlib.pyplot import Axes
 from matplotlib.text import Text
+from matplotlib.colors import LogNorm
 from matplotlib.backend_bases import LocationEvent
 from matplotlib.collections import QuadMesh
 import matplotlib.pyplot as plt
@@ -239,15 +240,20 @@ class Histogrammer:
         self.connect_mpl_callbacks(axis)
             
         
-    def draw_hist2d(self, name: str, axis: Axes) -> QuadMesh:
+    def draw_hist2d(self, name: str, axis: Axes, log_z: bool = False) -> QuadMesh:
         if name not in self.histograms:
             return
         
         hist = self.histograms[name]
         if type(hist) is not Hist2D:
             return
-
-        mesh = axis.pcolormesh(hist.x_bins, hist.y_bins, hist.counts)
+        mesh = None
+        if log_z:
+            min_scale = np.min(hist.counts) + 0.00001
+            max_scale = np.max(hist.counts)
+            mesh = axis.pcolormesh(hist.x_bins, hist.y_bins, hist.counts, norm=LogNorm(min_scale, max_scale))
+        else:
+            mesh = axis.pcolormesh(hist.x_bins, hist.y_bins, hist.counts)
         self.axes[axis] = (name, None)
         self.connect_mpl_callbacks(axis)
         return mesh

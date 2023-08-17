@@ -59,7 +59,8 @@ class Cut2D:
         return self.path.contains_points(points)
 
     def is_cols_inside(self, columns: Series) -> Series:
-        return Series(values=self.path.contains_points(columns.to_list()))
+        data = np.transpose([columns.struct.field(name).to_list() for name in columns.struct.fields])
+        return Series(values=self.path.contains_points(data))
 
     def get_vertices(self) -> np.ndarray:
         return self.path.vertices

@@ -15,7 +15,7 @@ def phase_3(cluster_path: Path, parquet_path: Path, params: DetectorParameters):
     min_event = cluster_group.attrs['min_event']
     max_event = cluster_group.attrs['max_event']
 
-    print(f'Running initial analysis on clusters in {cluster_path} over events {min_event} to {max_event}')
+    print(f'Running physics estimation on clusters in {cluster_path} over events {min_event} to {max_event}')
 
     flush_percent = 0.01
     flush_val = int(flush_percent * (max_event - min_event))
