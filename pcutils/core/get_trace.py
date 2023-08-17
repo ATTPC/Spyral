@@ -21,6 +21,7 @@ class Peak:
     positive_inflection: float = 0.0
     negative_inflection: float = 0.0
     amplitude: float = 0.0
+    uncorrected_amplitude: float = 0.0
     integral: float = 0.0
 
 
@@ -46,6 +47,10 @@ class GetTrace:
             return
         
         self.raw_data = data.astype(np.int32) #Widen the type and sign it
+        #Edges can be strange, so smooth them a bit
+        self.raw_data[0] = self.raw_data[1]
+        self.raw_data[511] = self.raw_data[510]
+        self.corrected_data = (self.raw_data - self.evaluate_baseline(baseline_window_scale)).clip(min = 0) #remove the baseline
         self.hw_id = id
         self.find_peaks(params.peak_separation, params.peak_prominence, params.peak_max_width, params.peak_threshold)
 
@@ -82,6 +87,12 @@ class GetTrace:
             peak.integral = np.sum(self.raw_data[peak.positive_inflection:peak.negative_inflection])
             if peak.amplitude > threshold:
                 self.peaks.append(peak)
+
+        #Get rid of peaks from saturated trace (NMT)
+        #temp_arr = np.array([[Peak.positive_inflection, Peak.negative_inflection, Peak.uncorrected_amplitude] for Peak in self.peaks])
+        #unique, counts = np.unique(temp_arr, axis = 0, return_counts = True)
+        #duplicates = unique[counts > 1].tolist()
+        #self.peaks = [Peak for Peak in self.peaks if np.logical_and(~(np.isin([Peak.positive_inflection, Peak.negative_inflection, Peak.uncorrected_amplitude], duplicates).all()), Peak.uncorrected_amplitude < 4095)]
 
         if len(self.peaks) > 0:
             return True

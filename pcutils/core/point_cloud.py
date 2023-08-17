@@ -14,7 +14,6 @@ class PointCloud:
 
     def load_cloud_from_get_event(self, event: GetEvent, pmap: PadMap):
         self.event_number = event.number
-        self.cloud = np.empty((0,5)) # point elements are x, y, z, height, integral
         count = 0
         for trace in event.traces:
             if trace.hw_id.cobo_id != 10:
@@ -117,7 +116,6 @@ class PointCloud:
         '''
         for idx, point in enumerate(self.cloud):
             self.cloud[idx][2] = (window_tb - point[2]) / (window_tb - micromegas_tb) * detector_length
-
 
     def smooth_cloud(self, max_distance: float = 10.0):
         '''
