@@ -4,7 +4,9 @@ from pcutils.plot.cut import load_cut_json, write_cut_json, CutHandler
 from pcutils.plot.histogram import Histogrammer
 from pathlib import Path
 from typing import Optional
+import numpy as np
 
+RAD2DEG = 180.0/np.pi
 DATA_DIRECTORY: str = '/Volumes/Pattern/Analysis/a1975/estimates/'
 
 #Merge a bunch of runs into one dataframe. This can be useful for doing one-shot analysis,
@@ -36,30 +38,34 @@ def plot(run_min: int, run_max: int):
         return
 
     grammer = Histogrammer()
-    grammer.add_hist2d('ede_gated', (512, 512), ((0.0, 4096.0), (0.0, 4096.0)))
-    grammer.add_hist2d('ede', (512, 512), ((0.0, 4096.0), (0.0, 4096.0)))
+    grammer.add_hist2d('ede_gated', (200, 150), ((0.0, 20000.0), (0.0, 1.5)))
+    grammer.add_hist2d('ede', (200, 150), ((0.0, 20000.0), (0.0, 1.5)))
+    grammer.add_hist2d('theta_brho_gated', (180, 150), ((0.0, 180.0), (0.0, 1.5)))
+    grammer.add_hist2d('theta_brho', (180, 150), ((0.0, 180.0), (0.0, 1.5)))
 
     for run in range(run_min, run_max+1):
         df = get_dataframe(run)
         if df is None:
             continue
-
-        df_ede = df.filter(polars.col('dEdx').arr.concat('brho').map(ede_cut.is_cols_inside))
+        df_ede = df.filter(polars.struct(['dEdx', 'brho']).map(ede_cut.is_cols_inside))
         grammer.fill_hist2d('ede', df.select('dEdx').to_numpy(), df.select('brho').to_numpy())
-        grammer.fill_hist2d('ede', df_ede.select('dEdx').to_numpy(), df.select('brho').to_numpy())
+        grammer.fill_hist2d('ede_gated', df_ede.select('dEdx').to_numpy(), df_ede.select('brho').to_numpy())
+        grammer.fill_hist2d('theta_brho', df.select('polar').to_numpy() * RAD2DEG, df.select('brho').to_numpy())
+        grammer.fill_hist2d('theta_brho_gated', df_ede.select('polar').to_numpy() * RAD2DEG, df_ede.select('brho').to_numpy())
 
     fig, ax = pyplot.subplots(1,2)
     fig.suptitle(f'Runs {run_min} to {run_max}')
-    mesh_1 = grammer.draw_hist2d('ede_gated', ax[0])
-    mesh_2 = grammer.draw_hist2d('ede', ax[1])
+    mesh_1 = grammer.draw_hist2d('ede', ax[0])
+    mesh_2 = grammer.draw_hist2d('theta_brho', ax[1], log_z=True)
     ax[0].set_xlabel('Energy Loss (channels)')
-    ax[0].set_ylabel(r'B\rho (T*m)')
-    ax[0].set_title('E-dE with Gate')
+    ax[0].set_ylabel(r'B$\rho$ (T*m)')
+    ax[0].set_title('E-dE')
     pyplot.colorbar(mesh_1, ax=ax[0])
-    ax[1].set_xlabel('Energy Loss (channels)')
-    ax[1].set_ylabel(r'B\rho (T*m)')
-    ax[1].set_title('E-dE')
-    pyplot.colorbar(mesh_2, ax=ax[0])
+    ax[1].set_xlabel(r'$\theta_{lab}$ (deg)')
+    ax[1].set_ylabel(r'B$\rho$ (T*m)')
+    ax[1].set_title('Kinematics')
+    pyplot.colorbar(mesh_2, ax=ax[1])
+
     pyplot.tight_layout()
     pyplot.show()
 
@@ -68,7 +74,7 @@ def draw_ede_cut(run_min: int, run_max: int):
     handler = CutHandler()
     grammer = Histogrammer()
 
-    grammer.add_hist2d('ede', (200, 150), ((0.0, 20000.0), (0.0, 0.5)))
+    grammer.add_hist2d('ede', (200, 150), ((0.0, 20000.0), (0.0, 1.5)))
     for run in range(run_min, run_max+1):
         df = get_dataframe(run)
         grammer.fill_hist2d('ede', df.select('dEdx').to_numpy(), df.select('brho').to_numpy())
@@ -88,5 +94,5 @@ def draw_ede_cut(run_min: int, run_max: int):
         pass
 
 if __name__ == '__main__':
-    #plot(4, 4)
-    draw_ede_cut(4, 4)
+    plot(4, 4)
+    #draw_ede_cut(4, 4)
