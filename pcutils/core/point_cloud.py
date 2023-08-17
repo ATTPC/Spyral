@@ -128,7 +128,7 @@ class PointCloud:
         '''
         smoothed_cloud = np.zeros(self.cloud.shape)
         for idx, point in enumerate(self.cloud):
-            mask = np.sqrt((self.cloud[:,0]-point[0])**2.0+(self.cloud[:,1]-point[1])**2.0+(self.cloud[:,2]-point[2])**2.0) <= max_distance
+            mask = np.linalg.norm((self.cloud[:, :3] - point[:3]), axis=1) < max_distance
             neighbors = self.cloud[mask]
             if len(neighbors) == 0:
                 continue
@@ -146,3 +146,14 @@ class PointCloud:
         smoothed_cloud = smoothed_cloud[smoothed_cloud[:, 3] != 0.0]
         _, indicies = np.unique(np.round(smoothed_cloud[:, :3], decimals=2), axis=0, return_index=True)
         self.cloud = smoothed_cloud[indicies]
+
+    def sort_in_z(self):
+        indicies = np.argsort(self.cloud[:, 2])
+        self.cloud = self.cloud[indicies]
+
+    def drop_isolated_points(self, neighborhood_radius: float = 15.0, min_neighbors: int = 5):
+        mask = np.full(shape=(len(self.cloud)), fill_value=False)
+        for idx, point in enumerate(self.cloud):
+            neighbors = np.linalg.norm((self.cloud[:, :3] - point[:3])) < neighborhood_radius
+            mask[idx] = len(self.cloud[neighbors]) >= min_neighbors
+        self.cloud = self.cloud[mask] 
