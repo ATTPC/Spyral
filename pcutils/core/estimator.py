@@ -18,7 +18,7 @@ def generate_circle_points(center_x: float, center_y: float, radius: float) -> n
     array[:, 1] = center_y + np.sin(theta) * radius
     return array
 
-def estimate_physics(cluster: ClusteredCloud, estimate_params: EstimateParameters, detector_params: DetectorParameters, results: dict[str, list]):
+def estimate_physics(cluster_index: int, cluster: ClusteredCloud, estimate_params: EstimateParameters, detector_params: DetectorParameters, results: dict[str, list]):
     #Reject any clusters that were labeled as noise by the clustering algorithm
     if cluster.label == -1:
         return
@@ -108,7 +108,8 @@ def estimate_physics(cluster: ClusteredCloud, estimate_params: EstimateParameter
 
     #fill in our map
     results['event'].append(cluster.point_cloud.event_number)
-    results['cluster'].append(cluster.label)
+    results['cluster_index'].append(cluster_index)
+    results['cluster_label'].append(cluster.label)
     results['vertex_x'].append(vertex[0])
     results['vertex_y'].append(vertex[1])
     results['vertex_z'].append(vertex[2])

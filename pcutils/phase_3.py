@@ -22,7 +22,7 @@ def phase_3(cluster_path: Path, parquet_path: Path, estimate_params: EstimatePar
     flush_count = 0
     count = 0
 
-    data: dict[str, list] = {'event': [], 'cluster': [], 'vertex_x': [], 'vertex_y': [], 'vertex_z': [],\
+    data: dict[str, list] = {'event': [], 'cluster_index': [], 'cluster_label': [], 'vertex_x': [], 'vertex_y': [], 'vertex_z': [],\
                              'center_x': [], 'center_y': [], 'center_z': [], 'polar': [], 'azimuthal': [],\
                              'brho': [], 'dEdx': [], 'dE': [], 'arclength': []}
 
@@ -53,7 +53,7 @@ def phase_3(cluster_path: Path, parquet_path: Path, estimate_params: EstimatePar
             cluster.point_cloud.load_cloud_from_hdf5_data(cluster_data[:].copy(), idx)
 
             #Cluster is loaded do some analysis
-            estimate_physics(cluster, estimate_params, detector_params, data)
+            estimate_physics(cidx, cluster, estimate_params, detector_params, data)
 
     df = DataFrame(data)
     df.write_parquet(parquet_path)

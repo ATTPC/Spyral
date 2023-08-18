@@ -33,11 +33,6 @@ class DetectorParameters:
     window_time_bucket: float = 0.0
 
 @dataclass
-class GasParameters:
-    density: float = 0.0 #g/cm^3
-    energy_loss_path: str = ''
-
-@dataclass
 class TraceParameters:
     baseline_window_scale: float = 20.0
     peak_separation: float = 50.0
@@ -72,6 +67,11 @@ class EstimateParameters:
     max_distance_from_beam_axis: float = 0.0 #mm
 
 @dataclass
+class SolverParameters:
+    particle_id_path: str = ''
+    gas_data_path: str = ''
+
+@dataclass
 class Config:
     #Workspace
     workspace: WorkspaceParameters = field(default_factory=WorkspaceParameters)
@@ -81,9 +81,6 @@ class Config:
 
     #Detector
     detector: DetectorParameters = field(default_factory=DetectorParameters)
-
-    #Gas
-    gas: GasParameters = field(default_factory=GasParameters)
 
     #Traces
     trace: TraceParameters = field(default_factory=TraceParameters)
@@ -96,6 +93,9 @@ class Config:
 
     #Physics Estimate settings
     estimate: EstimateParameters =  field(default_factory=EstimateParameters)
+
+    #Physics Solver
+    solver: SolverParameters = field(default_factory=SolverParameters)
 
 def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
     config = Config()
@@ -122,9 +122,6 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
     config.detector.micromegas_time_bucket = json_data['micromegas_time_bucket']
     config.detector.window_time_bucket = json_data['window_time_bucket']
 
-    config.gas.density = json_data['gas_density(g/cm^3)']
-    config.gas.energy_loss_path = json_data['gas_energy_loss_path']
-
     config.trace.baseline_window_scale = json_data['trace_baseline_window_scale']
     config.trace.peak_separation = json_data['trace_peak_separation']
     config.trace.peak_prominence = json_data['trace_peak_prominence']
@@ -150,6 +147,9 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
     config.estimate.neighbor_distance = json_data['estimate_neighbor_distance']
     config.estimate.min_total_trajectory_points = json_data['estimate_mininum_total_trajectory_points']
     config.estimate.max_distance_from_beam_axis = json_data['estimate_maximum_distance_from_beam_axis']
+
+    config.solver.gas_data_path = json_data['solver_gas_data_path']
+    config.solver.particle_id_path = json_data['solver_particle_id_path']
     
     return config
 
