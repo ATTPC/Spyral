@@ -19,7 +19,7 @@ def run_pcutils(config: Config):
             phase_2(ws.get_point_cloud_file_path(idx), ws.get_cluster_file_path(idx), config.cluster)
 
         if config.run.do_phase3:
-            phase_3(ws.get_cluster_file_path(idx), ws.get_estimate_file_path_parquet(idx), config.detector)
+            phase_3(ws.get_cluster_file_path(idx), ws.get_estimate_file_path_parquet(idx), config.estimate, config.detector)
 
         if config.run.do_phase4:
             continue

@@ -65,6 +65,13 @@ class ClusterParameters:
     min_write_size: int = 0
 
 @dataclass
+class EstimateParameters:
+    neighbor_distance: float = 0.0 #mm
+    min_neighbors: int = 0
+    min_total_trajectory_points: int = 0
+    max_distance_from_beam_axis: float = 0.0 #mm
+
+@dataclass
 class Config:
     #Workspace
     workspace: WorkspaceParameters = field(default_factory=WorkspaceParameters)
@@ -86,6 +93,9 @@ class Config:
 
     #Clustering settings
     cluster: ClusterParameters = field(default_factory=ClusterParameters)
+
+    #Physics Estimate settings
+    estimate: EstimateParameters =  field(default_factory=EstimateParameters)
 
 def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
     config = Config()
@@ -135,6 +145,11 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
     config.cluster.fractional_distance_min = json_data['cluster_fractional_distance_min']
     config.cluster.fractional_charge_threshold = json_data['cluster_fractional_charge_threshold']
     config.cluster.min_write_size = json_data['cluster_minimum_write_size']
+
+    config.estimate.min_neighbors = json_data['estimate_minimum_neighbors']
+    config.estimate.neighbor_distance = json_data['estimate_neighbor_distance']
+    config.estimate.min_total_trajectory_points = json_data['estimate_mininum_total_trajectory_points']
+    config.estimate.max_distance_from_beam_axis = json_data['estimate_maximum_distance_from_beam_axis']
     
     return config
 

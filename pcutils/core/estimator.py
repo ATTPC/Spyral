@@ -1,5 +1,5 @@
 from .clusterize import least_squares_circle, ClusteredCloud
-from .config import DetectorParameters
+from .config import DetectorParameters, EstimateParameters
 import numpy as np
 import math
 from scipy.signal import argrelmax
@@ -14,19 +14,19 @@ class Direction(Enum):
 def generate_circle_points(center_x: float, center_y: float, radius: float) -> np.ndarray:
     theta = np.linspace(0., 2.0 * np.pi, 100000)
     array = np.zeros(shape=(len(theta), 2))
-    array[:, 0] = center_x + np.sin(theta) * radius
+    array[:, 0] = center_x + np.cos(theta) * radius
     array[:, 1] = center_y + np.sin(theta) * radius
     return array
 
-def estimate_physics(cluster: ClusteredCloud, params: DetectorParameters, results: dict[str, list]):
+def estimate_physics(cluster: ClusteredCloud, estimate_params: EstimateParameters, detector_params: DetectorParameters, results: dict[str, list]):
     #Reject any clusters that were labeled as noise by the clustering algorithm
     if cluster.label == -1:
         return
 
     #Drop any points which do not have a minimum number of neighbors
-    cluster.point_cloud.drop_isolated_points()
+    cluster.point_cloud.drop_isolated_points(estimate_params.neighbor_distance, estimate_params.min_neighbors)
     #Re-smooth to remove jitter in the trajectory
-    cluster.point_cloud.smooth_cloud()
+    cluster.point_cloud.smooth_cloud(estimate_params.neighbor_distance)
     #Sort our cloud to be ordered in z
     cluster.point_cloud.sort_in_z()
     #Smooth the cloud out again; this is safe as we operate on a single cluster
@@ -86,7 +86,7 @@ def estimate_physics(cluster: ClusteredCloud, params: DetectorParameters, result
     center[2] = vertex[2]
 
     #Toss tracks whose verticies are not close to the origin in x,y
-    if vertex_rho > 30.0:
+    if vertex_rho > estimate_params.max_distance_from_beam_axis:
         return
 
     polar = math.atan(fit.slope)
@@ -97,7 +97,7 @@ def estimate_physics(cluster: ClusteredCloud, params: DetectorParameters, result
     if azimuthal < 0:
         azimuthal += 2.0 * math.pi
 
-    brho = params.magnetic_field * radius * 0.001 / (math.sin(polar))
+    brho = detector_params.magnetic_field * radius * 0.001 / (math.sin(polar))
     if np.isnan(brho):
         brho = 0.0
     arclength = 0.0

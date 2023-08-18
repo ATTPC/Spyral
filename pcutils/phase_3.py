@@ -1,12 +1,12 @@
 from .core.clusterize import ClusteredCloud
-from .core.config import DetectorParameters
+from .core.config import DetectorParameters, EstimateParameters
 from .core.estimator import estimate_physics
 from pathlib import Path
 from polars import DataFrame
 from time import time
 import h5py as h5
 
-def phase_3(cluster_path: Path, parquet_path: Path, params: DetectorParameters):
+def phase_3(cluster_path: Path, parquet_path: Path, estimate_params: EstimateParameters, detector_params: DetectorParameters):
     start = time()
 
     cluster_file = h5.File(cluster_path, 'r')
@@ -53,7 +53,7 @@ def phase_3(cluster_path: Path, parquet_path: Path, params: DetectorParameters):
             cluster.point_cloud.load_cloud_from_hdf5_data(cluster_data[:].copy(), idx)
 
             #Cluster is loaded do some analysis
-            estimate_physics(cluster, params, data)
+            estimate_physics(cluster, estimate_params, detector_params, data)
 
     df = DataFrame(data)
     df.write_parquet(parquet_path)
