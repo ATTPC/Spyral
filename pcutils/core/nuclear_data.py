@@ -7,7 +7,8 @@ PATH_TO_MASSFILE = "./etc/amdc2016_mass.txt"
 
 @dataclass
 class NucleusData:
-    mass: float = 0.0
+    mass: float = 0.0 #nuclear mass, MeV
+    atomic_mass: float = 0.0 #atomic mass (includes electrons), amu
     element_symbol: str = "" #Element symbol (H, He, Li, etc.)
     isotopic_symbol: str = "" #Isotopic symbol w/o formating (1H, 2H, 3H, 4He, etc.)
     pretty_iso_symbol: str = "" #Isotopic symbol w/ rich text formating (<sup>1</sup>H, etc.)
@@ -39,6 +40,7 @@ class NuclearDataMap:
                 data.Z = int(entries[0]) #Column 1: Z
                 data.A = int(entries[1]) #Column 2: A
                 data.element_symbol = entries[3] #Column 3: Element
+                data.atomic_mass = float(entries[4])
                 data.mass = (float(entries[4]) - float(data.Z) * ELECTRON_MASS_U) * AMU_2_MEV #Remove electron masses to obtain nuclear masses, Column 4
                 data.isotopic_symbol = f"{data.A}{entries[3]}"
                 data.pretty_iso_symbol = f"<sup>{data.A}</sup>{entries[3]}"
