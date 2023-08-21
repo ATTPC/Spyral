@@ -1,8 +1,7 @@
 from .point_cloud import PointCloud
-from .config import ClusterParameters, DetectorParameters
+from .config import ClusterParameters
 import sklearn.cluster as skcluster
 from sklearn.preprocessing import StandardScaler
-from scipy.stats import iqr
 from dataclasses import dataclass, field
 import numpy as np
 
