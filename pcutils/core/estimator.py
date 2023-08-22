@@ -71,18 +71,18 @@ def estimate_physics(cluster_index: int, cluster: ClusteredCloud, estimate_param
 
     #Fit a circle to the first arc and extract some physics
     center[0], center[1], radius, _ = least_squares_circle(first_arc[:, 0], first_arc[:, 1])
-    # circle = generate_circle_points(center[0], center[1], radius)
-    # #Re-estimate vertex using the fitted circle. Extrapolate back to point closest to beam axis
-    # vertex_estimate_index = np.argsort(np.linalg.norm(circle, axis=1))[0]
-    # vertex[:2] = circle[vertex_estimate_index]
-    # #Re-calculate distance to vertex
-    # rho_to_vertex = np.linalg.norm((cluster.point_cloud.cloud[:, :2] - vertex[:2]), axis=1)
+    circle = generate_circle_points(center[0], center[1], radius)
+    #Re-estimate vertex using the fitted circle. Extrapolate back to point closest to beam axis
+    vertex_estimate_index = np.argsort(np.linalg.norm(circle, axis=1))[0]
+    vertex[:2] = circle[vertex_estimate_index]
+    #Re-calculate distance to vertex
+    rho_to_vertex = np.linalg.norm((cluster.point_cloud.cloud[:, :2] - vertex[:2]), axis=1)
 
     #Do a linear fit to small segment of trajectory to extract rho vs. z and extrapolate vertex z
     test_index = max(10, int(maximum * 0.5))
     fit = linregress(cluster.point_cloud.cloud[:test_index, 2], rho_to_vertex[:test_index])
-    vertex_rho = np.linalg.norm(vertex[:2])
-    vertex[2] = (vertex_rho - fit.intercept) / fit.slope
+    #vertex_rho = np.linalg.norm(vertex[:2])
+    vertex[2] = (fit.intercept) / fit.slope
     center[2] = vertex[2]
 
     #Toss tracks whose verticies are not close to the origin in x,y

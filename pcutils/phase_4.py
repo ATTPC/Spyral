@@ -3,6 +3,7 @@ from .core.clusterize import ClusteredCloud
 from .core.nuclear_data import NuclearDataMap
 from .core.particle_id import ParticleID, load_particle_id
 from .core.target import Target
+from .core.solver import solve_physics, InitialValue
 import h5py as h5
 import polars as pl
 from pathlib import Path
@@ -38,7 +39,7 @@ def phase_4(cluster_path: Path, estimate_path: Path, result_path: Path, detector
     count = 0
 
     results: dict[str, list] = { 'event': [], 'cluster_index': [], 'cluster_label': [], 'vertex_x': [], 'vertex_y': [], 'vertex_z': [], \
-                                 'E': [], 'polar': [], 'azimuthal': [], 'P': []}
+                                 'brho': [], 'polar': [], 'azimuthal': []}
     
     for row, event in enumerate(estimates_gated['event']):
         if count > flush_val:
@@ -48,14 +49,19 @@ def phase_4(cluster_path: Path, estimate_path: Path, result_path: Path, detector
         count += 1
 
         event_group = cluster_group[f'event_{event}']
-        local_cluster: h5.Dataset = event_group[f'cluster_{estimates_gated["cluster_index"][row]}']
+        cidx = estimates_gated['cluster_index'][row]
+        local_cluster: h5.Dataset = event_group[f'cluster_{cidx}']
         cluster = ClusteredCloud()
         cluster.label = local_cluster.attrs['label']
-        cluster.point_cloud.load_cloud_from_hdf5_data(local_cluster[:].copy(), event)
+        cluster.point_cloud.load_cloud_from_hdf5_data(local_cluster['cloud'][:].copy(), event)
 
         #Do the solver
-        #solve_physics(cluster_index, cluster, detector_params, pid.nucleus, target, results)
-        #or something
+        iv = InitialValue(polar=estimates_gated['polar'][row], azimuthal=estimates_gated['azimuthal'][row], brho=estimates_gated['brho'][row],
+                          vertex_x=estimates_gated['vertex_x'][row], vertex_y=estimates_gated['vertex_y'][row], vertex_z=estimates_gated['vertex_z'][row])
+        solve_physics(cidx, cluster, iv, detector_params, target, pid.nucleus, results)
+
+    physics_df = pl.DataFrame(results)
+    physics_df.write_parquet(result_path)
 
     stop = time()
     print(f'\nEllapsed time: {stop-start}s')

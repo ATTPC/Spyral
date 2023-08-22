@@ -3,6 +3,7 @@ from .core.workspace import Workspace
 from .phase_1 import phase_1
 from .phase_2 import phase_2
 from .phase_3 import phase_3
+from .phase_4 import phase_4
 from time import time
 
 def run_pcutils(config: Config):
@@ -22,9 +23,7 @@ def run_pcutils(config: Config):
             phase_3(ws.get_cluster_file_path(idx), ws.get_estimate_file_path_parquet(idx), config.estimate, config.detector)
 
         if config.run.do_phase4:
-            continue
-        if config.run.do_phase5:
-            continue
+            phase_4(ws.get_cluster_file_path(idx), ws.get_estimate_file_path_parquet(idx), ws.get_physics_file_path_parquet(idx), config.detector, config.solver)
         
     stop = time()
     print(f'Total ellapsed runtime: {stop - start}s')

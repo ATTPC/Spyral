@@ -38,6 +38,10 @@ class Workspace:
         if not self.estimate_path.exists():
             self.estimate_path.mkdir()
 
+        self.physics_path = self.workspace_path / 'physics'
+        if not self.physics_path.exists():
+            self.physics_path.mkdir()
+
         self.pad_geometry_path = Path(params.pad_geometry_path)
         if not self.pad_geometry_path.exists() or not self.pad_geometry_path.is_file():
             raise Exception('Workspace encountered an error! Pad geometry path does not exist!')
@@ -75,6 +79,14 @@ class Workspace:
     def get_estimate_file_path_csv(self, run_number: int) -> Path:
         runstr = form_run_string(run_number)
         return self.estimate_path / f'{runstr}.csv'
+    
+    def get_physics_file_path_parquet(self, run_number: int) -> Path:
+        runstr = form_run_string(run_number)
+        return self.physics_path / f'{runstr}.parquet'
+    
+    def get_physics_file_path_csv(self, run_number: int) -> Path:
+        runstr = form_run_string(run_number)
+        return self.physics_path / f'{runstr}.csv'
     
     def get_pad_map(self) -> PadMap:
         return self.pad_map

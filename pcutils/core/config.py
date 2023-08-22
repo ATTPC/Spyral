@@ -20,7 +20,6 @@ class RunParameters:
     do_phase2: bool = False
     do_phase3: bool = False
     do_phase4: bool = False
-    do_phase5: bool = False
 
 @dataclass
 class DetectorParameters:
@@ -112,7 +111,6 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
     config.run.do_phase2 = json_data['phase2']
     config.run.do_phase3 = json_data['phase3']
     config.run.do_phase4 = json_data['phase4']
-    config.run.do_phase5 = json_data['phase5']
 
     config.detector.magnetic_field = json_data['magnetic_field(T)']
     config.detector.electric_field = json_data['electric_field(V/m)']
