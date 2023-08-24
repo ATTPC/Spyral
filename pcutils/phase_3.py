@@ -24,7 +24,7 @@ def phase_3(cluster_path: Path, parquet_path: Path, estimate_params: EstimatePar
 
     data: dict[str, list] = {'event': [], 'cluster_index': [], 'cluster_label': [], 'vertex_x': [], 'vertex_y': [], 'vertex_z': [],\
                              'center_x': [], 'center_y': [], 'center_z': [], 'polar': [], 'azimuthal': [],\
-                             'brho': [], 'dEdx': [], 'dE': [], 'arclength': []}
+                             'brho': [], 'dEdx': [], 'dE': [], 'arclength': [], 'direction': []}
 
     for idx in range(min_event, max_event+1):
         if count > flush_val:

@@ -18,7 +18,7 @@ class PointCloud:
         for trace in event.traces:
             if trace.hw_id.cobo_id != 10:
                 count += trace.get_number_of_peaks()
-        self.cloud = np.zeros((count, 6))
+        self.cloud = np.zeros((count, 7))
         idx = 0
         for trace in event.traces:
             if trace.get_number_of_peaks() == 0 or trace.hw_id.cobo_id == 10:
@@ -27,10 +27,11 @@ class PointCloud:
             for peak in trace.get_peaks():
                 self.cloud[idx, 0] = pad.x # X-coordinate, geometry
                 self.cloud[idx, 1] = pad.y # Y-coordinate, geometry
-                self.cloud[idx, 2] = peak.centroid + pad.time_offset # Z-coordinate, time with correction
+                self.cloud[idx, 2] = peak.centroid + pad.time_offset # Z-coordinate, time with correction until calibrated with calibrate_z_position()
                 self.cloud[idx, 3] = peak.amplitude
                 self.cloud[idx, 4] = peak.integral * pad.gain
                 self.cloud[idx, 5] = trace.hw_id.pad_id
+                self.cloud[idx, 6] = peak.centroid + pad.time_offset # Time bucket, stored for later use
                 idx += 1
 
     def load_cloud_from_hdf5_data(self, data: np.ndarray, event_number: int):
@@ -139,7 +140,7 @@ class PointCloud:
             if np.isclose(ics, 0.0):
                 continue
             #smoothed_pc.append(np.average(neighbors, axis = 0))
-            smoothed_cloud[idx] = np.array([xs/ics, ys/ics, zs/ics, cs/len(neighbors), ics/len(neighbors), point[5]])
+            smoothed_cloud[idx] = np.array([xs/ics, ys/ics, zs/ics, cs/len(neighbors), ics/len(neighbors), point[5], point[6]])
         # Removes duplicate points
         smoothed_cloud = smoothed_cloud[smoothed_cloud[:, 3] != 0.0]
         _, indicies = np.unique(np.round(smoothed_cloud[:, :3], decimals=2), axis=0, return_index=True)

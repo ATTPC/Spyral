@@ -55,9 +55,8 @@ def estimate_physics(cluster_index: int, cluster: ClusteredCloud, estimate_param
     average_window_rho = np.mean(rhos[:5])
     average_micromegas_rho = np.mean(rhos[-5:-1])
 
-    #Guess that the vertex is the first point
-    vertex = cluster.point_cloud.cloud[0, :3]
-    
+    #Guess that the vertex is the first point; make sure to copy! not reference
+    vertex[:] = cluster.point_cloud.cloud[0, :3]
     
     #Find the first point that is furthest from the vertex in rho (local maximum) to get the first arc of the trajectory
     rho_to_vertex = np.linalg.norm(cluster.point_cloud.cloud[1:, :2] - vertex[:2], axis=1)
@@ -81,8 +80,8 @@ def estimate_physics(cluster_index: int, cluster: ClusteredCloud, estimate_param
     #Do a linear fit to small segment of trajectory to extract rho vs. z and extrapolate vertex z
     test_index = max(10, int(maximum * 0.5))
     fit = linregress(cluster.point_cloud.cloud[:test_index, 2], rho_to_vertex[:test_index])
-    #vertex_rho = np.linalg.norm(vertex[:2])
-    vertex[2] = (fit.intercept) / fit.slope
+    vertex_rho = np.linalg.norm(vertex[:2])
+    vertex[2] = (vertex_rho - fit.intercept) / fit.slope
     center[2] = vertex[2]
 
     #Toss tracks whose verticies are not close to the origin in x,y
@@ -93,7 +92,11 @@ def estimate_physics(cluster_index: int, cluster: ClusteredCloud, estimate_param
     if direction is Direction.BACKWARD:
         polar += math.pi
 
+    #From the trigonometry of the system to the center
     azimuthal = math.atan2(vertex[1] - center[1], vertex[0] - center[0])
+    if azimuthal < 0:
+        azimuthal += 2.0 * math.pi
+    azimuthal -= math.pi * 1.5
     if azimuthal < 0:
         azimuthal += 2.0 * math.pi
 
@@ -122,7 +125,7 @@ def estimate_physics(cluster_index: int, cluster: ClusteredCloud, estimate_param
     results['dEdx'].append(dEdx)
     results['dE'].append(charge_deposited)
     results['arclength'].append(arclength)
-
+    results['direction'].append(direction.value)
 
 
     

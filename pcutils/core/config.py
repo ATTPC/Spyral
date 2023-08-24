@@ -1,3 +1,4 @@
+from .constants import DEG2RAD
 from dataclasses import dataclass, field
 from pathlib import Path
 from json import load
@@ -25,7 +26,7 @@ class RunParameters:
 class DetectorParameters:
     magnetic_field: float = 0.0 #Tesla
     electric_field: float = 0.0 #V/m
-    tilt_angle: float = 0.0 #degrees
+    tilt_angle: float = 0.0 #input degrees, convert to radians
     detector_length: float = 0.0 #mm
     beam_region_radius: float = 0.0 #mm
     micromegas_time_bucket: float = 0.0
@@ -114,7 +115,7 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
 
     config.detector.magnetic_field = json_data['magnetic_field(T)']
     config.detector.electric_field = json_data['electric_field(V/m)']
-    config.detector.tilt_angle = json_data['tilt_angle(degrees)']
+    config.detector.tilt_angle = json_data['tilt_angle(degrees)'] * DEG2RAD
     config.detector.detector_length = json_data['detector_length(mm)']
     config.detector.beam_region_radius = json_data['beam_region_radius(mm)']
     config.detector.micromegas_time_bucket = json_data['micromegas_time_bucket']

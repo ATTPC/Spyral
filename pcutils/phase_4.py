@@ -3,6 +3,7 @@ from .core.clusterize import ClusteredCloud
 from .core.nuclear_data import NuclearDataMap
 from .core.particle_id import ParticleID, load_particle_id
 from .core.target import Target
+from .core.estimator import Direction
 from .core.solver import solve_physics, InitialValue
 import h5py as h5
 import polars as pl
@@ -57,7 +58,7 @@ def phase_4(cluster_path: Path, estimate_path: Path, result_path: Path, detector
 
         #Do the solver
         iv = InitialValue(polar=estimates_gated['polar'][row], azimuthal=estimates_gated['azimuthal'][row], brho=estimates_gated['brho'][row],
-                          vertex_x=estimates_gated['vertex_x'][row], vertex_y=estimates_gated['vertex_y'][row], vertex_z=estimates_gated['vertex_z'][row])
+                          vertex_x=estimates_gated['vertex_x'][row], vertex_y=estimates_gated['vertex_y'][row], vertex_z=estimates_gated['vertex_z'][row], direction=Direction(estimates_gated['direction'][row]))
         solve_physics(cidx, cluster, iv, detector_params, target, pid.nucleus, results)
 
     physics_df = pl.DataFrame(results)
