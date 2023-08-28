@@ -4,7 +4,7 @@ from .nuclear_data import NucleusData
 from .clusterize import ClusteredCloud
 from .estimator import Direction
 from .constants import MEV_2_JOULE, MEV_2_KG
-from scipy import optimize, integrate, constants
+from scipy import optimize, integrate, constants, linalg
 import numpy as np
 import math
 from dataclasses import dataclass
@@ -61,7 +61,58 @@ def calculate_decel(speed: float, target: Target, ejectile: NucleusData) -> tupl
 def hx(x: np.ndarray) -> np.ndarray:
     return np.array([x[0], x[1], x[2]])
 
-def apply_kalman_filter(cluster: ClusteredCloud, initial_value: InitialValue, detector_params: DetectorParameters, target: Target, ejectile: NucleusData) -> np.ndarray:
+def apply_kalman_filter(data: np.ndarray, fit_params: np.ndarray, detector_params: DetectorParameters, target: Target, ejectile: NucleusData) -> np.ndarray:
+    E_vec = np.array([0.0, 0.0, -1.0 * detector_params.electric_field])
+    B_vec = np.array([0.0, -1.0 * detector_params.magnetic_field * math.sin(detector_params.tilt_angle), -1.0 * detector_params.magnetic_field * math.cos(detector_params.tilt_angle)])
+    initial_state = np.zeros(6)
+    momentum = QBRHO_2_P * (fit_params[2] * 10.0 * 100.0 * float(ejectile.Z))
+    speed = momentum / ejectile.mass * constants.speed_of_light
+
+    initial_state[:3] = fit_params[3:]
+    initial_state[3] = speed * math.sin(fit_params[0]) * math.cos(fit_params[1])
+    initial_state[4] = speed * math.sin(fit_params[0]) * math.sin(fit_params[1])
+    initial_state[5] = speed * math.cos(fit_params[0])
+
+    def fx(x: np.ndarray, ds: float) -> np.ndarray:
+        speed = np.linalg.norm(x[3:])
+        dt = ds/speed
+        unit_vector = x[3:] / (speed)# direction
+        deceleration, qm = calculate_decel(speed, target, ejectile)
+        accel = np.array([qm * (E_vec[0] + x[4] * B_vec[2] - x[5] * B_vec[1]) - deceleration * unit_vector[0],
+                          qm * (E_vec[1] - x[3] * B_vec[2] + x[5] * B_vec[0]) - deceleration * unit_vector[1],
+                          qm * (E_vec[2] + x[3] * B_vec[1] - x[4] * B_vec[0]) - deceleration * unit_vector[2]])
+
+        transition = np.array( [[1., 0., 0., dt, 0., 0.],
+                                [0., 1., 0., 0., dt, 0.],
+                                [0., 0., 1., 0., 0., dt],
+                                [0., 0., 0., 1., 0., 0.],
+                                [0., 0., 0., 0., 1., 0.],
+                                [0., 0., 0., 0., 0., 1.],
+                               ])
+        offset = np.array([accel[0]*0.5*dt**2.0, accel[1]*0.5*dt**2.0, accel[2]*0.5*dt**2.0, accel[0]*dt, accel[1]*dt, accel[2]*dt])
+        return np.dot(transition, x) + offset
+
+
+    first_ds = np.linalg.norm(initial_state[:3] - data[0, :])
+    ds_set = [np.linalg.norm(point[:3] - data[idx-1, :]) for idx, point in enumerate(data[1:])]
+    ds_set.insert(0, first_ds)
+    points = MerweScaledSigmaPoints(6, alpha=.1, beta=2., kappa=-3)
+    k_filter = UnscentedKalmanFilter(6, 3, 0.0005, hx, fx, points)
+    sigma_speed = 0.1 * speed
+    sigma_pos = 0.0005
+    k_filter.P = np.diag([(10.0*sigma_pos)**2.0, (10.0*sigma_pos)**2.0, (10.0*sigma_pos)**2.0, sigma_speed**2.0, sigma_speed**2.0, sigma_speed**2.0])
+    k_filter.x = initial_state
+    k_filter.R = np.diag([sigma_pos**2.0, sigma_pos**2.0, sigma_pos**2.0])
+    k_filter.Q = Q_discrete_white_noise(dim=2, dt=0.0005, var=(sigma_speed)**2.0, block_size=3, order_by_dim=False)
+    (means, covs) = k_filter.batch_filter(data, dts=ds_set)
+    trajectory, traj_cov, _ = k_filter.rts_smoother(means, covs, dts=ds_set)
+    return trajectory
+
+def optimize_kalman_filter(fit_params: np.ndarray, data: np.ndarray, detector_params: DetectorParameters, target: Target, ejectile: NucleusData) -> float:
+    trajectory = apply_kalman_filter(data, fit_params, detector_params, target, ejectile)
+    return np.average(np.linalg.norm(data[:, :] - trajectory[:, :3], axis=1))
+
+def solve_physics_kalman(cluster_index: int, cluster: ClusteredCloud, initial_value: InitialValue, detector_params: DetectorParameters, target: Target, ejectile: NucleusData, results: dict[str, list]):
     cluster.point_cloud.drop_isolated_points()
     cluster.point_cloud.smooth_cloud()
     cluster.point_cloud.sort_in_z()
@@ -69,52 +120,13 @@ def apply_kalman_filter(cluster: ClusteredCloud, initial_value: InitialValue, de
     if initial_value.direction == Direction.BACKWARD:
         cluster.point_cloud.cloud = np.flip(cluster.point_cloud.cloud, axis=0)
 
-    E_vec = np.array([0.0, 0.0, -1.0 * detector_params.electric_field])
-    B_vec = np.array([0.0, -1.0 * detector_params.magnetic_field * math.sin(detector_params.tilt_angle), -1.0 * detector_params.magnetic_field * math.cos(detector_params.tilt_angle)])
-    fit_params = initial_value.convert_to_array()
-    initial_state = np.zeros(6)
-    initial_state[:3] = fit_params[3:] * 0.001 # vertex, convert to m
-    momentum = QBRHO_2_P * (fit_params[2] * 10.0 * 100.0 * float(ejectile.Z))
-    speed = momentum / ejectile.mass * constants.speed_of_light
-
+    #Convert everyting into meters
     cluster.point_cloud.cloud[:, :3] *= 0.001
+    initial_value.vertex_x *= 0.001
+    initial_value.vertex_y *= 0.001
+    initial_value.vertex_z *= 0.001
 
-    initial_state[3] = speed * math.sin(fit_params[0]) * math.cos(fit_params[1])
-    initial_state[4] = speed * math.sin(fit_params[0]) * math.sin(fit_params[1])
-    initial_state[5] = speed * math.cos(fit_params[0])
-
-    def fx(x: np.ndarray, ds: float) -> np.ndarray:
-        speed = np.linalg.norm(x[3:6])
-        dt = ds/speed
-        unit_vector = x[3:6] / (speed)# direction
-        deceleration, qm = calculate_decel(speed, target, ejectile)
-        transition = np.array( [[1., 0., 0., dt, 0., 0.],
-                                [0., 1., 0., 0., dt, 0.],
-                                [0., 0., 1., 0., 0., dt],
-                                [0., 0., 0., 1., qm * B_vec[2] * dt, -1.0 * qm * B_vec[1] * dt],
-                                [0., 0., 0., -1.0 * qm * B_vec[2] * dt, 1., qm * B_vec[0] * dt],
-                                [0., 0., 0., qm * B_vec[1] * dt, -1.0 * qm * B_vec[0] * dt, 1.],
-                               ])
-        constant = np.array([0., 0., 0., (qm * E_vec[0] - deceleration * unit_vector[0])*dt, (qm * E_vec[1] - deceleration * unit_vector[1])*dt, (qm * E_vec[2] - deceleration * unit_vector[2])*dt])
-        return np.dot(transition, x) + constant
-
-
-    first_ds = np.abs(np.linalg.norm(initial_state[:3] - cluster.point_cloud.cloud[0, :3]))
-    ds_set = [np.abs(np.linalg.norm(point[:3] - cluster.point_cloud.cloud[idx-1, :3])) for idx, point in enumerate(cluster.point_cloud.cloud[1:])]
-    ds_set.insert(0, first_ds)
-    points = MerweScaledSigmaPoints(6, alpha=.1, beta=2., kappa=-3)
-    k_filter = UnscentedKalmanFilter(6, 3, 0.5, hx, fx, points)
-    k_filter.P = np.diag([0.0005**2.0, 0.0005**2.0, 0.0005**2.0, 0.5**2.0, 0.5**2.0, 0.5**2.0])
-    k_filter.x = initial_state
-    k_filter.R = np.diag([0.0005**2.0, 0.0005**2.0, 0.0005**2.0])
-    k_filter.Q = Q_discrete_white_noise(dim=2, dt=0.5, var=0.5, block_size=3, order_by_dim=False)
-    print('filtering')
-    (means, covs) = k_filter.batch_filter(cluster.point_cloud.cloud[:, :3], dts=ds_set)
-    print('smoothing')
-    print(f'means: {means}')
-    trajectory, traj_cov, _ = k_filter.rts_smoother(means, covs, ds_set)
-    cluster.point_cloud.cloud[:, :3] *= 1000.0
-    return means * 1000.0 #convert back to mm
+    best_fit = optimize.minimize(optimize_kalman_filter, initial_value.convert_to_array(), args=(cluster.point_cloud.cloud[:, :3], detector_params, target, ejectile))
 
 #State = [x, y, z, vx, vy, vz]
 #Derivative = [vx, vy, vz, ax, ay, az] (returns)
