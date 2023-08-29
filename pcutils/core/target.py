@@ -5,6 +5,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from json import load
 from typing import Optional
+from scipy.interpolate import CubicSpline
+import numpy as np
 
 @dataclass
 class TargetData:
@@ -18,6 +20,14 @@ def load_target_data(target_path: Path) -> Optional[TargetData]:
             return None
         else:
             return TargetData(json_data['compound'], json_data['density'])
+        
+@dataclass
+class ElossInterpolater:
+    spline: CubicSpline
+    min_energy: float
+    max_energy: float
+    projectile_Z: int
+    projectile_A: int
 
 class Target:
 
@@ -35,9 +45,36 @@ class Target:
         self.material.density(self.data.density)
         print(f'density: ', self.material.density())
         print(f'Material: {self.pretty_string}')
+
+        self.interpolater: ElossInterpolater | None = None
     
     def __str__(self) -> str:
         return self.pretty_string
+    
+    #in MeV
+    def generate_interpolator(self, projectile_data: NucleusData, max_energy: float, min_energy: float, step_size: float):
+        x = np.arange(start=min_energy, stop=max_energy, step=step_size)
+        y = np.zeros(len(x))
+        mass_u = projectile_data.mass / AMU_2_MEV
+        projectile = catima.Projectile(mass_u, projectile_data.Z)
+        for idx, energy in enumerate(x):
+            projectile.T(energy/mass_u)
+            y[idx] = catima.dedx(projectile, self.material)
+        self.interpolater = ElossInterpolater(CubicSpline(x, y), min_energy, max_energy, projectile_data.Z, projectile_data.A)
+
+    def get_dedx_interpolated(self, projectile_data: NucleusData, projectile_energy: float) -> Optional[float]:
+        if self.interpolater is None:
+            print('Warning tried to interpolate dEdx without having generated an interpolater!')
+            return None
+        elif projectile_data.Z != self.interpolater.projectile_Z or projectile_data.A != self.interpolater.projectile_A:
+            print('Mismatched nucleus at get_dedx_interpolated!')
+            return None
+        elif projectile_energy > self.interpolater.max_energy or projectile_energy < self.interpolater.min_energy:
+            print('Warning projectile energy outside of interpolater range at get_dedx_interpolated!')
+            return None
+        
+        return self.interpolater.spline(projectile_energy)
+
 
     def get_dedx(self, projectile_data: NucleusData, projectile_energy: float) -> float:
         '''
