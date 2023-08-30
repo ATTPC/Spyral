@@ -34,9 +34,13 @@ class Workspace:
         if not self.cluster_path.exists():
             self.cluster_path.mkdir()
 
-        self.ntuple_path = self.workspace_path / 'ntuple'
-        if not self.ntuple_path.exists():
-            self.ntuple_path.mkdir()
+        self.estimate_path = self.workspace_path / 'estimates'
+        if not self.estimate_path.exists():
+            self.estimate_path.mkdir()
+
+        self.physics_path = self.workspace_path / 'physics'
+        if not self.physics_path.exists():
+            self.physics_path.mkdir()
 
         self.pad_geometry_path = Path(params.pad_geometry_path)
         if not self.pad_geometry_path.exists() or not self.pad_geometry_path.is_file():
@@ -68,13 +72,21 @@ class Workspace:
         runstr = form_run_string(run_number)
         return self.cluster_path / f'{runstr}.h5'
     
-    def get_ntuple_file_path_csv(self, run_number: int) -> Path:
+    def get_estimate_file_path_parquet(self, run_number: int) -> Path:
         runstr = form_run_string(run_number)
-        return self.ntuple_path / f'{runstr}.csv'
+        return self.estimate_path / f'{runstr}.parquet'
     
-    def get_ntuple_file_path_h5(self, run_number: int) -> Path:
+    def get_estimate_file_path_csv(self, run_number: int) -> Path:
         runstr = form_run_string(run_number)
-        return self.ntuple_path / f'{runstr}.h5'
+        return self.estimate_path / f'{runstr}.csv'
+    
+    def get_physics_file_path_parquet(self, run_number: int) -> Path:
+        runstr = form_run_string(run_number)
+        return self.physics_path / f'{runstr}.parquet'
+    
+    def get_physics_file_path_csv(self, run_number: int) -> Path:
+        runstr = form_run_string(run_number)
+        return self.physics_path / f'{runstr}.csv'
     
     def get_pad_map(self) -> PadMap:
         return self.pad_map

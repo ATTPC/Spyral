@@ -1,3 +1,4 @@
+from .constants import DEG2RAD
 from dataclasses import dataclass, field
 from pathlib import Path
 from json import load
@@ -20,22 +21,16 @@ class RunParameters:
     do_phase2: bool = False
     do_phase3: bool = False
     do_phase4: bool = False
-    do_phase5: bool = False
 
 @dataclass
 class DetectorParameters:
     magnetic_field: float = 0.0 #Tesla
     electric_field: float = 0.0 #V/m
-    tilt_angle: float = 0.0 #degrees
+    tilt_angle: float = 0.0 #input degrees, convert to radians
     detector_length: float = 0.0 #mm
     beam_region_radius: float = 0.0 #mm
     micromegas_time_bucket: float = 0.0
     window_time_bucket: float = 0.0
-
-@dataclass
-class GasParameters:
-    density: float = 0.0 #g/cm^3
-    energy_loss_path: str = ''
 
 @dataclass
 class TraceParameters:
@@ -65,6 +60,18 @@ class ClusterParameters:
     min_write_size: int = 0
 
 @dataclass
+class EstimateParameters:
+    neighbor_distance: float = 0.0 #mm
+    min_neighbors: int = 0
+    min_total_trajectory_points: int = 0
+    max_distance_from_beam_axis: float = 0.0 #mm
+
+@dataclass
+class SolverParameters:
+    particle_id_path: str = ''
+    gas_data_path: str = ''
+
+@dataclass
 class Config:
     #Workspace
     workspace: WorkspaceParameters = field(default_factory=WorkspaceParameters)
@@ -75,9 +82,6 @@ class Config:
     #Detector
     detector: DetectorParameters = field(default_factory=DetectorParameters)
 
-    #Gas
-    gas: GasParameters = field(default_factory=GasParameters)
-
     #Traces
     trace: TraceParameters = field(default_factory=TraceParameters)
 
@@ -86,6 +90,12 @@ class Config:
 
     #Clustering settings
     cluster: ClusterParameters = field(default_factory=ClusterParameters)
+
+    #Physics Estimate settings
+    estimate: EstimateParameters =  field(default_factory=EstimateParameters)
+
+    #Physics Solver
+    solver: SolverParameters = field(default_factory=SolverParameters)
 
 def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
     config = Config()
@@ -102,18 +112,14 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
     config.run.do_phase2 = json_data['phase2']
     config.run.do_phase3 = json_data['phase3']
     config.run.do_phase4 = json_data['phase4']
-    config.run.do_phase5 = json_data['phase5']
 
     config.detector.magnetic_field = json_data['magnetic_field(T)']
     config.detector.electric_field = json_data['electric_field(V/m)']
-    config.detector.tilt_angle = json_data['tilt_angle(degrees)']
+    config.detector.tilt_angle = json_data['tilt_angle(degrees)'] * DEG2RAD
     config.detector.detector_length = json_data['detector_length(mm)']
     config.detector.beam_region_radius = json_data['beam_region_radius(mm)']
     config.detector.micromegas_time_bucket = json_data['micromegas_time_bucket']
     config.detector.window_time_bucket = json_data['window_time_bucket']
-
-    config.gas.density = json_data['gas_density(g/cm^3)']
-    config.gas.energy_loss_path = json_data['gas_energy_loss_path']
 
     config.trace.baseline_window_scale = json_data['trace_baseline_window_scale']
     config.trace.peak_separation = json_data['trace_peak_separation']
@@ -135,6 +141,14 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
     config.cluster.fractional_distance_min = json_data['cluster_fractional_distance_min']
     config.cluster.fractional_charge_threshold = json_data['cluster_fractional_charge_threshold']
     config.cluster.min_write_size = json_data['cluster_minimum_write_size']
+
+    config.estimate.min_neighbors = json_data['estimate_minimum_neighbors']
+    config.estimate.neighbor_distance = json_data['estimate_neighbor_distance']
+    config.estimate.min_total_trajectory_points = json_data['estimate_mininum_total_trajectory_points']
+    config.estimate.max_distance_from_beam_axis = json_data['estimate_maximum_distance_from_beam_axis']
+
+    config.solver.gas_data_path = json_data['solver_gas_data_path']
+    config.solver.particle_id_path = json_data['solver_particle_id_path']
     
     return config
 

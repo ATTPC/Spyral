@@ -5,7 +5,7 @@ import h5py as h5
 from pathlib import Path
 from time import time
 
-def phase_2(point_path: Path, cluster_path: Path, cluster_params: ClusterParameters, detector_params: DetectorParameters):
+def phase_2(point_path: Path, cluster_path: Path, cluster_params: ClusterParameters):
 
     start = time()
 
