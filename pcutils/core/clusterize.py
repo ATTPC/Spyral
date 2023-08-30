@@ -1,8 +1,7 @@
 from .point_cloud import PointCloud
-from .config import ClusterParameters, DetectorParameters
+from .config import ClusterParameters
 import sklearn.cluster as skcluster
 from sklearn.preprocessing import StandardScaler
-from scipy.stats import iqr
 from dataclasses import dataclass, field
 import numpy as np
 
@@ -77,9 +76,9 @@ def join_clusters(clusters: list[ClusteredCloud], params: ClusterParameters) -> 
     event_number = clusters[0].point_cloud.event_number
 
     #Fit the clusters with circles
-    centers = np.zeros((len(clusters), 2))
+    centers = np.zeros((len(clusters), 3))
     for idx, cluster in enumerate(clusters):
-        centers[idx, 0], centers[idx, 1], _, _ = least_squares_circle(cluster.point_cloud.cloud[:, 0], cluster.point_cloud.cloud[:, 1])
+        centers[idx, 0], centers[idx, 1], centers[idx, 2], _ = least_squares_circle(cluster.point_cloud.cloud[:, 0], cluster.point_cloud.cloud[:, 1])
 
     #Make a dictionary of center groups
     #First everyone is in their own group
@@ -91,12 +90,12 @@ def join_clusters(clusters: list[ClusteredCloud], params: ClusterParameters) -> 
     for idx, center in enumerate(centers):
         cluster = clusters[idx]
         #Reject noise
-        if cluster.label == -1 or np.isnan(center[0]):
+        if cluster.label == -1 or np.isnan(center[0]) or center[2] < 10.0:
             continue
 
         for cidx, comp_cluster in enumerate(clusters):
             comp_center = centers[cidx]
-            if comp_cluster.label == -1 or np.isnan(comp_center[0]):
+            if comp_cluster.label == -1 or np.isnan(comp_center[0]) or center[2] < 10.0:
                 continue
             center_distance = np.sqrt((center[0] - comp_center[0])**2.0 + (center[1] - comp_center[1])**2.0)
             #If we find matching centers (that havent already been matched) take all of the clouds in both groups and merge them
@@ -118,7 +117,7 @@ def join_clusters(clusters: list[ClusteredCloud], params: ClusterParameters) -> 
 
         new_cluster = ClusteredCloud(g, PointCloud())
         new_cluster.point_cloud.event_number = event_number
-        new_cluster.point_cloud.cloud = np.zeros((0,6))
+        new_cluster.point_cloud.cloud = np.zeros((0,7))
         for idx in groups[g]:
             new_cluster.point_cloud.cloud = np.concatenate((new_cluster.point_cloud.cloud, clusters[idx].point_cloud.cloud), axis=0)
         new_clusters.append(new_cluster)

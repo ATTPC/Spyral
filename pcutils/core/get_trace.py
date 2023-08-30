@@ -3,8 +3,7 @@ from .constants import INVALID_PAD_ID, NUMBER_OF_TIME_BUCKETS, INVALID_PEAK_CENT
 from .hardware_id import HardwareID
 from .config import TraceParameters
 from typing import Optional
-from scipy.signal import find_peaks
-from scipy.interpolate import UnivariateSpline
+from scipy import signal
 from dataclasses import dataclass
 
 @dataclass
@@ -47,10 +46,6 @@ class GetTrace:
             return
         
         self.raw_data = data.astype(np.int32) #Widen the type and sign it
-        #Edges can be strange, so smooth them a bit
-        self.raw_data[0] = self.raw_data[1]
-        self.raw_data[511] = self.raw_data[510]
-        self.corrected_data = (self.raw_data - self.evaluate_baseline(baseline_window_scale)).clip(min = 0) #remove the baseline
         self.hw_id = id
         self.find_peaks(params.peak_separation, params.peak_prominence, params.peak_max_width, params.peak_threshold)
 
@@ -77,7 +72,7 @@ class GetTrace:
 
         ## GWM 08/08/23 -- This method is way faster cause we don't need to make splines in set_trace_data, but is way more impacted
         ## by user input parameters
-        pks, props = find_peaks(self.raw_data, distance=separation, prominence=prominence, width=(0, max_width), rel_height=0.85)
+        pks, props = signal.find_peaks(self.raw_data, distance=separation, prominence=prominence, width=(0, max_width), rel_height=0.85)
         for idx, p in enumerate(pks):
             peak = Peak()
             peak.centroid = p
