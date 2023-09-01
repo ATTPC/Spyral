@@ -46,13 +46,10 @@ class GetTrace:
             return
         
         self.raw_data = data.astype(np.int32) #Widen the type and sign it
-<<<<<<< HEAD
         #Edges can be strange, so smooth them a bit
         self.raw_data[0] = self.raw_data[1]
         self.raw_data[511] = self.raw_data[510]
         #self.corrected_data = (self.raw_data - self.evaluate_baseline(baseline_window_scale)).clip(min = 0) #remove the baseline
-=======
->>>>>>> 577a179e20daa618f00875e03c7f66a197dbeacc
         self.hw_id = id
         self.find_peaks(params.peak_separation, params.peak_prominence, params.peak_max_width, params.peak_threshold)
 

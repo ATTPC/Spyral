@@ -1,5 +1,6 @@
 import polars
-from matplotlib import pyplot, widgets
+from matplotlib import pyplot, widgets, colormaps
+from matplotlib.colors import LinearSegmentedColormap, rgb2hex
 from pcutils.plot.cut import load_cut_json, write_cut_json, CutHandler
 from pcutils.plot.histogram import Histogrammer
 from pathlib import Path
@@ -7,7 +8,29 @@ from typing import Optional
 import numpy as np
 
 RAD2DEG = 180.0/np.pi
-DATA_DIRECTORY: str = '/Volumes/Pattern/Analysis/a1975/estimates/'
+DATA_DIRECTORY: str = '/mnt/analysis/e20009/e20009_Turi/Workspace/estimates/'
+
+#Additional colormaps with white backgrounds
+cmap_jet = colormaps.get_cmap("jet")
+white_jet = LinearSegmentedColormap.from_list('white_jet', [
+    (0, '#ffffff'),
+    (1e-20, rgb2hex(cmap_jet(1e-20))),
+    (0.2, rgb2hex(cmap_jet(0.2))),
+    (0.4, rgb2hex(cmap_jet(0.4))),
+    (0.6, rgb2hex(cmap_jet(0.6))),
+    (0.8, rgb2hex(cmap_jet(0.8))),
+    (1, rgb2hex(cmap_jet(0.9))),  
+], N = 256)
+
+white_viridis = LinearSegmentedColormap.from_list('white_viridis', [
+    (0, '#ffffff'),
+    (1e-20, '#440053'),
+    (0.2, '#404388'),
+    (0.4, '#2a788e'),
+    (0.6, '#21a784'),
+    (0.8, '#78d151'),
+    (1, '#fde624'),
+], N=256)
 
 #Merge a bunch of runs into one dataframe. This can be useful for doing one-shot analysis,
 #but need to be mindful of memory limitations (and performance penalties)
@@ -74,7 +97,7 @@ def draw_ede_cut(run_min: int, run_max: int):
     handler = CutHandler()
     grammer = Histogrammer()
 
-    grammer.add_hist2d('ede', (200, 150), ((0.0, 20000.0), (0.0, 1.5)))
+    grammer.add_hist2d('ede', (200, 150), ((0.0, 7500.0), (0.0, 1.5)))
     for run in range(run_min, run_max+1):
         df = get_dataframe(run)
         grammer.fill_hist2d('ede', df.select('dEdx').to_numpy(), df.select('brho').to_numpy())
@@ -82,7 +105,7 @@ def draw_ede_cut(run_min: int, run_max: int):
     fig, ax = pyplot.subplots(1,1)
     selector = widgets.PolygonSelector(ax, handler.onselect)
 
-    mesh = grammer.draw_hist2d('ede', ax)
+    mesh = grammer.draw_hist2d(name = 'ede', axis = ax, cmap = white_jet)
     pyplot.colorbar(mesh, ax=ax)
     pyplot.tight_layout()
     pyplot.show()
@@ -94,5 +117,5 @@ def draw_ede_cut(run_min: int, run_max: int):
         pass
 
 if __name__ == '__main__':
-    plot(4, 4)
-    #draw_ede_cut(4, 4)
+    #plot(347, 356)
+    draw_ede_cut(347, 356)

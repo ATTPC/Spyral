@@ -6,11 +6,11 @@
     "pad_time_path": "/user/turi/PointCloud-utils/etc/pad_time_correction.csv",
     "pad_electronics_path": "/user/turi/PointCloud-utils/etc/pad_electronics.csv",
 
-    "run_min": 348,
+    "run_min": 347,
     "run_max": 356,
     "phase1": true,
     "phase2": true,
-    "phase3": false,
+    "phase3": true,
     "phase4": false,
 
     "magnetic_field(T)": 2.9,
@@ -21,12 +21,9 @@
     "micromegas_time_bucket": 17.0,
     "window_time_bucket": 500.0,
 
-<<<<<<< HEAD
     "gas_density(g/cm^3)": 0.00625,
     "gas_energy_loss_path": "/user/turi/PointCloud-utils/etc/dEdx/Be10dpSRIM_Proton.txt",
 
-=======
->>>>>>> 577a179e20daa618f00875e03c7f66a197dbeacc
     "trace_baseline_window_scale": 20.0,
     "trace_peak_separation": 50.0,
     "trace_peak_prominence": 20.0,
@@ -42,14 +39,6 @@
 
     "cluster_smoothing_neighbor_distance(mm)": 10.0,
     "cluster_minimum_size": 10,
-<<<<<<< HEAD
-    "cluster_minimum_points": 5,
-    "cluster_max_center_distance(mm)": 30.0,
-    "cluster_fractional_distance_min": 0.1,
-    "cluster_fractional_charge_threshold": 0.5,
-    "cluster_minimum_write_size": 50
-}
-=======
     "cluster_minimum_points": 10,
     "cluster_max_center_distance(mm)": 35.0,
     "cluster_fractional_distance_min": 0.0,
@@ -64,4 +53,3 @@
     "solver_gas_data_path": "/path/to/some/gas/file.json",
     "solver_particle_id_path": "/path/to/some/particle/id.json"
 }
->>>>>>> 577a179e20daa618f00875e03c7f66a197dbeacc

@@ -240,7 +240,7 @@ class Histogrammer:
         self.connect_mpl_callbacks(axis)
             
         
-    def draw_hist2d(self, name: str, axis: Axes, log_z: bool = False) -> QuadMesh:
+    def draw_hist2d(self, name: str, axis: Axes, log_z: bool = False, cmap = 'viridis') -> QuadMesh:
         if name not in self.histograms:
             return
         
@@ -251,9 +251,9 @@ class Histogrammer:
         if log_z:
             min_scale = np.min(hist.counts) + 0.00001
             max_scale = np.max(hist.counts)
-            mesh = axis.pcolormesh(hist.x_bins, hist.y_bins, hist.counts, norm=LogNorm(min_scale, max_scale))
+            mesh = axis.pcolormesh(hist.x_bins, hist.y_bins, hist.counts, norm=LogNorm(min_scale, max_scale), cmap = cmap)
         else:
-            mesh = axis.pcolormesh(hist.x_bins, hist.y_bins, hist.counts)
+            mesh = axis.pcolormesh(hist.x_bins, hist.y_bins, hist.counts, cmap = cmap)
         self.axes[axis] = (name, None)
         self.connect_mpl_callbacks(axis)
         return mesh
