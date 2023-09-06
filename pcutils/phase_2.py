@@ -1,6 +1,6 @@
 from .core.config import ClusterParameters, DetectorParameters
 from .core.point_cloud import PointCloud
-from .core.clusterize import clusterize, join_clusters
+from .core.clusterize import clusterize, join_clusters, cleanup_clusters
 import h5py as h5
 from pathlib import Path
 from time import time
@@ -47,17 +47,19 @@ def phase_2(point_path: Path, cluster_path: Path, cluster_params: ClusterParamet
 
         clusters = clusterize(cloud, cluster_params)
         joined = join_clusters(clusters, cluster_params)
+        cleaned = cleanup_clusters(joined, cluster_params)
 
         #Write the clusters, but only if the size of the cluster exceeds the inputed value
         cluster_event_group = cluster_group.create_group(f'event_{idx}')
         cluster_event_group.attrs['nclusters'] = len(joined)
-        for cidx, cluster in enumerate(joined):
+        for cidx, cluster in enumerate(cleaned):
             #Dump clusters which don't have enough points
             if len(cluster.point_cloud.cloud) < cluster_params.min_write_size:
                 continue
             local_group = cluster_event_group.create_group(f'cluster_{cidx}')
             local_group.attrs['label'] = cluster.label
             local_group.create_dataset('cloud', data=cluster.point_cloud.cloud)
+
 
     stop = time()
     print(f'\nProcessing complete. Duration: {stop - start}s')

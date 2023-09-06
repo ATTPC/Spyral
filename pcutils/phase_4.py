@@ -41,7 +41,7 @@ def phase_4(cluster_path: Path, estimate_path: Path, result_path: Path, detector
 
     results: dict[str, list] = { 'event': [], 'cluster_index': [], 'cluster_label': [], 'vertex_x': [], 'vertex_y': [], 'vertex_z': [], \
                                  'brho': [], 'polar': [], 'azimuthal': []}
-    
+    print('Starting solver...')
     for row, event in enumerate(estimates_gated['event']):
         if count > flush_val:
             count = 0

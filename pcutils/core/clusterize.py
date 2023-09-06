@@ -123,6 +123,17 @@ def join_clusters(clusters: list[ClusteredCloud], params: ClusterParameters) -> 
         new_clusters.append(new_cluster)
 
     return new_clusters
+
+def cleanup_clusters(clusters: list[ClusteredCloud], cluster_params: ClusterParameters) -> list[ClusteredCloud]:
+    for cluster in clusters:
+        #Drop any points which do not have a minimum number of neighbors
+        cluster.point_cloud.drop_isolated_points(cluster_params.cleanup_neighbor_distance, cluster_params.cleanup_min_neighbors)
+        #Re-smooth to remove jitter in the trajectory
+        cluster.point_cloud.smooth_cloud(cluster_params.cleanup_neighbor_distance)
+        #Sort our cloud to be ordered in z
+        cluster.point_cloud.sort_in_z()
+
+    return [cluster for cluster in clusters if len(cluster.point_cloud.cloud) > 0]
     
 def clusterize(pc: PointCloud, cluster_params: ClusterParameters) -> list[ClusteredCloud]:
     '''
@@ -162,11 +173,5 @@ def clusterize(pc: PointCloud, cluster_params: ClusterParameters) -> list[Cluste
         mask = fitted_clusters.labels_ == label
         clusters[idx].point_cloud.cloud = pc.cloud[mask]
         clusters[idx].point_cloud.event_number = pc.event_number
-        #Drop any points which do not have a minimum number of neighbors
-        clusters[idx].point_cloud.drop_isolated_points(cluster_params.cleanup_neighbor_distance, cluster_params.cleanup_min_neighbors)
-        #Re-smooth to remove jitter in the trajectory
-        clusters[idx].point_cloud.smooth_cloud(cluster_params.cleanup_neighbor_distance)
-        #Sort our cloud to be ordered in z
-        clusters[idx].point_cloud.sort_in_z()
-
-    return [cluster for cluster in clusters if len(cluster.point_cloud.cloud) != 0]
+        
+    return clusters
