@@ -56,9 +56,11 @@ def phase_4(cluster_path: Path, estimate_path: Path, result_path: Path, detector
         cluster.label = local_cluster.attrs['label']
         cluster.point_cloud.load_cloud_from_hdf5_data(local_cluster['cloud'][:].copy(), event)
 
+        cluster.point_cloud.cloud[:, :3] *= 0.001 #convert to SI (meters)
+
         #Do the solver
         iv = InitialValue(polar=estimates_gated['polar'][row], azimuthal=estimates_gated['azimuthal'][row], brho=estimates_gated['brho'][row],
-                          vertex_x=estimates_gated['vertex_x'][row], vertex_y=estimates_gated['vertex_y'][row], vertex_z=estimates_gated['vertex_z'][row], direction=Direction(estimates_gated['direction'][row]))
+                          vertex_x=estimates_gated['vertex_x'][row] * 0.001, vertex_y=estimates_gated['vertex_y'][row] * 0.001, vertex_z=estimates_gated['vertex_z'][row] * 0.001, direction=Direction(estimates_gated['direction'][row]))
         solve_physics(cidx, cluster, iv, detector_params, target, pid.nucleus, results)
 
     physics_df = pl.DataFrame(results)
