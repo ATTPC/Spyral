@@ -16,7 +16,8 @@ def PlotClusters(cluster_Path, event_num):
         pass
 
     nclusters = event.attrs['nclusters']
-    print('Number of clusters: ', nclusters)
+    print(f'Event number: {event_num}')
+    print(f'Number of clusters: {nclusters}')
 
     fig = plt.figure(figsize = (8, 6))
     ax = fig.add_subplot(projection = '3d')
@@ -28,8 +29,9 @@ def PlotClusters(cluster_Path, event_num):
             if len(local_cloud) < 10:
                 continue
             print(f'Cluster {cluster_i} has {len(local_cloud)} points')
-            ax.scatter(local_cloud[:,2], local_cloud[:,0], local_cloud[:,1], s = 5, c = cluster_i*np.ones(len(local_cloud)), label = cluster_i)
+            ax.scatter(local_cloud[:,2], local_cloud[:,0], local_cloud[:,1], s = 5, label = cluster_i)
         except:
+            print(f'Cluster {cluster_i} has 0 points')
             continue
         #print(f'Cluster {cluster_i} has {len(local_cloud)} points')
         #local_cloud = local_cluster['cloud']
@@ -52,7 +54,7 @@ def PlotClusters(cluster_Path, event_num):
 def main():
     cluster_Path = '/mnt/analysis/e20009/e20009_Turi/Workspace/clusters/run_0348.h5'
     event_num = np.random.randint(low = 146663, high = 228636)
-    #event_num = 147472
+    #event_num = 154522
     PlotClusters(cluster_Path = cluster_Path, event_num = event_num)
 
 if __name__ == '__main__':

@@ -105,7 +105,7 @@ def draw_ede_cut(run_min: int, run_max: int):
     fig, ax = pyplot.subplots(1,1)
     selector = widgets.PolygonSelector(ax, handler.onselect)
 
-    mesh = grammer.draw_hist2d(name = 'ede', axis = ax, cmap = white_jet)
+    mesh = grammer.draw_hist2d(name = 'ede', axis = ax, cmap = white_viridis)
     pyplot.colorbar(mesh, ax=ax)
     pyplot.tight_layout()
     pyplot.show()
@@ -117,5 +117,5 @@ def draw_ede_cut(run_min: int, run_max: int):
         pass
 
 if __name__ == '__main__':
-    #plot(347, 356)
-    draw_ede_cut(347, 356)
+    plot(347, 356)
+    #draw_ede_cut(347, 356)
