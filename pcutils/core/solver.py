@@ -10,6 +10,7 @@ import math
 from dataclasses import dataclass
 from filterpy.kalman import UnscentedKalmanFilter, MerweScaledSigmaPoints
 from filterpy.common import Q_discrete_white_noise
+from functools import partial
 
 @dataclass
 class InitialValue:
@@ -28,6 +29,7 @@ TIME_WINDOW: float = 1.0e-6 #1us window
 INTERVAL: float = 1.0e-10 #0.1 ns sample
 QBRHO_2_P: float = 1.0e-9 * constants.speed_of_light #kG * cm -> MeV
 SAMPLING_PERIOD: float = 1.0e-6/512 # seconds, converts time bucket interval to time
+SAMPLING_RANGE: np.ndarray = np.linspace(0., TIME_WINDOW, int(TIME_WINDOW/INTERVAL))
 
 def calculate_decel(speed: float, target: Target, ejectile: NucleusData) -> tuple[float, float]:
     kinetic_energy = ejectile.mass * (1.0/math.sqrt(1.0 - (speed / constants.speed_of_light)**2.0) - 1.0) #MeV
@@ -41,29 +43,12 @@ def calculate_decel(speed: float, target: Target, ejectile: NucleusData) -> tupl
     qm = charge / mass_kg
     return (deceleration, qm)
 
-# def fx(x: np.ndarray, dt: float, Bfield: np.ndarray, Efield: np.ndarray, target: Target, ejectile: NucleusData) -> np.ndarray:
-#     speed = np.linalg.norm(x[3:6])
-#     unit_vector = x[3:] / (speed)# direction
-#     deceleration, qm = calculate_decel(speed, target, ejectile)
-#     transition = np.array( [[1., 0., 0., dt, 0., 0., 0.5*dt**2.0, 0., 0.],
-#                             [0., 1., 0., 0., dt, 0., 0., 0.5*dt**2.0, 0., 0.],
-#                             [0., 0., 1., 0., 0., dt, 0., 0., 0.5*dt**2.0],
-#                             [0., 0., 0., 1., 0., 0., dt, 0., 0.],
-#                             [0., 0., 0., 0., 1., 0., 0., dt, 0.],
-#                             [0., 0., 0., 0., 0., 1., 0., 0., dt],
-#                             [0., 0., 0., 0., qm * Bfield[2],  -1.0 * qm * Bfield[1], 0., 0., 0.],
-#                             [0., 0., 0., -1.0 * qm * Bfield[2], 0., 1.0, qm *Bfield[0], 0., 0., 0.],
-#                             [0., 0., 0., qm * Bfield[1], -1.0 * qm * Bfield[0], 0., 0., 0., 0.],
-#                            ])
-#     constant = np.array([0., 0., 0., 0., 0., 0., qm * Efield[0] - deceleration * unit_vector[0], qm * Efield[1] - deceleration * unit_vector[1], qm * Efield[2] - deceleration * unit_vector[2]])
-#     return np.dot(transition, x) + constant
-
 def hx(x: np.ndarray) -> np.ndarray:
     return np.array([x[0], x[1], x[2]])
 
 def apply_kalman_filter(data: np.ndarray, fit_params: np.ndarray, detector_params: DetectorParameters, target: Target, ejectile: NucleusData) -> np.ndarray:
-    E_vec = np.array([0.0, 0.0, -1.0 * detector_params.electric_field])
-    B_vec = np.array([0.0, -1.0 * detector_params.magnetic_field * math.sin(detector_params.tilt_angle), -1.0 * detector_params.magnetic_field * math.cos(detector_params.tilt_angle)])
+    Efield = -1.0 * detector_params.electric_field
+    Bfield = -1.0 * detector_params.magnetic_field
     initial_state = np.zeros(6)
     momentum = QBRHO_2_P * (fit_params[2] * 10.0 * 100.0 * float(ejectile.Z))
     speed = momentum / ejectile.mass * constants.speed_of_light
@@ -74,13 +59,13 @@ def apply_kalman_filter(data: np.ndarray, fit_params: np.ndarray, detector_param
     initial_state[5] = speed * math.cos(fit_params[0])
 
     def fx(x: np.ndarray, ds: float) -> np.ndarray:
-        speed = np.linalg.norm(x[3:])
+        speed = math.sqrt(x[3]**2.0 + x[4]**2.0 + x[5]**2.0)
         dt = ds/speed
         unit_vector = x[3:] / (speed)# direction
         deceleration, qm = calculate_decel(speed, target, ejectile)
-        accel = np.array([qm * (E_vec[0] + x[4] * B_vec[2] - x[5] * B_vec[1]) - deceleration * unit_vector[0],
-                          qm * (E_vec[1] - x[3] * B_vec[2] + x[5] * B_vec[0]) - deceleration * unit_vector[1],
-                          qm * (E_vec[2] + x[3] * B_vec[1] - x[4] * B_vec[0]) - deceleration * unit_vector[2]])
+        accel = np.array([qm * (x[4] * Bfield) - deceleration * unit_vector[0],
+                          qm * ( -1.0 * x[3] * Bfield) - deceleration * unit_vector[1],
+                          qm * Efield - deceleration * unit_vector[2]])
 
         transition = np.array( [[1., 0., 0., dt, 0., 0.],
                                 [0., 1., 0., 0., dt, 0.],
@@ -130,49 +115,65 @@ def solve_physics_kalman(cluster_index: int, cluster: ClusteredCloud, initial_va
 
 #State = [x, y, z, vx, vy, vz]
 #Derivative = [vx, vy, vz, ax, ay, az] (returns)
-def equation_of_motion(t: float, state: np.ndarray, Bfield: np.ndarray, Efield: np.ndarray, target: Target, ejectile: NucleusData) -> np.ndarray:
+def equation_of_motion(t: float, state: np.ndarray, Bfield: float, Efield: float, target: Target, ejectile: NucleusData) -> np.ndarray:
 
-    speed = np.linalg.norm(state[3:])
-    unit_vector = state[3:] / (speed)# direction
+    speed = math.sqrt(state[3]**2.0 + state[4]**2.0 + state[5]**2.0)
+    unit_vector = state[3:] / speed # direction
     kinetic_energy = ejectile.mass * (1.0/math.sqrt(1.0 - (speed / constants.speed_of_light)**2.0) - 1.0) #MeV
-    charge = ejectile.Z * constants.elementary_charge #Coulombs
-    mass_kg = ejectile.mass * MEV_2_KG #kg
+    mass_kg = ejectile.mass * MEV_2_KG
+    charge_c = ejectile.Z * constants.elementary_charge
+    qm = charge_c/mass_kg
 
-    dEdx = target.get_dedx(ejectile, kinetic_energy) #MeV/g/cm^2
-    dEdx *= MEV_2_JOULE #J/g/cm^2
-    force = dEdx * target.data.density * 100.0 # J/cm * cm/m = J/m = kg m/s^2
-    deceleration = force / (mass_kg)
-    result = np.zeros(len(state))
-    qm = charge / mass_kg
+    deceleration = (target.get_dedx(ejectile, kinetic_energy) * MEV_2_JOULE * target.data.density * 100.0) / mass_kg
+    results = np.zeros(6)
+    results[0] = state[3]
+    results[1] = state[4]
+    results[2] = state[5]
+    results[3] = qm * state[4] * Bfield - deceleration * unit_vector[0]
+    results[4] = qm * (-1.0 * state[3] * Bfield) - deceleration * unit_vector[1]
+    results[5] = qm * Efield - deceleration * unit_vector[2]
 
-    #v = v
-    result[0] = state[3]
-    result[1] = state[4]
-    result[2] = state[5]
-    # a = q/m * (E + v x B) - stopping
-    result[3] = qm * (Efield[0] + state[4] * Bfield[2] - state[5] * Bfield[1]) - deceleration * unit_vector[0]
-    result[4] = qm * (Efield[1] - state[3] * Bfield[2] + state[5] * Bfield[0]) - deceleration * unit_vector[1]
-    result[5] = qm * (Efield[2] + state[3] * Bfield[1] - state[4] * Bfield[0]) - deceleration * unit_vector[2]
-    #result[3:] = (charge/mass_kg * (Efield + np.cross(state[3:], Bfield)) - deceleration * unit_vector)
+    return results
 
-    return result
+def jacobian(t, state: np.ndarray, Bfield: float, Efield: float, target: Target, ejectile: NucleusData) -> np.ndarray:
+    jac = np.zeros((len(state), len(state)))
+    mass_kg = ejectile.mass * MEV_2_KG
+    charge_c = ejectile.Z * constants.elementary_charge
+    qm = charge_c/mass_kg
 
-def generate_trajectory(fit_params: np.ndarray, Bfield: np.ndarray, Efield: np.ndarray, target: Target, ejectile: NucleusData) -> np.ndarray:
+    jac[0, 3] = 1.0
+    jac[1, 4] = 1.0
+    jac[2, 5] = 1.0
+    jac[3, 4] = qm * Bfield
+    jac[4, 3] = -1.0 * qm * Bfield
+
+    return jac
+
+def get_sampling_steps(cluster: ClusteredCloud, vertexX: float, vertexY: float, vertexZ: float) -> np.ndarray:
+    steps = np.zeros(len(cluster.point_cloud.cloud))
+    for idx, point in enumerate(cluster.point_cloud.cloud):
+        if idx == 0:
+            steps[idx] = math.sqrt((point[0] - vertexX)**2.0 + (point[1] - vertexY)**2.0 + (point[2] - vertexZ)**2.0)
+        else:
+            steps[idx] = steps[idx-1] + np.linalg.norm(point[:3] - cluster.point_cloud.cloud[idx-1, :3])
+    return steps
+
+def generate_trajectory(fit_params: np.ndarray, Bfield: float, Efield: float, target: Target, ejectile: NucleusData) -> np.ndarray:
     #Convert guessed parameters into initial values for ODE x, v
     initial_value = np.zeros(6)
-    initial_value[:3] = fit_params[3:] * 0.001 # vertex, convert to m
+    initial_value[:3] = fit_params[3:]
     momentum = QBRHO_2_P * (fit_params[2] * 10.0 * 100.0 * float(ejectile.Z))
     speed = momentum / ejectile.mass * constants.speed_of_light
     initial_value[3] = speed * math.sin(fit_params[0]) * math.cos(fit_params[1])
     initial_value[4] = speed * math.sin(fit_params[0]) * math.sin(fit_params[1])
     initial_value[5] = speed * math.cos(fit_params[0])
 
-    result = integrate.solve_ivp(equation_of_motion, (0.0, 1.0e-6), initial_value, args=(Bfield, Efield, target, ejectile), t_eval=np.linspace(0.,TIME_WINDOW, int(TIME_WINDOW/INTERVAL)), max_step=0.1)
-    positions: np.ndarray = result.y.T[:, :3] * 1000.0 # convert back to mm to match data
 
+    result = integrate.solve_ivp(equation_of_motion, (0.0, TIME_WINDOW), initial_value, method='BDF', args=(Bfield, Efield, target, ejectile), t_eval=SAMPLING_RANGE, jac=jacobian)
+    positions: np.ndarray = result.y.T[:, :3]
     return positions
 
-def objective_function(fit_params: np.ndarray, data: np.ndarray, Bfield: np.ndarray, Efield: np.ndarray, target: Target, ejectile: NucleusData) -> float:
+def objective_function(fit_params: np.ndarray, data: np.ndarray, Bfield: float, Efield: float, target: Target, ejectile: NucleusData) -> float:
     trajectory = generate_trajectory(fit_params, Bfield, Efield, target, ejectile)
     error = 0.0
     for point in data:
@@ -181,10 +182,9 @@ def objective_function(fit_params: np.ndarray, data: np.ndarray, Bfield: np.ndar
         
 
 def solve_physics(cluster_index: int, cluster: ClusteredCloud, initial_value: InitialValue, detector_params: DetectorParameters, target: Target, ejectile: NucleusData, results: dict[str, list]):
-    E_vec = np.array([0.0, 0.0, -1.0 * detector_params.electric_field])
-    B_vec = np.array([0.0, -1.0 * detector_params.magnetic_field * math.sin(detector_params.tilt_angle), -1.0 * detector_params.magnetic_field * math.cos(detector_params.tilt_angle)])
-
-    best_fit = optimize.minimize(objective_function, initial_value.convert_to_array(), args=(cluster.point_cloud.cloud[:, :3], B_vec, E_vec, target, ejectile))
+    Efield = -1.0 * detector_params.electric_field
+    Bfield = -1.0 * detector_params.magnetic_field
+    best_fit = optimize.minimize(objective_function, initial_value.convert_to_array(), args=(cluster.point_cloud.cloud[:, :3], Bfield, Efield, target, ejectile))
 
     results['event'].append(cluster.point_cloud.event_number)
     results['cluster_index'].append(cluster_index)
