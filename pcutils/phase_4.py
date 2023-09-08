@@ -39,8 +39,8 @@ def phase_4(cluster_path: Path, estimate_path: Path, result_path: Path, detector
     flush_count = 0
     count = 0
 
-    results: dict[str, list] = { 'event': [], 'cluster_index': [], 'cluster_label': [], 'vertex_x': [], 'vertex_y': [], 'vertex_z': [], \
-                                 'brho': [], 'polar': [], 'azimuthal': []}
+    results: dict[str, list] = { 'event': [], 'cluster_index': [], 'cluster_label': [], 'vertex_x': [], 'sigma_vx': [], 'vertex_y': [], 'sigma_vy': [], 'vertex_z': [], 'sigma_vz': [], \
+                                 'brho': [], 'sigma_brho': [], 'polar': [], 'sigma_polar': [], 'azimuthal': [], 'sigma_azimuthal': [], 'redchisq': []}
     print('Starting solver...')
     for row, event in enumerate(estimates_gated['event']):
         if count > flush_val:
@@ -55,8 +55,6 @@ def phase_4(cluster_path: Path, estimate_path: Path, result_path: Path, detector
         cluster = ClusteredCloud()
         cluster.label = local_cluster.attrs['label']
         cluster.point_cloud.load_cloud_from_hdf5_data(local_cluster['cloud'][:].copy(), event)
-
-        cluster.point_cloud.cloud[:, :3] *= 0.001 #convert to SI (meters)
 
         #Do the solver
         iv = InitialValue(polar=estimates_gated['polar'][row], azimuthal=estimates_gated['azimuthal'][row], brho=estimates_gated['brho'][row],

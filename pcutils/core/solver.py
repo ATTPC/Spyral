@@ -4,11 +4,11 @@ from .nuclear_data import NucleusData
 from .clusterize import ClusteredCloud
 from .estimator import Direction
 from .constants import MEV_2_JOULE, MEV_2_KG
-from scipy import optimize, integrate, constants
+from scipy import integrate, constants
 import numpy as np
 import math
 from dataclasses import dataclass
-from lmfit import Parameters, minimize
+from lmfit import Parameters, minimize, fit_report
 from lmfit.minimizer import MinimizerResult
 
 @dataclass
@@ -44,7 +44,7 @@ def equation_of_motion(t: float, state: np.ndarray, Bfield: float, Efield: float
     charge_c = ejectile.Z * constants.elementary_charge
     qm = charge_c/mass_kg
 
-    deceleration = (target.get_dedx(ejectile, kinetic_energy) * MEV_2_JOULE * target.data.density * 100.0) / mass_kg
+    deceleration = (target.get_dedx(ejectile, kinetic_energy) * MEV_2_JOULE * target.density * 100.0) / mass_kg
     results = np.zeros(6)
     results[0] = state[3]
     results[1] = state[4]
@@ -77,28 +77,7 @@ def get_sampling_steps(traj_data: np.ndarray, vertexX: float, vertexY: float, ve
             steps[idx] = steps[idx-1] + np.linalg.norm(point - traj_data[idx-1])
     return steps
 
-def generate_trajectory(fit_params: np.ndarray, Bfield: float, Efield: float, target: Target, ejectile: NucleusData) -> np.ndarray:
-    #Convert guessed parameters into initial values for ODE x, v
-    initial_value = np.zeros(6)
-    initial_value[:3] = fit_params[3:]
-    momentum = QBRHO_2_P * (fit_params[2] * 10.0 * 100.0 * float(ejectile.Z))
-    speed = momentum / ejectile.mass * constants.speed_of_light
-    initial_value[3] = speed * math.sin(fit_params[0]) * math.cos(fit_params[1])
-    initial_value[4] = speed * math.sin(fit_params[0]) * math.sin(fit_params[1])
-    initial_value[5] = speed * math.cos(fit_params[0])
-
-    result = integrate.solve_ivp(equation_of_motion, (0.0, TIME_WINDOW), initial_value, method='BDF', args=(Bfield, Efield, target, ejectile), t_eval=SAMPLING_RANGE, jac=jacobian)
-    positions: np.ndarray = result.y.T[:, :3]
-    return positions
-
-def objective_function(fit_params: np.ndarray, data: np.ndarray, Bfield: float, Efield: float, target: Target, ejectile: NucleusData) -> float:
-    trajectory = generate_trajectory(fit_params, Bfield, Efield, target, ejectile)
-    error = 0.0
-    for point in data:
-        error += np.min(np.linalg.norm(trajectory - point, axis=1))
-    return error / len(data)
-
-def generate_trajectory_lm(fit_params: Parameters, Bfield: float, Efield: float, target: Target, ejectile: NucleusData) -> np.ndarray:
+def generate_trajectory(fit_params: Parameters, Bfield: float, Efield: float, target: Target, ejectile: NucleusData) -> np.ndarray:
     #Convert guessed parameters into initial values for ODE x, v
     initial_value = np.zeros(6)
     initial_value[0] = fit_params['vertex_x'].value
@@ -116,12 +95,24 @@ def generate_trajectory_lm(fit_params: Parameters, Bfield: float, Efield: float,
     return positions
 
 
-def objective_function_lm(fit_params: Parameters, x: np.ndarray, Bfield: float, Efield: float, target: Target, ejectile: NucleusData) -> np.ndarray:
-    trajectory = generate_trajectory_lm(fit_params, Bfield, Efield, target, ejectile)
+def objective_function(fit_params: Parameters, x: np.ndarray, Bfield: float, Efield: float, target: Target, ejectile: NucleusData, direction: Direction) -> np.ndarray:
+    trajectory = generate_trajectory(fit_params, Bfield, Efield, target, ejectile)
     errors = np.zeros(len(x))
-    max_z = np.max(x[:, 2])
-    valid_traj = trajectory[trajectory[:, 2] < max_z]
+
+    valid_traj: np.ndarray | None = None
+    if direction is Direction.FORWARD:
+        max_z = np.max(x[:, 2])
+        valid_traj = trajectory[trajectory[:, 2] < max_z]
+    else:
+        min_z = np.min(x[:, 1])
+        valid_traj = trajectory[trajectory[:, 2] > min_z]
+
+    if len(valid_traj) == 0:
+        errors += 1.0e6 #This was a super bad guess resulting in a trajectory going the wrong way, happens with gross bad events sometimes
+        return errors
+    
     for idx, point in enumerate(x):
+        # errors[idx] = np.linalg.norm(valid_traj[np.argmin(valid_traj[:, 2] - point[2]), :2] - point[:2])
         errors[idx] = np.min(np.linalg.norm(valid_traj - point, axis=1))
     return errors
 
@@ -129,8 +120,8 @@ def create_params(initial_value: InitialValue, ejectile: NucleusData, data: np.n
     momentum = 1.0 * ejectile.mass
     phys_max_brho = 0.5 * momentum / QBRHO_2_P / (ejectile.Z * 10.0 * 100.0) # set upper limit at v=0.5c
 
-    uncertainty_position = 0.1
-    uncertainty_brho = 0.25
+    uncertainty_position = 0.25
+    uncertainty_brho = 1.0
 
     min_brho = initial_value.brho - initial_value.brho * uncertainty_brho * 2.0
     if min_brho < 0.0:
@@ -153,8 +144,10 @@ def create_params(initial_value: InitialValue, ejectile: NucleusData, data: np.n
     min_z = initial_value.vertex_z * 0.001 - initial_value.vertex_z * 0.001 * uncertainty_position * 2.0
     max_z = initial_value.vertex_z * 0.001 + initial_value.vertex_z * 0.001 * uncertainty_position * 2.0
 
-    if max_z > np.max(data[:, 2]):
+    if initial_value.direction is Direction.FORWARD and max_z > np.max(data[:, 2]):
         max_z = np.max(data[:, 2])
+    elif initial_value.direction is Direction.BACKWARD and min_z < np.min(data[:, 2]):
+        min_z = np.min(data[:, 2])
 
     fit_params = Parameters()
     fit_params.add('brho', initial_value.brho, min=min_brho, max=max_brho)
@@ -166,30 +159,53 @@ def create_params(initial_value: InitialValue, ejectile: NucleusData, data: np.n
     return fit_params
 
 
-def run_lm(cluster: ClusteredCloud, initial_value: InitialValue, detector_params: DetectorParameters, target: Target, ejectile: NucleusData) -> dict[str, float]:
+#For testing, not for use in production
+def fit_model(cluster: ClusteredCloud, initial_value: InitialValue, detector_params: DetectorParameters, target: Target, ejectile: NucleusData) -> Parameters:
     traj_data = cluster.point_cloud.cloud[:, :3] * 0.001
     fit_params = create_params(initial_value, ejectile, traj_data)
 
     bfield = -1.0 * detector_params.magnetic_field
     efield = -1.0 * detector_params.electric_field
 
-    result: MinimizerResult = minimize(objective_function_lm, fit_params, args = (traj_data, bfield, efield, target, ejectile))
+    result: MinimizerResult = minimize(objective_function, fit_params, args = (traj_data, bfield, efield, target, ejectile, initial_value.direction))
+    print(fit_report(result))
 
-    return result.params.valuesdict()
+    return result.params
         
 
 def solve_physics(cluster_index: int, cluster: ClusteredCloud, initial_value: InitialValue, detector_params: DetectorParameters, target: Target, ejectile: NucleusData, results: dict[str, list]):
-    Efield = -1.0 * detector_params.electric_field
-    Bfield = -1.0 * detector_params.magnetic_field
-    
-    best_fit = optimize.minimize(objective_function, initial_value.convert_to_array(), args=(cluster.point_cloud.cloud[:, :3], Bfield, Efield, target, ejectile))
+    traj_data = cluster.point_cloud.cloud[:, :3] * 0.001
+    fit_params = create_params(initial_value, ejectile, traj_data)
+
+    bfield = -1.0 * detector_params.magnetic_field
+    efield = -1.0 * detector_params.electric_field
+
+    best_fit: MinimizerResult = minimize(objective_function, fit_params, args = (traj_data, bfield, efield, target, ejectile, initial_value.direction))
 
     results['event'].append(cluster.point_cloud.event_number)
     results['cluster_index'].append(cluster_index)
     results['cluster_label'].append(cluster.label)
-    results['vertex_x'].append(best_fit.x[3])
-    results['vertex_y'].append(best_fit.x[4])
-    results['vertex_z'].append(best_fit.x[5])
-    results['brho'].append(best_fit.x[2])
-    results['polar'].append(best_fit.x[0])
-    results['azimuthal'].append(best_fit.x[1])
+    #Best fit values and uncertainties
+    results['vertex_x'].append(best_fit.params['vertex_x'].value)
+    results['vertex_y'].append(best_fit.params['vertex_y'].value)
+    results['vertex_z'].append(best_fit.params['vertex_z'].value)
+    results['brho'].append(best_fit.params['brho'].value)
+    results['polar'].append(best_fit.params['polar'].value)
+    results['azimuthal'].append(best_fit.params['azimuthal'].value)
+    results['redchisq'].append(best_fit.redchi)
+
+    #Sometimes fit is so bad uncertainties cannot be estimated
+    if (hasattr(best_fit, 'uvars')):
+        results['sigma_vx'].append(best_fit.uvars['vertex_x'].s)
+        results['sigma_vy'].append(best_fit.uvars['vertex_y'].s)
+        results['sigma_vz'].append(best_fit.uvars['vertex_z'].s)
+        results['sigma_brho'].append(best_fit.uvars['brho'].s)
+        results['sigma_polar'].append(best_fit.uvars['polar'].s)
+        results['sigma_azimuthal'].append(best_fit.uvars['azimuthal'].s)
+    else:
+        results['sigma_vx'].append(1.0e6)
+        results['sigma_vy'].append(1.0e6)
+        results['sigma_vz'].append(1.0e6)
+        results['sigma_brho'].append(1.0e6)
+        results['sigma_polar'].append(1.0e6)
+        results['sigma_azimuthal'].append(1.0e6)
