@@ -23,7 +23,7 @@ class Guess:
     brho: float = 0.0
     polar: float = 0.0
     azimuthal: float = 0.0
-    direction: Direction = field(default_factory=Direction)
+    direction: Direction = field(default=-1)
 
 def fx(x: np.ndarray, ds: float) -> np.ndarray:
         args = get_kalman_args()
@@ -104,13 +104,28 @@ def solve_physics_kalman(cluster_index: int, cluster: ClusteredCloud, initial_gu
     momentum = np.linalg.norm(trajectory[0, 3:]) * ejectile.mass / constants.speed_of_light
     polar = np.arctan2(np.linalg.norm(trajectory[0, 3:5]), trajectory[0, 5])
     azimuthal = np.arctan2(trajectory[0, 4], trajectory[0, 3])
+    sigma_velox = math.sqrt(covariance[0,3,3])
+    sigma_veloy = math.sqrt(covariance[0,4,4])
+    sigma_veloz = math.sqrt(covariance[0,5,5])
+    sigma_velo = np.linalg.norm(trajectory[0, 3:]) * math.sqrt((sigma_velox/trajectory[0,3])**2.0 + (sigma_veloy/trajectory[0,4])**2.0 + (sigma_veloz/trajectory[0,5])**2.0)
+    sigma_veloxy = np.linalg.norm(trajectory[0, 3:]) * math.sqrt((sigma_velox/trajectory[0,3])**2.0 + (sigma_veloy/trajectory[0,4])**2.0)
+    sigma_momentum = sigma_velo * ejectile.mass/constants.speed_of_light
+    sigma_polar = abs(polar - np.arctan2(np.linalg.norm(trajectory[0, 3:5]) + sigma_veloxy, trajectory[0,5] + sigma_veloz))
+    sigma_azimuth = abs(azimuthal - np.arctan2(trajectory[0,4] + sigma_veloy, trajectory[0,3] + sigma_velox))
 
     results['cluster_index'].append(cluster_index)
     results['cluster_label'].append(cluster.label)
     results['event'].append(cluster.point_cloud.event_number)
     results['vertex_x'].append(trajectory[0,0] * 1000.0)
+    results['sigma_vx'].append(math.sqrt(covariance[0,0,0]))
     results['vertex_y'].append(trajectory[0,1] * 1000.0)
+    results['sigma_vy'].append(math.sqrt(covariance[0,1,1]))
     results['vertex_z'].append(trajectory[0,2] * 1000.0)
+    results['sigma_vz'].append(math.sqrt(covariance[0,2,2]))
     results['brho'].append(momentum / (QBRHO_2_P * ejectile.Z))
+    results['sigma_brho'].append(sigma_momentum / (QBRHO_2_P * ejectile.Z))
     results['polar'].append(polar)
+    results['sigma_polar'].append(sigma_polar)
     results['azimuthal'].append(azimuthal)
+    results['sigma_azimuthal'].append(sigma_azimuth)
+    results['redchisq'].append(0.0)
