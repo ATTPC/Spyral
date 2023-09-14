@@ -40,6 +40,9 @@ def phase_2(point_path: Path, cluster_path: Path, cluster_params: ClusterParamet
         except:
             continue
 
+        if cloud_data is None:
+            continue
+
         cloud = PointCloud()
         cloud.load_cloud_from_hdf5_data(cloud_data[:].copy(), idx)
         if len(cloud.cloud) < cluster_params.min_write_size:
