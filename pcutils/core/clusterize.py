@@ -133,7 +133,7 @@ def cleanup_clusters(clusters: list[ClusteredCloud], cluster_params: ClusterPara
         #Sort our cloud to be ordered in z
         cluster.point_cloud.sort_in_z()
 
-    return [cluster for cluster in clusters if len(cluster.point_cloud.cloud) > 0]
+    return [cluster for cluster in clusters if len(cluster.point_cloud.cloud) > cluster_params.min_write_size]
     
 def clusterize(pc: PointCloud, cluster_params: ClusterParameters) -> list[ClusteredCloud]:
     '''

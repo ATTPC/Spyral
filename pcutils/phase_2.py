@@ -54,11 +54,8 @@ def phase_2(point_path: Path, cluster_path: Path, cluster_params: ClusterParamet
 
         #Write the clusters, but only if the size of the cluster exceeds the inputed value
         cluster_event_group = cluster_group.create_group(f'event_{idx}')
-        cluster_event_group.attrs['nclusters'] = len(joined)
+        cluster_event_group.attrs['nclusters'] = len(cleaned)
         for cidx, cluster in enumerate(cleaned):
-            #Dump clusters which don't have enough points
-            if len(cluster.point_cloud.cloud) < cluster_params.min_write_size:
-                continue
             local_group = cluster_event_group.create_group(f'cluster_{cidx}')
             local_group.attrs['label'] = cluster.label
             local_group.create_dataset('cloud', data=cluster.point_cloud.cloud)
