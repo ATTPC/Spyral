@@ -10,10 +10,8 @@ import polars as pl
 from pathlib import Path
 from time import time
 
-def phase_4(cluster_path: Path, estimate_path: Path, result_path: Path, detector_params: DetectorParameters, solver_params: SolverParameters):
+def phase_4(cluster_path: Path, estimate_path: Path, result_path: Path, detector_params: DetectorParameters, solver_params: SolverParameters, nuclear_data: NuclearDataMap):
     start = time()
-
-    nuclear_data = NuclearDataMap()
 
     pid: ParticleID = load_particle_id(solver_params.particle_id_path, nuclear_data)
     if pid is None:

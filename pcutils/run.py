@@ -4,12 +4,14 @@ from .phase_1 import phase_1
 from .phase_2 import phase_2
 from .phase_3 import phase_3
 from .phase_4 import phase_4
+from .phase_4_kalman import phase_4_kalman
 from time import time
 
 def run_pcutils(config: Config):
 
     ws = Workspace(config.workspace)
     pad_map = ws.get_pad_map()
+    nuclear_map = ws.get_nuclear_map()
     start = time()
     for idx in range(config.run.run_min, config.run.run_max + 1, 1):
 
@@ -23,7 +25,8 @@ def run_pcutils(config: Config):
             phase_3(ws.get_cluster_file_path(idx), ws.get_estimate_file_path_parquet(idx), config.estimate, config.detector)
 
         if config.run.do_phase4:
-            phase_4(ws.get_cluster_file_path(idx), ws.get_estimate_file_path_parquet(idx), ws.get_physics_file_path_parquet(idx), config.detector, config.solver)
+            #phase_4(ws.get_cluster_file_path(idx), ws.get_estimate_file_path_parquet(idx), ws.get_physics_file_path_parquet(idx), config.detector, config.solver)
+            phase_4_kalman(ws.get_cluster_file_path(idx), ws.get_estimate_file_path_parquet(idx), ws.get_physics_file_path_parquet(idx), config.detector, config.solver)
         
     stop = time()
     print(f'Total ellapsed runtime: {stop - start}s')
