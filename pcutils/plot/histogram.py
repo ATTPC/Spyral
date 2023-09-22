@@ -33,6 +33,9 @@ Hist2D:
 '''
 @dataclass
 class Hist1D:
+    '''
+    Container wrapping a numpy array used to store histogram data and retrieve histogram statistics
+    '''
     name: str
     counts: NDArray[np.float64]
     bins: NDArray[np.float64]
@@ -58,6 +61,9 @@ class Hist1D:
 
 @dataclass
 class Hist2D:
+    '''
+    Container wrapping a numpy array used to store two-dimensional histogram data and retrieve histogram statistics
+    '''
     name: str
     counts: NDArray[np.float64]
     x_bins: NDArray[np.float64]

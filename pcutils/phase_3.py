@@ -1,13 +1,16 @@
 from .core.clusterize import ClusteredCloud
 from .core.config import DetectorParameters, EstimateParameters
 from .core.estimator import estimate_physics
-from pathlib import Path
+from .core.workspace import Workspace
 from polars import DataFrame
 from time import time
 import h5py as h5
 
-def phase_3(cluster_path: Path, parquet_path: Path, estimate_params: EstimateParameters, detector_params: DetectorParameters):
+def phase_3(run: int, ws: Workspace, estimate_params: EstimateParameters, detector_params: DetectorParameters):
     start = time()
+
+    cluster_path = ws.get_cluster_file_path(run)
+    estimate_path = ws.get_estimate_file_path_parquet(run)
 
     cluster_file = h5.File(cluster_path, 'r')
     cluster_group: h5.Group = cluster_file.get('cluster')
@@ -22,9 +25,24 @@ def phase_3(cluster_path: Path, parquet_path: Path, estimate_params: EstimatePar
     flush_count = 0
     count = 0
 
-    data: dict[str, list] = {'event': [], 'cluster_index': [], 'cluster_label': [], 'vertex_x': [], 'vertex_y': [], 'vertex_z': [],\
-                             'center_x': [], 'center_y': [], 'center_z': [], 'polar': [], 'azimuthal': [],\
-                             'brho': [], 'dEdx': [], 'dE': [], 'arclength': [], 'direction': []}
+    data: dict[str, list] = {
+        'event': [], 
+        'cluster_index': [], 
+        'cluster_label': [], 
+        'vertex_x': [], 
+        'vertex_y': [], 
+        'vertex_z': [],
+        'center_x': [], 
+        'center_y': [], 
+        'center_z': [], 
+        'polar': [], 
+        'azimuthal': [],
+        'brho': [], 
+        'dEdx': [], 
+        'dE': [], 
+        'arclength': [], 
+        'direction': []
+    }
 
     for idx in range(min_event, max_event+1):
         if count > flush_val:
@@ -36,7 +54,7 @@ def phase_3(cluster_path: Path, parquet_path: Path, estimate_params: EstimatePar
         event: h5.Group | None = None
         try:
             event = cluster_group[f'event_{idx}']
-        except:
+        except Exception:
             continue
 
         nclusters = event.attrs['nclusters']
@@ -44,7 +62,7 @@ def phase_3(cluster_path: Path, parquet_path: Path, estimate_params: EstimatePar
             local_cluster: h5.Group | None = None
             try:
                 local_cluster = event[f'cluster_{cidx}']
-            except:
+            except Exception:
                 continue
 
             cluster = ClusteredCloud()
@@ -56,7 +74,7 @@ def phase_3(cluster_path: Path, parquet_path: Path, estimate_params: EstimatePar
             estimate_physics(cidx, cluster, estimate_params, detector_params, data)
 
     df = DataFrame(data)
-    df.write_parquet(parquet_path)
+    df.write_parquet(estimate_path)
 
 
     stop = time()

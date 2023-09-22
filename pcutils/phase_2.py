@@ -1,13 +1,15 @@
-from .core.config import ClusterParameters, DetectorParameters
+from .core.config import ClusterParameters
 from .core.point_cloud import PointCloud
 from .core.clusterize import clusterize, join_clusters, cleanup_clusters
+from .core.workspace import Workspace
 import h5py as h5
-from pathlib import Path
 from time import time
 
-def phase_2(point_path: Path, cluster_path: Path, cluster_params: ClusterParameters):
+def phase_2(run: int, ws: Workspace, cluster_params: ClusterParameters):
 
     start = time()
+    point_path = ws.get_point_cloud_file_path(run)
+    cluster_path = ws.get_cluster_file_path(run)
 
     point_file = h5.File(point_path, 'r')
     cluster_file = h5.File(cluster_path, 'w')
@@ -37,7 +39,7 @@ def phase_2(point_path: Path, cluster_path: Path, cluster_params: ClusterParamet
         cloud_data: h5.Dataset | None = None
         try:
             cloud_data = cloud_group.get(f'cloud_{idx}')
-        except:
+        except Exception:
             continue
 
         if cloud_data is None:

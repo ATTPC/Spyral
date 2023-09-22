@@ -4,7 +4,6 @@ from .constants import INVALID_EVENT_NUMBER
 from .config import CrossTalkParameters
 import numpy as np
 from typing import Optional
-import warnings
 
 class PointCloud:
 

@@ -1,4 +1,5 @@
 from .core.config import DetectorParameters, SolverParameters
+from .core.workspace import Workspace
 from .core.clusterize import ClusteredCloud
 from .core.nuclear_data import NuclearDataMap
 from .core.particle_id import ParticleID, load_particle_id
@@ -7,19 +8,21 @@ from .core.estimator import Direction
 from .core.solver import solve_physics, InitialValue
 import h5py as h5
 import polars as pl
-from pathlib import Path
 from time import time
 
-def phase_4(cluster_path: Path, estimate_path: Path, result_path: Path, detector_params: DetectorParameters, solver_params: SolverParameters, nuclear_data: NuclearDataMap):
+def phase_4(run: int, ws: Workspace, detector_params: DetectorParameters, solver_params: SolverParameters, nuclear_data: NuclearDataMap):
     start = time()
 
-    pid: ParticleID = load_particle_id(solver_params.particle_id_path, nuclear_data)
+    pid: ParticleID = load_particle_id(ws.get_gate_file_path(solver_params.particle_id_filename), nuclear_data)
     if pid is None:
         print('Particle ID error at phase 4!')
         return
     
     target: Target = Target(solver_params.gas_data_path, nuclear_data)
 
+    cluster_path = ws.get_cluster_file_path(run)
+    estimate_path = ws.get_estimate_file_path_parquet(run)
+    result_path = ws.get_physics_file_path_parquet(run, pid.nucleus)
     cluster_file = h5.File(cluster_path, 'r')
     estimate_df = pl.scan_parquet(estimate_path)
 

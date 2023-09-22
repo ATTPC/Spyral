@@ -1,10 +1,9 @@
 from .get_trace import GetTrace
-from .config import Config, TraceParameters
+from .config import TraceParameters
 from .constants import INVALID_EVENT_NAME, INVALID_EVENT_NUMBER
 from .hardware_id import hardware_id_from_array
 import numpy as np
 import h5py
-from pathlib import Path
 
 GET_DATA_TRACE_START: int = 5
 GET_DATA_TRACE_STOP: int = 512+5
@@ -64,32 +63,3 @@ def preprocess_traces(traces: np.ndarray, baseline_window_scale: float) -> np.nd
     result = np.real(np.fft.ifft2(transformed * fil, axes=(1,))) #Apply the filter -> multiply in Fourier = convolve in normal
         
     return traces - result
-
-#GWM: test speed up between reading chunks of events vs. single event at a time
-
-def read_get_event_chunk(config: Config, start_event: int, stop_event: int) -> list[GetEvent]:
-    try:
-        with h5py.File(config.workspace.trace_data_path, 'r') as hfile:
-            get_group = hfile['get']
-            event_list: list[GetEvent] = []
-            for evt in range(start_event, stop_event+1):
-                evt_name = f'evt{evt}_data'
-                event_list.append(GetEvent(get_group[evt_name], evt, config.trace))
-            return event_list
-    except Exception as e:
-        print(f'While reading file {config.workspace.trace_data_path} for events {start_event} to {stop_event} recieved the following exception:')
-        print(f'\t{type(e)}: {e}')
-        print(f'No events will have been read.')
-        return list()
-    
-def read_get_event(config: Config, event: int) -> GetEvent:
-    try:
-        with h5py.File(config.workspace.trace_data_path, 'r') as hfile:
-            get_group = hfile['get']
-            event_name = f'evt{event}_data'
-            return GetEvent(get_group[event_name], event, config.trace)
-    except Exception as e:
-        print(f'While reading file {config.workspace.trace_data_path} for event {event} recieved the following exception:')
-        print(f'\t{type(e)}: {e}')
-        print(f'No event will have been read.')
-        return None

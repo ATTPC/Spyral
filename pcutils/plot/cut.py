@@ -83,7 +83,7 @@ def load_cut_json(filepath: str) -> Optional[Cut2D]:
         with open(filepath, 'r') as input:
             buffer = input.read()
             cut_dict = json.loads(buffer)
-            if not 'name' in cut_dict or not 'vertices' in cut_dict:
+            if 'name' not in cut_dict or 'vertices' not in cut_dict:
                 print(f'Data in file {filepath} is not the right format for Cut2D, could not load')
                 return None
             return Cut2D(cut_dict['name'], cut_dict['vertices'])
