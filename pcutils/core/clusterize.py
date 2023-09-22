@@ -46,7 +46,7 @@ def least_squares_circle(x: np.ndarray, y: np.ndarray) -> tuple[float, float, fl
     c = None
     try:
         c = np.linalg.solve(matrix_a, matrix_b)
-    except:
+    except Exception:
         return (np.nan, np.nan, np.nan, np.nan)
 
     xc = c[0] + mean_x

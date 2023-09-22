@@ -52,11 +52,11 @@ Configurations contain many parameters. These can be seen in the config.json exa
 - Workspace parameters: These are file paths to either raw data, the workspace, or various AT-TPC pad data files.
 - Run parameters: Run numbers over which the data should be processed, as well as indications of which types of analysis to run
 - Detector parameters: detector conditions and configuration
-- Gas parameters: energy loss parameters
 - Trace parameters: parameters which are used in the peak identification and baseline removal analysis
 - Cross-talk parameters: parameters used in cross-talk removal, after peaks have been identified
 - Clustering parameters: point cloud clustering parameters
-- More to come...
+- Estimation parameters: used to generate estimates of physical observables
+- Solver parameters: used to control the physics solver (minimzation or kalman filter)
 
 ### Running
 
@@ -65,3 +65,7 @@ To use PointCloud-utils, run the main.py script located at the top level of the 
 ```[bash]
 python main.py my_config.json
 ```
+
+### Plotting
+
+PointCloud-utils also bundles some helpful plotting tools for creating dataset histograms. The default numpy/scipy/matplotlib histogramming solution is not terribly useful for larger datasets. The tools included in pcutils/plot can help generate histograms of large datasets as well as generate gates for use with various analyses. The plotter.py file contains an example of how to generate a particle ID gate and then apply it to a dataset.
