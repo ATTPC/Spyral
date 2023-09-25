@@ -23,6 +23,9 @@ def get_event_range(trace_file: File) -> tuple[int, int]:
 def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParameters, cross_params: CrossTalkParameters, detector_params: DetectorParameters):
     start = time()
     trace_path = ws.get_trace_file_path(run)
+    if not trace_path.exists():
+        return
+    
     point_path = ws.get_point_cloud_file_path(run)
     trace_file = File(trace_path, 'r')
     point_file = File(point_path, 'w')

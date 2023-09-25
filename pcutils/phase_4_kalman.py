@@ -22,6 +22,9 @@ def phase_4_kalman(run: int, ws: Workspace, detector_params: DetectorParameters,
 
     cluster_path = ws.get_cluster_file_path(run)
     estimate_path = ws.get_estimate_file_path_parquet(run)
+    if not cluster_path.exists() or not estimate_path.exists():
+        return
+    
     result_path = ws.get_physics_file_path_parquet(run, pid.nucleus)
     cluster_file = h5.File(cluster_path, 'r')
     estimate_df = pl.scan_parquet(estimate_path)

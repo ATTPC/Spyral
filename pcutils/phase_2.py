@@ -9,6 +9,9 @@ def phase_2(run: int, ws: Workspace, cluster_params: ClusterParameters):
 
     start = time()
     point_path = ws.get_point_cloud_file_path(run)
+    if not point_path.exists():
+        return
+    
     cluster_path = ws.get_cluster_file_path(run)
 
     point_file = h5.File(point_path, 'r')

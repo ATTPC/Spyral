@@ -30,7 +30,10 @@ def fx(x: np.ndarray, ds: float) -> np.ndarray:
         speed = math.sqrt(x[3]**2.0 + x[4]**2.0 + x[5]**2.0)
         dt = ds/speed
         unit_vector = x[3:] / (speed)# direction
-        kinetic_energy = args.ejectile.mass * (1.0/math.sqrt(1.0 - (speed / constants.speed_of_light)**2.0) - 1.0) #MeV
+        momentum = speed/constants.speed_of_light * args.ejectile.mass
+        kinetic_energy = math.sqrt(momentum ** 2.0 + args.ejectile.mass ** 2.0) - args.ejectile.mass #MeV
+        if kinetic_energy < 0.001:
+             return x
         charge = args.ejectile.Z * constants.elementary_charge #Coulombs
         mass_kg = args.ejectile.mass * MEV_2_KG #kg
         deceleration = args.target.get_dedx(args.ejectile, kinetic_energy) * MEV_2_JOULE \
@@ -68,9 +71,16 @@ def apply_kalman_filter(data: np.ndarray, initial_guess: Guess) -> tuple[np.ndar
 
     first_ds = np.linalg.norm(initial_state[:3] - data[0, :])
     ds_set = [np.linalg.norm(point[:3] - data[idx-1, :]) for idx, point in enumerate(data) if idx != 0]
+    mean_ds = np.average(ds_set)
+    sigma_ds = np.std(ds_set)
     ds_set.insert(0, first_ds)
+    cutoff = 0
+    for idx, ds in enumerate(ds_set[1:]):
+         if ds > (mean_ds + 1.5 * sigma_ds):
+              cutoff = idx
+              break
 
-    points = MerweScaledSigmaPoints(6, alpha=.001, beta=2., kappa=-3)
+    points = MerweScaledSigmaPoints(6, alpha=.001, beta=2., kappa=0)
     k_filter = UnscentedKalmanFilter(6, 3, 0.001, hx, fx, points)
     sigma_speed = 0.01 * speed
     sigma_pos = 0.001
@@ -79,9 +89,12 @@ def apply_kalman_filter(data: np.ndarray, initial_guess: Guess) -> tuple[np.ndar
     k_filter.R = np.diag([sigma_pos**2.0, sigma_pos**2.0, sigma_pos**2.0])
     k_filter.Q = Q_discrete_white_noise(dim=2, dt=0.001, var=(sigma_speed)**2.0, block_size=3, order_by_dim=False)
 
-    (means, covs) = k_filter.batch_filter(data, dts=ds_set)
+    (means, covs) = k_filter.batch_filter(data[:cutoff], dts=ds_set[:cutoff])
 
-    trajectory, traj_cov, _ = k_filter.rts_smoother(means, covs, dts=ds_set)
+    ds_set.insert(0, 0.0)
+    all_means = np.insert(means, 0, initial_state, axis=0)
+    all_cov = np.insert(covs, 0, np.diag([(sigma_pos)**2.0, (sigma_pos)**2.0, (sigma_pos)**2.0, sigma_speed**2.0, sigma_speed**2.0, sigma_speed**2.0]), axis=0)
+    trajectory, traj_cov, _ = k_filter.rts_smoother(all_means, all_cov, dts=ds_set[:(cutoff+1)])
     return trajectory, traj_cov
 
 def solve_physics_kalman(cluster_index: int, cluster: ClusteredCloud, initial_guess: Guess, det_params: DetectorParameters, target: Target, ejectile: NucleusData, results: dict[str, list[float]]):
@@ -100,10 +113,15 @@ def solve_physics_kalman(cluster_index: int, cluster: ClusteredCloud, initial_gu
     if initial_guess.direction is Direction.BACKWARD:
         np.flip(data, axis=0)
 
-    trajectory, covariance = apply_kalman_filter(data, initial_guess)
+    try:
+        trajectory, covariance = apply_kalman_filter(data, initial_guess)
+    except Exception:
+         return
     momentum = np.linalg.norm(trajectory[0, 3:]) * ejectile.mass / constants.speed_of_light
     polar = np.arctan2(np.linalg.norm(trajectory[0, 3:5]), trajectory[0, 5])
     azimuthal = np.arctan2(trajectory[0, 4], trajectory[0, 3])
+    if azimuthal < 0.0:
+         azimuthal += 2.0 * np.pi
     sigma_velox = math.sqrt(covariance[0,3,3])
     sigma_veloy = math.sqrt(covariance[0,4,4])
     sigma_veloz = math.sqrt(covariance[0,5,5])

@@ -14,6 +14,8 @@ def run_pcutils(config: Config):
     start = time()
     for idx in range(config.run.run_min, config.run.run_max + 1, 1):
 
+        print(f'Analyzing run {idx}...')
+
         if config.run.do_phase1:
             phase_1(idx, ws, pad_map, config.trace, config.cross, config.detector)
 

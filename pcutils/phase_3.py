@@ -10,6 +10,9 @@ def phase_3(run: int, ws: Workspace, estimate_params: EstimateParameters, detect
     start = time()
 
     cluster_path = ws.get_cluster_file_path(run)
+    if not cluster_path.exists():
+        return
+    
     estimate_path = ws.get_estimate_file_path_parquet(run)
 
     cluster_file = h5.File(cluster_path, 'r')

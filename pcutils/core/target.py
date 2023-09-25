@@ -44,8 +44,6 @@ class Target:
             self.material.add_element(nuclear_data.get_data(z, a).atomic_mass, z, float(s))
         self.density: float = self.data.density()
         self.material.density(self.density)
-        print(f'Density: {self.material.density()}')
-        print(f'Material: {self.pretty_string}')
 
     def __str__(self) -> str:
         return self.pretty_string
