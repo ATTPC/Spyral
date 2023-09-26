@@ -51,11 +51,11 @@ class CrossTalkParameters:
 
 @dataclass
 class ClusterParameters:
-    smoothing_neighbor_distance: float = 0.0 #mm
+    smoothing_neighbor_distance: float = 10.0 #mm
     min_points: int = 0
     min_size: int = 0
     fractional_distance_min: float = 0.0
-    max_center_distance: float = 0.0
+    max_center_distance: float = 25.0
     fractional_charge_threshold: float = 0.0
     min_write_size: int = 0
 

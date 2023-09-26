@@ -60,8 +60,9 @@ def PointCloudTest(h5_Path: Path, event_num: int, plot_3d: bool = False):
     pad_geometry_Path = '../etc/padxy.csv'
     gain_Path = '../etc/pad_gain_map.csv'
     time_correction_Path = '../etc/pad_time_correction.csv'
+    electronics_Path = '../etc/pad_electronics.csv'
 
-    padmap = PadMap(geometry_path = pad_geometry_Path, gain_path = gain_Path, time_correction_path = time_correction_Path)
+    padmap = PadMap(geometry_path = pad_geometry_Path, gain_path = gain_Path, time_correction_path = time_correction_Path, electronics_path = electronics_Path)
 
     Event = read_get_event(h5_Path, event_num)
     pc = PointCloud()

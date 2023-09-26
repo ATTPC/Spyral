@@ -26,7 +26,7 @@ class NucleusData:
 
 #Szudzik pairing function, requires use of unsigned integers
 def generate_nucleus_id(z: np.uint32, a: np.uint32) -> np.uint32 :
-    return z*z + z + a if z > a else a*a + z
+    return z*z + z + a if z == max(z, a) else a*a + z
 
 class NuclearDataMap:
     def __init__(self):

@@ -116,6 +116,38 @@ def draw_ede_cut(run_min: int, run_max: int):
     except:
         pass
 
+def dataframe_to_csv(run_min: int, run_max: int):
+    df = merge_runs_to_dataframe(run_min, run_max)
+    df.write_csv('ntuple.csv')
+
+def plot_kine(run_min: int, run_max: int):
+    df = merge_runs_to_dataframe(run_min, run_max)
+    pyplot.figure(figsize = (8, 6))
+    pyplot.scatter(df.select('polar').to_numpy() * RAD2DEG, df.select('brho').to_numpy(), s = 2)
+    pyplot.xlim([0, 180])
+    pyplot.ylim([0, 2])
+    pyplot.grid()
+    pyplot.show()
+
+def draw_kine_cut(run_min: int, run_max: int):
+    handler = CutHandler()
+    grammer = Histogrammer()
+
+    grammer.add_hist2d('kine', (250, 200), ((0, 180.0), (0.0, 1.5)))
+    df = merge_runs_to_dataframe(run_min, run_max)
+    grammer.fill_hist2d('kine', df.select('polar').to_numpy() * RAD2DEG, df.select('brho').to_numpy())
+
+    fig, ax = pyplot.subplots(1, 1)
+    selector = widgets.PolygonSelector(ax, handler.onselect)
+
+    mesh = grammer.draw_hist2d(name = 'kine', axis = ax, cmap = white_jet)
+    pyplot.colorbar(mesh, ax = ax)
+    pyplot.tight_layout()
+    pyplot.show()
+
 if __name__ == '__main__':
-    plot(347, 356)
+    #plot(347, 356)
     #draw_ede_cut(347, 356)
+    #dataframe_to_csv(347, 356)
+    #plot_kine(347, 356)
+    draw_kine_cut(347, 356)
