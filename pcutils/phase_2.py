@@ -57,7 +57,6 @@ def phase_2(run: int, ws: Workspace, cluster_params: ClusterParameters):
         joined = join_clusters(clusters, cluster_params)
         cleaned = cleanup_clusters(joined, cluster_params)
 
-        #Write the clusters, but only if the size of the cluster exceeds the inputed value
         cluster_event_group = cluster_group.create_group(f'event_{idx}')
         cluster_event_group.attrs['nclusters'] = len(cleaned)
         for cidx, cluster in enumerate(cleaned):

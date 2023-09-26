@@ -28,8 +28,8 @@ def plot(run_min: int, run_max: int, ws: Workspace, pid_file):
         return
 
     grammer = Histogrammer()
-    grammer.add_hist2d('ede_gated', (400, 600), ((0.0, 20000.0), (0.0, 3.0)))
-    grammer.add_hist2d('ede', (400, 600), ((0.0, 20000.0), (0.0, 3.0)))
+    grammer.add_hist2d('ede_gated', (400, 600), ((0.0, 10000.0), (0.0, 3.0)))
+    grammer.add_hist2d('ede', (400, 600), ((0.0, 10000.0), (0.0, 3.0)))
     grammer.add_hist2d('theta_brho_gated', (360, 600), ((0.0, 180.0), (0.0, 3.0)))
     grammer.add_hist2d('theta_brho', (360, 600), ((0.0, 180.0), (0.0, 3.0)))
 
@@ -79,7 +79,7 @@ def draw_gate(run_min: int, run_max: int, ws: Workspace):
     handler = CutHandler()
     grammer = Histogrammer()
 
-    grammer.add_hist2d('pid', (400, 600), ((0.0, 20000.0), (0.0, 3.0)))
+    grammer.add_hist2d('pid', (400, 300), ((0.0, 10000.0), (0.1, 3.0)))
     for run in range(run_min, run_max+1):
         run_path = ws.get_estimate_file_path_parquet(run)
         if not run_path.exists():
@@ -90,7 +90,7 @@ def draw_gate(run_min: int, run_max: int, ws: Workspace):
     _fig, ax = pyplot.subplots(1,1)
     _selector = widgets.PolygonSelector(ax, handler.onselect)
 
-    mesh = grammer.draw_hist2d('pid', ax, log_z=True)
+    mesh = grammer.draw_hist2d('pid', ax, log_z=False)
     pyplot.colorbar(mesh, ax=ax)
     pyplot.tight_layout()
     pyplot.show()

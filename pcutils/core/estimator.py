@@ -20,8 +20,8 @@ def generate_circle_points(center_x: float, center_y: float, radius: float) -> n
 
 def estimate_physics(cluster_index: int, cluster: ClusteredCloud, estimate_params: EstimateParameters, detector_params: DetectorParameters, results: dict[str, list]):
     #Reject any clusters that were labeled as noise by the clustering algorithm
-    if cluster.label == -1:
-        return
+    #if cluster.label == -1:
+    #    return
 
     if len(cluster.point_cloud.cloud) < estimate_params.min_total_trajectory_points:
         return
@@ -53,7 +53,7 @@ def estimate_physics(cluster_index: int, cluster: ClusteredCloud, estimate_param
     
     #Find the first point that is furthest from the vertex in rho (local maximum) to get the first arc of the trajectory
     rho_to_vertex = np.linalg.norm(cluster.point_cloud.cloud[1:, :2] - vertex[:2], axis=1)
-    maxima = argrelmax(rho_to_vertex, order=10)[0]
+    maxima = argrelmax(rho_to_vertex, order=2)[0]
     maximum = 0
     if len(maxima) == 0:
         maximum = len(cluster.point_cloud.cloud)
@@ -71,7 +71,7 @@ def estimate_physics(cluster_index: int, cluster: ClusteredCloud, estimate_param
     rho_to_vertex = np.linalg.norm((cluster.point_cloud.cloud[:, :2] - vertex[:2]), axis=1)
 
     #Do a linear fit to small segment of trajectory to extract rho vs. z and extrapolate vertex z
-    test_index = max(10, int(maximum * 0.5))
+    test_index = max(5, int(maximum * 0.5))
     fit = linregress(cluster.point_cloud.cloud[:test_index, 2], rho_to_vertex[:test_index])
     vertex_rho = np.linalg.norm(vertex[:2])
     vertex[2] = (vertex_rho - fit.intercept) / fit.slope

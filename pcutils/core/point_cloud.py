@@ -1,7 +1,7 @@
 from .get_event import GetEvent
 from .pad_map import PadMap
 from .constants import INVALID_EVENT_NUMBER
-from .config import CrossTalkParameters
+from .config import CrossTalkParameters, DetectorParameters
 import numpy as np
 from typing import Optional
 
@@ -156,7 +156,33 @@ class PointCloud:
             mask[idx] = len(self.cloud[neighbors]) >= min_neighbors
         self.cloud = self.cloud[mask]
 
-    def bin_cloud_z(self, fractional_bin_size = 0.1):
+    def bin_cloud_z(self, fractional_bin_size = 0.05):
         sigma_z = np.std(self.cloud[:, 2])
         bin_width = sigma_z * fractional_bin_size
-        #Not implemented yet
+
+        bin_mins = np.arange(np.min(self.cloud[:, 2]), np.max(self.cloud[:, 2]), step=bin_width)
+        binned_cloud = np.full((len(bin_mins), 7), np.nan, dtype=np.float64)
+        for idx, z_low_edge in enumerate(bin_mins):
+            z_diffs = z_low_edge - self.cloud[:, 2]
+            which_points_in_bin = np.logical_and(z_diffs < bin_width, z_diffs >= 0.0)
+            points_in_bin = self.cloud[which_points_in_bin]
+            if len(points_in_bin) == 0:
+                continue
+
+            r = np.linalg.norm(points_in_bin[:, :2], axis=1)
+            mean_r = np.mean(r)
+            std_r  = np.std(r)
+            if std_r != 0.0:
+                points_in_bin = points_in_bin[np.abs(r - mean_r) < std_r]
+            if len(points_in_bin) == 0:
+                continue
+
+            binned_cloud[idx, 0] = np.mean(points_in_bin[:, 0])
+            binned_cloud[idx, 1] = np.mean(points_in_bin[:, 1])
+            binned_cloud[idx, 2] = z_low_edge + 0.5 * bin_width
+            binned_cloud[idx, 3] = np.mean(points_in_bin[:, 3])
+            binned_cloud[idx, 4] = np.mean(points_in_bin[:, 4])
+            binned_cloud[idx, 5] = 0.0 #this has no meaning any more
+            binned_cloud[idx, 6] = np.mean(points_in_bin[:, 6])
+
+        self.cloud = binned_cloud[~np.isnan(binned_cloud[:, 0])]

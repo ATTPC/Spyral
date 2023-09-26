@@ -1,5 +1,5 @@
 from .point_cloud import PointCloud
-from .config import ClusterParameters
+from .config import ClusterParameters, DetectorParameters
 import sklearn.cluster as skcluster
 from sklearn.preprocessing import StandardScaler
 from dataclasses import dataclass, field
@@ -127,13 +127,14 @@ def join_clusters(clusters: list[ClusteredCloud], params: ClusterParameters) -> 
 def cleanup_clusters(clusters: list[ClusteredCloud], cluster_params: ClusterParameters) -> list[ClusteredCloud]:
     for cluster in clusters:
         #Drop any points which do not have a minimum number of neighbors
-        cluster.point_cloud.drop_isolated_points(cluster_params.cleanup_neighbor_distance, cluster_params.cleanup_min_neighbors)
-        #Re-smooth to remove jitter in the trajectory
-        cluster.point_cloud.smooth_cloud(cluster_params.cleanup_neighbor_distance)
+        #cluster.point_cloud.drop_isolated_points(cluster_params.cleanup_neighbor_distance, cluster_params.cleanup_min_neighbors)
         #Sort our cloud to be ordered in z
         cluster.point_cloud.sort_in_z()
+        #Re-smooth to remove jitter in the trajectory
+        cluster.point_cloud.bin_cloud_z()
 
-    return [cluster for cluster in clusters if len(cluster.point_cloud.cloud) > cluster_params.min_write_size]
+    #return [cluster for cluster in clusters if len(cluster.point_cloud.cloud) > cluster_params.min_write_size]
+    return [cluster for cluster in clusters if cluster.label != -1]
     
 def clusterize(pc: PointCloud, cluster_params: ClusterParameters) -> list[ClusteredCloud]:
     '''
