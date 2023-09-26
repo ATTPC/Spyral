@@ -8,14 +8,14 @@
 
     "run_min": 347,
     "run_max": 356,
+
     "phase1": true,
     "phase2": true,
     "phase3": true,
     "phase4": false,
 
     "magnetic_field(T)": 2.9,
-    "electric_field(V/m)": 6000.0,
-    "tilt_angle(degrees)": 5.0,
+    "electric_field(V/m)": 45000.0,
     "detector_length(mm)": 1000.0,
     "beam_region_radius(mm)": 25.0,
     "micromegas_time_bucket": 17.0,
@@ -40,16 +40,16 @@
     "cluster_smoothing_neighbor_distance(mm)": 10.0,
     "cluster_minimum_size": 10,
     "cluster_minimum_points": 10,
-    "cluster_max_center_distance(mm)": 35.0,
+    "cluster_max_center_distance(mm)": 50.0,
     "cluster_fractional_distance_min": 0.0,
     "cluster_fractional_charge_threshold": 0.65,
     "cluster_minimum_write_size": 50,
+    "cluster_cleanup_minimum_neighbors": 5,
+    "cluster_cleanup_neighbor_distance(mm)": 15.0,
 
-    "estimate_minimum_neighbors": 5,
-    "estimate_neighbor_distance": 15.0,
     "estimate_mininum_total_trajectory_points": 50,
     "estimate_maximum_distance_from_beam_axis": 30.0,
 
     "solver_gas_data_path": "/path/to/some/gas/file.json",
-    "solver_particle_id_path": "/path/to/some/particle/id.json"
+    "solver_particle_id_file": "some_particle_id.json"
 }

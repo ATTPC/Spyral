@@ -21,3 +21,7 @@ ELECTRON_MASS_U: float = physical_constants['electron mass in u'][0] #CODATA 201
 MEV_2_JOULE: float = physical_constants['electron volt-joule relationship'][0] * 1.0e6 # J/ev * ev/MeV = J/MeV
 
 MEV_2_KG: float = physical_constants['electron volt-kilogram relationship'][0] * 1.0e6 # kg/ev * ev/MeV = kg/MeV (per c^2)
+
+ROOM_TEMPERATURE: float = 293.0 #Kelvin
+
+GAS_CONSTANT: float = physical_constants['molar gas constant'][0] * 0.0075 * ((100.0) ** 3.0)  # m^3 Pa / K mol -> m^3 Torr / K mol -> cm^3 Torr / K mol

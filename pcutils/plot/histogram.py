@@ -4,11 +4,15 @@ from dataclasses import dataclass
 from typing import Optional
 from matplotlib.pyplot import Axes
 from matplotlib.text import Text
-from matplotlib.colors import LogNorm
+from matplotlib.colors import LogNorm, Colormap
 from matplotlib.backend_bases import LocationEvent
 from matplotlib.collections import QuadMesh
 import matplotlib.pyplot as plt
+from matplotlib import colormaps
 from math import floor
+
+cmap = colormaps['viridis']
+cmap.set_under('white')
 
 #Utility functions
 def clamp_low(x: float, edge: float) -> float:
@@ -33,6 +37,9 @@ Hist2D:
 '''
 @dataclass
 class Hist1D:
+    '''
+    Container wrapping a numpy array used to store histogram data and retrieve histogram statistics
+    '''
     name: str
     counts: NDArray[np.float64]
     bins: NDArray[np.float64]
@@ -58,6 +65,9 @@ class Hist1D:
 
 @dataclass
 class Hist2D:
+    '''
+    Container wrapping a numpy array used to store two-dimensional histogram data and retrieve histogram statistics
+    '''
     name: str
     counts: NDArray[np.float64]
     x_bins: NDArray[np.float64]
@@ -249,11 +259,9 @@ class Histogrammer:
             return
         mesh = None
         if log_z:
-            min_scale = np.min(hist.counts) + 0.00001
-            max_scale = np.max(hist.counts)
-            mesh = axis.pcolormesh(hist.x_bins, hist.y_bins, hist.counts, norm=LogNorm(min_scale, max_scale), cmap = cmap)
+            mesh = axis.pcolormesh(hist.x_bins, hist.y_bins, hist.counts, cmap=cmap, norm=LogNorm())
         else:
-            mesh = axis.pcolormesh(hist.x_bins, hist.y_bins, hist.counts, cmap = cmap)
+            mesh = axis.pcolormesh(hist.x_bins, hist.y_bins, hist.counts, cmap=cmap, vmin=1.0e-6)
         self.axes[axis] = (name, None)
         self.connect_mpl_callbacks(axis)
         return mesh

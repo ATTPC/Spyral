@@ -34,8 +34,6 @@ class GetTrace:
 
     def invalidate(self):
         self.raw_data = None
-        self.smoothing_spline = None
-        self.smoothed_output = None
         self.pad_id: int = INVALID_PAD_ID
 
     def set_trace_data(self, data: np.ndarray, id: HardwareID, params: TraceParameters):

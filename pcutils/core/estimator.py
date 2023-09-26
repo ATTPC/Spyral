@@ -23,14 +23,7 @@ def estimate_physics(cluster_index: int, cluster: ClusteredCloud, estimate_param
     if cluster.label == -1:
         return
 
-    #Drop any points which do not have a minimum number of neighbors
-    cluster.point_cloud.drop_isolated_points(estimate_params.neighbor_distance, estimate_params.min_neighbors)
-    #Re-smooth to remove jitter in the trajectory
-    cluster.point_cloud.smooth_cloud(estimate_params.neighbor_distance)
-    #Sort our cloud to be ordered in z
-    cluster.point_cloud.sort_in_z()
-    #Smooth the cloud out again; this is safe as we operate on a single cluster
-    if len(cluster.point_cloud.cloud) < 50:
+    if len(cluster.point_cloud.cloud) < estimate_params.min_total_trajectory_points:
         return
     
     rhos = np.linalg.norm(cluster.point_cloud.cloud[:, :2], axis=1) #cylindrical coordinates rho
@@ -85,8 +78,8 @@ def estimate_physics(cluster_index: int, cluster: ClusteredCloud, estimate_param
     center[2] = vertex[2]
 
     #Toss tracks whose verticies are not close to the origin in x,y
-    # if vertex_rho > estimate_params.max_distance_from_beam_axis:
-    #     return
+    if vertex_rho > estimate_params.max_distance_from_beam_axis:
+        return
 
     polar = math.atan(fit.slope)
     if direction is Direction.BACKWARD:

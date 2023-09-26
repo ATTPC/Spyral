@@ -2,8 +2,7 @@
 import numpy as np
 from dataclasses import dataclass
 from .constants import AMU_2_MEV, ELECTRON_MASS_U
-
-PATH_TO_MASSFILE = "./etc/amdc_2020.txt"
+from pathlib import Path
 
 @dataclass
 class NucleusData:
@@ -29,10 +28,10 @@ def generate_nucleus_id(z: np.uint32, a: np.uint32) -> np.uint32 :
     return z*z + z + a if z == max(z, a) else a*a + z
 
 class NuclearDataMap:
-    def __init__(self):
+    def __init__(self, mass_path: Path):
         self.map = {}
 
-        with open(PATH_TO_MASSFILE) as massfile:
+        with open(mass_path) as massfile:
             massfile.readline() # Header
             for line in massfile:
                 entries = line.split()
