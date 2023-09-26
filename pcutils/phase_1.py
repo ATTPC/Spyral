@@ -2,7 +2,7 @@ from .core.config import TraceParameters, CrossTalkParameters, DetectorParameter
 from .core.get_event import GetEvent
 from .core.pad_map import PadMap
 from .core.point_cloud import PointCloud
-from pathlib import Path
+from .core.workspace import Workspace
 from h5py import File, Group, Dataset
 from time import time
 
@@ -20,8 +20,13 @@ def get_event_range(trace_file: File) -> tuple[int, int]:
     meta_data = meta_group.get('meta')
     return (int(meta_data[0]), int(meta_data[2]))
 
-def phase_1(trace_path: Path, point_path: Path, pad_map: PadMap, trace_params: TraceParameters, cross_params: CrossTalkParameters, detector_params: DetectorParameters):
+def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParameters, cross_params: CrossTalkParameters, detector_params: DetectorParameters):
     start = time()
+    trace_path = ws.get_trace_file_path(run)
+    if not trace_path.exists():
+        return
+    
+    point_path = ws.get_point_cloud_file_path(run)
     trace_file = File(trace_path, 'r')
     point_file = File(point_path, 'w')
 
@@ -50,7 +55,7 @@ def phase_1(trace_path: Path, point_path: Path, pad_map: PadMap, trace_params: T
         event_data: Dataset | None = None
         try:
             event_data = event_group[f'evt{idx}_data']
-        except:
+        except Exception:
             continue
 
         event = GetEvent(event_data, idx, trace_params)

@@ -1,5 +1,6 @@
 from .config import WorkspaceParameters
 from .pad_map import PadMap
+from .nuclear_data import NuclearDataMap, NucleusData
 from pathlib import Path
 
 def form_run_string(run_number: int) -> str:
@@ -42,6 +43,10 @@ class Workspace:
         if not self.physics_path.exists():
             self.physics_path.mkdir()
 
+        self.gate_path = self.workspace_path / 'gates'
+        if not self.gate_path.exists():
+            self.gate_path.mkdir()
+
         self.pad_geometry_path = Path(params.pad_geometry_path)
         if not self.pad_geometry_path.exists() or not self.pad_geometry_path.is_file():
             raise Exception('Workspace encountered an error! Pad geometry path does not exist!')
@@ -58,8 +63,13 @@ class Workspace:
         if not self.pad_electronics_path.exists() or not self.pad_electronics_path.is_file():
             raise Exception('Workspace encountered an error! Pad gain path does not exist!')
         
-        self.pad_map = PadMap(self.pad_geometry_path, self.pad_gain_path, self.pad_time_path, self.pad_electronics_path)
+        self.nuclear_data_path = Path(params.nuclear_data_path)
+        if not self.nuclear_data_path.exists() or not self.nuclear_data_path.is_file():
+            raise Exception('Workspace encountered an error! Nuclear data path does not exist!')
         
+        self.pad_map = PadMap(self.pad_geometry_path, self.pad_gain_path, self.pad_time_path, self.pad_electronics_path)
+        self.nuclear_map = NuclearDataMap(self.nuclear_data_path)
+
     def get_trace_file_path(self, run_number: int) -> Path:
         runstr = form_run_string(run_number)
         return self.trace_data_path / f'{runstr}.h5'
@@ -80,14 +90,20 @@ class Workspace:
         runstr = form_run_string(run_number)
         return self.estimate_path / f'{runstr}.csv'
     
-    def get_physics_file_path_parquet(self, run_number: int) -> Path:
+    def get_physics_file_path_parquet(self, run_number: int, particle: NucleusData) -> Path:
         runstr = form_run_string(run_number)
-        return self.physics_path / f'{runstr}.parquet'
+        return self.physics_path / f'{runstr}_{particle.isotopic_symbol}.parquet'
     
-    def get_physics_file_path_csv(self, run_number: int) -> Path:
+    def get_physics_file_path_csv(self, run_number: int, particle: NucleusData) -> Path:
         runstr = form_run_string(run_number)
-        return self.physics_path / f'{runstr}.csv'
+        return self.physics_path / f'{runstr}_{particle.isotopic_symbol}.csv'
+    
+    def get_gate_file_path(self, gate_name: str) -> Path:
+        return self.gate_path / gate_name
     
     def get_pad_map(self) -> PadMap:
         return self.pad_map
+    
+    def get_nuclear_map(self) -> NuclearDataMap:
+        return self.nuclear_map
         

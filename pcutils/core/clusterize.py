@@ -46,7 +46,7 @@ def least_squares_circle(x: np.ndarray, y: np.ndarray) -> tuple[float, float, fl
     c = None
     try:
         c = np.linalg.solve(matrix_a, matrix_b)
-    except:
+    except Exception:
         return (np.nan, np.nan, np.nan, np.nan)
 
     xc = c[0] + mean_x
@@ -121,8 +121,19 @@ def join_clusters(clusters: list[ClusteredCloud], params: ClusterParameters) -> 
         for idx in groups[g]:
             new_cluster.point_cloud.cloud = np.concatenate((new_cluster.point_cloud.cloud, clusters[idx].point_cloud.cloud), axis=0)
         new_clusters.append(new_cluster)
-    
+
     return new_clusters
+
+def cleanup_clusters(clusters: list[ClusteredCloud], cluster_params: ClusterParameters) -> list[ClusteredCloud]:
+    for cluster in clusters:
+        #Drop any points which do not have a minimum number of neighbors
+        cluster.point_cloud.drop_isolated_points(cluster_params.cleanup_neighbor_distance, cluster_params.cleanup_min_neighbors)
+        #Re-smooth to remove jitter in the trajectory
+        cluster.point_cloud.smooth_cloud(cluster_params.cleanup_neighbor_distance)
+        #Sort our cloud to be ordered in z
+        cluster.point_cloud.sort_in_z()
+
+    return [cluster for cluster in clusters if len(cluster.point_cloud.cloud) > cluster_params.min_write_size]
     
 def clusterize(pc: PointCloud, cluster_params: ClusterParameters) -> list[ClusteredCloud]:
     '''
@@ -162,5 +173,5 @@ def clusterize(pc: PointCloud, cluster_params: ClusterParameters) -> list[Cluste
         mask = fitted_clusters.labels_ == label
         clusters[idx].point_cloud.cloud = pc.cloud[mask]
         clusters[idx].point_cloud.event_number = pc.event_number
-
+        
     return clusters

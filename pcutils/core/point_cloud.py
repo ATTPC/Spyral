@@ -4,7 +4,6 @@ from .constants import INVALID_EVENT_NUMBER
 from .config import CrossTalkParameters
 import numpy as np
 from typing import Optional
-import warnings
 
 class PointCloud:
 
@@ -155,4 +154,9 @@ class PointCloud:
         for idx, point in enumerate(self.cloud):
             neighbors = np.linalg.norm((self.cloud[:, :3] - point[:3]), axis=1) < neighborhood_radius
             mask[idx] = len(self.cloud[neighbors]) >= min_neighbors
-        self.cloud = self.cloud[mask] 
+        self.cloud = self.cloud[mask]
+
+    def bin_cloud_z(self, fractional_bin_size = 0.1):
+        sigma_z = np.std(self.cloud[:, 2])
+        bin_width = sigma_z * fractional_bin_size
+        #Not implemented yet

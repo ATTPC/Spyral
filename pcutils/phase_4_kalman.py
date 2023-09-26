@@ -5,12 +5,12 @@ from .core.nuclear_data import NuclearDataMap
 from .core.particle_id import ParticleID, load_particle_id
 from .core.target import Target
 from .core.estimator import Direction
-from .core.solver import solve_physics, InitialValue
+from .core.solver_kalman import solve_physics_kalman, Guess
 import h5py as h5
 import polars as pl
 from time import time
 
-def phase_4(run: int, ws: Workspace, detector_params: DetectorParameters, solver_params: SolverParameters, nuclear_data: NuclearDataMap):
+def phase_4_kalman(run: int, ws: Workspace, detector_params: DetectorParameters, solver_params: SolverParameters, nuclear_data: NuclearDataMap):
     start = time()
 
     pid: ParticleID = load_particle_id(ws.get_gate_file_path(solver_params.particle_id_filename), nuclear_data)
@@ -32,7 +32,7 @@ def phase_4(run: int, ws: Workspace, detector_params: DetectorParameters, solver
     cluster_group: h5.Group = cluster_file.get('cluster')
 
     print(f'Running physics solver on clusters in {cluster_path} using initial guesses from {estimate_path}')
-    print(f'Selecting data which corresponds to particle group from {solver_params.particle_id_path}')
+    print(f'Selecting data which corresponds to particle group from {solver_params.particle_id_filename}')
 
     #Select the particle group data, convert to dictionary for row-wise operations
     estimates_gated = estimate_df.filter(pl.struct(['dEdx', 'brho']).map(pid.cut.is_cols_inside)).collect().to_dict()
@@ -43,8 +43,25 @@ def phase_4(run: int, ws: Workspace, detector_params: DetectorParameters, solver
     flush_count = 0
     count = 0
 
-    results: dict[str, list] = { 'event': [], 'cluster_index': [], 'cluster_label': [], 'vertex_x': [], 'sigma_vx': [], 'vertex_y': [], 'sigma_vy': [], 'vertex_z': [], 'sigma_vz': [], \
-                                 'brho': [], 'sigma_brho': [], 'polar': [], 'sigma_polar': [], 'azimuthal': [], 'sigma_azimuthal': [], 'redchisq': []}
+    results: dict[str, list] = { 
+        'event': [], 
+        'cluster_index': [], 
+        'cluster_label': [], 
+        'vertex_x': [], 
+        'sigma_vx': [], 
+        'vertex_y': [], 
+        'sigma_vy': [], 
+        'vertex_z': [], 
+        'sigma_vz': [],
+        'brho': [], 
+        'sigma_brho': [], 
+        'polar': [], 
+        'sigma_polar': [], 
+        'azimuthal': [], 
+        'sigma_azimuthal': [], 
+        'redchisq': []
+    }
+    
     print('Starting solver...')
     for row, event in enumerate(estimates_gated['event']):
         if count > flush_val:
@@ -61,9 +78,15 @@ def phase_4(run: int, ws: Workspace, detector_params: DetectorParameters, solver
         cluster.point_cloud.load_cloud_from_hdf5_data(local_cluster['cloud'][:].copy(), event)
 
         #Do the solver
-        iv = InitialValue(polar=estimates_gated['polar'][row], azimuthal=estimates_gated['azimuthal'][row], brho=estimates_gated['brho'][row],
-                          vertex_x=estimates_gated['vertex_x'][row] * 0.001, vertex_y=estimates_gated['vertex_y'][row] * 0.001, vertex_z=estimates_gated['vertex_z'][row] * 0.001, direction=Direction(estimates_gated['direction'][row]))
-        solve_physics(cidx, cluster, iv, detector_params, target, pid.nucleus, results)
+        guess = Guess()
+        guess.polar = estimates_gated['polar'][row]
+        guess.azimuthal = estimates_gated['azimuthal'][row]
+        guess.brho = estimates_gated['brho'][row]
+        guess.vertex_x = estimates_gated['vertex_x'][row]
+        guess.vertex_y = estimates_gated['vertex_y'][row]
+        guess.vertex_z = estimates_gated['vertex_z'][row]
+        guess.direction = Direction(estimates_gated['direction'][row])
+        solve_physics_kalman(cidx, cluster, guess, detector_params, target, pid.nucleus, results)
 
     physics_df = pl.DataFrame(results)
     physics_df.write_parquet(result_path)

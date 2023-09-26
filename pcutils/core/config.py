@@ -1,4 +1,3 @@
-from .constants import DEG2RAD
 from dataclasses import dataclass, field
 from pathlib import Path
 from json import load
@@ -6,15 +5,22 @@ from typing import Any
 
 @dataclass
 class WorkspaceParameters:
+    '''
+    Parameters describing paths to various resources used across the application
+    '''
     trace_data_path: str = ''
     workspace_path: str = ''
     pad_geometry_path: str = ''
     pad_gain_path: str = ''
     pad_time_path: str = ''
     pad_electronics_path: str = ''
+    nuclear_data_path: str = ''
 
 @dataclass
 class RunParameters:
+    '''
+    Parameters describing the set of operations to be peformed
+    '''
     run_min: int = -1
     run_max: int = -1
     do_phase1: bool = False
@@ -24,9 +30,11 @@ class RunParameters:
 
 @dataclass
 class DetectorParameters:
+    '''
+    Parameters describing the detector configuration
+    '''
     magnetic_field: float = 0.0 #Tesla
     electric_field: float = 0.0 #V/m
-    tilt_angle: float = 0.0 #input degrees, convert to radians
     detector_length: float = 0.0 #mm
     beam_region_radius: float = 0.0 #mm
     micromegas_time_bucket: float = 0.0
@@ -34,6 +42,9 @@ class DetectorParameters:
 
 @dataclass
 class TraceParameters:
+    '''
+    Parameters for trace baseline and peak finding
+    '''
     baseline_window_scale: float = 20.0
     peak_separation: float = 50.0
     peak_prominence: float = 20.0
@@ -42,6 +53,9 @@ class TraceParameters:
 
 @dataclass
 class CrossTalkParameters:
+    '''
+    Parameters for cross talk analysis
+    '''
     saturation_threshold: float = 2000.0
     cross_talk_threshold: float = 1000.0
     neighborhood_threshold: float = 1500.0
@@ -51,6 +65,9 @@ class CrossTalkParameters:
 
 @dataclass
 class ClusterParameters:
+    '''
+    Parameters for clustering, cluster joining, and cluster cleaning
+    '''
     smoothing_neighbor_distance: float = 10.0 #mm
     min_points: int = 0
     min_size: int = 0
@@ -58,21 +75,30 @@ class ClusterParameters:
     max_center_distance: float = 25.0
     fractional_charge_threshold: float = 0.0
     min_write_size: int = 0
+    cleanup_min_neighbors: int = 0
+    cleanup_neighbor_distance: float = 0.0 #mm
 
 @dataclass
 class EstimateParameters:
-    neighbor_distance: float = 0.0 #mm
-    min_neighbors: int = 0
+    '''
+    Parameters for physics estimation
+    '''
     min_total_trajectory_points: int = 0
     max_distance_from_beam_axis: float = 0.0 #mm
 
 @dataclass
 class SolverParameters:
-    particle_id_path: str = ''
+    '''
+    Parameters for physics solving
+    '''
+    particle_id_filename: str = ''
     gas_data_path: str = ''
 
 @dataclass
 class Config:
+    '''
+    Container which holds all configuration parameters. Can be serialized/deserialized to json.
+    '''
     #Workspace
     workspace: WorkspaceParameters = field(default_factory=WorkspaceParameters)
 
@@ -105,6 +131,7 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
     config.workspace.pad_gain_path = json_data['pad_gain_path']
     config.workspace.pad_time_path = json_data['pad_time_path']
     config.workspace.pad_electronics_path = json_data['pad_electronics_path']
+    config.workspace.nuclear_data_path = json_data['nuclear_data_path']
 
     config.run.run_min = json_data['run_min']
     config.run.run_max = json_data['run_max']
@@ -115,7 +142,6 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
 
     config.detector.magnetic_field = json_data['magnetic_field(T)']
     config.detector.electric_field = json_data['electric_field(V/m)']
-    config.detector.tilt_angle = json_data['tilt_angle(degrees)'] * DEG2RAD
     config.detector.detector_length = json_data['detector_length(mm)']
     config.detector.beam_region_radius = json_data['beam_region_radius(mm)']
     config.detector.micromegas_time_bucket = json_data['micromegas_time_bucket']
@@ -141,14 +167,14 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
     config.cluster.fractional_distance_min = json_data['cluster_fractional_distance_min']
     config.cluster.fractional_charge_threshold = json_data['cluster_fractional_charge_threshold']
     config.cluster.min_write_size = json_data['cluster_minimum_write_size']
+    config.cluster.cleanup_min_neighbors = json_data['cluster_cleanup_minimum_neighbors']
+    config.cluster.cleanup_neighbor_distance = json_data['cluster_cleanup_neighbor_distance(mm)']
 
-    config.estimate.min_neighbors = json_data['estimate_minimum_neighbors']
-    config.estimate.neighbor_distance = json_data['estimate_neighbor_distance']
     config.estimate.min_total_trajectory_points = json_data['estimate_mininum_total_trajectory_points']
     config.estimate.max_distance_from_beam_axis = json_data['estimate_maximum_distance_from_beam_axis']
 
     config.solver.gas_data_path = json_data['solver_gas_data_path']
-    config.solver.particle_id_path = json_data['solver_particle_id_path']
+    config.solver.particle_id_filename = json_data['solver_particle_id_file']
     
     return config
 
