@@ -44,7 +44,7 @@
     "cluster_cleanup_minimum_neighbors": 5,
     "cluster_cleanup_neighbor_distance(mm)": 15.0,
 
-    "estimate_mininum_total_trajectory_points": 50,
+    "estimate_mininum_total_trajectory_points": 20,
     "estimate_maximum_distance_from_beam_axis": 30.0,
 
     "solver_gas_data_path": "/path/to/some/gas/file.json",
