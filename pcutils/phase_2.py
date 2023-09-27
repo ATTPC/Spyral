@@ -62,7 +62,11 @@ def phase_2(run: int, ws: Workspace, cluster_params: ClusterParameters):
         for cidx, cluster in enumerate(cleaned):
             local_group = cluster_event_group.create_group(f'cluster_{cidx}')
             local_group.attrs['label'] = cluster.label
-            local_group.create_dataset('cloud', data=cluster.point_cloud.cloud)
+            local_group.attrs['z_bin_width'] = cluster.z_bin_width
+            local_group.attrs['z_bin_low_edge'] = cluster.z_bin_low_edge
+            local_group.attrs['z_bin_hi_edge'] = cluster.z_bin_hi_edge
+            local_group.attrs['n_z_bins'] = cluster.n_z_bins
+            local_group.create_dataset('cloud', data=cluster.data)
 
 
     stop = time()

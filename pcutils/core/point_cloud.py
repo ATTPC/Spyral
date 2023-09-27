@@ -1,7 +1,7 @@
 from .get_event import GetEvent
 from .pad_map import PadMap
 from .constants import INVALID_EVENT_NUMBER
-from .config import CrossTalkParameters, DetectorParameters
+from .config import CrossTalkParameters
 import numpy as np
 from typing import Optional
 
@@ -180,8 +180,8 @@ class PointCloud:
             binned_cloud[idx, 0] = np.mean(points_in_bin[:, 0])
             binned_cloud[idx, 1] = np.mean(points_in_bin[:, 1])
             binned_cloud[idx, 2] = z_low_edge + 0.5 * bin_width
-            binned_cloud[idx, 3] = np.mean(points_in_bin[:, 3])
-            binned_cloud[idx, 4] = np.mean(points_in_bin[:, 4])
+            binned_cloud[idx, 3] = np.max(points_in_bin[:, 3])
+            binned_cloud[idx, 4] = np.max(points_in_bin[:, 4])
             binned_cloud[idx, 5] = 0.0 #this has no meaning any more
             binned_cloud[idx, 6] = np.mean(points_in_bin[:, 6])
 

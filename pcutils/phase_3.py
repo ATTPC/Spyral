@@ -1,4 +1,4 @@
-from .core.clusterize import ClusteredCloud
+from .core.cluster import Cluster
 from .core.config import DetectorParameters, EstimateParameters
 from .core.estimator import estimate_physics
 from .core.workspace import Workspace
@@ -68,11 +68,8 @@ def phase_3(run: int, ws: Workspace, estimate_params: EstimateParameters, detect
             except Exception:
                 continue
 
-            cluster = ClusteredCloud()
-            cluster.label = local_cluster.attrs['label']
-            cluster_data = local_cluster['cloud']
-            cluster.point_cloud.load_cloud_from_hdf5_data(cluster_data[:].copy(), idx)
-
+            cluster = Cluster(idx, local_cluster.attrs['label'], local_cluster['cloud'][:].copy())
+            
             #Cluster is loaded do some analysis
             estimate_physics(cidx, cluster, estimate_params, detector_params, data)
 

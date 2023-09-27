@@ -79,7 +79,7 @@ def draw_gate(run_min: int, run_max: int, ws: Workspace):
     handler = CutHandler()
     grammer = Histogrammer()
 
-    grammer.add_hist2d('pid', (400, 300), ((0.0, 10000.0), (0.1, 3.0)))
+    grammer.add_hist2d('pid', (400, 300), ((-100.0, 10000.0), (0.0, 3.0)))
     for run in range(run_min, run_max+1):
         run_path = ws.get_estimate_file_path_parquet(run)
         if not run_path.exists():
