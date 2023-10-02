@@ -48,5 +48,12 @@
     "estimate_maximum_distance_from_beam_axis": 30.0,
 
     "solver_gas_data_path": "/path/to/some/gas/file.json",
-    "solver_particle_id_file": "some_particle_id.json"
+    "solver_particle_id_file": "some_particle_id.json",
+    "solver_interp_file_name": "some_interpolation_file.h5",
+    "solver_interp_ke_min(MeV)": 0.1,
+    "solver_interp_ke_max(MeV)": 40.0,
+    "solver_interp_ke_bins": 200,
+    "solver_interp_polar_min(deg)": 5.0,
+    "solver_interp_polar_max(deg)": 85.0,
+    "solver_interp_polar_bins": 30
 }

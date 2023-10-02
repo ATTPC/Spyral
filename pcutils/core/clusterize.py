@@ -119,10 +119,13 @@ def join_clusters(clusters: list[LabeledCloud], params: ClusterParameters) -> li
 
     return new_clusters
 
-def cleanup_clusters(clusters: list[LabeledCloud], cluster_params: ClusterParameters) -> list[Cluster]:
-    return [convert_labeled_to_cluster(cluster) for cluster in clusters if cluster.label != -1]
+def cleanup_clusters(clusters: list[LabeledCloud], params: ClusterParameters) -> list[Cluster]:
+    '''
+    Converts the LabeledClouds to Clusters and bins the data in z
+    '''
+    return [convert_labeled_to_cluster(cluster, params) for cluster in clusters if cluster.label != -1]
     
-def clusterize(pc: PointCloud, cluster_params: ClusterParameters) -> list[LabeledCloud]:
+def clusterize(pc: PointCloud, params: ClusterParameters) -> list[LabeledCloud]:
     '''
     Analyze a point cloud, and group the points into clusters which in principle should correspond to particle trajectories. This analysis contains several steps,
     and revolves around the HDBSCAN clustering algorithm implemented in scikit-learn (see [their description](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html) for details)
@@ -135,12 +138,15 @@ def clusterize(pc: PointCloud, cluster_params: ClusterParameters) -> list[Labele
     cluster_params: ClusterParameters, parameters controlling the clustering algorithms
 
     ## Returns
-    list[ClusteredCloud]: list of clusters found by the algorithm
+    list[LabeledCloud]: list of clusters found by the algorithm
     '''
-    clusterizer = skcluster.HDBSCAN(min_cluster_size=cluster_params.min_size, min_samples=cluster_params.min_points, cluster_selection_epsilon=cluster_params.fractional_distance_min)
+    clusterizer = skcluster.HDBSCAN(min_cluster_size=params.min_size, min_samples=params.min_points, cluster_selection_epsilon=params.fractional_distance_min)
 
     #Smooth out the point cloud by averaging over neighboring points within a distance, droping any duplicate points
-    pc.smooth_cloud(cluster_params.smoothing_neighbor_distance)
+    pc.smooth_cloud(params.smoothing_neighbor_distance)
+
+    if len(pc.cloud) < params.min_size:
+        return []
 
     #Use spatial dimensions and integrated charge
     cluster_data = np.empty(shape=(len(pc.cloud), 4))

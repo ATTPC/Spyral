@@ -37,6 +37,7 @@ class Target:
             print(f'Could not load target data in file {target_file}. Prepare for a crash.')
 
         self.pretty_string: str = ''.join(f'{nuclear_data.get_data(z, a).pretty_iso_symbol}<sub>{s}</sub>' for (z, a, s) in self.data.compound)
+        self.ugly_string: str = ''.join(f'{nuclear_data.get_data(z, a).isotopic_symbol}{s}' for (z, a, s) in self.data.compound)
         
         #Construct the target material
         self.material = catima.Material()

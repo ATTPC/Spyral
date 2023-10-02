@@ -74,9 +74,8 @@ class ClusterParameters:
     fractional_distance_min: float = 0.0
     max_center_distance: float = 0.0
     fractional_charge_threshold: float = 0.0
-    min_write_size: int = 0
-    cleanup_min_neighbors: int = 0
-    cleanup_neighbor_distance: float = 0.0 #mm
+    z_bin_fractional_size: float = 0
+    z_bin_outlier_cutoff: float = 0
 
 @dataclass
 class EstimateParameters:
@@ -93,6 +92,13 @@ class SolverParameters:
     '''
     particle_id_filename: str = ''
     gas_data_path: str = ''
+    interp_file_name: str = ''
+    interp_ke_min: str = ''
+    interp_ke_max: str = ''
+    interp_ke_bins: str = ''
+    interp_polar_min: str = ''
+    interp_polar_max: str = ''
+    interp_polar_bins: str = ''
 
 @dataclass
 class Config:
@@ -166,15 +172,21 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
     config.cluster.max_center_distance = json_data['cluster_max_center_distance(mm)']
     config.cluster.fractional_distance_min = json_data['cluster_fractional_distance_min']
     config.cluster.fractional_charge_threshold = json_data['cluster_fractional_charge_threshold']
-    config.cluster.min_write_size = json_data['cluster_minimum_write_size']
-    config.cluster.cleanup_min_neighbors = json_data['cluster_cleanup_minimum_neighbors']
-    config.cluster.cleanup_neighbor_distance = json_data['cluster_cleanup_neighbor_distance(mm)']
+    config.cluster.z_bin_fractional_size = json_data['cluster_z_bin_fractional_size']
+    config.cluster.z_bin_outlier_cutoff = json_data['cluster_z_bin_outlier_cutoff']
 
     config.estimate.min_total_trajectory_points = json_data['estimate_mininum_total_trajectory_points']
     config.estimate.max_distance_from_beam_axis = json_data['estimate_maximum_distance_from_beam_axis']
 
     config.solver.gas_data_path = json_data['solver_gas_data_path']
     config.solver.particle_id_filename = json_data['solver_particle_id_file']
+    config.solver.interp_file_name = json_data['solver_interp_file_name']
+    config.solver.interp_ke_min = json_data['solver_interp_ke_min(MeV)']
+    config.solver.interp_ke_max = json_data['solver_interp_ke_max(MeV)']
+    config.solver.interp_ke_bins = json_data['solver_interp_ke_bins']
+    config.solver.interp_polar_min = json_data['solver_interp_polar_min(deg)']
+    config.solver.interp_polar_max = json_data['solver_interp_polar_max(deg)']
+    config.solver.interp_polar_bins = json_data['solver_interp_polar_bins']
     
     return config
 

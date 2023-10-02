@@ -1,7 +1,7 @@
 from .point_cloud import PointCloud
+from .config import ClusterParameters
 import numpy as np
 from dataclasses import dataclass, field
-from h5py import Group
 
 @dataclass
 class LabeledCloud:
@@ -23,15 +23,15 @@ class Cluster:
         self.z_bin_hi_edge = 0.0
         self.n_z_bins = 0
 
-    def from_labeled_cloud(self, cloud: LabeledCloud):
+    def from_labeled_cloud(self, cloud: LabeledCloud, params: ClusterParameters):
         self.event = cloud.point_cloud.event_number
         self.label = cloud.label
-        self.bin_cloud_z(cloud.point_cloud)
+        self.bin_cloud_z(cloud.point_cloud, params)
 
-    def bin_cloud_z(self, cloud: PointCloud, fractional_bin_size: float = 0.05):
+    def bin_cloud_z(self, cloud: PointCloud, params: ClusterParameters):
         cloud.sort_in_z()
         sigma_z = np.std(cloud.cloud[:, 2])
-        bin_width = sigma_z * fractional_bin_size
+        bin_width = sigma_z * params.z_bin_fractional_size
 
         bin_mins = np.arange(np.min(cloud.cloud[:, 2]), np.max(cloud.cloud[:, 2]), step=bin_width)
         binned_cloud = np.full((len(bin_mins), 7), np.nan, dtype=np.float64)
@@ -46,7 +46,7 @@ class Cluster:
             mean_r = np.mean(r)
             std_r  = np.std(r)
             if std_r != 0.0:
-                points_in_bin = points_in_bin[np.abs(r - mean_r) < std_r]
+                points_in_bin = points_in_bin[np.abs(r - mean_r)/std_r < params.z_bin_outlier_cutoff]
             if len(points_in_bin) == 0:
                 continue
 
@@ -61,7 +61,7 @@ class Cluster:
         self.z_bin_low_edge = bin_mins[0]
         self.z_bin_hi_edge = bin_mins[-1] + bin_width
 
-def convert_labeled_to_cluster(cloud: LabeledCloud) -> Cluster:
+def convert_labeled_to_cluster(cloud: LabeledCloud, params: ClusterParameters) -> Cluster:
     cluster = Cluster()
-    cluster.from_labeled_cloud(cloud)
+    cluster.from_labeled_cloud(cloud, params)
     return cluster

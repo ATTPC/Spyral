@@ -50,8 +50,6 @@ def phase_2(run: int, ws: Workspace, cluster_params: ClusterParameters):
 
         cloud = PointCloud()
         cloud.load_cloud_from_hdf5_data(cloud_data[:].copy(), idx)
-        if len(cloud.cloud) < cluster_params.min_write_size:
-            continue
 
         clusters = clusterize(cloud, cluster_params)
         joined = join_clusters(clusters, cluster_params)

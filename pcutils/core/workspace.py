@@ -1,6 +1,7 @@
 from .config import WorkspaceParameters
 from .pad_map import PadMap
 from .nuclear_data import NuclearDataMap, NucleusData
+from .track_generator import GeneratorParams
 from pathlib import Path
 
 def form_run_string(run_number: int) -> str:
@@ -46,6 +47,10 @@ class Workspace:
         self.gate_path = self.workspace_path / 'gates'
         if not self.gate_path.exists():
             self.gate_path.mkdir()
+
+        self.track_path = self.workspace_path / 'tracks'
+        if not self.track_path.exists():
+            self.track_path.mkdir()
 
         self.pad_geometry_path = Path(params.pad_geometry_path)
         if not self.pad_geometry_path.exists() or not self.pad_geometry_path.is_file():
@@ -106,4 +111,7 @@ class Workspace:
     
     def get_nuclear_map(self) -> NuclearDataMap:
         return self.nuclear_map
+    
+    def get_track_file(self, name: str) -> Path:
+        return self.track_path / name
         
