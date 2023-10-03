@@ -54,7 +54,7 @@ def estimate_physics(cluster_index: int, cluster: Cluster, estimate_params: Esti
     
     #Find the first point that is furthest from the vertex in rho (local maximum) to get the first arc of the trajectory
     rho_to_vertex = np.linalg.norm(cluster.data[1:, :2] - vertex[:2], axis=1)
-    maxima = argrelmax(rho_to_vertex, order=2)[0]
+    maxima = argrelmax(rho_to_vertex, order=10)[0]
     maximum = 0
     if len(maxima) == 0:
         maximum = len(cluster.data)
@@ -72,7 +72,7 @@ def estimate_physics(cluster_index: int, cluster: Cluster, estimate_params: Esti
     rho_to_vertex = np.linalg.norm((cluster.data[:, :2] - vertex[:2]), axis=1)
 
     #Do a linear fit to small segment of trajectory to extract rho vs. z and extrapolate vertex z
-    test_index = max(5, int(maximum * 0.5))
+    test_index = max(10, int(maximum * 0.5))
     fit = linregress(cluster.data[:test_index, 2], rho_to_vertex[:test_index])
     vertex_rho = np.linalg.norm(vertex[:2])
     vertex[2] = (vertex_rho - fit.intercept) / fit.slope

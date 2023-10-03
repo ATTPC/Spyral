@@ -26,7 +26,14 @@ class Cluster:
     def from_labeled_cloud(self, cloud: LabeledCloud, params: ClusterParameters):
         self.event = cloud.point_cloud.event_number
         self.label = cloud.label
-        self.bin_cloud_z(cloud.point_cloud, params)
+        #self.bin_cloud_z(cloud.point_cloud, params)
+        self.copy_cloud(cloud.point_cloud, params)
+
+    def copy_cloud(self, cloud: PointCloud, params: ClusterParameters):
+        cloud.sort_in_z()
+        self.data = np.zeros((len(cloud.cloud), 4))
+        self.data[:, :3] = cloud.cloud[:, :3]
+        self.data[:, 3] = cloud.cloud[:, 4]
 
     def bin_cloud_z(self, cloud: PointCloud, params: ClusterParameters):
         cloud.sort_in_z()

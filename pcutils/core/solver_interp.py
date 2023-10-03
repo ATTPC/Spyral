@@ -1,13 +1,11 @@
 from .nuclear_data import NucleusData
 from .cluster import Cluster
 from .track_generator import TrackInterpolator, InitialState, QBRHO_2_P
-from .config import DetectorParameters
 
 from lmfit import Parameters, minimize, fit_report
 from lmfit.minimizer import MinimizerResult
 import numpy as np
 import math
-from scipy import constants, interpolate
 from scipy.interpolate import CubicSpline
 from dataclasses import dataclass
 
@@ -36,6 +34,8 @@ def generate_trajectory(fit_params: Parameters, interpolator: TrackInterpolator,
 def objective_function(fit_params: Parameters, x: np.ndarray, interpolator: TrackInterpolator, ejectile: NucleusData) -> np.ndarray:
     trajectory = generate_trajectory(fit_params, interpolator, ejectile)
     errors = np.full(len(x), 1.0e6)
+    if trajectory is None:
+        return errors
     xy = trajectory(x[:, 2])
     valid_trajectory = xy[~np.isnan(xy[:, 0])]
     limit = len(valid_trajectory)
@@ -51,13 +51,14 @@ def create_params(guess: Guess, ejectile: NucleusData, interpolator: TrackInterp
     interp_min_polar = interpolator.polar_min * np.pi / 180.0
     interp_max_polar = interpolator.polar_max * np.pi / 180.0
 
-    uncertainty_position = 0.05
+    uncertainty_position_xy = 0.01
+    uncertainty_position_z = 0.1
     uncertainty_brho = 1.0
 
-    min_brho = guess.brho - guess.brho * uncertainty_brho * 2.0
+    min_brho = guess.brho - uncertainty_brho * 2.0
     if min_brho < interp_min_brho:
         min_brho = interp_min_brho
-    max_brho = guess.brho + guess.brho * uncertainty_brho * 2.0
+    max_brho = guess.brho + uncertainty_brho * 2.0
     if max_brho > interp_max_brho:
         max_brho = interp_max_brho
 
@@ -70,20 +71,20 @@ def create_params(guess: Guess, ejectile: NucleusData, interpolator: TrackInterp
     min_azimuthal = guess.azimuthal - np.pi*0.25
     max_azimuthal = guess.azimuthal + np.pi*0.25
 
-    min_x = guess.vertex_x * 0.001 - uncertainty_position * 2.0
-    max_x = guess.vertex_x * 0.001 + uncertainty_position * 2.0
-    min_y = guess.vertex_y * 0.001 - uncertainty_position * 2.0
-    max_y = guess.vertex_y * 0.001 + uncertainty_position * 2.0
-    min_z = guess.vertex_z * 0.001 - uncertainty_position * 2.0
-    max_z = guess.vertex_z * 0.001 + uncertainty_position * 2.0
+    min_x = guess.vertex_x * 0.001 - uncertainty_position_xy * 2.0
+    max_x = guess.vertex_x * 0.001 + uncertainty_position_xy * 2.0
+    min_y = guess.vertex_y * 0.001 - uncertainty_position_xy * 2.0
+    max_y = guess.vertex_y * 0.001 + uncertainty_position_xy * 2.0
+    min_z = guess.vertex_z * 0.001 - uncertainty_position_z * 2.0
+    max_z = guess.vertex_z * 0.001 + uncertainty_position_z * 2.0
 
     fit_params = Parameters()
     fit_params.add('brho', guess.brho, min=min_brho, max=max_brho)
     fit_params.add('polar', guess.polar, min=min_polar, max=max_polar)
     fit_params.add('azimuthal', guess.azimuthal, min=min_azimuthal, max=max_azimuthal)
-    fit_params.add('vertex_x', guess.vertex_x * 0.001, min=min_x, max=max_x)
-    fit_params.add('vertex_y', guess.vertex_y * 0.001, min=min_y, max=max_y)
-    fit_params.add('vertex_z', guess.vertex_z * 0.001, min=min_z, max=max_z)
+    fit_params.add('vertex_x', guess.vertex_x * 0.001, min=min_x, max=max_x, vary=False)
+    fit_params.add('vertex_y', guess.vertex_y * 0.001, min=min_y, max=max_y, vary=False)
+    fit_params.add('vertex_z', guess.vertex_z * 0.001, min=min_z, max=max_z, vary=True)
     return fit_params
 
 

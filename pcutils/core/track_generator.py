@@ -3,10 +3,11 @@ from scipy.integrate import solve_ivp
 import h5py as h5
 from .target import Target
 from .nuclear_data import NucleusData
-from .config import DetectorParameters
 from dataclasses import dataclass
 from pathlib import Path
-from scipy import constants, interpolate, spatial
+from scipy import constants, spatial
+from ..interpolate import BilinearInterpolator
+from scipy.interpolate import CubicSpline
 from .constants import MEV_2_JOULE, MEV_2_KG
 import math
 
@@ -99,7 +100,7 @@ def generate_tracks(params: GeneratorParams, trackpath: Path):
     track_group.attrs['polar_min'] = params.polar_min
     track_group.attrs['polar_max'] = params.polar_max
     track_group.attrs['polar_bins'] = params.polar_bins
-    data = track_group.create_dataset('data', shape=(len(SAMPLING_RANGE), 6,  params.ke_bins, params.polar_bins), dtype=np.float64)  #time x (x, y, z, vx, vy, vz) x ke x polar
+    data = track_group.create_dataset('data', shape=(len(SAMPLING_RANGE), 3,  params.ke_bins, params.polar_bins), dtype=np.float64)  #time x (x, y, z, vx, vy, vz) x ke x polar
 
     initial_state = np.zeros(6)
 
@@ -127,7 +128,7 @@ def generate_tracks(params: GeneratorParams, trackpath: Path):
             initial_state[3] = speed * math.sin(p)
             initial_state[5] = speed * math.cos(p)
             result = solve_ivp(equation_of_motion, (0.0, TIME_WINDOW), initial_state, method='BDF', args=(bfield, efield, params.target, params.particle), t_eval=SAMPLING_RANGE, jac=jacobian)
-            data[:, :, eidx, pidx] = result.y.T
+            data[:, :, eidx, pidx] = result.y.T[:, :3]
 
     print('\n')
 
@@ -165,35 +166,28 @@ class TrackInterpolator:
         self.polar_bins = track_group.attrs['polar_bins']
         self.data = track_group['data'][:].copy()
 
-        e_values = np.linspace(self.ke_min, self.ke_max, self.ke_bins)
-        p_values = np.linspace(self.polar_min * DEG2RAD, self.polar_max * DEG2RAD, self.polar_bins)
-        self.interpolators = []
-        for time in self.data:
-            self.interpolators.append(interpolate.RegularGridInterpolator((p_values, e_values), time.T))
+        pmin_rad = self.polar_min * DEG2RAD
+        pmax_rad = self.polar_max * DEG2RAD
 
-    def get_interpolated_trajectory(self, initial_state: InitialState) -> interpolate.CubicSpline:
-        data_shape = self.data.shape
+        self.interpolators = [BilinearInterpolator(pmin_rad, pmax_rad, self.polar_bins, self.ke_min, self.ke_max, self.ke_bins, time.T[:, :, :3]) for time in self.data]
+
+    def get_interpolated_trajectory(self, initial_state: InitialState) -> CubicSpline | None:
 
         is_backwards = False
         if initial_state.polar > np.pi*0.5:
             is_backwards = True
             initial_state.polar -= np.pi*0.5
 
-        interp_point = np.array([initial_state.polar, initial_state.kinetic_energy])
-        trajectory = np.zeros((data_shape[0], data_shape[1]))
-        for idx in range(len(trajectory)):
-            trajectory[idx] = self.interpolators[idx](interp_point)
+        trajectory = np.asarray([interp(initial_state.polar, initial_state.kinetic_energy) for interp in self.interpolators])
 
         #Rotate polar by 90 degrees if nescessary
         #Since we rotate the entire coordinate system, is as simple as flip in z
         #Order here is important! Must be polar, azimuthal, translate!
         if is_backwards:
             trajectory[:, 2] *= -1
-            trajectory[:, 5] *= -1
         #Rotate the trajectory in azimuthal (around z) to match data
         z_rot = spatial.transform.Rotation.from_rotvec([0.0, 0.0, initial_state.azimuthal])
-        trajectory[:, :3] = z_rot.apply(trajectory[:, :3])
-        trajectory[:, 3:] = z_rot.apply(trajectory[:, 3:])
+        trajectory = z_rot.apply(trajectory)
         #Translate to vertex
         trajectory[:, 0] += initial_state.vertex_x
         trajectory[:, 1] += initial_state.vertex_y
@@ -202,8 +196,10 @@ class TrackInterpolator:
         #Trim stopped region
         _, indicies = np.unique(trajectory[:, 2], return_index=True)
         trajectory = trajectory[indicies]
+        if len(trajectory) < 2:
+            return None
 
-        return interpolate.CubicSpline(trajectory[:, 2], trajectory[:, :2], extrapolate=False)
+        return CubicSpline(trajectory[:, 2], trajectory[:, :2], extrapolate=False)
     
     def check_interpolator(self, params: GeneratorParams) -> bool:
         is_valid = (
