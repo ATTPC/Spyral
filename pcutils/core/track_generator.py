@@ -20,6 +20,9 @@ DEG2RAD: float = np.pi / 180.0
 
 @dataclass
 class InitialState:
+    '''
+    Wrapper for the initial state used to generate a trajectory
+    '''
     vertex_x: float = 0.0 #m
     vertex_y: float = 0.0
     vertex_z: float = 0.0
@@ -29,6 +32,9 @@ class InitialState:
 
 @dataclass
 class GeneratorParams:
+    '''
+    Wrapper for the general parameters required to generate an interpolation scheme
+    '''
     target: Target
     particle: NucleusData
     bfield: float #T
@@ -43,6 +49,20 @@ class GeneratorParams:
 #State = [x, y, z, vx, vy, vz]
 #Derivative = [vx, vy, vz, ax, ay, az] (returns)
 def equation_of_motion(t: float, state: np.ndarray, Bfield: float, Efield: float, target: Target, ejectile: NucleusData) -> np.ndarray:
+    '''
+    The equations of motion for a charged particle in a static electromagnetic field which experiences energy loss through some material.
+
+    ## Parameters
+    t: float, time step
+    state: ndarray, the state of the particle (x,y,z,vx,vy,vz)
+    Bfield: float, the magnitude of the magnetic field
+    Efield: float, the magnitude of the electric field
+    target: Target, the material through which the particle travels
+    ejectile: NucleusData, data on the particle
+
+    ## Returns
+    ndarray: the derivatives of the state
+    '''
 
     speed = math.sqrt(state[3]**2.0 + state[4]**2.0 + state[5]**2.0)
     unit_vector = state[3:] / speed # direction
@@ -65,6 +85,20 @@ def equation_of_motion(t: float, state: np.ndarray, Bfield: float, Efield: float
     return results
 
 def jacobian(t, state: np.ndarray, Bfield: float, Efield: float, target: Target, ejectile: NucleusData) -> np.ndarray:
+    '''
+    Computes the jacobian of the charged particle in a static electromagnetic field which experiences energy loss through some material
+
+    ## Parameters
+    t: float, time step
+    state: ndarray, the state of the particle (x,y,z,vx,vy,vz)
+    Bfield: float, the magnitude of the magnetic field
+    Efield: float, the magnitude of the electric field
+    target: Target, the material through which the particle travels
+    ejectile: NucleusData, data on the particle
+
+    ## Returns
+    ndarray: the jacobian
+    '''
     jac = np.zeros((len(state), len(state)))
     mass_kg = ejectile.mass * MEV_2_KG
     charge_c = ejectile.Z * constants.elementary_charge
@@ -78,6 +112,9 @@ def jacobian(t, state: np.ndarray, Bfield: float, Efield: float, target: Target,
     return jac
 
 def check_tracks_exist(trackpath: Path) -> bool:
+    '''
+    Simple file-existance checker with a nice print message
+    '''
     if trackpath.exists():
         print(f'Track file {trackpath} detected, this file will be used. If new tracks are needed, please delete the original file.')
         return True
@@ -85,6 +122,13 @@ def check_tracks_exist(trackpath: Path) -> bool:
         return False
 
 def generate_tracks(params: GeneratorParams, trackpath: Path):
+    '''
+    Generate a set of tracks given some parameters and write them to an h5 file at a path.
+    
+    ## Parameters
+    params: GeneratorParams, parameters which control the tracks
+    trackpath: Path, where to write the tracks to
+    '''
     kes = np.linspace(params.ke_min, params.ke_max, params.ke_bins)
     polars = np.linspace(params.polar_min * DEG2RAD, params.polar_max * DEG2RAD, params.polar_bins)
 
@@ -135,6 +179,12 @@ def generate_tracks(params: GeneratorParams, trackpath: Path):
     
 
 class TrackInterpolator:
+    '''
+    # TrackInterpolator
+    Represents an interpolation scheme used to generate trajectories. Solving ODE's can be expensive,
+    so to save time pre-generate a range of solutions and then interpolate on these solutions. TrackInterpolator 
+    uses bilinear interpolation to interpolate on the energy and polar angle (reaction angle) of the trajectory.
+    '''
     def __init__(self, track_path: Path):
         self.filepath = track_path
         self.data: np.ndarray | None = None
@@ -152,6 +202,9 @@ class TrackInterpolator:
 
     
     def read_file(self):
+        '''
+        Load data
+        '''
         track_file = h5.File(self.filepath, 'r')
         track_group: h5.Group = track_file['tracks']
         self.particle_name = track_group.attrs['particle']
@@ -172,6 +225,15 @@ class TrackInterpolator:
         self.interpolators = [BilinearInterpolator(pmin_rad, pmax_rad, self.polar_bins, self.ke_min, self.ke_max, self.ke_bins, time.T[:, :, :3]) for time in self.data]
 
     def get_interpolated_trajectory(self, initial_state: InitialState) -> CubicSpline | None:
+        '''
+        Get an interpolated trajectory given some initial state.
+
+        ## Parameters: 
+        initial_state: InitialState
+
+        ## Returns
+        CubicSpline | None: Returns a CubicSpline, which interpolates the trajectory upon z for x,y or None when the algorithm fails
+        '''
 
         is_backwards = False
         if initial_state.polar > np.pi*0.5:
@@ -202,6 +264,9 @@ class TrackInterpolator:
         return CubicSpline(trajectory[:, 2], trajectory[:, :2], extrapolate=False)
     
     def check_interpolator(self, params: GeneratorParams) -> bool:
+        '''
+        Check to see if this interpolator matches the given parameters
+        '''
         is_valid = (
                         params.particle.isotopic_symbol == self.particle_name 
                         and params.bfield == self.bfield and params.efield == self.efield 
@@ -216,6 +281,9 @@ class TrackInterpolator:
             return False
         
     def check_values_in_range(self, ke: float, polar: float) -> bool:
+        '''
+        Check if these values of energy, angle are within the interpolation range
+        '''
         polar_deg = polar / DEG2RAD
         if ke > self.ke_max or ke < self.ke_min or polar_deg < self.polar_min or polar_deg > self.polar_max:
             return False

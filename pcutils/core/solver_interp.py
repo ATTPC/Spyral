@@ -11,14 +11,28 @@ from dataclasses import dataclass
 
 @dataclass
 class Guess:
-    brho: float
-    polar: float
-    azimuthal: float
-    vertex_x: float
-    vertex_y: float
-    vertex_z: float
+    '''
+    Dataclass which is a simple container to hold initial guess info
+    '''
+    brho: float #Tm
+    polar: float #rad
+    azimuthal: float #rad
+    vertex_x: float #mm
+    vertex_y: float #mm
+    vertex_z: float #mm
 
-def generate_trajectory(fit_params: Parameters, interpolator: TrackInterpolator, ejectile: NucleusData) -> CubicSpline:
+def generate_trajectory(fit_params: Parameters, interpolator: TrackInterpolator, ejectile: NucleusData) -> CubicSpline | None:
+    '''
+    Use the interpolation scheme to generate a trajectory from the given fit parameters. 
+
+    ## Parameters:
+    fit_params: Parameters, the set of lmfit Parameters
+    interpolator: TrackInterpolator, the interpolation scheme
+    ejectile: NucleusData, data for the particle being tracked
+
+    ## Returns
+    CubicSpline | None: Returns a CubicSpline interpolating the x,y coordinates on z upon success. Upon failure (typically an out of bounds for the interpolation scheme) returns None.
+    '''
     state = InitialState()
     state.vertex_x = fit_params['vertex_x'].value
     state.vertex_y = fit_params['vertex_y'].value
@@ -32,6 +46,18 @@ def generate_trajectory(fit_params: Parameters, interpolator: TrackInterpolator,
 
 
 def objective_function(fit_params: Parameters, x: np.ndarray, interpolator: TrackInterpolator, ejectile: NucleusData) -> np.ndarray:
+    '''
+    Function to be minimized. Returns errors for data compared to estimated track.
+
+    ## Parameters
+    fit_params: Parameters, the set of lmfit Parameters
+    x: ndarray, the data to be fit (x,y,z) coordinates in meters
+    interpolator: TrackInterpolator, the interpolation scheme to be used
+    ejectile: NucleusData, the data for the particle being tracked
+
+    ## Returns
+    ndarray: the error between the estimate and the data
+    '''
     trajectory = generate_trajectory(fit_params, interpolator, ejectile)
     errors = np.full(len(x), 1.0e6)
     if trajectory is None:
@@ -43,6 +69,17 @@ def objective_function(fit_params: Parameters, x: np.ndarray, interpolator: Trac
     return errors[:]
 
 def create_params(guess: Guess, ejectile: NucleusData, interpolator: TrackInterpolator) -> Parameters:
+    '''
+    Create the lmfit parameters with appropriate bounds
+
+    ## Parameters
+    guess: Guess, the values of the parameters
+    ejectile: NucleusData, the data for the particle being tracked
+    interpolator: TrackInterpolator, the interpolation scheme to be used
+
+    ## Returns
+    Parameters: the lmfit parameters with bounds
+    '''
     interp_min_momentum = math.sqrt(interpolator.ke_min * (interpolator.ke_min + 2.0 * ejectile.mass))
     interp_max_momentum = math.sqrt(interpolator.ke_max * (interpolator.ke_max + 2.0 * ejectile.mass))
     interp_min_brho =  interp_min_momentum / QBRHO_2_P / (ejectile.Z * 10.0 * 100.0)
@@ -84,12 +121,24 @@ def create_params(guess: Guess, ejectile: NucleusData, interpolator: TrackInterp
     fit_params.add('azimuthal', guess.azimuthal, min=min_azimuthal, max=max_azimuthal)
     fit_params.add('vertex_x', guess.vertex_x * 0.001, min=min_x, max=max_x, vary=False)
     fit_params.add('vertex_y', guess.vertex_y * 0.001, min=min_y, max=max_y, vary=False)
-    fit_params.add('vertex_z', guess.vertex_z * 0.001, min=min_z, max=max_z, vary=True)
+    fit_params.add('vertex_z', guess.vertex_z * 0.001, min=min_z, max=max_z, vary=False)
     return fit_params
 
 
 #For testing, not for use in production
 def fit_model(cluster: Cluster, guess: Guess, interpolator: TrackInterpolator, ejectile: NucleusData) -> Parameters | None:
+    '''
+    Used for jupyter notebooks examining the good-ness of the model
+
+    ## Parameters
+    cluster: Cluster, the data to be fit
+    guess: Guess, the values of the parameters
+    ejectile: NucleusData, the data for the particle being tracked
+    interpolator: TrackInterpolator, the interpolation scheme to be used
+
+    ## Returns
+    Parameters | None: Returns the best fit Parameters upon success, or None upon failure
+    '''
     traj_data = cluster.data[:, :3] * 0.001
     momentum = QBRHO_2_P * (guess.brho * 10.0 * 100.0 * float(ejectile.Z))
     kinetic_energy = math.sqrt(momentum**2.0 + ejectile.mass**2.0) - ejectile.mass
@@ -97,6 +146,23 @@ def fit_model(cluster: Cluster, guess: Guess, interpolator: TrackInterpolator, e
         return None
     
     fit_params = create_params(guess, ejectile, interpolator)
+    is_too_short = True
+    depth = 0
+    while is_too_short:
+        depth += 1
+        print(depth)
+        print(f'Brho {fit_params["brho"].value}')
+        try:
+            trajectory = generate_trajectory(fit_params, interpolator, ejectile)
+        except Exception:
+            return
+        if trajectory is None:
+            fit_params['brho'].value += fit_params['brho'].value * 0.1
+        traj_xy = trajectory(traj_data[:, 2])
+        if np.any(np.isnan(traj_xy[:, 0])):
+            fit_params['brho'].value += fit_params['brho'].value * 0.1
+        else:
+            is_too_short = False
 
     result: MinimizerResult = minimize(objective_function, fit_params, args = (traj_data, interpolator, ejectile))
     print(fit_report(result))
@@ -105,13 +171,41 @@ def fit_model(cluster: Cluster, guess: Guess, interpolator: TrackInterpolator, e
         
 
 def solve_physics_interp(cluster_index: int, cluster: Cluster, guess: Guess, interpolator: TrackInterpolator, ejectile: NucleusData, results: dict[str, list]):
+    '''
+    High level function to be called from the application. Takes the Cluster and fits a trajectory to it using the initial Guess. It then writes the results to the dictionary.
+
+    ## Parameters
+    cluster_index: index of the cluster in the h5 scheme. Used only for debugging
+    cluster: Cluster, the data to be fit
+    guess: Guess, the values of the parameters
+    ejectile: NucleusData, the data for the particle being tracked
+    interpolator: TrackInterpolator, the interpolation scheme to be used
+    results: dict[str, list], storage for results from the fitting, which will later be written as a dataframe.
+    '''
     traj_data = cluster.data[:, :3] * 0.001
     momentum = QBRHO_2_P * (guess.brho * 10.0 * 100.0 * float(ejectile.Z))
     kinetic_energy = math.sqrt(momentum**2.0 + ejectile.mass**2.0) - ejectile.mass
     if not interpolator.check_values_in_range(kinetic_energy, guess.polar):
-        return None
+        return
     
     fit_params = create_params(guess, ejectile, interpolator)
+    #Sometimes brho is far enough away that the estimated trajectory stops before the end of the data. To avoid this, pre-adjust brho to better fit
+    is_too_short = True
+    while is_too_short:
+        trajectory = None
+        try:
+            trajectory = generate_trajectory(fit_params, interpolator, ejectile)
+        except Exception:
+            #This is a case where the data/guess is so messed up that there is no valid trajectory with that length/energy
+            return
+        if trajectory is None:
+            fit_params['brho'].value += fit_params['brho'].value * 0.1
+            continue
+        traj_xy = trajectory(traj_data[:, 2])
+        if np.any(np.isnan(traj_xy[:, 0])):
+            fit_params['brho'].value += fit_params['brho'].value * 0.01
+        else:
+            is_too_short = False
 
     best_fit: MinimizerResult = minimize(objective_function, fit_params, args = (traj_data, interpolator, ejectile))
 

@@ -76,6 +76,8 @@ def phase_4_interp(run: int, ws: Workspace, solver_params: SolverParameters, det
                     solver_params.interp_polar_max, 
                     solver_params.interp_polar_bins
                 )
+    print(f'Using interpolation with energy range {gen_params.ke_min} to {gen_params.ke_max} MeV with {gen_params.ke_bins} bins and')
+    print(f'angle range {gen_params.polar_min} to {gen_params.polar_max} degrees with {gen_params.polar_bins} bins and')
     interpolator: TrackInterpolator = None
     if not interp_path.exists():
         print(f'Interpolation data does not exist, generating... This may take some time...')

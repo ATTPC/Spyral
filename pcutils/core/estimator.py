@@ -54,7 +54,7 @@ def estimate_physics(cluster_index: int, cluster: Cluster, estimate_params: Esti
     
     #Find the first point that is furthest from the vertex in rho (local maximum) to get the first arc of the trajectory
     rho_to_vertex = np.linalg.norm(cluster.data[1:, :2] - vertex[:2], axis=1)
-    maxima = argrelmax(rho_to_vertex, order=10)[0]
+    maxima = argrelmax(rho_to_vertex, order=5)[0]
     maximum = 0
     if len(maxima) == 0:
         maximum = len(cluster.data)
