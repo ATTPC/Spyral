@@ -1,6 +1,6 @@
 from .core.config import ClusterParameters
 from .core.point_cloud import PointCloud
-from .core.clusterize import clusterize, join_clusters, cleanup_clusters
+from .core.clusterize import clusterize, join_clusters_depth, cleanup_clusters
 from .core.workspace import Workspace
 import h5py as h5
 from time import time
@@ -52,7 +52,7 @@ def phase_2(run: int, ws: Workspace, cluster_params: ClusterParameters):
         cloud.load_cloud_from_hdf5_data(cloud_data[:].copy(), idx)
 
         clusters = clusterize(cloud, cluster_params)
-        joined = join_clusters(clusters, cluster_params)
+        joined = join_clusters_depth(clusters, cluster_params)
         cleaned = cleanup_clusters(joined, cluster_params)
 
         cluster_event_group = cluster_group.create_group(f'event_{idx}')

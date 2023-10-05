@@ -28,10 +28,10 @@ def plot(run_min: int, run_max: int, ws: Workspace, pid_file):
         return
 
     grammer = Histogrammer()
-    grammer.add_hist2d('ede_gated', (400, 300), ((-100.0, 10000.0), (0.0, 3.0)))
-    grammer.add_hist2d('ede', (400, 300), ((-100.0, 10000.0), (0.0, 3.0)))
-    grammer.add_hist2d('theta_brho_gated', (360, 300), ((0.0, 180.0), (0.0, 3.0)))
-    grammer.add_hist2d('theta_brho', (360, 300), ((0.0, 180.0), (0.0, 3.0)))
+    grammer.add_hist2d('ede_gated', (200, 200), ((-100.0, 5000.0), (0.0, 2.0)))
+    grammer.add_hist2d('ede', (200, 200), ((-100.0, 5000.0), (0.0, 2.0)))
+    grammer.add_hist2d('theta_brho_gated', (360, 200), ((0.0, 180.0), (0.0, 2.0)))
+    grammer.add_hist2d('theta_brho', (360, 200), ((0.0, 180.0), (0.0, 2.0)))
 
     for run in range(run_min, run_max+1):
         run_path = ws.get_estimate_file_path_parquet(run)
@@ -79,7 +79,7 @@ def draw_gate(run_min: int, run_max: int, ws: Workspace):
     handler = CutHandler()
     grammer = Histogrammer()
 
-    grammer.add_hist2d('pid', (400, 300), ((-100.0, 10000.0), (0.0, 3.0)))
+    grammer.add_hist2d('pid', (400, 300), ((-100.0, 8000.0), (0.0, 3.0)))
     for run in range(run_min, run_max+1):
         run_path = ws.get_estimate_file_path_parquet(run)
         if not run_path.exists():

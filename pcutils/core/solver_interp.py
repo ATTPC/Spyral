@@ -121,7 +121,7 @@ def create_params(guess: Guess, ejectile: NucleusData, interpolator: TrackInterp
     fit_params.add('azimuthal', guess.azimuthal, min=min_azimuthal, max=max_azimuthal)
     fit_params.add('vertex_x', guess.vertex_x * 0.001, min=min_x, max=max_x, vary=False)
     fit_params.add('vertex_y', guess.vertex_y * 0.001, min=min_y, max=max_y, vary=False)
-    fit_params.add('vertex_z', guess.vertex_z * 0.001, min=min_z, max=max_z, vary=False)
+    fit_params.add('vertex_z', guess.vertex_z * 0.001, min=min_z, max=max_z, vary=True)
     return fit_params
 
 

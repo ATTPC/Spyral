@@ -51,6 +51,18 @@ def least_squares_circle(x: np.ndarray, y: np.ndarray) -> tuple[float, float, fl
     residual = np.sum((radii - mean_radius)**2.0)
     return (xc, yc, mean_radius, residual)
 
+def join_clusters_depth(clusters: list[LabeledCloud], params: ClusterParameters) -> list[LabeledCloud]:
+
+    jclusters = clusters.copy()
+    before = len(jclusters)
+    after = 0
+    while before != after and len(jclusters) > 1:
+        before = len(jclusters)
+        jclusters = join_clusters(jclusters, params)
+        after = len(jclusters)
+    return jclusters
+
+
 
 def join_clusters(clusters: list[LabeledCloud], params: ClusterParameters) -> list[LabeledCloud]:
     '''

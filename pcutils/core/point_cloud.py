@@ -128,7 +128,7 @@ class PointCloud:
         for idx, point in enumerate(self.cloud):
             mask = np.linalg.norm((self.cloud[:, :3] - point[:3]), axis=1) < max_distance
             neighbors = self.cloud[mask]
-            if len(neighbors) == 0:
+            if len(neighbors) < 2:
                 continue
             # Weight points
             xs = np.sum(neighbors[:,0] * neighbors[:,4])

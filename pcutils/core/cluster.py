@@ -43,16 +43,16 @@ class Cluster:
         bin_mins = np.arange(np.min(cloud.cloud[:, 2]), np.max(cloud.cloud[:, 2]), step=bin_width)
         binned_cloud = np.full((len(bin_mins), 7), np.nan, dtype=np.float64)
         for idx, z_low_edge in enumerate(bin_mins):
-            z_diffs = z_low_edge - cloud.cloud[:, 2]
+            z_diffs = cloud.cloud[:, 2] - z_low_edge
             which_points_in_bin = np.logical_and(z_diffs < bin_width, z_diffs >= 0.0)
             points_in_bin = cloud.cloud[which_points_in_bin]
             if len(points_in_bin) == 0:
                 continue
-
-            r = np.linalg.norm(points_in_bin[:, :2], axis=1)
-            mean_r = np.mean(r)
-            std_r  = np.std(r)
-            if std_r != 0.0:
+            
+            if len(points_in_bin) > 2:
+                r = np.linalg.norm(points_in_bin[:, :2], axis=1)
+                mean_r = np.mean(r)
+                std_r  = np.std(r)
                 points_in_bin = points_in_bin[np.abs(r - mean_r)/std_r < params.z_bin_outlier_cutoff]
             if len(points_in_bin) == 0:
                 continue

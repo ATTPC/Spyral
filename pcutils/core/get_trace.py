@@ -77,15 +77,9 @@ class GetTrace:
             peak.amplitude = self.raw_data[p]
             peak.positive_inflection = int(np.floor(props['left_ips'][idx]))
             peak.negative_inflection = int(np.ceil(props['right_ips'][idx]))
-            peak.integral = np.sum(self.raw_data[peak.positive_inflection:peak.negative_inflection])
+            peak.integral = np.sum(np.abs(self.raw_data[peak.positive_inflection:peak.negative_inflection]))
             if peak.amplitude > threshold:
                 self.peaks.append(peak)
-
-        #Get rid of peaks from saturated trace (NMT)
-        #temp_arr = np.array([[Peak.positive_inflection, Peak.negative_inflection, Peak.uncorrected_amplitude] for Peak in self.peaks])
-        #unique, counts = np.unique(temp_arr, axis = 0, return_counts = True)
-        #duplicates = unique[counts > 1].tolist()
-        #self.peaks = [Peak for Peak in self.peaks if np.logical_and(~(np.isin([Peak.positive_inflection, Peak.negative_inflection, Peak.uncorrected_amplitude], duplicates).all()), Peak.uncorrected_amplitude < 4095)]
 
         if len(self.peaks) > 0:
             return True
