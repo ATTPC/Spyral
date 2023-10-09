@@ -49,7 +49,7 @@ class Cut2D:
     for plotting after the fact.
     '''
     def __init__(self, name: str, vertices: list[tuple[float, float]]):
-        self.path: Path = Path(vertices, closed=True)
+        self.path: Path = Path(vertices, closed=False) # Has to be false, sometimes without this, the algorithm does some weird jumping between the first and last point
         self.name = name
         
     def is_point_inside(self, x: float, y: float) -> bool:

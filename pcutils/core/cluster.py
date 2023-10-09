@@ -53,7 +53,8 @@ class Cluster:
                 r = np.linalg.norm(points_in_bin[:, :2], axis=1)
                 mean_r = np.mean(r)
                 std_r  = np.std(r)
-                points_in_bin = points_in_bin[np.abs(r - mean_r)/std_r < params.z_bin_outlier_cutoff]
+                if std_r != 0:
+                    points_in_bin = points_in_bin[np.abs(r - mean_r)/std_r < params.z_bin_outlier_cutoff]
             if len(points_in_bin) == 0:
                 continue
 

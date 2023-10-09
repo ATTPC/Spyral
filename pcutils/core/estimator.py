@@ -46,9 +46,6 @@ def estimate_physics(cluster_index: int, cluster: Cluster, estimate_params: Esti
     else:
         direction = Direction.FORWARD
 
-    average_window_rho = np.mean(rhos[:5])
-    average_micromegas_rho = np.mean(rhos[-5:-1])
-
     #Guess that the vertex is the first point; make sure to copy! not reference
     vertex[:] = cluster.data[0, :3]
     

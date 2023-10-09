@@ -70,3 +70,9 @@ class Target:
         mass_u = projectile_data.mass / AMU_2_MEV # convert to u
         projectile = catima.Projectile(mass_u, projectile_data.Z,T=projectile_energy/mass_u)
         return catima.calculate(projectile, self.material).get_dict()['sigma_a']
+    
+    def get_energy_loss(self, projectile_data: NucleusData, projectile_energy: float, distance: float) -> float:
+        mass_u = projectile_data.mass / AMU_2_MEV # convert to u
+        projectile = catima.Projectile(mass_u, projectile_data.Z, T=projectile_energy/mass_u)
+        self.material.thickness_cm(distance * 100.0)
+        return catima.calculate(projectile, self.material).get_dict()['e_out']

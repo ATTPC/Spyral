@@ -52,7 +52,16 @@ def least_squares_circle(x: np.ndarray, y: np.ndarray) -> tuple[float, float, fl
     return (xc, yc, mean_radius, residual)
 
 def join_clusters_depth(clusters: list[LabeledCloud], params: ClusterParameters) -> list[LabeledCloud]:
+    '''
+    Join clusters until either only one cluster is left or no clusters meet the criteria to be joined together.
 
+    ## Parameters
+    clusters: list[LabeledCloud], the set of clusters to examine
+    params: ClusterParameters, contains parameters controlling the joining algorithm
+
+    ## Returns
+    list[LabeledCloud]: the set of joined clusters
+    '''
     jclusters = clusters.copy()
     before = len(jclusters)
     after = 0
@@ -99,18 +108,34 @@ def join_clusters(clusters: list[LabeledCloud], params: ClusterParameters) -> li
         #Reject noise
         if cluster.label == -1 or np.isnan(center[0]) or center[2] < 10.0:
             continue
+        radius = np.linalg.norm(center[:2])
+        area = np.pi * radius**2.0
 
         for cidx, comp_cluster in enumerate(clusters):
             comp_center = centers[cidx]
-            if comp_cluster.label == -1 or np.isnan(comp_center[0]) or center[2] < 10.0:
+            comp_radius = np.linalg.norm(comp_center[:2])
+            comp_area = np.pi * comp_radius**2.0
+            if comp_cluster.label == -1 or np.isnan(comp_center[0]) or center[2] < 10.0 or cidx == idx:
                 continue
             center_distance = np.sqrt((center[0] - comp_center[0])**2.0 + (center[1] - comp_center[1])**2.0)
-            #If we find matching centers (that havent already been matched) take all of the clouds in both groups and merge them
+
+            #Calculate area of overlap between the two circles
+            term1 = (center_distance**2.0 + radius**2.0 - comp_radius**2.0)/(2.0 * center_distance * radius)
+            term2 = (center_distance**2.0 + comp_radius**2.0 - radius**2.0)/(2.0 * center_distance * comp_radius)
+            term3 = (-center_distance + radius + comp_radius)*(center_distance + radius - comp_radius)*(center_distance - radius + comp_radius)*(center_distance + radius + comp_radius)
+            if term3 < 0.0: #term3 cant be negative, inside sqrt
+                continue
+            term1 = min(1.0, max(-1.0, term1)) #clamp to arccos range to avoid silly floating point precision errors
+            term2 = min(1.0, max(-1.0, term2))
+            
+            area_overlap = radius**2.0 * np.arccos(term1) + comp_radius**2.0 * np.arccos(term2) - 0.5 * np.sqrt(term3)
+            smaller_area = min(area, comp_area)
             comp_mean_charge = np.mean(comp_cluster.point_cloud.cloud[:, 4], axis=0)
             mean_charge = np.mean(cluster.point_cloud.cloud[:, 4], axis=0)
             charge_diff = np.abs(mean_charge - comp_mean_charge)
             threshold = params.fractional_charge_threshold * np.max([comp_mean_charge, mean_charge])
-            if (center_distance < params.max_center_distance) and (cidx not in groups[cluster.label]) and (charge_diff < threshold):
+            if (area_overlap > 0.75 * smaller_area) and (cidx not in groups[cluster.label]) and (charge_diff < threshold):
+            # if (center_distance < params.max_center_distance) and (cidx not in groups[cluster.label]) and (charge_diff < threshold):
                 comp_group = groups.pop(comp_cluster.label)
                 for subs in comp_group:
                     clusters[subs].label = cluster.label
