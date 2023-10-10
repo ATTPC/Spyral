@@ -102,7 +102,7 @@ def join_clusters(clusters: list[LabeledCloud], params: ClusterParameters) -> li
     for idx, cluster in enumerate(clusters):
         groups[cluster.label] = [idx]
 
-    #Now regroup, searching for clusters which match centers
+    #Now regroup, searching for clusters whose circles mostly overlap
     for idx, center in enumerate(centers):
         cluster = clusters[idx]
         #Reject noise
@@ -117,9 +117,10 @@ def join_clusters(clusters: list[LabeledCloud], params: ClusterParameters) -> li
             comp_area = np.pi * comp_radius**2.0
             if comp_cluster.label == -1 or np.isnan(comp_center[0]) or center[2] < 10.0 or cidx == idx:
                 continue
-            center_distance = np.sqrt((center[0] - comp_center[0])**2.0 + (center[1] - comp_center[1])**2.0)
-
+            
             #Calculate area of overlap between the two circles
+            #See Wolfram MathWorld https://mathworld.wolfram.com/Circle-CircleIntersection.html
+            center_distance = np.sqrt((center[0] - comp_center[0])**2.0 + (center[1] - comp_center[1])**2.0)
             term1 = (center_distance**2.0 + radius**2.0 - comp_radius**2.0)/(2.0 * center_distance * radius)
             term2 = (center_distance**2.0 + comp_radius**2.0 - radius**2.0)/(2.0 * center_distance * comp_radius)
             term3 = (-center_distance + radius + comp_radius)*(center_distance + radius - comp_radius)*(center_distance - radius + comp_radius)*(center_distance + radius + comp_radius)
@@ -127,15 +128,14 @@ def join_clusters(clusters: list[LabeledCloud], params: ClusterParameters) -> li
                 continue
             term1 = min(1.0, max(-1.0, term1)) #clamp to arccos range to avoid silly floating point precision errors
             term2 = min(1.0, max(-1.0, term2))
-            
             area_overlap = radius**2.0 * np.arccos(term1) + comp_radius**2.0 * np.arccos(term2) - 0.5 * np.sqrt(term3)
+
             smaller_area = min(area, comp_area)
             comp_mean_charge = np.mean(comp_cluster.point_cloud.cloud[:, 4], axis=0)
             mean_charge = np.mean(cluster.point_cloud.cloud[:, 4], axis=0)
             charge_diff = np.abs(mean_charge - comp_mean_charge)
             threshold = params.fractional_charge_threshold * np.max([comp_mean_charge, mean_charge])
-            if (area_overlap > 0.75 * smaller_area) and (cidx not in groups[cluster.label]) and (charge_diff < threshold):
-            # if (center_distance < params.max_center_distance) and (cidx not in groups[cluster.label]) and (charge_diff < threshold):
+            if (area_overlap > params.circle_overlap_ratio * smaller_area) and (cidx not in groups[cluster.label]) and (charge_diff < threshold):
                 comp_group = groups.pop(comp_cluster.label)
                 for subs in comp_group:
                     clusters[subs].label = cluster.label
@@ -177,7 +177,7 @@ def clusterize(pc: PointCloud, params: ClusterParameters) -> list[LabeledCloud]:
     ## Returns
     list[LabeledCloud]: list of clusters found by the algorithm
     '''
-    clusterizer = skcluster.HDBSCAN(min_cluster_size=params.min_size, min_samples=params.min_points, cluster_selection_epsilon=params.fractional_distance_min)
+    clusterizer = skcluster.HDBSCAN(min_cluster_size=params.min_size, min_samples=params.min_points)
 
     #Smooth out the point cloud by averaging over neighboring points within a distance, droping any duplicate points
     pc.smooth_cloud(params.smoothing_neighbor_distance)

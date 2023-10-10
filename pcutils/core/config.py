@@ -71,8 +71,7 @@ class ClusterParameters:
     smoothing_neighbor_distance: float = 0.0 #mm
     min_points: int = 0
     min_size: int = 0
-    fractional_distance_min: float = 0.0
-    max_center_distance: float = 0.0
+    circle_overlap_ratio: float = 0.0
     fractional_charge_threshold: float = 0.0
     z_bin_fractional_size: float = 0
     z_bin_outlier_cutoff: float = 0
@@ -169,8 +168,7 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
     config.cluster.smoothing_neighbor_distance = json_data['cluster_smoothing_neighbor_distance(mm)']
     config.cluster.min_size = json_data['cluster_minimum_size']
     config.cluster.min_points = json_data['cluster_minimum_points']
-    config.cluster.max_center_distance = json_data['cluster_max_center_distance(mm)']
-    config.cluster.fractional_distance_min = json_data['cluster_fractional_distance_min']
+    config.cluster.circle_overlap_ratio = json_data['cluster_circle_overlap_ratio']
     config.cluster.fractional_charge_threshold = json_data['cluster_fractional_charge_threshold']
     config.cluster.z_bin_fractional_size = json_data['cluster_z_bin_fractional_size']
     config.cluster.z_bin_outlier_cutoff = json_data['cluster_z_bin_outlier_cutoff']
