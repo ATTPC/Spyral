@@ -2,11 +2,13 @@ import numpy as np
 from numba import float64
 from numba.experimental import jitclass
 
-@jitclass([('x', float64[:]), ('y', float64[:, :])])
+@jitclass([('x', float64[:]), ('y', float64[:, :]), ('x_min', float64), ('x_max', float64)])
 class LinearInterpolator:
     def __init__(self, x_vals: np.ndarray, y_vals: np.ndarray):
         self.x = x_vals
         self.y = y_vals
+        self.x_min = x_vals[0]
+        self.x_max = x_vals[-1]
         self.check_values()
 
     def check_values(self):
@@ -22,6 +24,9 @@ class LinearInterpolator:
         results = np.empty((len(xs), len(self.y)))
         for idx in range(len(self.y)):
             results[:, idx] = np.interp(xs, self.x, self.y[idx])
+        for idx, x in enumerate(xs):
+            if x < self.x_min or x > self.x_max:
+                results[idx] = np.array([np.nan, np.nan])
         return results
 
 

@@ -5,8 +5,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from json import load
 from typing import Optional
-
-
+import numpy as np
 
 @dataclass
 class TargetData:
@@ -71,8 +70,12 @@ class Target:
         projectile = catima.Projectile(mass_u, projectile_data.Z,T=projectile_energy/mass_u)
         return catima.calculate(projectile, self.material).get_dict()['sigma_a']
     
-    def get_energy_loss(self, projectile_data: NucleusData, projectile_energy: float, distance: float) -> float:
+    def get_energy_loss(self, projectile_data: NucleusData, projectile_energy: float, distances: np.ndarray) -> np.ndarray:
         mass_u = projectile_data.mass / AMU_2_MEV # convert to u
         projectile = catima.Projectile(mass_u, projectile_data.Z, T=projectile_energy/mass_u)
-        self.material.thickness_cm(distance * 100.0)
-        return catima.calculate(projectile, self.material).get_dict()['e_out']
+        eloss = np.zeros(len(distances))
+        for idx, distance in enumerate(distances):
+            self.material.thickness_cm(distance * 100.0)
+            projectile.T(projectile_energy/mass_u)
+            eloss[idx] = catima.calculate(projectile, self.material).get_dict()['Eloss']
+        return eloss

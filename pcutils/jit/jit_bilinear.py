@@ -1,9 +1,9 @@
 import numpy as np
 import math
-from numba import jit, int32, float64, boolean
+from numba import njit, int32, float64, boolean
 from numba.experimental import jitclass
 
-@jit
+@njit
 def clamp(value: float | int, low: float | int, hi: float | int) -> float | int:
     return max(low, min(value, hi))
 
@@ -73,8 +73,15 @@ class BilinearInterpolator:
         xx1 = x - x1
         yy1 = y - y1
 
-        return (q11 * (x2x) * (y2y) +
-                q21 * (xx1) * (y2y) +
-                q12 * (x2x) * (yy1) +
-                q22 * (xx1) * (yy1)
-               ) / ((x2 - x1) * (y2 - y1))
+        if x2 == x1 and y1 == y2: #On a corner
+            return q11
+        elif x2 == x1: #At xlim
+            return (q11 * yy1 + q12 * y2y) / (y2 - y1)
+        elif y1 == y2: #At ylim
+            return (q11 * xx1 + q21 * x2x) / (x1 - x2)
+        else: #In a coord
+            return (q11 * (x2x) * (y2y) +
+                    q21 * (xx1) * (y2y) +
+                    q12 * (x2x) * (yy1) +
+                    q22 * (xx1) * (yy1)
+                   ) / ((x2 - x1) * (y2 - y1))

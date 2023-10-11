@@ -6,12 +6,13 @@ from ..core.nuclear_data import NucleusData
 from dataclasses import dataclass
 from pathlib import Path
 from scipy import constants
-from ..interpolate import BilinearInterpolator, LinearInterpolator
+from .jit_bilinear import BilinearInterpolator
+from .jit_linear import LinearInterpolator
 from scipy.interpolate import CubicSpline
 from ..core.constants import MEV_2_JOULE, MEV_2_KG
 import math
 
-from numba import float64, int32
+from numba import float64, int32, njit
 from numba.extending import as_numba_type
 from numba.types import string, ListType
 from numba.typed import List
@@ -21,8 +22,13 @@ TIME_WINDOW: float = 1.0e-6 #1us window
 QBRHO_2_P: float = 1.0e-9 * constants.speed_of_light #kG * cm -> MeV
 SAMPLING_PERIOD: float = 2.0e-9 # seconds, converts time bucket interval to time
 SAMPLING_RANGE: np.ndarray = np.arange(0., TIME_WINDOW, SAMPLING_PERIOD)
-PRECISION: float = 2.0e-6
+KE_LIMIT = 0.1
 DEG2RAD: float = np.pi / 180.0
+
+@njit
+def is_float_equal(lhs: float, rhs: float) -> bool:
+    PRECISION: float = 1.0e-6
+    return abs(lhs - rhs) < PRECISION
 
 @dataclass
 class InitialState:
@@ -76,7 +82,7 @@ def equation_of_motion(t: float, state: np.ndarray, Bfield: float, Efield: float
     speed = math.sqrt(state[3]**2.0 + state[4]**2.0 + state[5]**2.0)
     unit_vector = state[3:] / speed # direction
     kinetic_energy = ejectile.mass * (1.0/math.sqrt(1.0 - (speed / constants.speed_of_light)**2.0) - 1.0) #MeV
-    if kinetic_energy < PRECISION:
+    if kinetic_energy < KE_LIMIT:
         return np.zeros(6)
     mass_kg = ejectile.mass * MEV_2_KG
     charge_c = ejectile.Z * constants.elementary_charge
@@ -258,7 +264,7 @@ class TrackInterpolator:
         removal = np.full(len(trajectory), True)
         previous_element = np.full(3, -1.0)
         for idx, element in enumerate(trajectory):
-            if element[0] == previous_element[0] and element[1] == previous_element[1] and element[2] == previous_element[2]:
+            if np.all(previous_element[:] == element[:]):
                 removal[idx] = False
             previous_element = element
 
@@ -268,16 +274,16 @@ class TrackInterpolator:
 
         return LinearInterpolator(trajectory[:, 2], trajectory[:, :2].T)
     
-    def check_interpolator(self, params: GeneratorParams) -> bool:
+    def check_interpolator(self, particle: str, bfield: float, efield: float, target: str, ke_min: float, ke_max: float, ke_bins: int, polar_min: float, polar_max: float, polar_bins: int) -> bool:
         '''
         Check to see if this interpolator matches the given parameters
         '''
         is_valid = (
-                        params.particle.isotopic_symbol == self.particle_name 
-                        and params.bfield == self.bfield and params.efield == self.efield 
-                        and params.target.pretty_string == self.gas_name
-                        and params.ke_min == self.ke_min and params.ke_max == self.ke_max and params.ke_bins == self.ke_bins 
-                        and params.polar_min == self.polar_min and params.polar_max == self.polar_max and params.polar_bins == self.polar_bins
+                        particle == self.particle_name 
+                        and bfield == self.bfield and efield == self.efield 
+                        and target == self.gas_name
+                        and ke_min == self.ke_min and ke_max == self.ke_max and ke_bins == self.ke_bins 
+                        and polar_min == self.polar_min and polar_max == self.polar_max and polar_bins == self.polar_bins
                     )
         
         if is_valid:
