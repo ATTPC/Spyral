@@ -3,7 +3,7 @@ from .nuclear_data import NucleusData
 from .kalman_args import get_kalman_args, set_kalman_args
 from .constants import MEV_2_KG, MEV_2_JOULE
 from .config import DetectorParameters
-from .clusterize import ClusteredCloud
+from .cluster import Cluster
 from .estimator import Direction
 
 from scipy import constants
@@ -25,10 +25,10 @@ class Guess:
     azimuthal: float = 0.0
     direction: Direction = field(default=-1)
 
-def fx(x: np.ndarray, ds: float) -> np.ndarray:
+def fx(x: np.ndarray, dz: float) -> np.ndarray:
         args = get_kalman_args()
         speed = math.sqrt(x[3]**2.0 + x[4]**2.0 + x[5]**2.0)
-        dt = ds/speed
+        dt = dz/x[5]
         unit_vector = x[3:] / (speed)# direction
         momentum = speed/constants.speed_of_light * args.ejectile.mass
         kinetic_energy = math.sqrt(momentum ** 2.0 + args.ejectile.mass ** 2.0) - args.ejectile.mass #MeV
@@ -56,7 +56,7 @@ def fx(x: np.ndarray, ds: float) -> np.ndarray:
 def hx(x: np.ndarray) -> np.ndarray:
     return np.array([x[0], x[1], x[2]])
 
-def apply_kalman_filter(data: np.ndarray, initial_guess: Guess) -> tuple[np.ndarray, np.ndarray]:
+def apply_kalman_filter(data: np.ndarray, dz: float, initial_guess: Guess) -> tuple[np.ndarray, np.ndarray]:
     initial_state = np.zeros(6)
     args = get_kalman_args()
     momentum = QBRHO_2_P * (initial_guess.brho * float(args.ejectile.Z))
@@ -69,42 +69,42 @@ def apply_kalman_filter(data: np.ndarray, initial_guess: Guess) -> tuple[np.ndar
     initial_state[4] = speed * math.sin(initial_guess.polar) * math.sin(initial_guess.azimuthal)
     initial_state[5] = speed * math.cos(initial_guess.polar)
 
-    first_ds = np.linalg.norm(initial_state[:3] - data[0, :])
-    ds_set = [np.linalg.norm(point[:3] - data[idx-1, :]) for idx, point in enumerate(data) if idx != 0]
-    mean_ds = np.average(ds_set)
-    sigma_ds = np.std(ds_set)
-    ds_set.insert(0, first_ds)
-    cutoff = 0
-    for idx, ds in enumerate(ds_set[1:]):
-         if ds > (mean_ds + 1.5 * sigma_ds):
+    first_dz = np.abs(initial_state[2] - data[0, 2])
+    dz_set = [np.abs(point[2] - data[idx-1, 2]) for idx, point in enumerate(data) if idx != 0]
+    mean_dz = np.average(dz_set)
+    sigma_dz = np.std(dz_set)
+    dz_set.insert(0, first_dz)
+    cutoff = len(dz_set)
+    for idx, ds in enumerate(dz_set[1:]):
+         if ds > (mean_dz + 2.0 * sigma_dz):
               cutoff = idx
               break
 
     points = MerweScaledSigmaPoints(6, alpha=.001, beta=2., kappa=0)
-    k_filter = UnscentedKalmanFilter(6, 3, 0.001, hx, fx, points)
+    k_filter = UnscentedKalmanFilter(6, 3, dz, hx, fx, points)
     sigma_speed = 0.01 * speed
     sigma_pos = 0.001
-    k_filter.P = np.diag([(sigma_pos)**2.0, (sigma_pos)**2.0, (sigma_pos)**2.0, sigma_speed**2.0, sigma_speed**2.0, sigma_speed**2.0])
+    k_filter.P = np.diag([(sigma_pos)**2.0, (sigma_pos)**2.0, (dz)**2.0, sigma_speed**2.0, sigma_speed**2.0, sigma_speed**2.0])
     k_filter.x = initial_state
     k_filter.R = np.diag([sigma_pos**2.0, sigma_pos**2.0, sigma_pos**2.0])
-    k_filter.Q = Q_discrete_white_noise(dim=2, dt=0.001, var=(sigma_speed)**2.0, block_size=3, order_by_dim=False)
+    k_filter.Q = Q_discrete_white_noise(dim=2, dt=dz, var=(sigma_speed)**2.0, block_size=3, order_by_dim=False)
 
-    (means, covs) = k_filter.batch_filter(data[:cutoff], dts=ds_set[:cutoff])
+    (means, covs) = k_filter.batch_filter(data[:cutoff], dts=dz_set[:cutoff])
 
-    ds_set.insert(0, 0.0)
+    dz_set.insert(0, 0.0)
     all_means = np.insert(means, 0, initial_state, axis=0)
     all_cov = np.insert(covs, 0, np.diag([(sigma_pos)**2.0, (sigma_pos)**2.0, (sigma_pos)**2.0, sigma_speed**2.0, sigma_speed**2.0, sigma_speed**2.0]), axis=0)
-    trajectory, traj_cov, _ = k_filter.rts_smoother(all_means, all_cov, dts=ds_set[:(cutoff+1)])
+    trajectory, traj_cov, _ = k_filter.rts_smoother(all_means, all_cov, dts=dz_set[:(cutoff+1)])
     return trajectory, traj_cov
 
-def solve_physics_kalman(cluster_index: int, cluster: ClusteredCloud, initial_guess: Guess, det_params: DetectorParameters, target: Target, ejectile: NucleusData, results: dict[str, list[float]]):
+def solve_physics_kalman(cluster_index: int, cluster: Cluster, initial_guess: Guess, det_params: DetectorParameters, target: Target, ejectile: NucleusData, results: dict[str, list[float]]):
     bfield = -1.0 * det_params.magnetic_field
     efield = -1.0 * det_params.electric_field
 
     set_kalman_args(target, ejectile, bfield, efield)
 
     #convert everyone to meters from mm
-    data = cluster.point_cloud.cloud[:, :3]
+    data = cluster.data[:, :3]
     data *= 0.001
     initial_guess.vertex_x *= 0.001
     initial_guess.vertex_y *= 0.001
@@ -114,7 +114,7 @@ def solve_physics_kalman(cluster_index: int, cluster: ClusteredCloud, initial_gu
         np.flip(data, axis=0)
 
     try:
-        trajectory, covariance = apply_kalman_filter(data, initial_guess)
+        trajectory, covariance = apply_kalman_filter(data, cluster.z_bin_width * 0.001, initial_guess)
     except Exception:
          return
     momentum = np.linalg.norm(trajectory[0, 3:]) * ejectile.mass / constants.speed_of_light
@@ -122,9 +122,9 @@ def solve_physics_kalman(cluster_index: int, cluster: ClusteredCloud, initial_gu
     azimuthal = np.arctan2(trajectory[0, 4], trajectory[0, 3])
     if azimuthal < 0.0:
          azimuthal += 2.0 * np.pi
-    sigma_velox = math.sqrt(covariance[0,3,3])
-    sigma_veloy = math.sqrt(covariance[0,4,4])
-    sigma_veloz = math.sqrt(covariance[0,5,5])
+    sigma_velox = math.sqrt(np.abs(covariance[0,3,3]))
+    sigma_veloy = math.sqrt(np.abs(covariance[0,4,4]))
+    sigma_veloz = math.sqrt(np.abs(covariance[0,5,5]))
     sigma_velo = np.linalg.norm(trajectory[0, 3:]) * math.sqrt((sigma_velox/trajectory[0,3])**2.0 + (sigma_veloy/trajectory[0,4])**2.0 + (sigma_veloz/trajectory[0,5])**2.0)
     sigma_veloxy = np.linalg.norm(trajectory[0, 3:]) * math.sqrt((sigma_velox/trajectory[0,3])**2.0 + (sigma_veloy/trajectory[0,4])**2.0)
     sigma_momentum = sigma_velo * ejectile.mass/constants.speed_of_light
@@ -133,7 +133,7 @@ def solve_physics_kalman(cluster_index: int, cluster: ClusteredCloud, initial_gu
 
     results['cluster_index'].append(cluster_index)
     results['cluster_label'].append(cluster.label)
-    results['event'].append(cluster.point_cloud.event_number)
+    results['event'].append(cluster.event)
     results['vertex_x'].append(trajectory[0,0] * 1000.0)
     results['sigma_vx'].append(math.sqrt(covariance[0,0,0]))
     results['vertex_y'].append(trajectory[0,1] * 1000.0)

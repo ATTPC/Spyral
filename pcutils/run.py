@@ -4,6 +4,7 @@ from .phase_1 import phase_1
 from .phase_2 import phase_2
 from .phase_3 import phase_3
 from .phase_4_kalman import phase_4_kalman
+from .phase_4_interp import phase_4_interp
 from time import time
 
 def run_pcutils(config: Config):
@@ -26,8 +27,9 @@ def run_pcutils(config: Config):
             phase_3(idx, ws, config.estimate, config.detector)
 
         if config.run.do_phase4:
-            #phase_4(idx, ws, config.detector, config.solver)
-            phase_4_kalman(idx, ws, config.detector, config.solver, nuclear_map)
+            # phase_4(idx, ws, config.detector, config.solver)
+            # phase_4_kalman(idx, ws, config.detector, config.solver, nuclear_map)
+            phase_4_interp(idx, ws, config.solver, config.detector, nuclear_map)
         
     stop = time()
     print(f'Total ellapsed runtime: {stop - start}s')

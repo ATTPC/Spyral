@@ -1,7 +1,7 @@
 from .config import DetectorParameters
 from .target import Target
 from .nuclear_data import NucleusData
-from .clusterize import ClusteredCloud
+from .clusterize import Cluster
 from .estimator import Direction
 from .constants import MEV_2_JOULE, MEV_2_KG
 from scipy import integrate, constants
@@ -160,8 +160,8 @@ def create_params(initial_value: InitialValue, ejectile: NucleusData, data: np.n
 
 
 #For testing, not for use in production
-def fit_model(cluster: ClusteredCloud, initial_value: InitialValue, detector_params: DetectorParameters, target: Target, ejectile: NucleusData) -> Parameters:
-    traj_data = cluster.point_cloud.cloud[:, :3] * 0.001
+def fit_model(cluster: Cluster, initial_value: InitialValue, detector_params: DetectorParameters, target: Target, ejectile: NucleusData) -> Parameters:
+    traj_data = cluster.data[:, :3] * 0.001
     fit_params = create_params(initial_value, ejectile, traj_data)
 
     bfield = -1.0 * detector_params.magnetic_field
@@ -173,8 +173,8 @@ def fit_model(cluster: ClusteredCloud, initial_value: InitialValue, detector_par
     return result.params
         
 
-def solve_physics(cluster_index: int, cluster: ClusteredCloud, initial_value: InitialValue, detector_params: DetectorParameters, target: Target, ejectile: NucleusData, results: dict[str, list]):
-    traj_data = cluster.point_cloud.cloud[:, :3] * 0.001
+def solve_physics(cluster_index: int, cluster: Cluster, initial_value: InitialValue, detector_params: DetectorParameters, target: Target, ejectile: NucleusData, results: dict[str, list]):
+    traj_data = cluster.data[:, :3] * 0.001
     fit_params = create_params(initial_value, ejectile, traj_data)
 
     bfield = -1.0 * detector_params.magnetic_field
@@ -182,7 +182,7 @@ def solve_physics(cluster_index: int, cluster: ClusteredCloud, initial_value: In
 
     best_fit: MinimizerResult = minimize(objective_function, fit_params, args = (traj_data, bfield, efield, target, ejectile, initial_value.direction))
 
-    results['event'].append(cluster.point_cloud.event_number)
+    results['event'].append(cluster.event)
     results['cluster_index'].append(cluster_index)
     results['cluster_label'].append(cluster.label)
     #Best fit values and uncertainties

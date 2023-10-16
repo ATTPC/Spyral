@@ -205,7 +205,7 @@ class Histogrammer:
         draw_y = yrange[1] - 0.25 * np.abs(yrange[0] - yrange[1])
         self.axes[event.inaxes] = (data[0], event.inaxes.text(draw_x, draw_y,
                         f'Integral: {stats[0]}\nCentroid X: {stats[1]:.3f}\nCentroid Y: {stats[2]:.3f}\nSigma X: {stats[3]:.3f}\nSigma Y: {stats[4]:.3f}',
-                        color='w'))
+                        color='black'))
         plt.draw()
 
     def on_axes_enter(self, event: LocationEvent):

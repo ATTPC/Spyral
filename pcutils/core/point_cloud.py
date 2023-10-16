@@ -128,7 +128,7 @@ class PointCloud:
         for idx, point in enumerate(self.cloud):
             mask = np.linalg.norm((self.cloud[:, :3] - point[:3]), axis=1) < max_distance
             neighbors = self.cloud[mask]
-            if len(neighbors) == 0:
+            if len(neighbors) < 2:
                 continue
             # Weight points
             xs = np.sum(neighbors[:,0] * neighbors[:,4])
@@ -138,7 +138,6 @@ class PointCloud:
             ics = np.sum(neighbors[:,4])
             if np.isclose(ics, 0.0):
                 continue
-            #smoothed_pc.append(np.average(neighbors, axis = 0))
             smoothed_cloud[idx] = np.array([xs/ics, ys/ics, zs/ics, cs/len(neighbors), ics/len(neighbors), point[5], point[6]])
         # Removes duplicate points
         smoothed_cloud = smoothed_cloud[smoothed_cloud[:, 3] != 0.0]
@@ -155,8 +154,3 @@ class PointCloud:
             neighbors = np.linalg.norm((self.cloud[:, :3] - point[:3]), axis=1) < neighborhood_radius
             mask[idx] = len(self.cloud[neighbors]) >= min_neighbors
         self.cloud = self.cloud[mask]
-
-    def bin_cloud_z(self, fractional_bin_size = 0.1):
-        sigma_z = np.std(self.cloud[:, 2])
-        bin_width = sigma_z * fractional_bin_size
-        #Not implemented yet
