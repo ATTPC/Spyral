@@ -1,22 +1,32 @@
-import numpy as np
-from scipy.integrate import solve_ivp
-import h5py as h5
 from .target import Target
 from .nuclear_data import NucleusData
-from dataclasses import dataclass
-from pathlib import Path
-from scipy import constants, spatial
-from ..interpolate import BilinearInterpolator
-from scipy.interpolate import CubicSpline
+from ..interpolate import BilinearInterpolator, LinearInterpolator
 from .constants import MEV_2_JOULE, MEV_2_KG
+
 import math
+import numpy as np
+import h5py as h5
+from dataclasses import dataclass
+from scipy.integrate import solve_ivp
+from scipy import constants
+from pathlib import Path
+from numba import float64, int32, njit
+from numba.extending import as_numba_type
+from numba.types import string, ListType
+from numba.typed import List
+from numba.experimental import jitclass
 
 TIME_WINDOW: float = 1.0e-6 #1us window
 QBRHO_2_P: float = 1.0e-9 * constants.speed_of_light #kG * cm -> MeV
 SAMPLING_PERIOD: float = 2.0e-9 # seconds, converts time bucket interval to time
 SAMPLING_RANGE: np.ndarray = np.arange(0., TIME_WINDOW, SAMPLING_PERIOD)
-PRECISION: float = 2.0e-6
+KE_LIMIT = 0.1
 DEG2RAD: float = np.pi / 180.0
+
+@njit
+def is_float_equal(lhs: float, rhs: float) -> bool:
+    PRECISION: float = 1.0e-6
+    return abs(lhs - rhs) < PRECISION
 
 @dataclass
 class InitialState:
@@ -29,6 +39,9 @@ class InitialState:
     polar: float = 0.0 #rad
     azimuthal: float = 0.0
     kinetic_energy: float = 0.0 # MeV
+
+    def to_array(self) -> np.ndarray:
+        np.array([self.vertex_x, self.vertex_y, self.vertex_z, self.polar, self.azimuthal, self.kinetic_energy])
 
 @dataclass
 class GeneratorParams:
@@ -67,7 +80,7 @@ def equation_of_motion(t: float, state: np.ndarray, Bfield: float, Efield: float
     speed = math.sqrt(state[3]**2.0 + state[4]**2.0 + state[5]**2.0)
     unit_vector = state[3:] / speed # direction
     kinetic_energy = ejectile.mass * (1.0/math.sqrt(1.0 - (speed / constants.speed_of_light)**2.0) - 1.0) #MeV
-    if kinetic_energy < PRECISION:
+    if kinetic_energy < KE_LIMIT:
         return np.zeros(6)
     mass_kg = ejectile.mass * MEV_2_KG
     charge_c = ejectile.Z * constants.elementary_charge
@@ -176,55 +189,52 @@ def generate_tracks(params: GeneratorParams, trackpath: Path):
 
     print('\n')
 
-    
-
+# To use numba with a class we need to declare the types of all members of the class
+# and use the @jitclass decorator
+@jitclass([
+    ('filepath', string), 
+    ('particle_name', string), 
+    ('gas_name', string), 
+    ('bfield', float64), 
+    ('efield', float64), 
+    ('ke_min', float64), 
+    ('ke_max', float64), 
+    ('ke_bins', int32), 
+    ('polar_min', float64), 
+    ('polar_max', float64), 
+    ('polar_bins', int32), 
+    ('interpolators', ListType(BilinearInterpolator.class_type.instance_type))
+])
 class TrackInterpolator:
     '''
     # TrackInterpolator
     Represents an interpolation scheme used to generate trajectories. Solving ODE's can be expensive,
     so to save time pre-generate a range of solutions and then interpolate on these solutions. TrackInterpolator 
     uses bilinear interpolation to interpolate on the energy and polar angle (reaction angle) of the trajectory.
+
+    We use numba to just-in-time compile these methods, which results in a dramatic speed up on the order
+    of a factor of 50.
     '''
-    def __init__(self, track_path: Path):
+    def __init__(self, track_path: str, interpolators: ListType(BilinearInterpolator.class_type.instance_type), 
+                 particle_name: str, gas_name: str, bfield: float, efield: float,
+                 ke_min: float, ke_max: float, ke_bins: int,
+                 polar_min: float, polar_max: float, polar_bins: int):
+        
         self.filepath = track_path
-        self.data: np.ndarray | None = None
-        self.particle_name: str = 'Invalid'
-        self.gas_name: str = 'Invalid'
-        self.bfield: float = 0.0
-        self.efield: float = 0.0
-        self.ke_min: float = 0.0
-        self.ke_max: float = 0.0
-        self.ke_binsx: int = 0
-        self.polar_min: float = 0.0
-        self.polar_max: float = 0.0
-        self.polar_bins: int = 0
-        self.read_file()
+        self.particle_name: str = particle_name
+        self.gas_name: str = gas_name
+        self.bfield: float = bfield
+        self.efield: float = efield
+        self.ke_min: float = ke_min
+        self.ke_max: float = ke_max
+        self.ke_bins: int = ke_bins
+        self.polar_min: float = polar_min
+        self.polar_max: float = polar_max
+        self.polar_bins: int = polar_bins
 
-    
-    def read_file(self):
-        '''
-        Load data
-        '''
-        track_file = h5.File(self.filepath, 'r')
-        track_group: h5.Group = track_file['tracks']
-        self.particle_name = track_group.attrs['particle']
-        self.gas_name = track_group.attrs['gas']
-        self.bfield = track_group.attrs['bfield']
-        self.efield = track_group.attrs['efield']
-        self.ke_min = track_group.attrs['ke_min']
-        self.ke_max = track_group.attrs['ke_max']
-        self.ke_bins = track_group.attrs['ke_bins']
-        self.polar_min = track_group.attrs['polar_min']
-        self.polar_max = track_group.attrs['polar_max']
-        self.polar_bins = track_group.attrs['polar_bins']
-        self.data = track_group['data'][:].copy()
+        self.interpolators = interpolators
 
-        pmin_rad = self.polar_min * DEG2RAD
-        pmax_rad = self.polar_max * DEG2RAD
-
-        self.interpolators = [BilinearInterpolator(pmin_rad, pmax_rad, self.polar_bins, self.ke_min, self.ke_max, self.ke_bins, time.T[:, :, :3]) for time in self.data]
-
-    def get_interpolated_trajectory(self, initial_state: InitialState) -> CubicSpline | None:
+    def get_interpolated_trajectory(self, vx: float, vy: float, vz: float, polar: float, azim: float, ke: float) -> LinearInterpolator | None:
         '''
         Get an interpolated trajectory given some initial state.
 
@@ -232,15 +242,17 @@ class TrackInterpolator:
         initial_state: InitialState
 
         ## Returns
-        CubicSpline | None: Returns a CubicSpline, which interpolates the trajectory upon z for x,y or None when the algorithm fails
+        LinearInterpolator | None: Returns a LinearInterpolator, which interpolates the trajectory upon z for x,y or None when the algorithm fails
         '''
 
         is_backwards = False
-        if initial_state.polar > np.pi*0.5:
+        if polar > np.pi*0.5:
             is_backwards = True
-            initial_state.polar -= np.pi*0.5
+            polar -= np.pi*0.5
 
-        trajectory = np.asarray([interp(initial_state.polar, initial_state.kinetic_energy) for interp in self.interpolators])
+        trajectory = np.zeros((len(self.interpolators), 3))
+        for idx, _ in enumerate(trajectory):
+            trajectory[idx] = self.interpolators[idx].interpolate(polar, ke)
 
         #Rotate polar by 90 degrees if nescessary
         #Since we rotate the entire coordinate system, is as simple as flip in z
@@ -248,31 +260,39 @@ class TrackInterpolator:
         if is_backwards:
             trajectory[:, 2] *= -1
         #Rotate the trajectory in azimuthal (around z) to match data
-        z_rot = spatial.transform.Rotation.from_rotvec([0.0, 0.0, initial_state.azimuthal])
-        trajectory = z_rot.apply(trajectory)
+        z_rot = np.array([[np.cos(azim), -np.sin(azim), 0.0], [np.sin(azim), np.cos(azim), 0.0], [0., 0., 1.0]])
+        trajectory = (z_rot @ trajectory.T).T
         #Translate to vertex
-        trajectory[:, 0] += initial_state.vertex_x
-        trajectory[:, 1] += initial_state.vertex_y
-        trajectory[:, 2] += initial_state.vertex_z
+        trajectory[:, 0] += vx
+        trajectory[:, 1] += vy
+        trajectory[:, 2] += vz
         #Rotate
         #Trim stopped region
-        _, indicies = np.unique(trajectory[:, 2], return_index=True)
-        trajectory = trajectory[indicies]
+        removal = np.full(len(trajectory), True)
+        previous_element = np.full(3, -1.0)
+        for idx, element in enumerate(trajectory):
+            if np.all(previous_element[:] == element[:]):
+                removal[idx] = False
+            previous_element = element
+
+        trajectory = trajectory[removal]
         if len(trajectory) < 2:
             return None
 
-        return CubicSpline(trajectory[:, 2], trajectory[:, :2], extrapolate=False)
+        return LinearInterpolator(trajectory[:, 2], trajectory[:, :2].T)
     
-    def check_interpolator(self, params: GeneratorParams) -> bool:
+    def check_interpolator(self, particle: str, bfield: float, efield: float, target: str,
+                           ke_min: float, ke_max: float, ke_bins: int,
+                           polar_min: float, polar_max: float, polar_bins: int) -> bool:
         '''
         Check to see if this interpolator matches the given parameters
         '''
         is_valid = (
-                        params.particle.isotopic_symbol == self.particle_name 
-                        and params.bfield == self.bfield and params.efield == self.efield 
-                        and params.target.pretty_string == self.gas_name
-                        and params.ke_min == self.ke_min and params.ke_max == self.ke_max and params.ke_bins == self.ke_bins 
-                        and params.polar_min == self.polar_min and params.polar_max == self.polar_max and params.polar_bins == self.polar_bins
+                        particle == self.particle_name 
+                        and bfield == self.bfield and efield == self.efield 
+                        and target == self.gas_name
+                        and ke_min == self.ke_min and ke_max == self.ke_max and ke_bins == self.ke_bins 
+                        and polar_min == self.polar_min and polar_max == self.polar_max and polar_bins == self.polar_bins
                     )
         
         if is_valid:
@@ -290,3 +310,32 @@ class TrackInterpolator:
         else:
             return True
         
+
+def create_interpolator(track_path: Path) -> TrackInterpolator:
+    '''
+    This is a utility function wrapping the creation of a TrackInterpolator. Numba doesn't support h5py for 
+    obvious reasons, so we need to retrieve the track data outside of the class and then manually pass it all
+    to the initialization.
+    '''
+    track_file = h5.File(track_path, 'r')
+    track_group: h5.Group = track_file['tracks']
+    particle_name = track_group.attrs['particle']
+    gas_name = track_group.attrs['gas']
+    bfield = track_group.attrs['bfield']
+    efield = track_group.attrs['efield']
+    ke_min = track_group.attrs['ke_min']
+    ke_max = track_group.attrs['ke_max']
+    ke_bins = track_group.attrs['ke_bins']
+    polar_min = track_group.attrs['polar_min']
+    polar_max = track_group.attrs['polar_max']
+    polar_bins = track_group.attrs['polar_bins']
+    data = track_group['data'][:].copy()
+
+    pmin_rad = polar_min * DEG2RAD
+    pmax_rad = polar_max * DEG2RAD
+
+    typed_interpolators = List()
+
+    [typed_interpolators.append(BilinearInterpolator(pmin_rad, pmax_rad, polar_bins, ke_min, ke_max, ke_bins, time.T[:, :, :3])) for time in data]
+
+    return TrackInterpolator(str(track_path), typed_interpolators, particle_name, gas_name, bfield, efield, ke_min, ke_max, ke_bins, polar_min, polar_max, polar_bins)

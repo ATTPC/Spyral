@@ -1,5 +1,5 @@
 from .core.config import SolverParameters, DetectorParameters
-from .core.track_generator import GeneratorParams, generate_tracks, TrackInterpolator
+from .core.track_generator import GeneratorParams, generate_tracks, TrackInterpolator, create_interpolator
 from .core.workspace import Workspace
 from .core.solver_interp import solve_physics_interp, Guess
 from .core.nuclear_data import NuclearDataMap
@@ -83,12 +83,12 @@ def phase_4_interp(run: int, ws: Workspace, solver_params: SolverParameters, det
         print(f'Interpolation data does not exist, generating... This may take some time...')
         generate_tracks(gen_params, interp_path)
         print(f'Interpolation data generated. Loading interpolation scheme...')
-        interpolator = TrackInterpolator(interp_path)
+        interpolator = create_interpolator(interp_path)
         print(f'Interpolation loaded.')
     else:
         print(f'Found interpolation data. Checking to see if it matches expected configuration...')
-        interpolator = TrackInterpolator(interp_path)
-        if interpolator.check_interpolator(gen_params):
+        interpolator = create_interpolator(interp_path)
+        if interpolator.check_interpolator(gen_params.particle.isotopic_symbol, gen_params.bfield, gen_params.efield, gen_params.target.pretty_string, gen_params.ke_min, gen_params.ke_max, gen_params.ke_bins, gen_params.polar_min, gen_params.polar_max, gen_params.polar_bins):
             print('Interpolator configuration matches. Interpolation loaded.')
         else:
             print('Interpolator configuration does not match! If you want to regenerate this data, please delete the extant file.')

@@ -42,7 +42,7 @@ def generate_trajectory(fit_params: Parameters, interpolator: TrackInterpolator,
     state.polar = fit_params['polar'].value
     state.azimuthal = fit_params['azimuthal'].value
 
-    return interpolator.get_interpolated_trajectory(state)
+    return interpolator.get_interpolated_trajectory(state.vertex_x, state.vertex_y, state.vertex_z, state.polar, state.azimuthal, state.kinetic_energy)
 
 
 def objective_function(fit_params: Parameters, x: np.ndarray, interpolator: TrackInterpolator, ejectile: NucleusData) -> np.ndarray:
@@ -62,7 +62,7 @@ def objective_function(fit_params: Parameters, x: np.ndarray, interpolator: Trac
     errors = np.full(len(x), 1.0e6)
     if trajectory is None:
         return errors
-    xy = trajectory(x[:, 2])
+    xy = trajectory.interpolate(x[:, 2])
     valid_trajectory = xy[~np.isnan(xy[:, 0])]
     limit = len(valid_trajectory)
     errors[:limit] = np.linalg.norm(x[:limit, :2] - valid_trajectory, axis=1)
@@ -150,15 +150,17 @@ def fit_model(cluster: Cluster, guess: Guess, interpolator: TrackInterpolator, e
     depth = 0
     while is_too_short:
         depth += 1
-        print(depth)
-        print(f'Brho {fit_params["brho"].value}')
         try:
             trajectory = generate_trajectory(fit_params, interpolator, ejectile)
         except Exception:
             return
+        if depth > 50:
+            return
         if trajectory is None:
             fit_params['brho'].value += fit_params['brho'].value * 0.1
-        traj_xy = trajectory(traj_data[:, 2])
+        traj_xy = trajectory.interpolate(traj_data[:, 2])
+        if np.isnan(traj_xy[0, 0]):
+            return None
         if np.any(np.isnan(traj_xy[:, 0])):
             fit_params['brho'].value += fit_params['brho'].value * 0.1
         else:
@@ -201,8 +203,10 @@ def solve_physics_interp(cluster_index: int, cluster: Cluster, guess: Guess, int
         if trajectory is None:
             fit_params['brho'].value += fit_params['brho'].value * 0.1
             continue
-        traj_xy = trajectory(traj_data[:, 2])
-        if np.any(np.isnan(traj_xy[:, 0])):
+        traj_xy = trajectory.interpolate(traj_data[:, 2])
+        if np.isnan(traj_xy[0, 0]):
+            return
+        elif np.any(np.isnan(traj_xy[:, 0])):
             fit_params['brho'].value += fit_params['brho'].value * 0.01
         else:
             is_too_short = False

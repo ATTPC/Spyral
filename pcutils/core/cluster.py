@@ -13,6 +13,10 @@ class LabeledCloud:
     point_cloud: PointCloud = field(default_factory=PointCloud)
 
 class Cluster:
+    '''
+    # Cluster
+    Representation of cluster data.
+    '''
     def __init__(self, event: int | None = None,  label: int | None = None, data: np.ndarray | None = None):
         self.event = event
         self.label = label
@@ -24,18 +28,28 @@ class Cluster:
         self.n_z_bins = 0
 
     def from_labeled_cloud(self, cloud: LabeledCloud, params: ClusterParameters):
+        '''
+        Convert a LabeledCloud to a Cluster, applying z-binning to the data
+        '''
         self.event = cloud.point_cloud.event_number
         self.label = cloud.label
         self.bin_cloud_z(cloud.point_cloud, params)
-        #self.copy_cloud(cloud.point_cloud, params)
 
     def copy_cloud(self, cloud: PointCloud, params: ClusterParameters):
+        '''
+        Copy point cloud data to the cluster
+        '''
         cloud.sort_in_z()
         self.data = np.zeros((len(cloud.cloud), 4))
         self.data[:, :3] = cloud.cloud[:, :3]
         self.data[:, 3] = cloud.cloud[:, 4]
 
     def bin_cloud_z(self, cloud: PointCloud, params: ClusterParameters):
+        '''
+        Bin the point cloud data in z and apply some noise removal by rejecting outliers in radial distance within
+        the z-bin. This method is adaptive. The number of z-bins is determined by the standard deviation of the data in z
+        and a user paramter (z_bin_fractional_size).
+        '''
         cloud.sort_in_z()
         sigma_z = np.std(cloud.cloud[:, 2])
         bin_width = sigma_z * params.z_bin_fractional_size
@@ -70,6 +84,9 @@ class Cluster:
         self.z_bin_hi_edge = bin_mins[-1] + bin_width
 
 def convert_labeled_to_cluster(cloud: LabeledCloud, params: ClusterParameters) -> Cluster:
+    '''
+    Function which takes in a LabeledCloud and ClusterParamters and returns a Cluster
+    '''
     cluster = Cluster()
     cluster.from_labeled_cloud(cloud, params)
     return cluster
