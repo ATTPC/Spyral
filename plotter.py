@@ -1,5 +1,5 @@
 import polars
-<<<<<<< HEAD
+from typing import Optional
 from matplotlib import pyplot, widgets, colormaps
 from matplotlib.colors import LinearSegmentedColormap, rgb2hex
 from pcutils.core.config import load_config, Config
@@ -10,8 +10,8 @@ import numpy as np
 import sys
 
 RAD2DEG = 180.0/np.pi
-<<<<<<< HEAD
-DATA_DIRECTORY: str = '/mnt/analysis/e20009/e20009_Turi/Workspace/estimates/'
+#DATA_DIRECTORY: str = '/mnt/analysis/e20009/e20009_Turi/Workspace/estimates/'
+DATA_DIRECTORY: str = '/mnt/analysis/e20009/a2091_Turi/Workspace/estimates/'
 
 #Additional colormaps with white backgrounds
 cmap_jet = colormaps.get_cmap("jet")
@@ -34,27 +34,6 @@ white_viridis = LinearSegmentedColormap.from_list('white_viridis', [
     (0.8, '#78d151'),
     (1, '#fde624'),
 ], N=256)
-
-#Merge a bunch of runs into one dataframe. This can be useful for doing one-shot analysis,
-#but need to be mindful of memory limitations (and performance penalties)
-def merge_runs_to_dataframe(run_min: int, run_max: int) -> polars.DataFrame:
-    data_path = Path(DATA_DIRECTORY)
-    path = data_path / f'run_{run_min:04d}.parquet'
-    total_df = polars.read_parquet(path)
-    for i in range(run_min+1, run_max+1):
-        path = data_path / f'run_{i:04d}.parquet'
-        if path.exists():
-            total_df.vstack(polars.read_parquet(path), in_place=True)
-    total_df.rechunk()
-    return total_df
-
-def get_dataframe(run_num: int) -> Optional[polars.DataFrame]:
-    data_path = Path(DATA_DIRECTORY)
-    path = data_path / f'run_{run_num:04d}.parquet'
-    if path.exists():
-        return polars.read_parquet(path)
-    else:
-        return None
 
 def help_string() -> str:
     return\
@@ -126,7 +105,7 @@ def draw_gate(run_min: int, run_max: int, ws: Workspace):
     handler = CutHandler()
     grammer = Histogrammer()
 
-    grammer.add_hist2d('ede', (200, 150), ((0.0, 7500.0), (0.0, 1.5)))
+    grammer.add_hist2d('pid', (300, 200), ((0.0, 7500.0), (0.0, 1.5)))
     for run in range(run_min, run_max+1):
         run_path = ws.get_estimate_file_path_parquet(run)
         if not run_path.exists():

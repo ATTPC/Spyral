@@ -6,8 +6,6 @@ from pathlib import Path
 from json import load
 from typing import Optional
 
-
-
 @dataclass
 class TargetData:
     compound: list[tuple[int, int, int]] = field(default_factory=list) #(Z, A, S)
@@ -18,8 +16,6 @@ class TargetData:
         for (z, a, s) in self.compound:
             molar_mass += a*s
         return molar_mass * self.pressure / (GAS_CONSTANT * ROOM_TEMPERATURE)
-
-
 
 def load_target_data(target_path: Path) -> Optional[TargetData]:
     with open(target_path, 'r') as target_file:

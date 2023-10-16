@@ -68,11 +68,11 @@ class ClusterParameters:
     '''
     Parameters for clustering, cluster joining, and cluster cleaning
     '''
-    smoothing_neighbor_distance: float = 10.0 #mm
+    smoothing_neighbor_distance: float = 0.0 #mm
     min_points: int = 0
     min_size: int = 0
     fractional_distance_min: float = 0.0
-    max_center_distance: float = 25.0
+    max_center_distance: float = 0.0
     fractional_charge_threshold: float = 0.0
     min_write_size: int = 0
     cleanup_min_neighbors: int = 0
@@ -91,8 +91,8 @@ class SolverParameters:
     '''
     Parameters for physics solving
     '''
-    particle_id_filename: str = ''
     gas_data_path: str = ''
+    particle_id_filename: str = ''
 
 @dataclass
 class Config:
