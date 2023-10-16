@@ -2,10 +2,10 @@ import polars
 from typing import Optional
 from matplotlib import pyplot, widgets, colormaps
 from matplotlib.colors import LinearSegmentedColormap, rgb2hex
-from pcutils.core.config import load_config, Config
-from pcutils.core.workspace import Workspace
-from pcutils.plot.cut import load_cut_json, write_cut_json, CutHandler
-from pcutils.plot.histogram import Histogrammer
+from spyral.core.config import load_config, Config
+from spyral.core.workspace import Workspace
+from spyral.plot.cut import load_cut_json, write_cut_json, CutHandler
+from spyral.plot.histogram import Histogrammer
 import numpy as np
 import sys
 

@@ -7,7 +7,7 @@ from .phase_4_kalman import phase_4_kalman
 from .phase_4_interp import phase_4_interp
 from time import time
 
-def run_pcutils(config: Config):
+def run_spyral(config: Config):
 
     ws = Workspace(config.workspace)
     pad_map = ws.get_pad_map()
