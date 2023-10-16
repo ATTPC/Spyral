@@ -1,6 +1,6 @@
 from .core.config import DetectorParameters, SolverParameters
 from .core.workspace import Workspace
-from .core.clusterize import ClusteredCloud
+from .core.cluster import Cluster
 from .core.nuclear_data import NuclearDataMap
 from .core.particle_id import ParticleID, load_particle_id
 from .core.target import Target
@@ -56,9 +56,7 @@ def phase_4(run: int, ws: Workspace, detector_params: DetectorParameters, solver
         event_group = cluster_group[f'event_{event}']
         cidx = estimates_gated['cluster_index'][row]
         local_cluster: h5.Dataset = event_group[f'cluster_{cidx}']
-        cluster = ClusteredCloud()
-        cluster.label = local_cluster.attrs['label']
-        cluster.point_cloud.load_cloud_from_hdf5_data(local_cluster['cloud'][:].copy(), event)
+        cluster = Cluster(event, local_cluster.attrs['label'], local_cluster['cloud'][:].copy())
 
         #Do the solver
         iv = InitialValue(polar=estimates_gated['polar'][row], azimuthal=estimates_gated['azimuthal'][row], brho=estimates_gated['brho'][row],

@@ -54,10 +54,10 @@ def plot(run_min: int, run_max: int, ws: Workspace, pid_file):
         return
 
     grammer = Histogrammer()
-    grammer.add_hist2d('ede_gated', (400, 600), ((0.0, 20000.0), (0.0, 3.0)))
-    grammer.add_hist2d('ede', (400, 600), ((0.0, 20000.0), (0.0, 3.0)))
-    grammer.add_hist2d('theta_brho_gated', (360, 600), ((0.0, 180.0), (0.0, 3.0)))
-    grammer.add_hist2d('theta_brho', (360, 600), ((0.0, 180.0), (0.0, 3.0)))
+    grammer.add_hist2d('ede_gated', (200, 200), ((-100.0, 5000.0), (0.0, 2.0)))
+    grammer.add_hist2d('ede', (200, 200), ((-100.0, 5000.0), (0.0, 2.0)))
+    grammer.add_hist2d('theta_brho_gated', (360, 200), ((0.0, 180.0), (0.0, 2.0)))
+    grammer.add_hist2d('theta_brho', (360, 200), ((0.0, 180.0), (0.0, 2.0)))
 
     for run in range(run_min, run_max+1):
         run_path = ws.get_estimate_file_path_parquet(run)
@@ -72,7 +72,7 @@ def plot(run_min: int, run_max: int, ws: Workspace, pid_file):
 
     fig, ax = pyplot.subplots(1,2)
     fig.suptitle(f'Runs {run_min} to {run_max} Gated')
-    mesh_1 = grammer.draw_hist2d('ede_gated', ax[0])
+    mesh_1 = grammer.draw_hist2d('ede_gated', ax[0], log_z=True)
     mesh_2 = grammer.draw_hist2d('theta_brho_gated', ax[1], log_z=True)
     ax[0].set_xlabel('Energy Loss (channels)')
     ax[0].set_ylabel(r'B$\rho$ (T*m)')
@@ -85,7 +85,7 @@ def plot(run_min: int, run_max: int, ws: Workspace, pid_file):
 
     fig2, ax2 = pyplot.subplots(1,2)
     fig2.suptitle(f'Runs {run_min} to {run_max}')
-    mesh_12 = grammer.draw_hist2d('ede', ax2[0])
+    mesh_12 = grammer.draw_hist2d('ede', ax2[0], log_z=True)
     mesh_22 = grammer.draw_hist2d('theta_brho', ax2[1], log_z=True)
     ax2[0].set_xlabel('Energy Loss (channels)')
     ax2[0].set_ylabel(r'B$\rho$ (T*m)')
@@ -104,8 +104,7 @@ def plot(run_min: int, run_max: int, ws: Workspace, pid_file):
 def draw_gate(run_min: int, run_max: int, ws: Workspace):
     handler = CutHandler()
     grammer = Histogrammer()
-
-    grammer.add_hist2d('pid', (300, 200), ((0.0, 7500.0), (0.0, 1.5)))
+    grammer.add_hist2d('pid', (400, 300), ((-100.0, 8000.0), (0.0, 3.0)))
     for run in range(run_min, run_max+1):
         run_path = ws.get_estimate_file_path_parquet(run)
         if not run_path.exists():
@@ -116,7 +115,8 @@ def draw_gate(run_min: int, run_max: int, ws: Workspace):
     _fig, ax = pyplot.subplots(1,1)
     _selector = widgets.PolygonSelector(ax, handler.onselect)
 
-    mesh = grammer.draw_hist2d(name = 'pid', axis = ax, cmap = white_viridis)
+    mesh = grammer.draw_hist2d(name = 'pid', axis = ax, cmap = white_viridis, log_z = True)
+
     pyplot.colorbar(mesh, ax=ax)
     pyplot.tight_layout()
     pyplot.show()

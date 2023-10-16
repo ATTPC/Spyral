@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from json import load
 from typing import Optional
+import numpy as np
 
 @dataclass
 class TargetData:
@@ -33,6 +34,7 @@ class Target:
             print(f'Could not load target data in file {target_file}. Prepare for a crash.')
 
         self.pretty_string: str = ''.join(f'{nuclear_data.get_data(z, a).pretty_iso_symbol}<sub>{s}</sub>' for (z, a, s) in self.data.compound)
+        self.ugly_string: str = ''.join(f'{nuclear_data.get_data(z, a).isotopic_symbol}{s}' for (z, a, s) in self.data.compound)
         
         #Construct the target material
         self.material = catima.Material()
@@ -65,3 +67,13 @@ class Target:
         mass_u = projectile_data.mass / AMU_2_MEV # convert to u
         projectile = catima.Projectile(mass_u, projectile_data.Z,T=projectile_energy/mass_u)
         return catima.calculate(projectile, self.material).get_dict()['sigma_a']
+    
+    def get_energy_loss(self, projectile_data: NucleusData, projectile_energy: float, distances: np.ndarray) -> np.ndarray:
+        mass_u = projectile_data.mass / AMU_2_MEV # convert to u
+        projectile = catima.Projectile(mass_u, projectile_data.Z, T=projectile_energy/mass_u)
+        eloss = np.zeros(len(distances))
+        for idx, distance in enumerate(distances):
+            self.material.thickness_cm(distance * 100.0)
+            projectile.T(projectile_energy/mass_u)
+            eloss[idx] = catima.calculate(projectile, self.material).get_dict()['Eloss']
+        return eloss

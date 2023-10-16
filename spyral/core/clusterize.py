@@ -1,14 +1,9 @@
 from .point_cloud import PointCloud
+from .cluster import LabeledCloud, Cluster, convert_labeled_to_cluster
 from .config import ClusterParameters
 import sklearn.cluster as skcluster
 from sklearn.preprocessing import StandardScaler
-from dataclasses import dataclass, field
 import numpy as np
-
-@dataclass
-class ClusteredCloud:
-    label: int = -1 #default is noise label
-    point_cloud: PointCloud = field(default_factory=PointCloud)
 
 def least_squares_circle(x: np.ndarray, y: np.ndarray) -> tuple[float, float, float, float]:
     '''
@@ -56,18 +51,39 @@ def least_squares_circle(x: np.ndarray, y: np.ndarray) -> tuple[float, float, fl
     residual = np.sum((radii - mean_radius)**2.0)
     return (xc, yc, mean_radius, residual)
 
+def join_clusters_depth(clusters: list[LabeledCloud], params: ClusterParameters) -> list[LabeledCloud]:
+    '''
+    Join clusters until either only one cluster is left or no clusters meet the criteria to be joined together.
 
-def join_clusters(clusters: list[ClusteredCloud], params: ClusterParameters) -> list[ClusteredCloud]:
+    ## Parameters
+    clusters: list[LabeledCloud], the set of clusters to examine
+    params: ClusterParameters, contains parameters controlling the joining algorithm
+
+    ## Returns
+    list[LabeledCloud]: the set of joined clusters
+    '''
+    jclusters = clusters.copy()
+    before = len(jclusters)
+    after = 0
+    while before != after and len(jclusters) > 1:
+        before = len(jclusters)
+        jclusters = join_clusters(jclusters, params)
+        after = len(jclusters)
+    return jclusters
+
+
+
+def join_clusters(clusters: list[LabeledCloud], params: ClusterParameters) -> list[LabeledCloud]:
     '''
     Combine clusters based on the center around which they orbit. This is necessary because often times tracks are
     fractured or contain regions of varying density which causes clustering algorithms to separate them.
 
     ## Paramters
-    clusters: list[ClusteredCloud], the set of clusters to examine
+    clusters: list[LabeledCloud], the set of clusters to examine
     params: ClusterParameters, contains the parameters controlling the joining algorithm (max_center_distance)
 
     ## Returns
-    list[ClusteredCloud]: the set of joined clusters
+    list[LabeledCloud]: the set of joined clusters
     '''
     #Can't join 1 or 0 clusters
     if len(clusters) < 2:
@@ -86,36 +102,52 @@ def join_clusters(clusters: list[ClusteredCloud], params: ClusterParameters) -> 
     for idx, cluster in enumerate(clusters):
         groups[cluster.label] = [idx]
 
-    #Now regroup, searching for clusters which match centers
+    #Now regroup, searching for clusters whose circles mostly overlap
     for idx, center in enumerate(centers):
         cluster = clusters[idx]
         #Reject noise
         if cluster.label == -1 or np.isnan(center[0]) or center[2] < 10.0:
             continue
+        radius = np.linalg.norm(center[:2])
+        area = np.pi * radius**2.0
 
         for cidx, comp_cluster in enumerate(clusters):
             comp_center = centers[cidx]
-            if comp_cluster.label == -1 or np.isnan(comp_center[0]) or center[2] < 10.0:
+            comp_radius = np.linalg.norm(comp_center[:2])
+            comp_area = np.pi * comp_radius**2.0
+            if comp_cluster.label == -1 or np.isnan(comp_center[0]) or center[2] < 10.0 or cidx == idx:
                 continue
+            
+            #Calculate area of overlap between the two circles
+            #See Wolfram MathWorld https://mathworld.wolfram.com/Circle-CircleIntersection.html
             center_distance = np.sqrt((center[0] - comp_center[0])**2.0 + (center[1] - comp_center[1])**2.0)
-            #If we find matching centers (that havent already been matched) take all of the clouds in both groups and merge them
+            term1 = (center_distance**2.0 + radius**2.0 - comp_radius**2.0)/(2.0 * center_distance * radius)
+            term2 = (center_distance**2.0 + comp_radius**2.0 - radius**2.0)/(2.0 * center_distance * comp_radius)
+            term3 = (-center_distance + radius + comp_radius)*(center_distance + radius - comp_radius)*(center_distance - radius + comp_radius)*(center_distance + radius + comp_radius)
+            if term3 < 0.0: #term3 cant be negative, inside sqrt
+                continue
+            term1 = min(1.0, max(-1.0, term1)) #clamp to arccos range to avoid silly floating point precision errors
+            term2 = min(1.0, max(-1.0, term2))
+            area_overlap = radius**2.0 * np.arccos(term1) + comp_radius**2.0 * np.arccos(term2) - 0.5 * np.sqrt(term3)
+
+            smaller_area = min(area, comp_area)
             comp_mean_charge = np.mean(comp_cluster.point_cloud.cloud[:, 4], axis=0)
             mean_charge = np.mean(cluster.point_cloud.cloud[:, 4], axis=0)
             charge_diff = np.abs(mean_charge - comp_mean_charge)
             threshold = params.fractional_charge_threshold * np.max([comp_mean_charge, mean_charge])
-            if (center_distance < params.max_center_distance) and (cidx not in groups[cluster.label]) and (charge_diff < threshold):
+            if (area_overlap > params.circle_overlap_ratio * smaller_area) and (cidx not in groups[cluster.label]) and (charge_diff < threshold):
                 comp_group = groups.pop(comp_cluster.label)
                 for subs in comp_group:
                     clusters[subs].label = cluster.label
                 groups[cluster.label].extend(comp_group)
     
     #Now reform the clouds such that there is one cloud per group
-    new_clusters: list[ClusteredCloud] = []
+    new_clusters: list[LabeledCloud] = []
     for g in groups.keys():
         if g == -1:
             continue
 
-        new_cluster = ClusteredCloud(g, PointCloud())
+        new_cluster = LabeledCloud(g, PointCloud())
         new_cluster.point_cloud.event_number = event_number
         new_cluster.point_cloud.cloud = np.zeros((0,7))
         for idx in groups[g]:
@@ -124,18 +156,13 @@ def join_clusters(clusters: list[ClusteredCloud], params: ClusterParameters) -> 
 
     return new_clusters
 
-def cleanup_clusters(clusters: list[ClusteredCloud], cluster_params: ClusterParameters) -> list[ClusteredCloud]:
-    for cluster in clusters:
-        #Drop any points which do not have a minimum number of neighbors
-        cluster.point_cloud.drop_isolated_points(cluster_params.cleanup_neighbor_distance, cluster_params.cleanup_min_neighbors)
-        #Re-smooth to remove jitter in the trajectory
-        cluster.point_cloud.smooth_cloud(cluster_params.cleanup_neighbor_distance)
-        #Sort our cloud to be ordered in z
-        cluster.point_cloud.sort_in_z()
-
-    return [cluster for cluster in clusters if len(cluster.point_cloud.cloud) > cluster_params.min_write_size]
+def cleanup_clusters(clusters: list[LabeledCloud], params: ClusterParameters) -> list[Cluster]:
+    '''
+    Converts the LabeledClouds to Clusters and bins the data in z
+    '''
+    return [convert_labeled_to_cluster(cluster, params) for cluster in clusters if cluster.label != -1]
     
-def clusterize(pc: PointCloud, cluster_params: ClusterParameters) -> list[ClusteredCloud]:
+def clusterize(pc: PointCloud, params: ClusterParameters) -> list[LabeledCloud]:
     '''
     Analyze a point cloud, and group the points into clusters which in principle should correspond to particle trajectories. This analysis contains several steps,
     and revolves around the HDBSCAN clustering algorithm implemented in scikit-learn (see [their description](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html) for details)
@@ -148,12 +175,15 @@ def clusterize(pc: PointCloud, cluster_params: ClusterParameters) -> list[Cluste
     cluster_params: ClusterParameters, parameters controlling the clustering algorithms
 
     ## Returns
-    list[ClusteredCloud]: list of clusters found by the algorithm
+    list[LabeledCloud]: list of clusters found by the algorithm
     '''
-    clusterizer = skcluster.HDBSCAN(min_cluster_size=cluster_params.min_size, min_samples=cluster_params.min_points, cluster_selection_epsilon=cluster_params.fractional_distance_min)
+    clusterizer = skcluster.HDBSCAN(min_cluster_size=params.min_size, min_samples=params.min_points)
 
     #Smooth out the point cloud by averaging over neighboring points within a distance, droping any duplicate points
-    pc.smooth_cloud(cluster_params.smoothing_neighbor_distance)
+    pc.smooth_cloud(params.smoothing_neighbor_distance)
+
+    if len(pc.cloud) < params.min_size:
+        return []
 
     #Use spatial dimensions and integrated charge
     cluster_data = np.empty(shape=(len(pc.cloud), 4))
@@ -167,9 +197,9 @@ def clusterize(pc: PointCloud, cluster_params: ClusterParameters) -> list[Cluste
     labels = np.unique(fitted_clusters.labels_)
 
     #Select out data into clusters
-    clusters: list[ClusteredCloud] = []
+    clusters: list[LabeledCloud] = []
     for idx, label in enumerate(labels):
-        clusters.append(ClusteredCloud(label, PointCloud()))
+        clusters.append(LabeledCloud(label, PointCloud()))
         mask = fitted_clusters.labels_ == label
         clusters[idx].point_cloud.cloud = pc.cloud[mask]
         clusters[idx].point_cloud.event_number = pc.event_number

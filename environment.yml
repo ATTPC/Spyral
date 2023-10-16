@@ -1,4 +1,4 @@
-name: pcutil-env
+name: spyral-env
 channels:
   - defaults
 dependencies:
