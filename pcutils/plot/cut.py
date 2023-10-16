@@ -71,7 +71,7 @@ class Cut2D:
 def write_cut_json(cut: Cut2D, filepath: str) -> bool:
     json_str = cut.to_json_str()
     try:
-        with open(filepath, 'w') as output:
+        with open(filepath, 'a') as output:
             output.write(json_str)
             return True
     except OSError as error:
@@ -80,7 +80,7 @@ def write_cut_json(cut: Cut2D, filepath: str) -> bool:
 
 def load_cut_json(filepath: str) -> Optional[Cut2D]:
     try:
-        with open(filepath, 'r') as input:
+        with open(filepath, 'a') as input:
             buffer = input.read()
             cut_dict = json.loads(buffer)
             if 'name' not in cut_dict or 'vertices' not in cut_dict:

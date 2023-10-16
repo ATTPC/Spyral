@@ -1,5 +1,6 @@
 import polars
-from matplotlib import pyplot, widgets
+from matplotlib import pyplot, widgets, colormaps
+from matplotlib.colors import LinearSegmentedColormap, rgb2hex
 from pcutils.core.config import load_config, Config
 from pcutils.core.workspace import Workspace
 from pcutils.plot.cut import load_cut_json, write_cut_json, CutHandler
@@ -8,6 +9,50 @@ import numpy as np
 import sys
 
 RAD2DEG = 180.0/np.pi
+DATA_DIRECTORY: str = '/mnt/analysis/e20009/e20009_Turi/Workspace/estimates/'
+
+#Additional colormaps with white backgrounds
+cmap_jet = colormaps.get_cmap("jet")
+white_jet = LinearSegmentedColormap.from_list('white_jet', [
+    (0, '#ffffff'),
+    (1e-20, rgb2hex(cmap_jet(1e-20))),
+    (0.2, rgb2hex(cmap_jet(0.2))),
+    (0.4, rgb2hex(cmap_jet(0.4))),
+    (0.6, rgb2hex(cmap_jet(0.6))),
+    (0.8, rgb2hex(cmap_jet(0.8))),
+    (1, rgb2hex(cmap_jet(0.9))),  
+], N = 256)
+
+white_viridis = LinearSegmentedColormap.from_list('white_viridis', [
+    (0, '#ffffff'),
+    (1e-20, '#440053'),
+    (0.2, '#404388'),
+    (0.4, '#2a788e'),
+    (0.6, '#21a784'),
+    (0.8, '#78d151'),
+    (1, '#fde624'),
+], N=256)
+
+#Merge a bunch of runs into one dataframe. This can be useful for doing one-shot analysis,
+#but need to be mindful of memory limitations (and performance penalties)
+def merge_runs_to_dataframe(run_min: int, run_max: int) -> polars.DataFrame:
+    data_path = Path(DATA_DIRECTORY)
+    path = data_path / f'run_{run_min:04d}.parquet'
+    total_df = polars.read_parquet(path)
+    for i in range(run_min+1, run_max+1):
+        path = data_path / f'run_{i:04d}.parquet'
+        if path.exists():
+            total_df.vstack(polars.read_parquet(path), in_place=True)
+    total_df.rechunk()
+    return total_df
+
+def get_dataframe(run_num: int) -> Optional[polars.DataFrame]:
+    data_path = Path(DATA_DIRECTORY)
+    path = data_path / f'run_{run_num:04d}.parquet'
+    if path.exists():
+        return polars.read_parquet(path)
+    else:
+        return None
 
 def help_string() -> str:
     return\
@@ -78,7 +123,6 @@ def plot(run_min: int, run_max: int, ws: Workspace, pid_file):
 def draw_gate(run_min: int, run_max: int, ws: Workspace):
     handler = CutHandler()
     grammer = Histogrammer()
-
     grammer.add_hist2d('pid', (400, 300), ((-100.0, 8000.0), (0.0, 3.0)))
     for run in range(run_min, run_max+1):
         run_path = ws.get_estimate_file_path_parquet(run)
@@ -90,7 +134,8 @@ def draw_gate(run_min: int, run_max: int, ws: Workspace):
     _fig, ax = pyplot.subplots(1,1)
     _selector = widgets.PolygonSelector(ax, handler.onselect)
 
-    mesh = grammer.draw_hist2d('pid', ax, log_z=False)
+    mesh = grammer.draw_hist2d(name = 'pid', axis = ax, cmap = white_viridis, log_z = True)
+
     pyplot.colorbar(mesh, ax=ax)
     pyplot.tight_layout()
     pyplot.show()

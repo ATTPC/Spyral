@@ -8,4 +8,8 @@ __pycache__/
 *.yaml
 *.ipynb
 *.txt
+<<<<<<< HEAD
+*.out
+=======
 !notebooks/*.ipynb
+>>>>>>> 75fced4ba2159bdb552a08b9f14ae427e9cea48a

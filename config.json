@@ -1,17 +1,17 @@
 {
-    "trace_data_path": "/path/to/some/traces/",
-    "workspace_path": "/path/to/some/workspace/",
-    "pad_geometry_path": "/path/to/some/pad/geometry.csv",
-    "pad_gain_path": "/path/to/some/pad/gain.csv",
-    "pad_time_path": "/path/to/some/pad/time.csv",
-    "pad_electronics_path": "/path/to/some/pad/electronics.csv",
-    "nuclear_data_path": "/path/to/nuclear/data.txt",
+    "trace_data_path": "/mnt/analysis/e20009/e20009_Turi/",
+    "workspace_path": "/mnt/analysis/e20009/e20009_Turi/Workspace/",
+    "pad_geometry_path": "/user/turi/PointCloud-utils/etc/padxy.csv",
+    "pad_gain_path": "/user/turi/PointCloud-utils/etc/pad_gain_map.csv",
+    "pad_time_path": "/user/turi/PointCloud-utils/etc/pad_time_correction.csv",
+    "pad_electronics_path": "/user/turi/PointCloud-utils/etc/pad_electronics.csv",
 
-    "run_min": 4,
-    "run_max": 4,
+    "run_min": 347,
+    "run_max": 356,
+
     "phase1": true,
-    "phase2": false,
-    "phase3": false,
+    "phase2": true,
+    "phase3": true,
     "phase4": false,
 
     "magnetic_field(T)": 2.9,
@@ -20,6 +20,9 @@
     "beam_region_radius(mm)": 25.0,
     "micromegas_time_bucket": 17.0,
     "window_time_bucket": 550.0,
+
+    "gas_density(g/cm^3)": 0.00625,
+    "gas_energy_loss_path": "/user/turi/PointCloud-utils/etc/dEdx/Be10dpSRIM_Proton.txt",
 
     "trace_baseline_window_scale": 20.0,
     "trace_peak_separation": 50.0,
@@ -54,4 +57,3 @@
     "solver_interp_polar_min(deg)": 5.0,
     "solver_interp_polar_max(deg)": 85.0,
     "solver_interp_polar_bins": 80
-}

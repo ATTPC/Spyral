@@ -68,7 +68,7 @@ class ClusterParameters:
     '''
     Parameters for clustering, cluster joining, and cluster cleaning
     '''
-    smoothing_neighbor_distance: float = 0.0 #mm
+    smoothing_neighbor_distance: float = 10.0 #mm
     min_points: int = 0
     min_size: int = 0
     circle_overlap_ratio: float = 0.0
