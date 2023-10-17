@@ -3,13 +3,12 @@ from .pad_map import PadMap
 from .constants import INVALID_EVENT_NUMBER
 from .config import CrossTalkParameters
 import numpy as np
-from typing import Optional
 
 class PointCloud:
 
     def __init__(self):
         self.event_number: int = INVALID_EVENT_NUMBER
-        self.cloud: Optional[np.ndarray] = None
+        self.cloud: np.ndarray = np.empty(0, dtype=np.float64)
 
     def load_cloud_from_get_event(self, event: GetEvent, pmap: PadMap):
         self.event_number = event.number
@@ -23,6 +22,8 @@ class PointCloud:
             if trace.get_number_of_peaks() == 0 or trace.hw_id.cobo_id == 10:
                 continue
             pad = pmap.get_pad_data(trace.hw_id.pad_id)
+            if pad is None:
+                continue
             for peak in trace.get_peaks():
                 self.cloud[idx, 0] = pad.x # X-coordinate, geometry
                 self.cloud[idx, 1] = pad.y # Y-coordinate, geometry
@@ -64,7 +65,11 @@ class PointCloud:
             if point[3] < params.saturation_threshold:
                 continue
 
-            point_hardware = pmap.get_pad_data(point[5]).hardware
+            pad = pmap.get_pad_data(point[5])
+            if pad is None:
+                continue
+
+            point_hardware = pad.hardware
             channel_max = point_hardware.aget_channel + params.channel_range
             if channel_max > 67:
                 channel_max = 67

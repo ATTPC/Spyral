@@ -3,6 +3,7 @@ from .core.get_event import GetEvent
 from .core.pad_map import PadMap
 from .core.point_cloud import PointCloud
 from .core.workspace import Workspace
+from .core.frib_event import FribEvent
 from h5py import File, Group, Dataset
 from time import time
 
@@ -35,6 +36,8 @@ def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParamet
     print(f'Running phase 1 on file {trace_path} for events {min_event} to {max_event}')
 
     event_group: Group = trace_file.get('get')
+    frib_group: Group = trace_file.get('frib')
+    frib_evt_group: Group = frib_group.get('evt')
     cloud_group: Group = point_file.create_group('cloud')
     cloud_group.attrs['min_event'] = min_event
     cloud_group.attrs['max_event'] = max_event
@@ -52,7 +55,7 @@ def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParamet
             print(f'\rPercent of data processed: {int(flush_count * flush_percent * 100)}%', end='')
         count += 1
 
-        event_data: Dataset | None = None
+        event_data: Dataset
         try:
             event_data = event_group[f'evt{idx}_data']
         except Exception:
@@ -65,7 +68,28 @@ def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParamet
         pc.eliminate_cross_talk(pad_map, cross_params)
         pc.calibrate_z_position(detector_params.micromegas_time_bucket, detector_params.window_time_bucket, detector_params.detector_length)
         
-        cloud_group.create_dataset(f'cloud_{pc.event_number}', data=pc.cloud)
+        pc_dataset = cloud_group.create_dataset(f'cloud_{pc.event_number}', data=pc.cloud)
+
+        pc_dataset.attrs['ic_amplitude'] = -1.0
+        pc_dataset.attrs['ic_integral'] = -1.0
+        pc_dataset.attrs['ic_centroid'] = -1.0
+
+        # Now analyze FRIBDAQ data
+        frib_data: Dataset
+        try:
+            frib_data = frib_group[f'evt{idx}_1903']
+        except Exception:
+            continue
+
+        frib_event = FribEvent(frib_data, idx)
+
+        ic_peak = frib_event.get_good_ic_peak()
+        if ic_peak is None:
+            continue
+        pc_dataset.attrs['ic_amplitude'] = ic_peak.amplitude
+        pc_dataset.attrs['ic_integral'] = ic_peak.integral
+        pc_dataset.attrs['ic_centroid'] = ic_peak.centroid
+        
 
     stop = time()
 

@@ -17,7 +17,7 @@ class Cluster:
     # Cluster
     Representation of cluster data.
     '''
-    def __init__(self, event: int | None = None,  label: int | None = None, data: np.ndarray | None = None):
+    def __init__(self, event: int = -1, label: int = -1, data: np.ndarray = np.empty(0, dtype=np.float64)):
         self.event = event
         self.label = label
         self.data = data

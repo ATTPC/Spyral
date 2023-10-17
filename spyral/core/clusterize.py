@@ -108,7 +108,7 @@ def join_clusters(clusters: list[LabeledCloud], params: ClusterParameters) -> li
         #Reject noise
         if cluster.label == -1 or np.isnan(center[0]) or center[2] < 10.0:
             continue
-        radius = np.linalg.norm(center[:2])
+        radius: float = np.linalg.norm(center[:2])
         area = np.pi * radius**2.0
 
         for cidx, comp_cluster in enumerate(clusters):

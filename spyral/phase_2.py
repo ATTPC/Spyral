@@ -18,8 +18,8 @@ def phase_2(run: int, ws: Workspace, cluster_params: ClusterParameters):
     cluster_file = h5.File(cluster_path, 'w')
 
     cloud_group: h5.Group = point_file.get('cloud')
-    min_event = cloud_group.attrs['min_event']
-    max_event = cloud_group.attrs['max_event']
+    min_event: int = cloud_group.attrs['min_event']
+    max_event: int = cloud_group.attrs['max_event']
     cluster_group: h5.Group = cluster_file.create_group('cluster')
     cluster_group.attrs['min_event'] = min_event
     cluster_group.attrs['max_event'] = max_event
@@ -57,6 +57,9 @@ def phase_2(run: int, ws: Workspace, cluster_params: ClusterParameters):
 
         cluster_event_group = cluster_group.create_group(f'event_{idx}')
         cluster_event_group.attrs['nclusters'] = len(cleaned)
+        cluster_event_group.attrs['ic_amplitude'] = cloud_data.attrs['ic_amplitude']
+        cluster_event_group.attrs['ic_centroid'] = cloud_data.attrs['ic_centroid']
+        cluster_event_group.attrs['ic_integral'] = cloud_data.attrs['ic_integral']
         for cidx, cluster in enumerate(cleaned):
             local_group = cluster_event_group.create_group(f'cluster_{cidx}')
             local_group.attrs['label'] = cluster.label
