@@ -10,8 +10,6 @@ import numpy as np
 import sys
 
 RAD2DEG = 180.0/np.pi
-#DATA_DIRECTORY: str = '/mnt/analysis/e20009/e20009_Turi/Workspace/estimates/'
-DATA_DIRECTORY: str = '/mnt/analysis/e20009/a2091_Turi/Workspace/estimates/'
 
 #Additional colormaps with white backgrounds
 cmap_jet = colormaps.get_cmap("jet")
@@ -104,7 +102,7 @@ def plot(run_min: int, run_max: int, ws: Workspace, pid_file):
 def draw_gate(run_min: int, run_max: int, ws: Workspace):
     handler = CutHandler()
     grammer = Histogrammer()
-    grammer.add_hist2d('pid', (400, 300), ((-100.0, 8000.0), (0.0, 3.0)))
+    grammer.add_hist2d('pid', (400, 300), ((-100.0, 5000.0), (0.0, 1.5)))
     for run in range(run_min, run_max+1):
         run_path = ws.get_estimate_file_path_parquet(run)
         if not run_path.exists():
