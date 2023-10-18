@@ -1,4 +1,4 @@
-from .core.config import TraceParameters, CrossTalkParameters, DetectorParameters
+from .core.config import TraceParameters, CrossTalkParameters, DetectorParameters, FribParameters
 from .core.get_event import GetEvent
 from .core.pad_map import PadMap
 from .core.point_cloud import PointCloud
@@ -6,6 +6,7 @@ from .core.workspace import Workspace
 from .core.frib_event import FribEvent
 from h5py import File, Group, Dataset
 from time import time
+import numpy as np
 
 def get_event_range(trace_file: File) -> tuple[int, int]:
     '''
@@ -21,7 +22,7 @@ def get_event_range(trace_file: File) -> tuple[int, int]:
     meta_data = meta_group.get('meta')
     return (int(meta_data[0]), int(meta_data[2]))
 
-def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParameters, cross_params: CrossTalkParameters, detector_params: DetectorParameters):
+def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParameters, frib_params: FribParameters, cross_params: CrossTalkParameters, detector_params: DetectorParameters):
     start = time()
     trace_path = ws.get_trace_file_path(run)
     if not trace_path.exists():
@@ -66,10 +67,10 @@ def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParamet
         pc = PointCloud()
         pc.load_cloud_from_get_event(event, pad_map)
         pc.eliminate_cross_talk(pad_map, cross_params)
-        pc.calibrate_z_position(detector_params.micromegas_time_bucket, detector_params.window_time_bucket, detector_params.detector_length)
         
-        pc_dataset = cloud_group.create_dataset(f'cloud_{pc.event_number}', data=pc.cloud)
+        pc_dataset = cloud_group.create_dataset(f'cloud_{pc.event_number}', shape=pc.cloud.shape, dtype=np.float64)
 
+        #default IC settings
         pc_dataset.attrs['ic_amplitude'] = -1.0
         pc_dataset.attrs['ic_integral'] = -1.0
         pc_dataset.attrs['ic_centroid'] = -1.0
@@ -77,19 +78,27 @@ def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParamet
         # Now analyze FRIBDAQ data
         frib_data: Dataset
         try:
-            frib_data = frib_group[f'evt{idx}_1903']
+            frib_data = frib_evt_group[f'evt{idx}_1903']
         except Exception:
+            pc.calibrate_z_position(detector_params.micromegas_time_bucket, detector_params.window_time_bucket, detector_params.detector_length)
+            pc_dataset[:] = pc.cloud
             continue
 
-        frib_event = FribEvent(frib_data, idx)
+        frib_event = FribEvent(frib_data, idx, frib_params)
 
-        ic_peak = frib_event.get_good_ic_peak()
+        ic_peak = frib_event.get_good_ic_peak(frib_params)
         if ic_peak is None:
+            pc.calibrate_z_position(detector_params.micromegas_time_bucket, detector_params.window_time_bucket, detector_params.detector_length)
+            pc_dataset[:] = pc.cloud
             continue
         pc_dataset.attrs['ic_amplitude'] = ic_peak.amplitude
         pc_dataset.attrs['ic_integral'] = ic_peak.integral
         pc_dataset.attrs['ic_centroid'] = ic_peak.centroid
-        
+
+        ic_cor = frib_event.correct_ic_time(ic_peak, detector_params.get_frequency)
+
+        pc.calibrate_z_position(detector_params.micromegas_time_bucket, detector_params.window_time_bucket, detector_params.detector_length, ic_cor)
+        pc_dataset[:] = pc.cloud
 
     stop = time()
 

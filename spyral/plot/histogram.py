@@ -8,11 +8,10 @@ from matplotlib.colors import LogNorm, Colormap
 from matplotlib.backend_bases import LocationEvent
 from matplotlib.collections import QuadMesh
 import matplotlib.pyplot as plt
-from matplotlib import colormaps
+from matplotlib import cm
 from math import floor
 
-cmap = colormaps['viridis']
-cmap.set_under('white')
+CMAP = cm.get_cmap('viridis').with_extremes(under='white')
 
 #Utility functions
 def clamp_low(x: float, edge: float) -> float:
@@ -250,18 +249,18 @@ class Histogrammer:
         self.connect_mpl_callbacks(axis)
             
         
-    def draw_hist2d(self, name: str, axis: Axes, log_z: bool = False, cmap = 'viridis') -> QuadMesh:
+    def draw_hist2d(self, name: str, axis: Axes, log_z: bool = False, cmap = 'viridis') -> QuadMesh | None:
         if name not in self.histograms:
-            return
+            return None
         
         hist = self.histograms[name]
         if type(hist) is not Hist2D:
-            return
+            return None
         mesh = None
         if log_z:
-            mesh = axis.pcolormesh(hist.x_bins, hist.y_bins, hist.counts, cmap=cmap, norm=LogNorm())
+            mesh = axis.pcolormesh(hist.x_bins, hist.y_bins, hist.counts, cmap=CMAP, norm=LogNorm())
         else:
-            mesh = axis.pcolormesh(hist.x_bins, hist.y_bins, hist.counts, cmap=cmap, vmin=1.0e-6)
+            mesh = axis.pcolormesh(hist.x_bins, hist.y_bins, hist.counts, cmap=CMAP, vmin=1.0e-6)
         self.axes[axis] = (name, None)
         self.connect_mpl_callbacks(axis)
         return mesh

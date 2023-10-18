@@ -18,7 +18,7 @@ def run(config: Config):
         print(f'Analyzing run {idx}...')
 
         if config.run.do_phase1:
-            phase_1(idx, ws, pad_map, config.trace, config.cross, config.detector)
+            phase_1(idx, ws, pad_map, config.trace, config.frib, config.cross, config.detector)
 
         if config.run.do_phase2:
             phase_2(idx, ws, config.cluster)

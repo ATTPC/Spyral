@@ -39,6 +39,7 @@ class DetectorParameters:
     beam_region_radius: float = 0.0 #mm
     micromegas_time_bucket: float = 0.0
     window_time_bucket: float = 0.0
+    get_frequency: float = 0.0 #MHz
 
 @dataclass
 class TraceParameters:
@@ -50,6 +51,19 @@ class TraceParameters:
     peak_prominence: float = 20.0
     peak_max_width: float = 100.0
     peak_threshold: float = 25.0
+
+@dataclass
+class FribParameters:
+    '''
+    Parameters for data taken using the FRIBDAQ (IC, Si, etc)
+    '''
+    baseline_window_scale: float = 20.0
+    peak_separation: float = 50.0
+    peak_prominence: float = 20.0
+    peak_max_width: float = 100.0
+    peak_threshold: float = 25.0
+    ic_multiplicity: int = 1
+    correct_ic_time: bool = True
 
 @dataclass
 class CrossTalkParameters:
@@ -91,13 +105,15 @@ class SolverParameters:
     '''
     gas_data_path: str = ''
     particle_id_filename: str = ''
+    ic_min_val: float = 0.0
+    ic_max_val: float = 0.0
     interp_file_name: str = ''
-    interp_ke_min: str = ''
-    interp_ke_max: str = ''
-    interp_ke_bins: str = ''
-    interp_polar_min: str = ''
-    interp_polar_max: str = ''
-    interp_polar_bins: str = ''
+    interp_ke_min: float = 0.0
+    interp_ke_max: float = 0.0
+    interp_ke_bins: int = 0
+    interp_polar_min: float = 0.0
+    interp_polar_max: float = 0.0
+    interp_polar_bins: int = 0
 
 @dataclass
 class Config:
@@ -115,6 +131,9 @@ class Config:
 
     #Traces
     trace: TraceParameters = field(default_factory=TraceParameters)
+
+    #FRIB data
+    frib: FribParameters = field(default_factory=FribParameters)
 
     #Cross talk
     cross: CrossTalkParameters = field(default_factory=CrossTalkParameters)
@@ -151,12 +170,21 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
     config.detector.beam_region_radius = json_data['beam_region_radius(mm)']
     config.detector.micromegas_time_bucket = json_data['micromegas_time_bucket']
     config.detector.window_time_bucket = json_data['window_time_bucket']
+    config.detector.get_frequency = json_data['get_frequency(MHz)']
 
     config.trace.baseline_window_scale = json_data['trace_baseline_window_scale']
     config.trace.peak_separation = json_data['trace_peak_separation']
     config.trace.peak_prominence = json_data['trace_peak_prominence']
     config.trace.peak_max_width = json_data['trace_peak_max_width']
     config.trace.peak_threshold = json_data['trace_peak_threshold']
+
+    config.frib.baseline_window_scale = json_data['frib_trace_baseline_window_scale']
+    config.frib.peak_separation = json_data['frib_trace_peak_separation']
+    config.frib.peak_prominence = json_data['frib_trace_peak_prominence']
+    config.frib.peak_max_width = json_data['frib_trace_peak_max_width']
+    config.frib.peak_threshold = json_data['frib_trace_peak_threshold']
+    config.frib.ic_multiplicity = json_data['frib_event_ic_multiplicity']
+    config.frib.correct_ic_time = json_data['frib_event_correct_ic_time']
 
     config.cross.saturation_threshold = json_data['cross_talk_saturation_threshold']
     config.cross.cross_talk_threshold = json_data['cross_talk_threshold']
@@ -178,6 +206,8 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
 
     config.solver.gas_data_path = json_data['solver_gas_data_path']
     config.solver.particle_id_filename = json_data['solver_particle_id_file']
+    config.solver.ic_min_val = json_data['solver_ic_min']
+    config.solver.ic_max_val = json_data['solver_ic_max']
     config.solver.interp_file_name = json_data['solver_interp_file_name']
     config.solver.interp_ke_min = json_data['solver_interp_ke_min(MeV)']
     config.solver.interp_ke_max = json_data['solver_interp_ke_max(MeV)']

@@ -10,16 +10,17 @@ from .core.cluster import Cluster
 import h5py as h5
 import polars as pl
 from time import time
+from pathlib import Path
 
 def phase_4_interp(run: int, ws: Workspace, solver_params: SolverParameters, det_params: DetectorParameters, nuclear_map: NuclearDataMap):
     start = time()
 
-    pid: ParticleID = load_particle_id(ws.get_gate_file_path(solver_params.particle_id_filename), nuclear_map)
+    pid: ParticleID | None = load_particle_id(ws.get_gate_file_path(solver_params.particle_id_filename), nuclear_map)
     if pid is None:
         print('Particle ID error at phase 4!')
         return
     
-    target: Target = Target(solver_params.gas_data_path, nuclear_map)
+    target: Target = Target(Path(solver_params.gas_data_path), nuclear_map)
 
     cluster_path = ws.get_cluster_file_path(run)
     estimate_path = ws.get_estimate_file_path_parquet(run)
@@ -36,7 +37,11 @@ def phase_4_interp(run: int, ws: Workspace, solver_params: SolverParameters, det
     print(f'Selecting data which corresponds to particle group from {solver_params.particle_id_filename}')
 
     #Select the particle group data, convert to dictionary for row-wise operations
-    estimates_gated = estimate_df.filter(pl.struct(['dEdx', 'brho']).map(pid.cut.is_cols_inside)).collect().to_dict()
+    estimates_gated = estimate_df.filter(
+            pl.struct(['dEdx', 'brho']).map(pid.cut.is_cols_inside) & 
+            (pl.col('ic_amplitude') > solver_params.ic_min_val) & 
+            (pl.col('ic_amplitude') < solver_params.ic_max_val)
+        ).collect().to_dict()
 
 
     flush_percent = 0.01
@@ -78,7 +83,7 @@ def phase_4_interp(run: int, ws: Workspace, solver_params: SolverParameters, det
                 )
     print(f'Using interpolation with energy range {gen_params.ke_min} to {gen_params.ke_max} MeV with {gen_params.ke_bins} bins and')
     print(f'angle range {gen_params.polar_min} to {gen_params.polar_max} degrees with {gen_params.polar_bins} bins and')
-    interpolator: TrackInterpolator = None
+    interpolator: TrackInterpolator
     if not interp_path.exists():
         print(f'Interpolation data does not exist, generating... This may take some time...')
         generate_tracks(gen_params, interp_path)

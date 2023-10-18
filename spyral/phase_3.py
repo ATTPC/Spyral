@@ -64,6 +64,9 @@ def phase_3(run: int, ws: Workspace, estimate_params: EstimateParameters, detect
             continue
 
         nclusters = event.attrs['nclusters']
+        ic_amp: float = event.attrs['ic_amplitude']
+        ic_cent: float = event.attrs['ic_centroid']
+        ic_int: float = event.attrs['ic_integral']
         for cidx in range(0, nclusters):
             local_cluster: h5.Group | None = None
             try:
@@ -72,9 +75,6 @@ def phase_3(run: int, ws: Workspace, estimate_params: EstimateParameters, detect
                 continue
 
             cluster = Cluster(idx, local_cluster.attrs['label'], local_cluster['cloud'][:].copy())
-            ic_amp: float = event.attrs['ic_amplitude']
-            ic_cent: float = event.attrs['ic_centroid']
-            ic_int: float = event.attrs['ic_integral']
             
             #Cluster is loaded do some analysis
             estimate_physics(cidx, cluster, ic_amp, ic_cent, ic_int, estimate_params, detector_params, data)
