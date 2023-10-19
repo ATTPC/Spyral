@@ -1,27 +1,10 @@
-import numpy as np
-from .constants import INVALID_PAD_ID, NUMBER_OF_TIME_BUCKETS, INVALID_PEAK_CENTROID
+from .constants import INVALID_PAD_ID, NUMBER_OF_TIME_BUCKETS
+from .peak import Peak
 from .hardware_id import HardwareID
 from .config import TraceParameters
+
 from scipy import signal
-from dataclasses import dataclass
-
-@dataclass
-class Peak:
-    '''
-    Dataclass representing a singal peak in a raw pad trace
-
-    ## Fields
-    centroid: float - the peak location in time buckets
-    amplitude: float - the basline corrected amplitude of the peak
-    integral: float - the basline corrected integral of the peak from the postive inflection point to negative inflection point (where possible)
-    '''
-    centroid: float = INVALID_PEAK_CENTROID
-    positive_inflection: float = 0.0
-    negative_inflection: float = 0.0
-    amplitude: float = 0.0
-    uncorrected_amplitude: float = 0.0
-    integral: float = 0.0
-
+import numpy as np
 
 class GetTrace:
     def __init__(self, data: np.ndarray, id: HardwareID, params: TraceParameters):

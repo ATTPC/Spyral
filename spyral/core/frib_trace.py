@@ -1,10 +1,10 @@
-import numpy as np
-import h5py as h5
-from scipy import signal
-from .get_trace import Peak
+from .peak import Peak
 from .config import FribParameters
+from .constants import FRIB_TRACE_LENGTH
 
-FRIB_TRACE_LENGTH: int = 2048
+import numpy as np
+from scipy import signal
+
 
 class FribTrace:
     '''

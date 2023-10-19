@@ -95,9 +95,12 @@ def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParamet
         pc_dataset.attrs['ic_integral'] = ic_peak.integral
         pc_dataset.attrs['ic_centroid'] = ic_peak.centroid
 
-        ic_cor = frib_event.correct_ic_time(ic_peak, detector_params.get_frequency)
+        if frib_params.correct_ic_time:
+            ic_cor = frib_event.correct_ic_time(ic_peak, detector_params.get_frequency)
+            pc.calibrate_z_position(detector_params.micromegas_time_bucket, detector_params.window_time_bucket, detector_params.detector_length, ic_cor)
+        else:
+            pc.calibrate_z_position(detector_params.micromegas_time_bucket, detector_params.window_time_bucket, detector_params.detector_length)
 
-        pc.calibrate_z_position(detector_params.micromegas_time_bucket, detector_params.window_time_bucket, detector_params.detector_length, ic_cor)
         pc_dataset[:] = pc.cloud
 
     stop = time()

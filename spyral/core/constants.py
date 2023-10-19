@@ -1,7 +1,7 @@
 from scipy.constants import physical_constants
 from numpy import pi
 
-INVALID_PEAK_CENTROID: int = -1.0
+INVALID_PEAK_CENTROID: float = -1.0
 
 INVALID_EVENT_NAME: str = "InvalidEvent"
 
@@ -11,7 +11,9 @@ INVALID_PAD_ID: int = -1
 
 NUMBER_OF_TIME_BUCKETS: int = 512
 
-DEG2RAD = pi/180.0
+DEG2RAD: float = pi/180.0
+
+FRIB_TRACE_LENGTH: int = 2048
 
 #Alias some scipy constants to avoid long key strings
 AMU_2_MEV: float = physical_constants['atomic mass constant energy equivalent in MeV'][0] #CODATA 2018, convert u to MeV/c^2
