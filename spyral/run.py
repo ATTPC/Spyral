@@ -6,6 +6,7 @@ from .phase_3 import phase_3
 from .phase_4_kalman import phase_4_kalman
 from .phase_4_interp import phase_4_interp
 from time import time
+import datetime
 
 def run_spyral(config: Config):
 
@@ -32,4 +33,5 @@ def run_spyral(config: Config):
             phase_4_interp(idx, ws, config.solver, config.detector, nuclear_map)
         
     stop = time()
-    print(f'Total ellapsed runtime: {stop - start}s')
+    timestr = str(datetime.timedelta(seconds = stop - start))
+    print(f'Total ellapsed runtime: {stop - start}s (i.e {timestr})')
