@@ -20,11 +20,12 @@ def generate_circle_points(center_x: float, center_y: float, radius: float) -> n
     return array
 
 def estimate_physics(cluster_index: int, cluster: Cluster, ic_amplitude: float, ic_centroid: float, ic_integral: float, estimate_params: EstimateParameters, detector_params: DetectorParameters, results: dict[str, list]):
-    #Reject any clusters that were labeled as noise by the clustering algorithm
-    #if cluster.label == -1:
-    #    return
 
+    # Do some cleanup, reject clusters which have too few points
     if len(cluster.data) < estimate_params.min_total_trajectory_points:
+        return
+    beam_region_fraction = float(len(cluster.data[np.linalg.norm(cluster.data[:, :2], axis=1) < detector_params.beam_region_radius])) / float(len(cluster.data))
+    if beam_region_fraction > 0.9:
         return
     
     rhos = np.linalg.norm(cluster.data[:, :2], axis=1) #cylindrical coordinates rho
@@ -120,7 +121,3 @@ def estimate_physics(cluster_index: int, cluster: Cluster, ic_amplitude: float, 
     results['dE'].append(charge_deposited)
     results['arclength'].append(arclength)
     results['direction'].append(direction.value)
-
-
-    
-

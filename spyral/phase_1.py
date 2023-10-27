@@ -4,9 +4,11 @@ from .core.pad_map import PadMap
 from .core.point_cloud import PointCloud
 from .core.workspace import Workspace
 from .core.frib_event import FribEvent
+from .correction import generate_electron_correction, create_electron_corrector, ElectronCorrector
 from h5py import File, Group, Dataset
 from time import time
 import numpy as np
+from pathlib import Path
 
 def get_event_range(trace_file: File) -> tuple[int, int]:
     '''
@@ -33,6 +35,20 @@ def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParamet
     point_file = File(point_path, 'w')
 
     min_event, max_event = get_event_range(trace_file)
+
+    print(f'Looking for electric field correction file {detector_params.efield_correction_name}...')
+    corr_path = ws.get_correction_file_path(detector_params.efield_correction_name)
+    corrector: ElectronCorrector
+    if not corr_path.exists():
+        print(f'Field correction does not exist, creating correction from GARFIELD data in {detector_params.garfield_file_path}...', end=' ')
+        generate_electron_correction(Path(detector_params.garfield_file_path), corr_path, detector_params)
+        print('Generated. Loading correction...', end=' ')
+        corrector = create_electron_corrector(corr_path)
+        print('Loaded.')
+    else:
+        print('Correction data found. Loading...', end=' ')
+        corrector = create_electron_corrector(corr_path)
+        print('Loaded.')
 
     print(f'Running phase 1 on file {trace_path} for events {min_event} to {max_event}')
 
@@ -65,7 +81,7 @@ def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParamet
         event = GetEvent(event_data, idx, trace_params)
         
         pc = PointCloud()
-        pc.load_cloud_from_get_event(event, pad_map)
+        pc.load_cloud_from_get_event(event, pad_map, corrector)
         pc.eliminate_cross_talk(pad_map, cross_params)
         
         pc_dataset = cloud_group.create_dataset(f'cloud_{pc.event_number}', shape=pc.cloud.shape, dtype=np.float64)
@@ -105,4 +121,4 @@ def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParamet
 
     stop = time()
 
-    print(f'\nEllapsed time {stop-start}s')
+    print(f'\nEllapsed time: {stop-start}s')

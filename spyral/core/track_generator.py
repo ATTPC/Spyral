@@ -97,33 +97,6 @@ def equation_of_motion(t: float, state: np.ndarray, Bfield: float, Efield: float
 
     return results
 
-def jacobian(t, state: np.ndarray, Bfield: float, Efield: float, target: Target, ejectile: NucleusData) -> np.ndarray:
-    '''
-    Computes the jacobian of the charged particle in a static electromagnetic field which experiences energy loss through some material
-
-    ## Parameters
-    t: float, time step
-    state: ndarray, the state of the particle (x,y,z,vx,vy,vz)
-    Bfield: float, the magnitude of the magnetic field
-    Efield: float, the magnitude of the electric field
-    target: Target, the material through which the particle travels
-    ejectile: NucleusData, data on the particle
-
-    ## Returns
-    ndarray: the jacobian
-    '''
-    jac = np.zeros((len(state), len(state)))
-    mass_kg = ejectile.mass * MEV_2_KG
-    charge_c = ejectile.Z * constants.elementary_charge
-    qm = charge_c/mass_kg
-    jac[0, 3] = 1.0
-    jac[1, 4] = 1.0
-    jac[2, 5] = 1.0
-    jac[3, 4] = qm * Bfield
-    jac[4, 3] = -1.0 * qm * Bfield
-
-    return jac
-
 def check_tracks_exist(trackpath: Path) -> bool:
     '''
     Simple file-existance checker with a nice print message
@@ -184,7 +157,7 @@ def generate_tracks(params: GeneratorParams, trackpath: Path):
             speed = momentum / params.particle.mass * constants.speed_of_light
             initial_state[3] = speed * math.sin(p)
             initial_state[5] = speed * math.cos(p)
-            result = solve_ivp(equation_of_motion, (0.0, TIME_WINDOW), initial_state, method='BDF', args=(bfield, efield, params.target, params.particle), t_eval=SAMPLING_RANGE, jac=jacobian)
+            result = solve_ivp(equation_of_motion, (0.0, TIME_WINDOW), initial_state, method='RK45', args=(bfield, efield, params.target, params.particle), t_eval=SAMPLING_RANGE)
             data[:, :, eidx, pidx] = result.y.T[:, :3]
 
     print('\n')

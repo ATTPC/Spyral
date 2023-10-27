@@ -59,6 +59,7 @@ Configurations contain many parameters. These can be seen in the config.json exa
 - Run parameters: Run numbers over which the data should be processed, as well as indications of which types of analysis to run
 - Detector parameters: detector conditions and configuration
 - Trace parameters: parameters which are used in the peak identification and baseline removal analysis
+- FRIB trace parameters: parameters used in the peak identification of FRIBDAQ signals (ion chamber, auxilary silicon, etc)
 - Cross-talk parameters: parameters used in cross-talk removal, after peaks have been identified
 - Clustering parameters: point cloud clustering parameters
 - Estimation parameters: used to generate estimates of physical observables
@@ -69,8 +70,10 @@ Configurations contain many parameters. These can be seen in the config.json exa
 To use Spyral, run the main.py script located at the top level of the repository with the virtual environment activated. Example:
 
 ```[bash]
-python main.py my_config.json
+python main.py <your_config.json>
 ```
+
+Replace `<your_config.json>` with the path to your configuration file.
 
 ### Performance
 
@@ -88,6 +91,25 @@ The final phase of the analysis involves using the equations of motion of a char
 
 An alternative approach, the Unscented Kalman Filter, also exists. But this approach is not sound yet; more testing and development needs to be done before this method is ready to be used in production.
 
-### Plotting
+## Plotting
 
-Spyral also bundles some helpful plotting tools for creating dataset histograms. The default numpy/scipy/matplotlib histogramming solution is not terribly useful for larger datasets. The tools included in spyral/plot can help generate histograms of large datasets as well as generate gates for use with various analyses. The plotter.py file contains an example of how to generate a particle ID gate and then apply it to a dataset.
+Spyral also bundles some helpful plotting tools for creating dataset histograms. The default numpy/scipy/matplotlib histogramming solution is not terribly useful for larger datasets. The tools included in spyral/plot can help generate histograms of large datasets as well as generate gates for use with various analyses. The plotter.py file contains an example of how to generate a particle ID gate and then apply it to a dataset. The example plotter can be run in two modes, gating and plotting. 
+
+### Gating
+To make a particle ID gate use
+
+```[bash]
+python plotter.py --gate <your_config.json>
+```
+
+where again you replace `<your_config.json>` with the path to your configuration file. You can draw a closed polygon around the particle group of interest. To save the gate, close the plot window and the gate will be automatically saved to the gate directory of your workspace with the name `pid_gate.json`. The PID file does need modified by the user before being used in Spyral. You will need to manually add the fields `Z` and `A` which are the proton and mass number of the particle associated with the group. The order in the JSON file does not matter, the fields simply need to have the correct name.
+
+### Plot
+
+To make a set of useful plots use
+
+```[bash]
+python plotter.py --plot <your_config.json>
+```
+
+This will produce some useful plots like the particle ID plot, the ion chamber energy, and the kinematic correlation of energy and angle. It will make a set with and without the particle ID gate applied. Note that this requires a real PID gate to be given by the configuration.

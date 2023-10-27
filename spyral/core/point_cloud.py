@@ -2,6 +2,7 @@ from .get_event import GetEvent
 from .pad_map import PadMap
 from .constants import INVALID_EVENT_NUMBER
 from .config import CrossTalkParameters
+from ..correction import ElectronCorrector
 import numpy as np
 
 class PointCloud:
@@ -10,7 +11,7 @@ class PointCloud:
         self.event_number: int = INVALID_EVENT_NUMBER
         self.cloud: np.ndarray = np.empty(0, dtype=np.float64)
 
-    def load_cloud_from_get_event(self, event: GetEvent, pmap: PadMap):
+    def load_cloud_from_get_event(self, event: GetEvent, pmap: PadMap, corrector: ElectronCorrector):
         self.event_number = event.number
         count = 0
         for trace in event.traces:
@@ -32,7 +33,9 @@ class PointCloud:
                 self.cloud[idx, 4] = peak.integral * pad.gain
                 self.cloud[idx, 5] = trace.hw_id.pad_id
                 self.cloud[idx, 6] = peak.centroid + pad.time_offset # Time bucket with correction
+                self.cloud[idx] = corrector.correct_point(self.cloud[idx])
                 idx += 1
+
 
     def load_cloud_from_hdf5_data(self, data: np.ndarray, event_number: int):
         self.event_number: int = event_number

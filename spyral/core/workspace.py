@@ -52,6 +52,10 @@ class Workspace:
         if not self.track_path.exists():
             self.track_path.mkdir()
 
+        self.correction_path = self.workspace_path / 'correction'
+        if not self.correction_path.exists():
+            self.correction_path.mkdir()
+
         self.pad_geometry_path = Path(params.pad_geometry_path)
         if not self.pad_geometry_path.exists() or not self.pad_geometry_path.is_file():
             raise Exception('Workspace encountered an error! Pad geometry path does not exist!')
@@ -112,6 +116,9 @@ class Workspace:
     def get_nuclear_map(self) -> NuclearDataMap:
         return self.nuclear_map
     
-    def get_track_file(self, name: str) -> Path:
+    def get_track_file_path(self, name: str) -> Path:
         return self.track_path / name
+    
+    def get_correction_file_path(self, name: str) -> Path:
+        return self.correction_path / name
         

@@ -69,7 +69,7 @@ def phase_4_interp(run: int, ws: Workspace, solver_params: SolverParameters, det
     }
 
     print(f'Looking for track interpolation data file {solver_params.interp_file_name}...')
-    interp_path = ws.get_track_file(solver_params.interp_file_name)
+    interp_path = ws.get_track_file_path(solver_params.interp_file_name)
     gen_params = GeneratorParams(
                     target, pid.nucleus, 
                     det_params.magnetic_field, 

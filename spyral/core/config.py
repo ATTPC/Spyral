@@ -40,6 +40,8 @@ class DetectorParameters:
     micromegas_time_bucket: float = 0.0
     window_time_bucket: float = 0.0
     get_frequency: float = 0.0 #MHz
+    garfield_file_path: str = ''
+    efield_correction_name: str = ''
 
 @dataclass
 class TraceParameters:
@@ -171,6 +173,8 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
     config.detector.micromegas_time_bucket = json_data['micromegas_time_bucket']
     config.detector.window_time_bucket = json_data['window_time_bucket']
     config.detector.get_frequency = json_data['get_frequency(MHz)']
+    config.detector.garfield_file_path = json_data['electric_field_garfield_path']
+    config.detector.efield_correction_name = json_data['electric_field_correction_file_name']
 
     config.trace.baseline_window_scale = json_data['trace_baseline_window_scale']
     config.trace.peak_separation = json_data['trace_peak_separation']
