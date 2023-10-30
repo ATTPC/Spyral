@@ -34,7 +34,6 @@ class Cluster:
         '''
         self.event = cloud.point_cloud.event_number
         self.label = cloud.label
-        self.copy_cloud(cloud.point_cloud, params)
         self.drop_outliers()
         # Z-binning is bad! destroys particle ID at higher energies. Maybe needs some tweaking??
         # self.bin_cloud_z(cloud.point_cloud, params)
