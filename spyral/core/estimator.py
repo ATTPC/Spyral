@@ -1,6 +1,7 @@
-from .clusterize import least_squares_circle
 from .cluster import Cluster
 from .config import DetectorParameters, EstimateParameters
+from ..utils.circle import generate_circle_points, least_squares_circle
+
 import numpy as np
 import math
 from scipy.signal import argrelmax
@@ -12,19 +13,13 @@ class Direction(Enum):
     FORWARD: int = 0
     BACKWARD: int = 1
 
-def generate_circle_points(center_x: float, center_y: float, radius: float) -> np.ndarray:
-    theta = np.linspace(0., 2.0 * np.pi, 100000)
-    array = np.zeros(shape=(len(theta), 2))
-    array[:, 0] = center_x + np.cos(theta) * radius
-    array[:, 1] = center_y + np.sin(theta) * radius
-    return array
+def estimate_physics(cluster_index: int, cluster: Cluster, ic_amplitude: float, ic_centroid: float, ic_integral: float, estimate_params: EstimateParameters, detector_params: DetectorParameters, results: dict[str, list]):
 
-def estimate_physics(cluster_index: int, cluster: Cluster, estimate_params: EstimateParameters, detector_params: DetectorParameters, results: dict[str, list]):
-    #Reject any clusters that were labeled as noise by the clustering algorithm
-    #if cluster.label == -1:
-    #    return
-
+    # Do some cleanup, reject clusters which have too few points
     if len(cluster.data) < estimate_params.min_total_trajectory_points:
+        return
+    beam_region_fraction = float(len(cluster.data[np.linalg.norm(cluster.data[:, :2], axis=1) < detector_params.beam_region_radius])) / float(len(cluster.data))
+    if beam_region_fraction > 0.9:
         return
     
     rhos = np.linalg.norm(cluster.data[:, :2], axis=1) #cylindrical coordinates rho
@@ -104,6 +99,9 @@ def estimate_physics(cluster_index: int, cluster: Cluster, estimate_params: Esti
     results['event'].append(cluster.event)
     results['cluster_index'].append(cluster_index)
     results['cluster_label'].append(cluster.label)
+    results['ic_amplitude'].append(ic_amplitude)
+    results['ic_centroid'].append(ic_centroid)
+    results['ic_integral'].append(ic_integral)
     results['vertex_x'].append(vertex[0])
     results['vertex_y'].append(vertex[1])
     results['vertex_z'].append(vertex[2])
@@ -117,7 +115,3 @@ def estimate_physics(cluster_index: int, cluster: Cluster, estimate_params: Esti
     results['dE'].append(charge_deposited)
     results['arclength'].append(arclength)
     results['direction'].append(direction.value)
-
-
-    
-

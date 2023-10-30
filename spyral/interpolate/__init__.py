@@ -1,2 +1,2 @@
-from .bilinear import BilinearInterpolator
+from .bilinear import BilinearInterpolator, clamp
 from .linear import LinearInterpolator

@@ -1,10 +1,15 @@
-from .core.config import TraceParameters, CrossTalkParameters, DetectorParameters
-from .core.get_event import GetEvent
+from .core.config import TraceParameters, CrossTalkParameters, DetectorParameters, FribParameters
 from .core.pad_map import PadMap
 from .core.point_cloud import PointCloud
 from .core.workspace import Workspace
+from .trace.frib_event import FribEvent
+from .trace.get_event import GetEvent
+from .correction import generate_electron_correction, create_electron_corrector, ElectronCorrector
+
 from h5py import File, Group, Dataset
 from time import time
+import numpy as np
+from pathlib import Path
 
 def get_event_range(trace_file: File) -> tuple[int, int]:
     '''
@@ -20,7 +25,7 @@ def get_event_range(trace_file: File) -> tuple[int, int]:
     meta_data = meta_group.get('meta')
     return (int(meta_data[0]), int(meta_data[2]))
 
-def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParameters, cross_params: CrossTalkParameters, detector_params: DetectorParameters):
+def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParameters, frib_params: FribParameters, cross_params: CrossTalkParameters, detector_params: DetectorParameters):
     start = time()
     trace_path = ws.get_trace_file_path(run)
     if not trace_path.exists():
@@ -32,9 +37,25 @@ def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParamet
 
     min_event, max_event = get_event_range(trace_file)
 
+    print(f'Looking for electric field correction file {detector_params.efield_correction_name}...')
+    corr_path = ws.get_correction_file_path(detector_params.efield_correction_name)
+    corrector: ElectronCorrector
+    if not corr_path.exists():
+        print(f'Field correction does not exist, creating correction from GARFIELD data in {detector_params.garfield_file_path}...', end=' ')
+        generate_electron_correction(Path(detector_params.garfield_file_path), corr_path, detector_params)
+        print('Generated. Loading correction...', end=' ')
+        corrector = create_electron_corrector(corr_path)
+        print('Loaded.')
+    else:
+        print('Correction data found. Loading...', end=' ')
+        corrector = create_electron_corrector(corr_path)
+        print('Loaded.')
+
     print(f'Running phase 1 on file {trace_path} for events {min_event} to {max_event}')
 
     event_group: Group = trace_file.get('get')
+    frib_group: Group = trace_file.get('frib')
+    frib_evt_group: Group = frib_group.get('evt')
     cloud_group: Group = point_file.create_group('cloud')
     cloud_group.attrs['min_event'] = min_event
     cloud_group.attrs['max_event'] = max_event
@@ -52,7 +73,7 @@ def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParamet
             print(f'\rPercent of data processed: {int(flush_count * flush_percent * 100)}%', end='')
         count += 1
 
-        event_data: Dataset | None = None
+        event_data: Dataset
         try:
             event_data = event_group[f'evt{idx}_data']
         except Exception:
@@ -61,12 +82,44 @@ def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParamet
         event = GetEvent(event_data, idx, trace_params)
         
         pc = PointCloud()
-        pc.load_cloud_from_get_event(event, pad_map)
+        pc.load_cloud_from_get_event(event, pad_map, corrector)
         pc.eliminate_cross_talk(pad_map, cross_params)
-        pc.calibrate_z_position(detector_params.micromegas_time_bucket, detector_params.window_time_bucket, detector_params.detector_length)
         
-        cloud_group.create_dataset(f'cloud_{pc.event_number}', data=pc.cloud)
+        pc_dataset = cloud_group.create_dataset(f'cloud_{pc.event_number}', shape=pc.cloud.shape, dtype=np.float64)
+
+        #default IC settings
+        pc_dataset.attrs['ic_amplitude'] = -1.0
+        pc_dataset.attrs['ic_integral'] = -1.0
+        pc_dataset.attrs['ic_centroid'] = -1.0
+
+        # Now analyze FRIBDAQ data
+        frib_data: Dataset
+        try:
+            frib_data = frib_evt_group[f'evt{idx}_1903']
+        except Exception:
+            pc.calibrate_z_position(detector_params.micromegas_time_bucket, detector_params.window_time_bucket, detector_params.detector_length)
+            pc_dataset[:] = pc.cloud
+            continue
+
+        frib_event = FribEvent(frib_data, idx, frib_params)
+
+        ic_peak = frib_event.get_good_ic_peak(frib_params)
+        if ic_peak is None:
+            pc.calibrate_z_position(detector_params.micromegas_time_bucket, detector_params.window_time_bucket, detector_params.detector_length)
+            pc_dataset[:] = pc.cloud
+            continue
+        pc_dataset.attrs['ic_amplitude'] = ic_peak.amplitude
+        pc_dataset.attrs['ic_integral'] = ic_peak.integral
+        pc_dataset.attrs['ic_centroid'] = ic_peak.centroid
+
+        if frib_params.correct_ic_time:
+            ic_cor = frib_event.correct_ic_time(ic_peak, detector_params.get_frequency)
+            pc.calibrate_z_position(detector_params.micromegas_time_bucket, detector_params.window_time_bucket, detector_params.detector_length, ic_cor)
+        else:
+            pc.calibrate_z_position(detector_params.micromegas_time_bucket, detector_params.window_time_bucket, detector_params.detector_length)
+
+        pc_dataset[:] = pc.cloud
 
     stop = time()
 
-    print(f'\nEllapsed time {stop-start}s')
+    print(f'\nEllapsed time: {stop-start}s')

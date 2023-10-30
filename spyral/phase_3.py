@@ -18,8 +18,8 @@ def phase_3(run: int, ws: Workspace, estimate_params: EstimateParameters, detect
     cluster_file = h5.File(cluster_path, 'r')
     cluster_group: h5.Group = cluster_file.get('cluster')
 
-    min_event = cluster_group.attrs['min_event']
-    max_event = cluster_group.attrs['max_event']
+    min_event: int = cluster_group.attrs['min_event']
+    max_event: int = cluster_group.attrs['max_event']
 
     print(f'Running physics estimation on clusters in {cluster_path} over events {min_event} to {max_event}')
 
@@ -31,7 +31,10 @@ def phase_3(run: int, ws: Workspace, estimate_params: EstimateParameters, detect
     data: dict[str, list] = {
         'event': [], 
         'cluster_index': [], 
-        'cluster_label': [], 
+        'cluster_label': [],
+        'ic_amplitude': [],
+        'ic_centroid': [],
+        'ic_integral': [], 
         'vertex_x': [], 
         'vertex_y': [], 
         'vertex_z': [],
@@ -61,6 +64,9 @@ def phase_3(run: int, ws: Workspace, estimate_params: EstimateParameters, detect
             continue
 
         nclusters = event.attrs['nclusters']
+        ic_amp: float = event.attrs['ic_amplitude']
+        ic_cent: float = event.attrs['ic_centroid']
+        ic_int: float = event.attrs['ic_integral']
         for cidx in range(0, nclusters):
             local_cluster: h5.Group | None = None
             try:
@@ -71,7 +77,7 @@ def phase_3(run: int, ws: Workspace, estimate_params: EstimateParameters, detect
             cluster = Cluster(idx, local_cluster.attrs['label'], local_cluster['cloud'][:].copy())
             
             #Cluster is loaded do some analysis
-            estimate_physics(cidx, cluster, estimate_params, detector_params, data)
+            estimate_physics(cidx, cluster, ic_amp, ic_cent, ic_int, estimate_params, detector_params, data)
 
     df = DataFrame(data)
     df.write_parquet(estimate_path)

@@ -1,6 +1,7 @@
-import pycatima as catima
 from .nuclear_data import NuclearDataMap, NucleusData
 from .constants import AMU_2_MEV, GAS_CONSTANT, ROOM_TEMPERATURE
+
+import pycatima as catima
 from dataclasses import dataclass, field
 from pathlib import Path
 from json import load

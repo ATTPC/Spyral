@@ -2,7 +2,6 @@ from .constants import INVALID_PAD_ID
 from .hardware_id import HardwareID, generate_electronics_id
 from pathlib import Path
 from dataclasses import dataclass, field
-from typing import Optional
 
 @dataclass
 class PadData:
@@ -51,13 +50,13 @@ class PadMap:
 
         
 
-    def get_pad_data(self, pad_number: int) -> Optional[PadData]:
+    def get_pad_data(self, pad_number: int) -> PadData | None:
         if (pad_number == INVALID_PAD_ID) or not (pad_number in self.map.keys()):
             return None
         
         return self.map[pad_number]
     
-    def get_pad_from_hardware(self, hardware: HardwareID) -> Optional[int]:
+    def get_pad_from_hardware(self, hardware: HardwareID) -> int | None:
         key = generate_electronics_id(hardware)
         if key in self.elec_map.keys():
             return self.elec_map[generate_electronics_id(hardware)]

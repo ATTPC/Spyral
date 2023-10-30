@@ -31,11 +31,11 @@ class BilinearInterpolator:
     def __init__(self, x_min: float, x_max: float, x_bins: int, y_min: float, y_max: float, y_bins: int, data: np.ndarray, nan: bool = True):
         self.x_min: float = x_min
         self.x_max: float = x_max
-        self.x_bins: float = x_bins
+        self.x_bins: int = x_bins
         self.x_width: float = (self.x_max - self.x_min) / float(self.x_bins)
         self.y_min: float = y_min
         self.y_max: float = y_max
-        self.y_bins: float = y_bins
+        self.y_bins: int = y_bins
         self.y_width: float = (self.y_max - self.y_min) / float(self.y_bins)
         self.values: np.ndarray = data
         self.nan: bool = nan
@@ -53,21 +53,21 @@ class BilinearInterpolator:
             print(f'The shape of the values given to BilinearInterpolator along the y-axis does not match the given y-axis! axis={self.y_bins} values={values_shape[1]}')
             raise Exception
         
-    def get_edges_x(self, value: float) -> (int, float, int, float):
+    def get_edges_x(self, value: float) -> tuple[int, float, int, float]:
         bin_low = math.floor((value - self.x_min)/float(self.x_width))
         edge_low = self.x_min + bin_low*self.x_width
         bin_hi = min(bin_low + 1, self.x_bins-1)
         edge_hi = self.x_min + bin_hi*self.x_width
         return (bin_low, edge_low, bin_hi, edge_hi)
     
-    def get_edges_y(self, value: float) -> (int, float):
+    def get_edges_y(self, value: float) -> tuple[int, float, int, float]:
         bin_low = math.floor((value - self.y_min)/float(self.y_width))
         edge_low = self.y_min + bin_low*self.y_width
         bin_hi = min(bin_low + 1, self.y_bins-1)
         edge_hi = self.y_min + bin_hi*self.y_width
         return (bin_low, edge_low, bin_hi, edge_hi)
     
-    def interpolate(self, x: float, y: float) -> float:
+    def interpolate(self, x: float, y: float) -> np.ndarray:
 
         if self.nan and (x  > self.x_max or x < self.x_min or y < self.y_min or y > self.y_max):
             return np.array([np.nan, np.nan, np.nan])

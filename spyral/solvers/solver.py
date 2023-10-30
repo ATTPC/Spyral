@@ -1,32 +1,20 @@
-from .config import DetectorParameters
-from .target import Target
-from .nuclear_data import NucleusData
-from .clusterize import Cluster
-from .estimator import Direction
-from .constants import MEV_2_JOULE, MEV_2_KG
-from scipy import integrate, constants
+from .guess import Guess
+from ..core.config import DetectorParameters
+from ..core.target import Target
+from ..core.nuclear_data import NucleusData
+from ..core.cluster import Cluster
+from ..core.estimator import Direction
+from ..core.constants import MEV_2_JOULE, MEV_2_KG, QBRHO_2_P, C, E_CHARGE
+
+from scipy import integrate
 import numpy as np
 import math
 from dataclasses import dataclass
 from lmfit import Parameters, minimize, fit_report
 from lmfit.minimizer import MinimizerResult
 
-@dataclass
-class InitialValue:
-    polar: float = 0.0 #radians
-    azimuthal: float = 0.0 #radians
-    brho: float = 0.0 #Tm
-    vertex_x: float = 0.0 #mm
-    vertex_y: float = 0.0 #mm
-    vertex_z: float = 0.0 #mm
-    direction: Direction = Direction.NONE 
-
-    def convert_to_array(self) -> np.ndarray:
-        return np.array([self.polar, self.azimuthal, self.brho, self.vertex_x, self.vertex_y, self.vertex_z])
-
 TIME_WINDOW: float = 0.1e-6 #1us window
 INTERVAL: float = 0.5e-9 #0.1 ns sample
-QBRHO_2_P: float = 1.0e-9 * constants.speed_of_light #kG * cm -> MeV
 SAMPLING_PERIOD: float = 1.0e-6/512 # seconds, converts time bucket interval to time
 SAMPLING_RANGE: np.ndarray = np.linspace(0., TIME_WINDOW, int(TIME_WINDOW/INTERVAL))
 PRECISION: float = 2.0e-6
@@ -37,11 +25,11 @@ def equation_of_motion(t: float, state: np.ndarray, Bfield: float, Efield: float
 
     speed = math.sqrt(state[3]**2.0 + state[4]**2.0 + state[5]**2.0)
     unit_vector = state[3:] / speed # direction
-    kinetic_energy = ejectile.mass * (1.0/math.sqrt(1.0 - (speed / constants.speed_of_light)**2.0) - 1.0) #MeV
+    kinetic_energy = ejectile.mass * (1.0/math.sqrt(1.0 - (speed / C)**2.0) - 1.0) #MeV
     if kinetic_energy < PRECISION:
         return np.zeros(6)
     mass_kg = ejectile.mass * MEV_2_KG
-    charge_c = ejectile.Z * constants.elementary_charge
+    charge_c = ejectile.Z * E_CHARGE
     qm = charge_c/mass_kg
 
     deceleration = (target.get_dedx(ejectile, kinetic_energy) * MEV_2_JOULE * target.density * 100.0) / mass_kg
@@ -58,7 +46,7 @@ def equation_of_motion(t: float, state: np.ndarray, Bfield: float, Efield: float
 def jacobian(t, state: np.ndarray, Bfield: float, Efield: float, target: Target, ejectile: NucleusData) -> np.ndarray:
     jac = np.zeros((len(state), len(state)))
     mass_kg = ejectile.mass * MEV_2_KG
-    charge_c = ejectile.Z * constants.elementary_charge
+    charge_c = ejectile.Z * E_CHARGE
     qm = charge_c/mass_kg
     jac[0, 3] = 1.0
     jac[1, 4] = 1.0
@@ -83,8 +71,8 @@ def generate_trajectory(fit_params: Parameters, Bfield: float, Efield: float, ta
     initial_value[0] = fit_params['vertex_x'].value
     initial_value[1] = fit_params['vertex_y'].value
     initial_value[2] = fit_params['vertex_z'].value
-    momentum = QBRHO_2_P * (fit_params['brho'].value * 10.0 * 100.0 * float(ejectile.Z))
-    speed = momentum / ejectile.mass * constants.speed_of_light
+    momentum = QBRHO_2_P * (fit_params['brho'].value * float(ejectile.Z))
+    speed = momentum / ejectile.mass * C
     initial_value[3] = speed * math.sin(fit_params['polar'].value) * math.cos(fit_params['azimuthal'].value)
     initial_value[4] = speed * math.sin(fit_params['polar'].value) * math.sin(fit_params['azimuthal'].value)
     initial_value[5] = speed * math.cos(fit_params['polar'].value)
@@ -116,9 +104,9 @@ def objective_function(fit_params: Parameters, x: np.ndarray, Bfield: float, Efi
         errors[idx] = np.min(np.linalg.norm(valid_traj - point, axis=1))
     return errors
 
-def create_params(initial_value: InitialValue, ejectile: NucleusData, data: np.ndarray) -> Parameters:
+def create_params(initial_value: Guess, ejectile: NucleusData, data: np.ndarray) -> Parameters:
     momentum = 1.0 * ejectile.mass
-    phys_max_brho = 0.5 * momentum / QBRHO_2_P / (ejectile.Z * 10.0 * 100.0) # set upper limit at v=0.5c
+    phys_max_brho = 0.5 * momentum / QBRHO_2_P / ejectile.Z # set upper limit at v=0.5c
 
     uncertainty_position = 0.25
     uncertainty_brho = 1.0
@@ -160,7 +148,7 @@ def create_params(initial_value: InitialValue, ejectile: NucleusData, data: np.n
 
 
 #For testing, not for use in production
-def fit_model(cluster: Cluster, initial_value: InitialValue, detector_params: DetectorParameters, target: Target, ejectile: NucleusData) -> Parameters:
+def fit_model(cluster: Cluster, initial_value: Guess, detector_params: DetectorParameters, target: Target, ejectile: NucleusData) -> Parameters:
     traj_data = cluster.data[:, :3] * 0.001
     fit_params = create_params(initial_value, ejectile, traj_data)
 
@@ -173,7 +161,7 @@ def fit_model(cluster: Cluster, initial_value: InitialValue, detector_params: De
     return result.params
         
 
-def solve_physics(cluster_index: int, cluster: Cluster, initial_value: InitialValue, detector_params: DetectorParameters, target: Target, ejectile: NucleusData, results: dict[str, list]):
+def solve_physics(cluster_index: int, cluster: Cluster, initial_value: Guess, detector_params: DetectorParameters, target: Target, ejectile: NucleusData, results: dict[str, list]):
     traj_data = cluster.data[:, :3] * 0.001
     fit_params = create_params(initial_value, ejectile, traj_data)
 

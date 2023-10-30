@@ -1,6 +1,7 @@
 from spyral.core.config import load_config
 from spyral.run import run_spyral
 import sys
+from pathlib import Path
 
 def main(config_path: str):
     config = load_config(config_path)

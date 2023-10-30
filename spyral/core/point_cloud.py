@@ -1,17 +1,17 @@
-from .get_event import GetEvent
 from .pad_map import PadMap
 from .constants import INVALID_EVENT_NUMBER
 from .config import CrossTalkParameters
+from ..correction import ElectronCorrector
+from ..trace.get_event import GetEvent
 import numpy as np
-from typing import Optional
 
 class PointCloud:
 
     def __init__(self):
         self.event_number: int = INVALID_EVENT_NUMBER
-        self.cloud: Optional[np.ndarray] = None
+        self.cloud: np.ndarray = np.empty(0, dtype=np.float64)
 
-    def load_cloud_from_get_event(self, event: GetEvent, pmap: PadMap):
+    def load_cloud_from_get_event(self, event: GetEvent, pmap: PadMap, corrector: ElectronCorrector):
         self.event_number = event.number
         count = 0
         for trace in event.traces:
@@ -23,6 +23,8 @@ class PointCloud:
             if trace.get_number_of_peaks() == 0 or trace.hw_id.cobo_id == 10:
                 continue
             pad = pmap.get_pad_data(trace.hw_id.pad_id)
+            if pad is None:
+                continue
             for peak in trace.get_peaks():
                 self.cloud[idx, 0] = pad.x # X-coordinate, geometry
                 self.cloud[idx, 1] = pad.y # Y-coordinate, geometry
@@ -30,8 +32,10 @@ class PointCloud:
                 self.cloud[idx, 3] = peak.amplitude
                 self.cloud[idx, 4] = peak.integral * pad.gain
                 self.cloud[idx, 5] = trace.hw_id.pad_id
-                self.cloud[idx, 6] = peak.centroid + pad.time_offset # Time bucket, stored for later use
+                self.cloud[idx, 6] = peak.centroid + pad.time_offset # Time bucket with correction
+                self.cloud[idx] = corrector.correct_point(self.cloud[idx])
                 idx += 1
+
 
     def load_cloud_from_hdf5_data(self, data: np.ndarray, event_number: int):
         self.event_number: int = event_number
@@ -64,7 +68,11 @@ class PointCloud:
             if point[3] < params.saturation_threshold:
                 continue
 
-            point_hardware = pmap.get_pad_data(point[5]).hardware
+            pad = pmap.get_pad_data(point[5])
+            if pad is None:
+                continue
+
+            point_hardware = pad.hardware
             channel_max = point_hardware.aget_channel + params.channel_range
             if channel_max > 67:
                 channel_max = 67
@@ -110,12 +118,12 @@ class PointCloud:
 
         self.cloud = self.cloud[points_to_keep]
 
-    def calibrate_z_position(self, micromegas_tb: float, window_tb: float, detector_length: float):
+    def calibrate_z_position(self, micromegas_tb: float, window_tb: float, detector_length: float, ic_correction: float = 0.0):
         '''
         Calibrate the point cloud z-poisition using a known time calibration for the window and micromegas
         '''
         for idx, point in enumerate(self.cloud):
-            self.cloud[idx][2] = (window_tb - point[2]) / (window_tb - micromegas_tb) * detector_length
+            self.cloud[idx][2] = (window_tb - point[6]) / (window_tb - micromegas_tb) * detector_length - ic_correction
 
     def smooth_cloud(self, max_distance: float = 10.0):
         '''

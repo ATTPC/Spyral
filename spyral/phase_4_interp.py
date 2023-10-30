@@ -1,25 +1,26 @@
 from .core.config import SolverParameters, DetectorParameters
 from .core.track_generator import GeneratorParams, generate_tracks, TrackInterpolator, create_interpolator
 from .core.workspace import Workspace
-from .core.solver_interp import solve_physics_interp, Guess
 from .core.nuclear_data import NuclearDataMap
 from .core.particle_id import load_particle_id, ParticleID
 from .core.target import Target
 from .core.cluster import Cluster
+from .solvers.solver_interp import solve_physics_interp, Guess
 
 import h5py as h5
 import polars as pl
 from time import time
+from pathlib import Path
 
 def phase_4_interp(run: int, ws: Workspace, solver_params: SolverParameters, det_params: DetectorParameters, nuclear_map: NuclearDataMap):
     start = time()
 
-    pid: ParticleID = load_particle_id(ws.get_gate_file_path(solver_params.particle_id_filename), nuclear_map)
+    pid: ParticleID | None = load_particle_id(ws.get_gate_file_path(solver_params.particle_id_filename), nuclear_map)
     if pid is None:
         print('Particle ID error at phase 4!')
         return
     
-    target: Target = Target(solver_params.gas_data_path, nuclear_map)
+    target: Target = Target(Path(solver_params.gas_data_path), nuclear_map)
 
     cluster_path = ws.get_cluster_file_path(run)
     estimate_path = ws.get_estimate_file_path_parquet(run)
@@ -36,7 +37,11 @@ def phase_4_interp(run: int, ws: Workspace, solver_params: SolverParameters, det
     print(f'Selecting data which corresponds to particle group from {solver_params.particle_id_filename}')
 
     #Select the particle group data, convert to dictionary for row-wise operations
-    estimates_gated = estimate_df.filter(pl.struct(['dEdx', 'brho']).map(pid.cut.is_cols_inside)).collect().to_dict()
+    estimates_gated = estimate_df.filter(
+            pl.struct(['dEdx', 'brho']).map(pid.cut.is_cols_inside) & 
+            (pl.col('ic_amplitude') > solver_params.ic_min_val) & 
+            (pl.col('ic_amplitude') < solver_params.ic_max_val)
+        ).collect().to_dict()
 
 
     flush_percent = 0.01
@@ -64,7 +69,7 @@ def phase_4_interp(run: int, ws: Workspace, solver_params: SolverParameters, det
     }
 
     print(f'Looking for track interpolation data file {solver_params.interp_file_name}...')
-    interp_path = ws.get_track_file(solver_params.interp_file_name)
+    interp_path = ws.get_track_file_path(solver_params.interp_file_name)
     gen_params = GeneratorParams(
                     target, pid.nucleus, 
                     det_params.magnetic_field, 
@@ -77,8 +82,8 @@ def phase_4_interp(run: int, ws: Workspace, solver_params: SolverParameters, det
                     solver_params.interp_polar_bins
                 )
     print(f'Using interpolation with energy range {gen_params.ke_min} to {gen_params.ke_max} MeV with {gen_params.ke_bins} bins and')
-    print(f'angle range {gen_params.polar_min} to {gen_params.polar_max} degrees with {gen_params.polar_bins} bins and')
-    interpolator: TrackInterpolator = None
+    print(f'angle range {gen_params.polar_min} to {gen_params.polar_max} degrees with {gen_params.polar_bins} bins')
+    interpolator: TrackInterpolator
     if not interp_path.exists():
         print(f'Interpolation data does not exist, generating... This may take some time...')
         generate_tracks(gen_params, interp_path)
@@ -114,9 +119,9 @@ def phase_4_interp(run: int, ws: Workspace, solver_params: SolverParameters, det
 
         #Do the solver
         guess = Guess(
-                    estimates_gated['brho'][row],
                     estimates_gated['polar'][row],
                     estimates_gated['azimuthal'][row],
+                    estimates_gated['brho'][row],
                     estimates_gated['vertex_x'][row],
                     estimates_gated['vertex_y'][row],
                     estimates_gated['vertex_z'][row]

@@ -1,23 +1,21 @@
 from .target import Target
 from .nuclear_data import NucleusData
+from .constants import MEV_2_JOULE, MEV_2_KG, C, E_CHARGE
 from ..interpolate import BilinearInterpolator, LinearInterpolator
-from .constants import MEV_2_JOULE, MEV_2_KG
 
 import math
 import numpy as np
 import h5py as h5
 from dataclasses import dataclass
 from scipy.integrate import solve_ivp
-from scipy import constants
 from pathlib import Path
+
 from numba import float64, int32, njit
-from numba.extending import as_numba_type
 from numba.types import string, ListType
 from numba.typed import List
 from numba.experimental import jitclass
 
 TIME_WINDOW: float = 1.0e-6 #1us window
-QBRHO_2_P: float = 1.0e-9 * constants.speed_of_light #kG * cm -> MeV
 SAMPLING_PERIOD: float = 2.0e-9 # seconds, converts time bucket interval to time
 SAMPLING_RANGE: np.ndarray = np.arange(0., TIME_WINDOW, SAMPLING_PERIOD)
 KE_LIMIT = 0.1
@@ -79,11 +77,11 @@ def equation_of_motion(t: float, state: np.ndarray, Bfield: float, Efield: float
 
     speed = math.sqrt(state[3]**2.0 + state[4]**2.0 + state[5]**2.0)
     unit_vector = state[3:] / speed # direction
-    kinetic_energy = ejectile.mass * (1.0/math.sqrt(1.0 - (speed / constants.speed_of_light)**2.0) - 1.0) #MeV
+    kinetic_energy = ejectile.mass * (1.0/math.sqrt(1.0 - (speed / C)**2.0) - 1.0) #MeV
     if kinetic_energy < KE_LIMIT:
         return np.zeros(6)
     mass_kg = ejectile.mass * MEV_2_KG
-    charge_c = ejectile.Z * constants.elementary_charge
+    charge_c = ejectile.Z * E_CHARGE
     qm = charge_c/mass_kg
 
     deceleration = (target.get_dedx(ejectile, kinetic_energy) * MEV_2_JOULE * target.density * 100.0) / mass_kg
@@ -96,33 +94,6 @@ def equation_of_motion(t: float, state: np.ndarray, Bfield: float, Efield: float
     results[5] = qm * Efield - deceleration * unit_vector[2]
 
     return results
-
-def jacobian(t, state: np.ndarray, Bfield: float, Efield: float, target: Target, ejectile: NucleusData) -> np.ndarray:
-    '''
-    Computes the jacobian of the charged particle in a static electromagnetic field which experiences energy loss through some material
-
-    ## Parameters
-    t: float, time step
-    state: ndarray, the state of the particle (x,y,z,vx,vy,vz)
-    Bfield: float, the magnitude of the magnetic field
-    Efield: float, the magnitude of the electric field
-    target: Target, the material through which the particle travels
-    ejectile: NucleusData, data on the particle
-
-    ## Returns
-    ndarray: the jacobian
-    '''
-    jac = np.zeros((len(state), len(state)))
-    mass_kg = ejectile.mass * MEV_2_KG
-    charge_c = ejectile.Z * constants.elementary_charge
-    qm = charge_c/mass_kg
-    jac[0, 3] = 1.0
-    jac[1, 4] = 1.0
-    jac[2, 5] = 1.0
-    jac[3, 4] = qm * Bfield
-    jac[4, 3] = -1.0 * qm * Bfield
-
-    return jac
 
 def check_tracks_exist(trackpath: Path) -> bool:
     '''
@@ -181,10 +152,10 @@ def generate_tracks(params: GeneratorParams, trackpath: Path):
             
             initial_state[:] = 0.0
             momentum = math.sqrt(e * (e + 2.0*params.particle.mass))
-            speed = momentum / params.particle.mass * constants.speed_of_light
+            speed = momentum / params.particle.mass * C
             initial_state[3] = speed * math.sin(p)
             initial_state[5] = speed * math.cos(p)
-            result = solve_ivp(equation_of_motion, (0.0, TIME_WINDOW), initial_state, method='BDF', args=(bfield, efield, params.target, params.particle), t_eval=SAMPLING_RANGE, jac=jacobian)
+            result = solve_ivp(equation_of_motion, (0.0, TIME_WINDOW), initial_state, method='RK45', args=(bfield, efield, params.target, params.particle), t_eval=SAMPLING_RANGE)
             data[:, :, eidx, pidx] = result.y.T[:, :3]
 
     print('\n')

@@ -17,7 +17,7 @@ class Cluster:
     # Cluster
     Representation of cluster data.
     '''
-    def __init__(self, event: int | None = None,  label: int | None = None, data: np.ndarray | None = None):
+    def __init__(self, event: int = -1, label: int = -1, data: np.ndarray = np.empty(0, dtype=np.float64)):
         self.event = event
         self.label = label
         self.data = data
@@ -33,8 +33,9 @@ class Cluster:
         '''
         self.event = cloud.point_cloud.event_number
         self.label = cloud.label
-        #self.bin_cloud_z(cloud.point_cloud, params)
         self.copy_cloud(cloud.point_cloud, params)
+        # Z-binning is bad! destroys particle ID at higher energies. Maybe needs some tweaking??
+        # self.bin_cloud_z(cloud.point_cloud, params)
 
     def copy_cloud(self, cloud: PointCloud, params: ClusterParameters):
         '''
