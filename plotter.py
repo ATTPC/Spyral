@@ -81,6 +81,8 @@ def plot(run_min: int, run_max: int, ws: Workspace, pid_file):
     ax[1].set_title('Kinematics')
     pyplot.colorbar(mesh_2, ax=ax[1])
 
+    pyplot.tight_layout()
+
     fig2, ax2 = pyplot.subplots(1,2)
     fig2.suptitle(f'Runs {run_min} to {run_max}')
     mesh_12 = grammer.draw_hist2d('ede', ax2[0], log_z=True)
@@ -113,7 +115,7 @@ def draw_gate(run_min: int, run_max: int, ws: Workspace):
     _fig, ax = pyplot.subplots(1,1)
     _selector = widgets.PolygonSelector(ax, handler.onselect)
 
-    mesh = grammer.draw_hist2d(name = 'pid', axis = ax, cmap = white_viridis, log_z = True)
+    mesh = grammer.draw_hist2d(name = 'pid', axis = ax, cmap = white_viridis, log_z = False)
 
     pyplot.colorbar(mesh, ax=ax)
     pyplot.tight_layout()
