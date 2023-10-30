@@ -21,6 +21,8 @@
     "micromegas_time_bucket": 17.0,
     "window_time_bucket": 550.0,
     "get_frequency(MHz)": 6.25,
+    "electric_field_garfield_path": "/Users/gordon/Spyral/etc/electrons.txt",
+    "electric_field_correction_file_name": "300torr_45kV_h2_correction.h5",
 
     "trace_baseline_window_scale": 20.0,
     "trace_peak_separation": 50.0,

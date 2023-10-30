@@ -1,5 +1,5 @@
+from ..core.constants import INVALID_PEAK_CENTROID
 from dataclasses import dataclass
-from .constants import INVALID_PEAK_CENTROID
 
 @dataclass
 class Peak:

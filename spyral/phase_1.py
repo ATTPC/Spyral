@@ -1,10 +1,11 @@
 from .core.config import TraceParameters, CrossTalkParameters, DetectorParameters, FribParameters
-from .core.get_event import GetEvent
 from .core.pad_map import PadMap
 from .core.point_cloud import PointCloud
 from .core.workspace import Workspace
-from .core.frib_event import FribEvent
+from .trace.frib_event import FribEvent
+from .trace.get_event import GetEvent
 from .correction import generate_electron_correction, create_electron_corrector, ElectronCorrector
+
 from h5py import File, Group, Dataset
 from time import time
 import numpy as np

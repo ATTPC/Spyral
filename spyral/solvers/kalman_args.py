@@ -1,5 +1,5 @@
-from .target import Target
-from .nuclear_data import NucleusData
+from ..core.target import Target
+from ..core.nuclear_data import NucleusData
 
 class KalmanArgs:
     def __init__(self):

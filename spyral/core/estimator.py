@@ -1,6 +1,7 @@
-from .clusterize import least_squares_circle
 from .cluster import Cluster
 from .config import DetectorParameters, EstimateParameters
+from ..utils.circle import generate_circle_points, least_squares_circle
+
 import numpy as np
 import math
 from scipy.signal import argrelmax
@@ -11,13 +12,6 @@ class Direction(Enum):
     NONE: int = -1
     FORWARD: int = 0
     BACKWARD: int = 1
-
-def generate_circle_points(center_x: float, center_y: float, radius: float) -> np.ndarray:
-    theta = np.linspace(0., 2.0 * np.pi, 100000)
-    array = np.zeros(shape=(len(theta), 2))
-    array[:, 0] = center_x + np.cos(theta) * radius
-    array[:, 1] = center_y + np.sin(theta) * radius
-    return array
 
 def estimate_physics(cluster_index: int, cluster: Cluster, ic_amplitude: float, ic_centroid: float, ic_integral: float, estimate_params: EstimateParameters, detector_params: DetectorParameters, results: dict[str, list]):
 

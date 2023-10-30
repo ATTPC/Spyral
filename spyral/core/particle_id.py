@@ -1,4 +1,4 @@
-from ..plot.cut import Cut2D
+from ..plot import Cut2D
 from .nuclear_data import NuclearDataMap, NucleusData
 from dataclasses import dataclass
 from pathlib import Path

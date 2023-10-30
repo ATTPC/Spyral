@@ -1,40 +1,27 @@
-from .target import Target
-from .nuclear_data import NucleusData
 from .kalman_args import get_kalman_args, set_kalman_args
-from .constants import MEV_2_KG, MEV_2_JOULE
-from .config import DetectorParameters
-from .cluster import Cluster
-from .estimator import Direction
+from .guess import Guess
+from ..core.target import Target
+from ..core.nuclear_data import NucleusData
+from ..core.constants import MEV_2_KG, MEV_2_JOULE, QBRHO_2_P, E_CHARGE, C
+from ..core.config import DetectorParameters
+from ..core.cluster import Cluster
+from ..core.estimator import Direction
 
-from scipy import constants
 import numpy as np
 import math
 from filterpy.kalman import UnscentedKalmanFilter, MerweScaledSigmaPoints
 from filterpy.common import Q_discrete_white_noise
-from dataclasses import dataclass, field
-
-QBRHO_2_P: float = 1.0e-9 * constants.speed_of_light * 100.0 * 10.0 #T * m -> MeV/c
-
-@dataclass
-class Guess:
-    vertex_x: float = 0.0
-    vertex_y: float = 0.0
-    vertex_z: float = 0.0
-    brho: float = 0.0
-    polar: float = 0.0
-    azimuthal: float = 0.0
-    direction: Direction = field(default=-1)
 
 def fx(x: np.ndarray, dz: float) -> np.ndarray:
         args = get_kalman_args()
         speed = math.sqrt(x[3]**2.0 + x[4]**2.0 + x[5]**2.0)
         dt = dz/x[5]
         unit_vector = x[3:] / (speed)# direction
-        momentum = speed/constants.speed_of_light * args.ejectile.mass
+        momentum = speed/C * args.ejectile.mass
         kinetic_energy = math.sqrt(momentum ** 2.0 + args.ejectile.mass ** 2.0) - args.ejectile.mass #MeV
         if kinetic_energy < 0.001:
              return x
-        charge = args.ejectile.Z * constants.elementary_charge #Coulombs
+        charge = args.ejectile.Z * E_CHARGE #Coulombs
         mass_kg = args.ejectile.mass * MEV_2_KG #kg
         deceleration = args.target.get_dedx(args.ejectile, kinetic_energy) * MEV_2_JOULE \
                         * args.target.data.density() * 100.0 / mass_kg # m/s^2
@@ -60,7 +47,7 @@ def apply_kalman_filter(data: np.ndarray, dz: float, initial_guess: Guess) -> tu
     initial_state = np.zeros(6)
     args = get_kalman_args()
     momentum = QBRHO_2_P * (initial_guess.brho * float(args.ejectile.Z))
-    speed = momentum / args.ejectile.mass * constants.speed_of_light
+    speed = momentum / args.ejectile.mass * C
 
     initial_state[0] = initial_guess.vertex_x
     initial_state[1] = initial_guess.vertex_y
@@ -117,7 +104,7 @@ def solve_physics_kalman(cluster_index: int, cluster: Cluster, initial_guess: Gu
         trajectory, covariance = apply_kalman_filter(data, cluster.z_bin_width * 0.001, initial_guess)
     except Exception:
          return
-    momentum = np.linalg.norm(trajectory[0, 3:]) * ejectile.mass / constants.speed_of_light
+    momentum = np.linalg.norm(trajectory[0, 3:]) * ejectile.mass / C
     polar = np.arctan2(np.linalg.norm(trajectory[0, 3:5]), trajectory[0, 5])
     azimuthal = np.arctan2(trajectory[0, 4], trajectory[0, 3])
     if azimuthal < 0.0:
@@ -127,7 +114,7 @@ def solve_physics_kalman(cluster_index: int, cluster: Cluster, initial_guess: Gu
     sigma_veloz = math.sqrt(np.abs(covariance[0,5,5]))
     sigma_velo = np.linalg.norm(trajectory[0, 3:]) * math.sqrt((sigma_velox/trajectory[0,3])**2.0 + (sigma_veloy/trajectory[0,4])**2.0 + (sigma_veloz/trajectory[0,5])**2.0)
     sigma_veloxy = np.linalg.norm(trajectory[0, 3:]) * math.sqrt((sigma_velox/trajectory[0,3])**2.0 + (sigma_veloy/trajectory[0,4])**2.0)
-    sigma_momentum = sigma_velo * ejectile.mass/constants.speed_of_light
+    sigma_momentum = sigma_velo * ejectile.mass/C
     sigma_polar = abs(polar - np.arctan2(np.linalg.norm(trajectory[0, 3:5]) + sigma_veloxy, trajectory[0,5] + sigma_veloz))
     sigma_azimuth = abs(azimuthal - np.arctan2(trajectory[0,4] + sigma_veloy, trajectory[0,3] + sigma_velox))
 

@@ -1,4 +1,5 @@
 from scipy.constants import physical_constants
+from scipy.constants import speed_of_light, elementary_charge
 from numpy import pi
 
 INVALID_PEAK_CENTROID: float = -1.0
@@ -27,3 +28,9 @@ MEV_2_KG: float = physical_constants['electron volt-kilogram relationship'][0] *
 ROOM_TEMPERATURE: float = 293.0 #Kelvin
 
 GAS_CONSTANT: float = physical_constants['molar gas constant'][0] * 0.0075 * ((100.0) ** 3.0)  # m^3 Pa / K mol -> m^3 Torr / K mol -> cm^3 Torr / K mol
+
+QBRHO_2_P: float = 1.0e-9 * 10.0 * 100.0 * speed_of_light #T * m -> MeV/c^2
+
+C = speed_of_light #m/s
+
+E_CHARGE = elementary_charge # Coulombs

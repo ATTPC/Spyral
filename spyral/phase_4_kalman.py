@@ -1,11 +1,12 @@
 from .core.config import DetectorParameters, SolverParameters
 from .core.workspace import Workspace
-from .core.clusterize import Cluster
+from .core.cluster import Cluster
 from .core.nuclear_data import NuclearDataMap
 from .core.particle_id import ParticleID, load_particle_id
 from .core.target import Target
 from .core.estimator import Direction
-from .core.solver_kalman import solve_physics_kalman, Guess
+from .solvers.solver_kalman import solve_physics_kalman, Guess
+
 import h5py as h5
 import polars as pl
 from time import time
@@ -13,7 +14,7 @@ from time import time
 def phase_4_kalman(run: int, ws: Workspace, detector_params: DetectorParameters, solver_params: SolverParameters, nuclear_data: NuclearDataMap):
     start = time()
 
-    pid: ParticleID = load_particle_id(ws.get_gate_file_path(solver_params.particle_id_filename), nuclear_data)
+    pid: ParticleID | None = load_particle_id(ws.get_gate_file_path(solver_params.particle_id_filename), nuclear_data)
     if pid is None:
         print('Particle ID error at phase 4!')
         return

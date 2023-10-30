@@ -1,7 +1,7 @@
 from .get_trace import GetTrace
-from .config import TraceParameters
-from .constants import INVALID_EVENT_NAME, INVALID_EVENT_NUMBER
-from .hardware_id import hardware_id_from_array
+from ..core.config import TraceParameters
+from ..core.constants import INVALID_EVENT_NAME, INVALID_EVENT_NUMBER
+from ..core.hardware_id import hardware_id_from_array
 import numpy as np
 import h5py
 

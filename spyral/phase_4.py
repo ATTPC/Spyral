@@ -5,7 +5,8 @@ from .core.nuclear_data import NuclearDataMap
 from .core.particle_id import ParticleID, load_particle_id
 from .core.target import Target
 from .core.estimator import Direction
-from .core.solver import solve_physics, InitialValue
+from .solvers.solver import solve_physics, Guess
+
 import h5py as h5
 import polars as pl
 from time import time
@@ -59,7 +60,7 @@ def phase_4(run: int, ws: Workspace, detector_params: DetectorParameters, solver
         cluster = Cluster(event, local_cluster.attrs['label'], local_cluster['cloud'][:].copy())
 
         #Do the solver
-        iv = InitialValue(polar=estimates_gated['polar'][row], azimuthal=estimates_gated['azimuthal'][row], brho=estimates_gated['brho'][row],
+        iv = Guess(polar=estimates_gated['polar'][row], azimuthal=estimates_gated['azimuthal'][row], brho=estimates_gated['brho'][row],
                           vertex_x=estimates_gated['vertex_x'][row] * 0.001, vertex_y=estimates_gated['vertex_y'][row] * 0.001, vertex_z=estimates_gated['vertex_z'][row] * 0.001, direction=Direction(estimates_gated['direction'][row]))
         solve_physics(cidx, cluster, iv, detector_params, target, pid.nucleus, results)
 

@@ -1,55 +1,11 @@
 from .point_cloud import PointCloud
 from .cluster import LabeledCloud, Cluster, convert_labeled_to_cluster
 from .config import ClusterParameters
+from ..utils.circle import least_squares_circle
+
 import sklearn.cluster as skcluster
 from sklearn.preprocessing import StandardScaler
 import numpy as np
-
-def least_squares_circle(x: np.ndarray, y: np.ndarray) -> tuple[float, float, float, float]:
-    '''
-    Implementation of analytic least squares circle fit. Taken from the scipy cookbooks.
-
-    ## Parameters
-    x: ndarray, list of all x position coordinates to be fit
-    y: ndarray, list of all y position coordinates to be fit
-
-    ## Returns
-    tuple[float, float, float, float]: A four member tuple containing the center x-coordinate, the center y-coordinate, the radius, and the RMSE (in that order)
-    These are NaN if the matrix is singular
-    '''
-    mean_x = x.mean()
-    mean_y = y.mean()
-
-    #Reduced coordinates
-    u = x - mean_x
-    v = y - mean_y
-
-    #linear system defining the center (uc, vc) in reduced coordinates
-    # Suu * uc + Suv * vc = (Suuu + Suvv)/2
-    # Suv * uc + Svv * vc = (Suuv + Svvv)/2
-    # => A * c = B
-    Suv = np.sum(u*v)
-    Suu = np.sum(u**2.0)
-    Svv = np.sum(v**2.0)
-    Suuv = np.sum(u**2.0 * v)
-    Suvv = np.sum(u * v**2.0)
-    Suuu = np.sum(u**3.0)
-    Svvv = np.sum(v**3.0)
-
-    matrix_a = np.array([[Suu, Suv], [Suv, Svv]])
-    matrix_b = np.array([(Suuu + Suvv)*0.5, (Suuv + Svvv)*0.5])
-    c = None
-    try:
-        c = np.linalg.solve(matrix_a, matrix_b)
-    except Exception:
-        return (np.nan, np.nan, np.nan, np.nan)
-
-    xc = c[0] + mean_x
-    yc = c[1] + mean_y
-    radii = np.sqrt((x - xc)**2.0 + (y - yc)**2.0)
-    mean_radius = np.mean(radii)
-    residual = np.sum((radii - mean_radius)**2.0)
-    return (xc, yc, mean_radius, residual)
 
 def join_clusters_depth(clusters: list[LabeledCloud], params: ClusterParameters) -> list[LabeledCloud]:
     '''
@@ -162,7 +118,7 @@ def cleanup_clusters(clusters: list[LabeledCloud], params: ClusterParameters) ->
     '''
     return [convert_labeled_to_cluster(cluster, params) for cluster in clusters if cluster.label != -1]
     
-def clusterize(pc: PointCloud, params: ClusterParameters) -> list[LabeledCloud]:
+def form_clusters(pc: PointCloud, params: ClusterParameters) -> list[LabeledCloud]:
     '''
     Analyze a point cloud, and group the points into clusters which in principle should correspond to particle trajectories. This analysis contains several steps,
     and revolves around the HDBSCAN clustering algorithm implemented in scikit-learn (see [their description](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html) for details)

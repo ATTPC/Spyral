@@ -1,6 +1,6 @@
 from .peak import Peak
-from .config import FribParameters
-from .constants import FRIB_TRACE_LENGTH
+from ..core.config import FribParameters
+from ..core.constants import FRIB_TRACE_LENGTH
 
 import numpy as np
 from scipy import signal

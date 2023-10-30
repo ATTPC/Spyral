@@ -1,7 +1,7 @@
-from .constants import INVALID_PAD_ID, NUMBER_OF_TIME_BUCKETS
 from .peak import Peak
-from .hardware_id import HardwareID
-from .config import TraceParameters
+from ..core.constants import INVALID_PAD_ID, NUMBER_OF_TIME_BUCKETS
+from ..core.config import TraceParameters
+from ..core.hardware_id import HardwareID
 
 from scipy import signal
 import numpy as np

@@ -1,11 +1,11 @@
 from .core.config import SolverParameters, DetectorParameters
 from .core.track_generator import GeneratorParams, generate_tracks, TrackInterpolator, create_interpolator
 from .core.workspace import Workspace
-from .core.solver_interp import solve_physics_interp, Guess
 from .core.nuclear_data import NuclearDataMap
 from .core.particle_id import load_particle_id, ParticleID
 from .core.target import Target
 from .core.cluster import Cluster
+from .solvers.solver_interp import solve_physics_interp, Guess
 
 import h5py as h5
 import polars as pl
@@ -82,7 +82,7 @@ def phase_4_interp(run: int, ws: Workspace, solver_params: SolverParameters, det
                     solver_params.interp_polar_bins
                 )
     print(f'Using interpolation with energy range {gen_params.ke_min} to {gen_params.ke_max} MeV with {gen_params.ke_bins} bins and')
-    print(f'angle range {gen_params.polar_min} to {gen_params.polar_max} degrees with {gen_params.polar_bins} bins and')
+    print(f'angle range {gen_params.polar_min} to {gen_params.polar_max} degrees with {gen_params.polar_bins} bins')
     interpolator: TrackInterpolator
     if not interp_path.exists():
         print(f'Interpolation data does not exist, generating... This may take some time...')
@@ -119,9 +119,9 @@ def phase_4_interp(run: int, ws: Workspace, solver_params: SolverParameters, det
 
         #Do the solver
         guess = Guess(
-                    estimates_gated['brho'][row],
                     estimates_gated['polar'][row],
                     estimates_gated['azimuthal'][row],
+                    estimates_gated['brho'][row],
                     estimates_gated['vertex_x'][row],
                     estimates_gated['vertex_y'][row],
                     estimates_gated['vertex_z'][row]

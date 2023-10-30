@@ -1,7 +1,6 @@
 from .config import WorkspaceParameters
 from .pad_map import PadMap
 from .nuclear_data import NuclearDataMap, NucleusData
-from .track_generator import GeneratorParams
 from pathlib import Path
 
 def form_run_string(run_number: int) -> str:

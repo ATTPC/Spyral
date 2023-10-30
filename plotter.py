@@ -30,7 +30,7 @@ def plot(run_min: int, run_max: int, ws: Workspace, pid_file):
 
     grammer = Histogrammer()
     grammer.add_hist2d('ede_gated', (200, 200), ((-100.0, 5000.0), (0.0, 3.0)))
-    grammer.add_hist2d('ede', (200, 200), ((-100.0, 5000.0), (0.0, 3.0)))
+    grammer.add_hist2d('ede', (500, 300), ((-100.0, 5000.0), (0.0, 1.5)))
     grammer.add_hist2d('theta_brho_gated', (360, 200), ((0.0, 180.0), (0.0, 3.0)))
     grammer.add_hist2d('theta_brho', (360, 200), ((0.0, 180.0), (0.0, 3.0)))
     grammer.add_hist1d('ic_amp', 4096, (0.0, 4096.0))
@@ -40,7 +40,8 @@ def plot(run_min: int, run_max: int, ws: Workspace, pid_file):
         if not run_path.exists():
             continue
         df = polars.read_parquet(run_path)
-        df = df.filter((polars.col('ic_amplitude') > 0.0))
+        # df = df.filter((polars.col('ic_amplitude') > 0.0))
+        # df = df.filter((polars.col('ic_amplitude') > 950.0) & (polars.col('ic_amplitude') < 1350.0))
         df_ede = df.filter(polars.struct(['dEdx', 'brho']).map(ede_cut.is_cols_inside))
         grammer.fill_hist2d('ede', df.select('dEdx').to_numpy(), df.select('brho').to_numpy())
         grammer.fill_hist2d('ede_gated', df_ede.select('dEdx').to_numpy(), df_ede.select('brho').to_numpy())
@@ -63,8 +64,8 @@ def plot(run_min: int, run_max: int, ws: Workspace, pid_file):
 
     fig2, ax2 = pyplot.subplots(1,2)
     fig2.suptitle(f'Runs {run_min} to {run_max}')
-    mesh_12 = grammer.draw_hist2d('ede', ax2[0], log_z=False)
-    mesh_22 = grammer.draw_hist2d('theta_brho', ax2[1], log_z=False)
+    mesh_12 = grammer.draw_hist2d('ede', ax2[0], log_z=True)
+    mesh_22 = grammer.draw_hist2d('theta_brho', ax2[1], log_z=True)
     ax2[0].set_xlabel('Energy Loss (channels)')
     ax2[0].set_ylabel(r'B$\rho$ (T*m)')
     ax2[0].set_title('E-dE')
@@ -94,6 +95,7 @@ def draw_gate(run_min: int, run_max: int, ws: Workspace):
         if not run_path.exists():
             continue
         df = polars.read_parquet(ws.get_estimate_file_path_parquet(run))
+        df = df.filter((polars.col('ic_amplitude') > 0.0))
         grammer.fill_hist2d('pid', df.select('dEdx').to_numpy(), df.select('brho').to_numpy())
 
     _fig, ax = pyplot.subplots(1,1)

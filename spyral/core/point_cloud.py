@@ -1,8 +1,8 @@
-from .get_event import GetEvent
 from .pad_map import PadMap
 from .constants import INVALID_EVENT_NUMBER
 from .config import CrossTalkParameters
 from ..correction import ElectronCorrector
+from ..trace.get_event import GetEvent
 import numpy as np
 
 class PointCloud:
