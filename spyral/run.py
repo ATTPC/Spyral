@@ -5,8 +5,9 @@ from .phase_2 import phase_2
 from .phase_3 import phase_3
 from .phase_4_interp import phase_4_interp
 from time import time
+import datetime
 
-def run(config: Config):
+def run_spyral(config: Config):
 
     ws = Workspace(config.workspace)
     pad_map = ws.get_pad_map()
@@ -30,4 +31,5 @@ def run(config: Config):
             phase_4_interp(idx, ws, config.solver, config.detector, nuclear_map)
         
     stop = time()
-    print(f'Total ellapsed runtime: {stop - start}s')
+    timestr = str(datetime.timedelta(seconds = stop - start))
+    print(f'Total ellapsed runtime: {stop - start}s (i.e {timestr})')
