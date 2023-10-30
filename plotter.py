@@ -1,5 +1,7 @@
 import polars
-from matplotlib import pyplot, widgets
+from typing import Optional
+from matplotlib import pyplot, widgets, colormaps
+from matplotlib.colors import LinearSegmentedColormap, rgb2hex
 from spyral.core.config import load_config, Config
 from spyral.core.workspace import Workspace
 from spyral.plot.cut import load_cut_json, write_cut_json, CutHandler
@@ -9,6 +11,28 @@ import sys
 from pathlib import Path
 
 RAD2DEG = 180.0/np.pi
+
+#Additional colormaps with white backgrounds
+cmap_jet = colormaps.get_cmap("jet")
+white_jet = LinearSegmentedColormap.from_list('white_jet', [
+    (0, '#ffffff'),
+    (1e-20, rgb2hex(cmap_jet(1e-20))),
+    (0.2, rgb2hex(cmap_jet(0.2))),
+    (0.4, rgb2hex(cmap_jet(0.4))),
+    (0.6, rgb2hex(cmap_jet(0.6))),
+    (0.8, rgb2hex(cmap_jet(0.8))),
+    (1, rgb2hex(cmap_jet(0.9))),  
+], N = 256)
+
+white_viridis = LinearSegmentedColormap.from_list('white_viridis', [
+    (0, '#ffffff'),
+    (1e-20, '#440053'),
+    (0.2, '#404388'),
+    (0.4, '#2a788e'),
+    (0.6, '#21a784'),
+    (0.8, '#78d151'),
+    (1, '#fde624'),
+], N=256)
 
 def help_string() -> str:
     return\
@@ -62,6 +86,8 @@ def plot(run_min: int, run_max: int, ws: Workspace, pid_file):
     ax[1].set_title('Kinematics')
     pyplot.colorbar(mesh_2, ax=ax[1])
 
+    pyplot.tight_layout()
+
     fig2, ax2 = pyplot.subplots(1,2)
     fig2.suptitle(f'Runs {run_min} to {run_max}')
     mesh_12 = grammer.draw_hist2d('ede', ax2[0], log_z=True)
@@ -89,7 +115,7 @@ def plot(run_min: int, run_max: int, ws: Workspace, pid_file):
 def draw_gate(run_min: int, run_max: int, ws: Workspace):
     handler = CutHandler()
     grammer = Histogrammer()
-    grammer.add_hist2d('pid', (400, 300), ((-100.0, 8000.0), (0.0, 3.0)))
+    grammer.add_hist2d('pid', (400, 300), ((-100.0, 5000.0), (0.0, 1.5)))
     for run in range(run_min, run_max+1):
         run_path = ws.get_estimate_file_path_parquet(run)
         if not run_path.exists():
@@ -101,7 +127,7 @@ def draw_gate(run_min: int, run_max: int, ws: Workspace):
     _fig, ax = pyplot.subplots(1,1)
     _selector = widgets.PolygonSelector(ax, handler.onselect)
 
-    mesh = grammer.draw_hist2d(name = 'pid', axis = ax, log_z = True)
+    mesh = grammer.draw_hist2d(name = 'pid', axis = ax, cmap = white_viridis, log_z = False)
 
     pyplot.colorbar(mesh, ax=ax)
     pyplot.tight_layout()
