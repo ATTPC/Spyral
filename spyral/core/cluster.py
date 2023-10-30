@@ -2,6 +2,7 @@ from .point_cloud import PointCloud
 from .config import ClusterParameters
 import numpy as np
 from dataclasses import dataclass, field
+from sklearn.neighbors import LocalOutlierFactor
 
 @dataclass
 class LabeledCloud:
@@ -34,6 +35,7 @@ class Cluster:
         self.event = cloud.point_cloud.event_number
         self.label = cloud.label
         self.copy_cloud(cloud.point_cloud, params)
+        self.drop_outliers()
         # Z-binning is bad! destroys particle ID at higher energies. Maybe needs some tweaking??
         # self.bin_cloud_z(cloud.point_cloud, params)
 
@@ -84,6 +86,19 @@ class Cluster:
         self.z_bin_width = bin_width
         self.z_bin_low_edge = bin_mins[0]
         self.z_bin_hi_edge = bin_mins[-1] + bin_width
+    
+    def drop_outliers(self, neighbors=2):
+        '''
+        Use scikit-learn LocalOutlierFactor to test the cluster for spatial outliers.
+        This helps reduce noise when fitting the data.
+
+        ## Parameters
+        neighbors: int, the number of neighbors to compare to for the outlier test
+        '''
+        test_data = self.data[:, :3].copy()
+        neigh = LocalOutlierFactor(n_neighbors=neighbors)
+        result = neigh.fit_predict(test_data)
+        self.data = self.data[result > 0]
 
 def convert_labeled_to_cluster(cloud: LabeledCloud, params: ClusterParameters) -> Cluster:
     '''

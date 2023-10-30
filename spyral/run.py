@@ -12,6 +12,7 @@ def run(config: Config):
     pad_map = ws.get_pad_map()
     nuclear_map = ws.get_nuclear_map()
     start = time()
+
     for idx in range(config.run.run_min, config.run.run_max + 1, 1):
 
         print(f'Analyzing run {idx}...')
