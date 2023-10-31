@@ -3,7 +3,6 @@ from ..interpolate import BilinearInterpolator
 
 import numpy as np
 from pathlib import Path
-import h5py as h5
 from contourpy import contour_generator, ContourGenerator
 
 def generate_electron_correction(garf_file_path: Path, output_path: Path, params: DetectorParameters):
@@ -77,8 +76,7 @@ def generate_electron_correction(garf_file_path: Path, output_path: Path, params
             correction_grid[ridx, zidx, 1] = others[1]
             correction_grid[ridx, zidx, 2] = others[2]
 
-    outfile = h5.File(output_path, 'w')
-    outfile.create_dataset('correction_grid', data=correction_grid)
+    np.save(output_path, correction_grid)
 
 def interpolate_initial_rho(contour: ContourGenerator, z: float, rho: float) -> float:
     lines = contour.lines(rho)

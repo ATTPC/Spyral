@@ -2,12 +2,14 @@ from .core.config import ClusterParameters
 from .core.point_cloud import PointCloud
 from .core.clusterize import form_clusters, join_clusters_depth, cleanup_clusters
 from .core.workspace import Workspace
+from .parallel.status_message import StatusMessage, Phase
 import h5py as h5
 from time import time
+from multiprocessing import SimpleQueue
 
-def phase_2(run: int, ws: Workspace, cluster_params: ClusterParameters):
+def phase_2(run: int, ws: Workspace, cluster_params: ClusterParameters, queue: SimpleQueue):
 
-    start = time()
+    # start = time()
     point_path = ws.get_point_cloud_file_path(run)
     if not point_path.exists():
         return
@@ -24,7 +26,7 @@ def phase_2(run: int, ws: Workspace, cluster_params: ClusterParameters):
     cluster_group.attrs['min_event'] = min_event
     cluster_group.attrs['max_event'] = max_event
 
-    print(f'Clustering point clouds in file {point_path} over events {min_event} to {max_event}')
+    # print(f'Clustering point clouds in file {point_path} over events {min_event} to {max_event}')
 
     flush_percent = 0.01
     flush_val = int(flush_percent * (max_event - min_event))
@@ -35,8 +37,9 @@ def phase_2(run: int, ws: Workspace, cluster_params: ClusterParameters):
 
         if count > flush_val:
             count = 0
-            flush_count += 1
-            print(f'\rPercent of data processed: {int(flush_count * flush_percent * 100)}%', end='')
+            # flush_count += 1
+            # print(f'\rPercent of data processed: {int(flush_count * flush_percent * 100)}%', end='')
+            queue.put(StatusMessage(run, Phase.CLUSTER, 1))
         count += 1
 
         cloud_data: h5.Dataset | None = None
@@ -70,8 +73,8 @@ def phase_2(run: int, ws: Workspace, cluster_params: ClusterParameters):
             local_group.create_dataset('cloud', data=cluster.data)
 
 
-    stop = time()
-    print(f'\nProcessing complete. Duration: {stop - start}s')
+    # stop = time()
+    # print(f'\nProcessing complete. Duration: {stop - start}s')
 
 
 
