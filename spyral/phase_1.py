@@ -4,13 +4,11 @@ from .core.point_cloud import PointCloud
 from .core.workspace import Workspace
 from .trace.frib_event import FribEvent
 from .trace.get_event import GetEvent
-from .correction import generate_electron_correction, create_electron_corrector, ElectronCorrector
+from .correction import create_electron_corrector
+from .parallel.status_message import StatusMessage, Phase
 
 from h5py import File, Group, Dataset
-from time import time
 import numpy as np
-from pathlib import Path
-from .parallel.status_message import StatusMessage, Phase
 from multiprocessing import SimpleQueue
 
 def get_event_range(trace_file: File) -> tuple[int, int]:
@@ -28,7 +26,6 @@ def get_event_range(trace_file: File) -> tuple[int, int]:
     return (int(meta_data[0]), int(meta_data[2]))
 
 def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParameters, frib_params: FribParameters, cross_params: CrossTalkParameters, detector_params: DetectorParameters, queue: SimpleQueue):
-    start = time()
     trace_path = ws.get_trace_file_path(run)
     if not trace_path.exists():
         return
@@ -42,22 +39,6 @@ def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParamet
     corr_path = ws.get_correction_file_path(detector_params.efield_correction_name)
     corrector = create_electron_corrector(corr_path)
 
-    # print(f'Looking for electric field correction file {detector_params.efield_correction_name}...')
-    # corr_path = ws.get_correction_file_path(detector_params.efield_correction_name)
-    # corrector: ElectronCorrector
-    # if not corr_path.exists():
-    #     print(f'Field correction does not exist, creating correction from GARFIELD data in {detector_params.garfield_file_path}...', end=' ')
-    #     generate_electron_correction(Path(detector_params.garfield_file_path), corr_path, detector_params)
-    #     print('Generated. Loading correction...', end=' ')
-    #     corrector = create_electron_corrector(corr_path)
-    #     print('Loaded.')
-    # else:
-    #     print('Correction data found. Loading...', end=' ')
-    #     corrector = create_electron_corrector(corr_path)
-    #     print('Loaded.')
-
-    # print(f'Running phase 1 on file {trace_path} for events {min_event} to {max_event}')
-
     event_group: Group = trace_file.get('get')
     frib_group: Group = trace_file.get('frib')
     frib_evt_group: Group = frib_group.get('evt')
@@ -67,15 +48,12 @@ def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParamet
 
     flush_percent = 0.01
     flush_val = int(flush_percent * (max_event - min_event))
-    flush_count = 0
     count = 0
 
     for idx in range(min_event, max_event+1):
 
         if count > flush_val:
             count = 0
-            # flush_count += 1
-            # print(f'\rPercent of data processed: {int(flush_count * flush_percent * 100)}%', end='')
             queue.put(StatusMessage(run, Phase.CLOUD, 1))
         count += 1
 
@@ -125,7 +103,3 @@ def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParamet
             pc.calibrate_z_position(detector_params.micromegas_time_bucket, detector_params.window_time_bucket, detector_params.detector_length)
 
         pc_dataset[:] = pc.cloud
-
-    # stop = time()
-
-    # print(f'\nEllapsed time: {stop-start}s')

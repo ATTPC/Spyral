@@ -5,6 +5,7 @@ from .core.target import Target
 from .core.particle_id import load_particle_id
 from .correction import generate_electron_correction
 from .parallel.status_message import StatusMessage, Phase
+from .parallel.run_stack import create_run_stacks
 from .run import run_spyral
 
 from multiprocessing import Process, SimpleQueue
@@ -43,46 +44,32 @@ def generate_shared_resources(config: Config):
                     config.solver.interp_polar_max, 
                     config.solver.interp_polar_bins
                 )
-        print('Creating the interpolation scheme... This may take some time...')
         generate_tracks(gen_params, track_path)
         print('Done.')
     print('Shared resources are ready.')
 
-def run_spyral_parallel(config: Config, n_processes: int = 2):
+def run_spyral_parallel(config: Config):
     #Some data must be made and shared across processes through files.
     generate_shared_resources(config)
+
+    n_processes = config.run.n_processes
 
     queues: list[SimpleQueue] = []
     processes: list[Process] = []
     pbars: list[tqdm] = []
     stats: list[Phase] = []
 
-    n_runs = config.run.run_max - config.run.run_min + 1
+    print('Optimally generating run lists for each process...')
+    stacks = create_run_stacks(config, n_processes)
+    print('Done.')
 
-    if n_runs == 1:
+    for s in range(0, len(stacks)):
+        local_config = deepcopy(config)
         queues.append(SimpleQueue())
-        processes.append(Process(target=run_spyral, args=(config,queues[-1])))
-        pbars.append(tqdm(total=100.0))
+        processes.append(Process(target=run_spyral, args=(local_config, stacks[s], queues[-1]), daemon=False))
+        pbars.append(tqdm(total=100))
         stats.append(Phase.WAIT)
-        pbars[-1].set_description(f'| Process {0} | { str(stats[-1]) } |')
-    else:
-        chunk_size = int(n_runs / n_processes)
-        remainder = n_runs - (chunk_size * n_processes)
-        start_of_next_p = config.run.run_min
-        for p in range(0, n_processes):
-            local_config = deepcopy(config)
-            local_config.run.run_min = start_of_next_p
-            if p < remainder:
-                local_config.run.run_max = local_config.run.run_min + chunk_size
-            else:
-                local_config.run.run_max = local_config.run.run_min + chunk_size - 1
-            start_of_next_p = local_config.run.run_max + 1
-
-            queues.append(SimpleQueue())
-            processes.append(Process(target=run_spyral, args=(local_config, queues[-1]), daemon=False))
-            pbars.append(tqdm(total=100))
-            stats.append(Phase.WAIT)
-            pbars[-1].set_description(f'| Process {p} | { str(stats[-1]) } |')
+        pbars[-1].set_description(f'| Process {s} | { str(stats[-1]) } |')
 
     for process in processes:
         process.start()
@@ -91,7 +78,7 @@ def run_spyral_parallel(config: Config, n_processes: int = 2):
     # main loop
     while True:
         anyone_alive = False
-        # check process still going
+        # check processes still going
         for process in processes:
             if process.is_alive():
                 anyone_alive = True
@@ -110,8 +97,6 @@ def run_spyral_parallel(config: Config, n_processes: int = 2):
                 pbars[idx].set_description(f'| Process {idx} | {msg.task_str()}')
                 stats[idx] = msg.phase
             pbars[idx].update(msg.progress)
-    
-    
     
     # People get nervous if the bars don't reach 100%
     for bar in pbars:

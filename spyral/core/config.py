@@ -23,6 +23,7 @@ class RunParameters:
     '''
     run_min: int = -1
     run_max: int = -1
+    n_processes: int = -1
     do_phase1: bool = False
     do_phase2: bool = False
     do_phase3: bool = False
@@ -89,8 +90,7 @@ class ClusterParameters:
     min_size: int = 0
     circle_overlap_ratio: float = 0.0
     fractional_charge_threshold: float = 0.0
-    z_bin_fractional_size: float = 0
-    z_bin_outlier_cutoff: float = 0
+    n_neighbors_outiler_test: int = 0
 
 @dataclass
 class EstimateParameters:
@@ -161,6 +161,7 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
 
     config.run.run_min = json_data['run_min']
     config.run.run_max = json_data['run_max']
+    config.run.n_processes = json_data['n_processes']
     config.run.do_phase1 = json_data['phase1']
     config.run.do_phase2 = json_data['phase2']
     config.run.do_phase3 = json_data['phase3']
@@ -202,8 +203,7 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
     config.cluster.min_points = json_data['cluster_minimum_points']
     config.cluster.circle_overlap_ratio = json_data['cluster_circle_overlap_ratio']
     config.cluster.fractional_charge_threshold = json_data['cluster_fractional_charge_threshold']
-    config.cluster.z_bin_fractional_size = json_data['cluster_z_bin_fractional_size']
-    config.cluster.z_bin_outlier_cutoff = json_data['cluster_z_bin_outlier_cutoff']
+    config.cluster.n_neighbors_outiler_test = json_data['cluster_n_neighbors_outlier_test']
 
     config.estimate.min_total_trajectory_points = json_data['estimate_mininum_total_trajectory_points']
     config.estimate.max_distance_from_beam_axis = json_data['estimate_maximum_distance_from_beam_axis']
