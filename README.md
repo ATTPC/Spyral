@@ -95,7 +95,7 @@ As was mentioned previously, Spyral is capable of running multiple data files in
 
 Some notes about parallel processing:
 
-- The number of processors should not exceed the number of physical cores *MINUS* one in the system being used. Doing so could result in extreme slow down and potential unresponsive behavior.
+- The number of processors should not exceed the number of physical cores in the system being used *MINUS* one (the extra one is the parent process which is monitoring the children). Doing so could result in extreme slow down and potential unresponsive behavior.
 - In general, it is best if the number of data files to be processed is evenly divisible by the number of processors. Otherwise, by necessity, the work load will be uneven across the processors.
 - Spyral will sometimes run fewer processes than requested. This is usually in the case where the number of requested processors is greater than the number of files to be processed.
 
