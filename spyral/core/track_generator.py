@@ -5,10 +5,10 @@ from ..interpolate import BilinearInterpolator, LinearInterpolator
 
 import math
 import numpy as np
-import h5py as h5
 from dataclasses import dataclass
 from scipy.integrate import solve_ivp
 from pathlib import Path
+import json
 
 from numba import float64, int32, njit
 from numba.types import string, ListType
@@ -39,7 +39,7 @@ class InitialState:
     kinetic_energy: float = 0.0 # MeV
 
     def to_array(self) -> np.ndarray:
-        np.array([self.vertex_x, self.vertex_y, self.vertex_z, self.polar, self.azimuthal, self.kinetic_energy])
+        return np.array([self.vertex_x, self.vertex_y, self.vertex_z, self.polar, self.azimuthal, self.kinetic_energy])
 
 @dataclass
 class GeneratorParams:
@@ -56,6 +56,23 @@ class GeneratorParams:
     polar_min: float #deg
     polar_max: float #deg
     polar_bins: int
+
+    def to_json_str(self) -> str:
+        return json.dumps(self,
+                          default=lambda obj : {
+                             'particle': obj.particle.isotopic_symbol,
+                             'gas': obj.target.pretty_string,
+                             'bfield': obj.bfield,
+                             'efield': obj.efield,
+                             'ke_min': obj.ke_min,
+                             'ke_max': obj.ke_max,
+                             'ke_bins': obj.ke_bins,
+                             'polar_min': obj.polar_min,
+                             'polar_max': obj.polar_max,
+                             'polar_bins': obj.polar_bins,
+                         },
+                         indent=4
+                         )
 
 #State = [x, y, z, vx, vy, vz]
 #Derivative = [vx, vy, vz, ax, ay, az] (returns)
@@ -95,17 +112,17 @@ def equation_of_motion(t: float, state: np.ndarray, Bfield: float, Efield: float
 
     return results
 
-def check_tracks_exist(trackpath: Path) -> bool:
+def check_tracks_exist(track_path: Path) -> bool:
     '''
     Simple file-existance checker with a nice print message
     '''
-    if trackpath.exists():
-        print(f'Track file {trackpath} detected, this file will be used. If new tracks are needed, please delete the original file.')
+    if track_path.exists():
+        print(f'Track file {track_path} detected, this file will be used. If new tracks are needed, please delete the original file.')
         return True
     else:
         return False
 
-def generate_tracks(params: GeneratorParams, trackpath: Path):
+def generate_tracks(params: GeneratorParams, track_path: Path):
     '''
     Generate a set of tracks given some parameters and write them to an h5 file at a path.
     
@@ -116,19 +133,11 @@ def generate_tracks(params: GeneratorParams, trackpath: Path):
     kes = np.linspace(params.ke_min, params.ke_max, params.ke_bins)
     polars = np.linspace(params.polar_min * DEG2RAD, params.polar_max * DEG2RAD, params.polar_bins)
 
-    track_file = h5.File(trackpath, 'w')
-    track_group: h5.Group = track_file.create_group('tracks')
-    track_group.attrs['particle'] = params.particle.isotopic_symbol
-    track_group.attrs['gas'] = params.target.pretty_string
-    track_group.attrs['bfield'] = params.bfield
-    track_group.attrs['efield'] = params.efield
-    track_group.attrs['ke_min'] = params.ke_min
-    track_group.attrs['ke_max'] = params.ke_max
-    track_group.attrs['ke_bins'] = params.ke_bins
-    track_group.attrs['polar_min'] = params.polar_min
-    track_group.attrs['polar_max'] = params.polar_max
-    track_group.attrs['polar_bins'] = params.polar_bins
-    data = track_group.create_dataset('data', shape=(len(SAMPLING_RANGE), 3,  params.ke_bins, params.polar_bins), dtype=np.float64)  #time x (x, y, z, vx, vy, vz) x ke x polar
+    track_meta_path = track_path.parents[0] / f'{track_path.stem}.json'
+    with open(track_meta_path, 'w') as metafile:
+        metafile.write(params.to_json_str())
+
+    data = np.zeros(shape=(len(SAMPLING_RANGE), 3,  params.ke_bins, params.polar_bins), dtype=np.float64)  #time x (x, y, z, vx, vy, vz) x ke x polar
 
     initial_state = np.zeros(6)
 
@@ -159,6 +168,8 @@ def generate_tracks(params: GeneratorParams, trackpath: Path):
             data[:, :, eidx, pidx] = result.y.T[:, :3]
 
     print('\n')
+
+    np.save(track_path, data)
 
 # To use numba with a class we need to declare the types of all members of the class
 # and use the @jitclass decorator
@@ -288,25 +299,30 @@ def create_interpolator(track_path: Path) -> TrackInterpolator:
     obvious reasons, so we need to retrieve the track data outside of the class and then manually pass it all
     to the initialization.
     '''
-    track_file = h5.File(track_path, 'r')
-    track_group: h5.Group = track_file['tracks']
-    particle_name = track_group.attrs['particle']
-    gas_name = track_group.attrs['gas']
-    bfield = track_group.attrs['bfield']
-    efield = track_group.attrs['efield']
-    ke_min = track_group.attrs['ke_min']
-    ke_max = track_group.attrs['ke_max']
-    ke_bins = track_group.attrs['ke_bins']
-    polar_min = track_group.attrs['polar_min']
-    polar_max = track_group.attrs['polar_max']
-    polar_bins = track_group.attrs['polar_bins']
-    data = track_group['data'][:].copy()
+    track_meta_path = track_path.parents[0] / f'{track_path.stem}.json'
+    meta_dict: dict
+    with open(track_meta_path, 'r') as metafile:
+        meta_dict = json.load(metafile)
+    data = np.load(track_path)
 
-    pmin_rad = polar_min * DEG2RAD
-    pmax_rad = polar_max * DEG2RAD
+    pmin_rad = meta_dict['polar_min'] * DEG2RAD
+    pmax_rad = meta_dict['polar_max'] * DEG2RAD
 
     typed_interpolators = List()
 
-    [typed_interpolators.append(BilinearInterpolator(pmin_rad, pmax_rad, polar_bins, ke_min, ke_max, ke_bins, time.T[:, :, :3])) for time in data]
+    [typed_interpolators.append(BilinearInterpolator(pmin_rad, pmax_rad, meta_dict['polar_bins'], meta_dict['ke_min'], meta_dict['ke_max'], meta_dict['ke_bins'], time.T[:, :, :3])) for time in data]
 
-    return TrackInterpolator(str(track_path), typed_interpolators, particle_name, gas_name, bfield, efield, ke_min, ke_max, ke_bins, polar_min, polar_max, polar_bins)
+    return TrackInterpolator(
+        str(track_path), 
+        typed_interpolators, 
+        meta_dict['particle'], 
+        meta_dict['gas'],
+        meta_dict['bfield'], 
+        meta_dict['efield'], 
+        meta_dict['ke_min'],
+        meta_dict['ke_max'], 
+        meta_dict['ke_bins'],
+        meta_dict['polar_min'],
+        meta_dict['polar_max'],
+        meta_dict['polar_bins']
+        )

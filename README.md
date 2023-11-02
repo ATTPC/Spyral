@@ -1,7 +1,6 @@
 # Spyral
 
-Spyral is an analysis application for data from the Active Target Time Projection Chamber (AT-TPC). Spyral provides a flexible analysis pipeline, transforming the raw trace data into 
-physical observables over several tunable steps.
+Spyral is an analysis application for data from the Active Target Time Projection Chamber (AT-TPC). Spyral provides a flexible analysis pipeline, transforming the raw trace data into physical observables over several tunable steps. Sypral can process multiple data files in parallel, allowing for scalable performance over larger experiment datasets.
 
 ## Installation
 
@@ -46,7 +45,6 @@ if using Anaconda: Anaconda >= 4.10.1
 Spyral aims to be cross platform and to support Linux, MacOS, and Windows. Currently Spyral has been tested and confirmed on MacOS and Ubuntu 22.04 Linux. Other platforms
 are not guaranteed to work; if there is a problem please make an issue on the GitHub page, and it will be resolved as quickly as possible.
 
-
 ## Usage
 
 ### Configuration
@@ -90,6 +88,16 @@ on extracting the most performance out of the application.
 The final phase of the analysis involves using the equations of motion of a charged ion in a electromagnetic field to extract physics parameters. As it might sound, this isn't that straight forward. The simple approach is to fit ODE solutions to the data, but it can prove quite expensive to solve the ODE's the hundreds of times it takes to minimize per event. To bypass this expense, Spyral pre-calculates many of these ODE solutions and then interpolates on them to find a best fit. To make this even faster, Numba is used to just-in-time compile a lot of the interpolation code. As such, the first time you run phase 4, it might take a while because Spyral is generating the interpolation scheme. But after that it will be really fast!
 
 An alternative approach, the Unscented Kalman Filter, also exists. But this approach is not sound yet; more testing and development needs to be done before this method is ready to be used in production.
+
+### Parallel Processing
+
+As was mentioned previously, Spyral is capable of running multiple data files in parallel. This is acheived through the python `multiprocessing` library. In the configuration file, there is a parameter named `n_processors`. The value of this parameter indicates to Spyral the *maximum* number of processors which can be spawned. Spyral will then inspect the data load that was submitted in the configuration and attempt to balance the load across the processors as equally as possible.
+
+Some notes about parallel processing:
+
+- The number of processors should not exceed the number of physical cores in the system being used *MINUS* one (the extra one is the parent process which is monitoring the children). Doing so could result in extreme slow down and potential unresponsive behavior.
+- In general, it is best if the number of data files to be processed is evenly divisible by the number of processors. Otherwise, by necessity, the work load will be uneven across the processors.
+- Spyral will sometimes run fewer processes than requested. This is usually in the case where the number of requested processors is greater than the number of files to be processed.
 
 ## Plotting
 
