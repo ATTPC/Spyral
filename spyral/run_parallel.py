@@ -14,6 +14,14 @@ from tqdm import tqdm
 from pathlib import Path
 
 def generate_shared_resources(config: Config):
+    '''
+    Shared resources such as interpolation tables need to be generated *before* the 
+    processors are started. Otherwise, there may be race conditions.
+
+    ## Parameters
+    config: Config, the project configuration
+    '''
+
     print('Checking to see if any shared resources need to be created...')
     ws = Workspace(config.workspace)
     nuc_map = ws.get_nuclear_map()
@@ -49,6 +57,14 @@ def generate_shared_resources(config: Config):
     print('Shared resources are ready.')
 
 def run_spyral_parallel(config: Config):
+    '''
+    This is the main function to be called to run Spyral. The configuration will be 
+    used to generate a set of child processes to analyze the data range. 
+
+    ## Parameters
+    config: Config, the project configuration
+    '''
+
     #Some data must be made and shared across processes through files.
     generate_shared_resources(config)
 
