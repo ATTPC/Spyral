@@ -27,6 +27,7 @@ class RunParameters:
     do_phase2: bool = False
     do_phase3: bool = False
     do_phase4: bool = False
+    num_cores: int = 1
 
 @dataclass
 class DetectorParameters:
@@ -161,6 +162,7 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
 
     config.run.run_min = json_data['run_min']
     config.run.run_max = json_data['run_max']
+    config.run.num_cores = json_data['num_cores']
     config.run.do_phase1 = json_data['phase1']
     config.run.do_phase2 = json_data['phase2']
     config.run.do_phase3 = json_data['phase3']
