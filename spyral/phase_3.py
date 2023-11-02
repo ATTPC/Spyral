@@ -2,12 +2,14 @@ from .core.cluster import Cluster
 from .core.config import DetectorParameters, EstimateParameters
 from .core.estimator import estimate_physics
 from .core.workspace import Workspace
-from polars import DataFrame
-from time import time
-import h5py as h5
+from .parallel.status_message import StatusMessage, Phase
 
-def phase_3(run: int, ws: Workspace, estimate_params: EstimateParameters, detector_params: DetectorParameters):
-    start = time()
+from polars import DataFrame
+import h5py as h5
+from multiprocessing.queues import SimpleQueue
+
+
+def phase_3(run: int, ws: Workspace, estimate_params: EstimateParameters, detector_params: DetectorParameters, queue: SimpleQueue):
 
     cluster_path = ws.get_cluster_file_path(run)
     if not cluster_path.exists():
@@ -21,11 +23,8 @@ def phase_3(run: int, ws: Workspace, estimate_params: EstimateParameters, detect
     min_event: int = cluster_group.attrs['min_event']
     max_event: int = cluster_group.attrs['max_event']
 
-    print(f'Running physics estimation on clusters in {cluster_path} over events {min_event} to {max_event}')
-
     flush_percent = 0.01
     flush_val = int(flush_percent * (max_event - min_event))
-    flush_count = 0
     count = 0
 
     data: dict[str, list] = {
@@ -53,8 +52,7 @@ def phase_3(run: int, ws: Workspace, estimate_params: EstimateParameters, detect
     for idx in range(min_event, max_event+1):
         if count > flush_val:
             count = 0
-            flush_count += 1
-            print(f'\rPercent of data processed: {int(flush_count * flush_percent * 100)}%', end='')
+            queue.put(StatusMessage(run, Phase.ESTIMATE, 1))
         count += 1
 
         event: h5.Group | None = None
@@ -81,7 +79,3 @@ def phase_3(run: int, ws: Workspace, estimate_params: EstimateParameters, detect
 
     df = DataFrame(data)
     df.write_parquet(estimate_path)
-
-
-    stop = time()
-    print(f'\nEllapsed time: {stop-start}s')

@@ -1,7 +1,6 @@
 from ..interpolate import BilinearInterpolator, clamp
 from pathlib import Path
 import numpy as np
-import h5py as h5
 
 class ElectronCorrector:
 
@@ -38,9 +37,7 @@ def create_electron_corrector(ecorr_path: Path) -> ElectronCorrector:
     z_bin_max = 1000.0
     z_bins = 1001
 
-    ecorr_file = h5.File(ecorr_path, 'r')
-
-    grid: np.ndarray = ecorr_file['correction_grid'][:].copy()
+    grid: np.ndarray = np.load(ecorr_path)
 
     interpolator = BilinearInterpolator(rho_bin_min, rho_bin_max, rho_bins, z_bin_min, z_bin_max, z_bins, grid)
     return ElectronCorrector(interpolator)
