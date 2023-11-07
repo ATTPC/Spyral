@@ -67,7 +67,7 @@ def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParamet
         
         pc = PointCloud()
         pc.load_cloud_from_get_event(event, pad_map, corrector)
-        pc.eliminate_cross_talk(pad_map, cross_params)
+        # pc.eliminate_cross_talk(pad_map, cross_params)
         
         pc_dataset = cloud_group.create_dataset(f'cloud_{pc.event_number}', shape=pc.cloud.shape, dtype=np.float64)
 

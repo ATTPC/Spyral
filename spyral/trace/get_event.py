@@ -4,6 +4,7 @@ from ..core.constants import INVALID_EVENT_NAME, INVALID_EVENT_NUMBER
 from ..core.hardware_id import hardware_id_from_array
 import numpy as np
 import h5py
+from numba import njit
 
 GET_DATA_TRACE_START: int = 5
 GET_DATA_TRACE_STOP: int = 512+5
@@ -25,6 +26,7 @@ class GetEvent:
     def is_valid(self) -> bool:
         return self.name != INVALID_EVENT_NAME and self.number != INVALID_EVENT_NUMBER
 
+@njit
 def preprocess_traces(traces: np.ndarray, baseline_window_scale: float) -> np.ndarray:
     '''
         Method for pre-cleaning the trace data in bulk before doing trace analysis

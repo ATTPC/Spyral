@@ -9,3 +9,4 @@ pycatima @ git+https://github.com/hrosiak/pycatima.git@546e725b81aac72a04af543b8
 scikit-learn==1.3.0
 scipy==1.11.1
 tqdm==4.66.1
+rocket-fft==0.2.2
