@@ -227,20 +227,10 @@ class TrackInterpolator:
         LinearInterpolator | None: Returns a LinearInterpolator, which interpolates the trajectory upon z for x,y or None when the algorithm fails
         '''
 
-        is_backwards = False
-        if polar > np.pi*0.5:
-            is_backwards = True
-            polar -= np.pi*0.5
-
         trajectory = np.zeros((len(self.interpolators), 3))
         for idx, _ in enumerate(trajectory):
             trajectory[idx] = self.interpolators[idx].interpolate(polar, ke)
 
-        #Rotate polar by 90 degrees if nescessary
-        #Since we rotate the entire coordinate system, is as simple as flip in z
-        #Order here is important! Must be polar, azimuthal, translate!
-        if is_backwards:
-            trajectory[:, 2] *= -1
         #Rotate the trajectory in azimuthal (around z) to match data
         z_rot = np.array([[np.cos(azim), -np.sin(azim), 0.0], [np.sin(azim), np.cos(azim), 0.0], [0., 0., 1.0]])
         trajectory = (z_rot @ trajectory.T).T
