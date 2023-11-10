@@ -74,6 +74,7 @@ def run_spyral_parallel(config: Config):
     processes: list[Process] = []
     pbars: list[tqdm] = []
     stats: list[Phase] = []
+    runs: list[int] = []
 
     print('Optimally generating run lists for each process...')
     stacks = create_run_stacks(config, n_processes)
@@ -85,6 +86,7 @@ def run_spyral_parallel(config: Config):
         processes.append(Process(target=run_spyral, args=(local_config, stacks[s], queues[-1]), daemon=False))
         pbars.append(tqdm(total=100))
         stats.append(Phase.WAIT)
+        runs.append(-1)
         pbars[-1].set_description(f'| Process {s} | { str(stats[-1]) } |')
 
     for process in processes:
@@ -108,10 +110,11 @@ def run_spyral_parallel(config: Config):
                 continue
 
             msg: StatusMessage = q.get()
-            if msg.phase != stats[idx]:
+            if msg.phase != stats[idx] or msg.run != runs[idx]:
                 pbars[idx].reset()
                 pbars[idx].set_description(f'| Process {idx} | {msg.task_str()}')
                 stats[idx] = msg.phase
+                runs[idx] = msg.run
             pbars[idx].update(msg.progress)
     
     # People get nervous if the bars don't reach 100%

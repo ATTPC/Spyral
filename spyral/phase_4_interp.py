@@ -31,11 +31,16 @@ def phase_4_interp(run: int, ws: Workspace, solver_params: SolverParameters, nuc
     cluster_group: h5.Group = cluster_file.get('cluster')
 
     #Select the particle group data, beam region of ic, convert to dictionary for row-wise operations
+    #Select only the largest polar angle for a given event to avoid beam-like particles
     estimates_gated = estimate_df.filter(
             pl.struct(['dEdx', 'brho']).map(pid.cut.is_cols_inside) & 
             (pl.col('ic_amplitude') > solver_params.ic_min_val) & 
             (pl.col('ic_amplitude') < solver_params.ic_max_val)
-        ).collect().to_dict()
+        ) \
+        .sort('polar', descending=True) \
+        .unique('event', keep='first') \
+        .collect() \
+        .to_dict()
     
     if len(estimates_gated['event']) == 0:
         queue.put(StatusMessage(run, Phase.WAIT, 100))

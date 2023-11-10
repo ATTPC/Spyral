@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Optional
 from matplotlib.pyplot import Axes
 from matplotlib.text import Text
-from matplotlib.colors import LogNorm, Colormap
+from matplotlib.colors import LogNorm
 from matplotlib.backend_bases import LocationEvent
 from matplotlib.collections import QuadMesh
 import matplotlib.pyplot as plt
