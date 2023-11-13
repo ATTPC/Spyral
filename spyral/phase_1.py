@@ -1,4 +1,4 @@
-from .core.config import TraceParameters, CrossTalkParameters, DetectorParameters, FribParameters
+from .core.config import TraceParameters, DetectorParameters, FribParameters
 from .core.pad_map import PadMap
 from .core.point_cloud import PointCloud
 from .core.workspace import Workspace
@@ -26,7 +26,7 @@ def get_event_range(trace_file: h5.File) -> tuple[int, int]:
     meta_data = meta_group.get('meta')
     return (int(meta_data[0]), int(meta_data[2]))
 
-def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParameters, frib_params: FribParameters, cross_params: CrossTalkParameters, detector_params: DetectorParameters, queue: SimpleQueue):
+def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParameters, frib_params: FribParameters, detector_params: DetectorParameters, queue: SimpleQueue):
     trace_path = ws.get_trace_file_path(run)
     if not trace_path.exists():
         spyral_warn(__name__, f'Run {run} does not exist for phase 1, skipping.')

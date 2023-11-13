@@ -31,7 +31,7 @@ def run_spyral(config: Config, run_list: list[int], queue: SimpleQueue, process_
 
         if config.run.do_phase1:
             spyral_info(__name__, 'Running phase 1')
-            phase_1(idx, ws, pad_map, config.trace, config.frib, config.cross, config.detector, queue)
+            phase_1(idx, ws, pad_map, config.trace, config.frib, config.detector, queue)
 
         if config.run.do_phase2:
             spyral_info(__name__, 'Running phase 2')

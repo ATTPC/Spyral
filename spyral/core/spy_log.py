@@ -1,7 +1,6 @@
-import logging
 from .workspace import Workspace
-from typing import Callable
-import functools
+
+import logging
 
 ROOT_LOGGER = 'spyral'
 
