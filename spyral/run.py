@@ -5,7 +5,7 @@ from .phase_1 import phase_1
 from .phase_2 import phase_2
 from .phase_3 import phase_3
 from .phase_4_interp import phase_4_interp
-
+    
 from multiprocessing import SimpleQueue
 
 def run_spyral(config: Config, run_list: list[int], queue: SimpleQueue, process_id: int):
@@ -18,7 +18,6 @@ def run_spyral(config: Config, run_list: list[int], queue: SimpleQueue, process_
     run_list: list[int], the set of runs for this process
     queue: SimpleQueue, a communication channel back to the parent process for monitoring progress
     '''
-
     ws = Workspace(config.workspace)
     pad_map = ws.get_pad_map()
     nuclear_map = ws.get_nuclear_map()

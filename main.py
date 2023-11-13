@@ -5,7 +5,8 @@ from pathlib import Path
 import click
 import contextlib
 import os
-
+import time
+import datetime
 
 # Generated using https://www.asciiart.eu
 SPLASH: str = \
@@ -30,6 +31,7 @@ def main(term: bool, config: Path):
     '''
     Spyral is an analysis framework for AT-TPC data. Provide a JSON configuration file CONFIG to control analysis settings.
     '''
+    start = time.time()
     configuration = load_config(config)
     if not term:
         with contextlib.redirect_stdout(open(os.devnull, 'w')):
@@ -37,6 +39,7 @@ def main(term: bool, config: Path):
     else:
         show_splash()
         run_spyral_parallel(configuration)
+    print(f'Time elapsed: {time.time()-start} seconds (i.e. {str(datetime.timedelta(seconds = time.time()-start))})')
         
 
 if __name__ == "__main__":

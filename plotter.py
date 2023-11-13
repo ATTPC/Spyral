@@ -41,8 +41,9 @@ def plot(run_min: int, run_max: int, ws: Workspace, pid_file):
         if not run_path.exists():
             continue
         df = polars.read_parquet(run_path)
-        # df = df.filter((polars.col('ic_amplitude') > 0.0))
-        # df = df.filter((polars.col('ic_amplitude') > 950.0) & (polars.col('ic_amplitude') < 1350.0))
+        #df = df.filter((polars.col('ic_amplitude') > 0.0))
+        #df = df.filter((polars.col('ic_amplitude') > 950.0) & (polars.col('ic_amplitude') < 1250.0))
+        df = df.filter((polars.col('ic_amplitude') > 1250.0) & (polars.col('ic_amplitude') < 1500.0))
         df_ede = df.filter(polars.struct(['dEdx', 'brho']).map(ede_cut.is_cols_inside))
         grammer.fill_hist2d('ede', df.select('dEdx').to_numpy(), df.select('brho').to_numpy())
         grammer.fill_hist2d('ede_gated', df_ede.select('dEdx').to_numpy(), df_ede.select('brho').to_numpy())
@@ -104,7 +105,11 @@ def draw_gate(run_min: int, run_max: int, ws: Workspace):
     _fig, ax = pyplot.subplots(1,1)
     _selector = widgets.PolygonSelector(ax, handler.onselect)
 
-    mesh = grammer.draw_hist2d(name = 'pid', axis = ax, log_z = False)
+
+    mesh = grammer.draw_hist2d(name = 'pid', axis = ax, cmap = white_viridis, log_z = True)
+
+    #ax.set_xlabel('dEdx')
+    #ax.set_ylabel('brho')
 
     pyplot.colorbar(mesh, ax=ax)
     pyplot.tight_layout()
