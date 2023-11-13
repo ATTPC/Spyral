@@ -19,7 +19,7 @@ def run_profile():
     config = load_config(CONFIG_PATH)
     runs = [config.run.run_min]
     queue = SimpleQueue()
-    run_spyral(config, runs, queue)
+    run_spyral(config, runs, queue, 1)
 
 if __name__ == '__main__':
     profile_spyral()

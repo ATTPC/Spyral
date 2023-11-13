@@ -6,12 +6,13 @@ from .trace.frib_event import FribEvent
 from .trace.get_event import GetEvent
 from .correction import create_electron_corrector
 from .parallel.status_message import StatusMessage, Phase
+from .core.spy_log import spyral_info, spyral_error, spyral_warn
 
-from h5py import File, Group, Dataset
+import h5py as h5
 import numpy as np
 from multiprocessing import SimpleQueue
 
-def get_event_range(trace_file: File) -> tuple[int, int]:
+def get_event_range(trace_file: h5.File) -> tuple[int, int]:
     '''
     The old merger didn't seem to use attributes, so everything was stored in datasets. Use this to retrieve the min and max event numbers.
 
@@ -28,21 +29,33 @@ def get_event_range(trace_file: File) -> tuple[int, int]:
 def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParameters, frib_params: FribParameters, cross_params: CrossTalkParameters, detector_params: DetectorParameters, queue: SimpleQueue):
     trace_path = ws.get_trace_file_path(run)
     if not trace_path.exists():
+        spyral_warn(__name__, f'Run {run} does not exist for phase 1, skipping.')
         return
     
     point_path = ws.get_point_cloud_file_path(run)
-    trace_file = File(trace_path, 'r')
-    point_file = File(point_path, 'w')
+    trace_file = h5.File(trace_path, 'r')
+    point_file = h5.File(point_path, 'w')
 
     min_event, max_event = get_event_range(trace_file)
 
     corr_path = ws.get_correction_file_path(detector_params.efield_correction_name)
     corrector = create_electron_corrector(corr_path)
 
-    event_group: Group = trace_file.get('get')
-    frib_group: Group = trace_file.get('frib')
-    frib_evt_group: Group = frib_group.get('evt')
-    cloud_group: Group = point_file.create_group('cloud')
+    event_group: h5.Group = trace_file['get']
+    if not isinstance(event_group, h5.Group):
+        spyral_error(__name__, f'GET event group does not exist in run {run}, phase 1 cannot be run!')
+        return
+    
+    frib_group: h5.Group = trace_file['frib']
+    if not isinstance(frib_group, h5.Group):
+        spyral_error(__name__, f'FRIB group does not exist in run {run}, phase 1 cannot be run!')
+        return
+    frib_evt_group: h5.Group = frib_group['evt']
+    if not isinstance(frib_evt_group, h5.Group):
+        spyral_error(__name__, f'FRIB event data group does not exist in run {run}, phase 1 cannot be run!')
+        return
+    
+    cloud_group = point_file.create_group('cloud')
     cloud_group.attrs['min_event'] = min_event
     cloud_group.attrs['max_event'] = max_event
 
@@ -57,7 +70,7 @@ def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParamet
             queue.put(StatusMessage(run, Phase.CLOUD, 1))
         count += 1
 
-        event_data: Dataset
+        event_data: h5.Dataset
         try:
             event_data = event_group[f'evt{idx}_data']
         except Exception:
@@ -67,7 +80,6 @@ def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParamet
         
         pc = PointCloud()
         pc.load_cloud_from_get_event(event, pad_map, corrector)
-        # pc.eliminate_cross_talk(pad_map, cross_params)
         
         pc_dataset = cloud_group.create_dataset(f'cloud_{pc.event_number}', shape=pc.cloud.shape, dtype=np.float64)
 
@@ -77,7 +89,7 @@ def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParamet
         pc_dataset.attrs['ic_centroid'] = -1.0
 
         # Now analyze FRIBDAQ data
-        frib_data: Dataset
+        frib_data: h5.Dataset
         try:
             frib_data = frib_evt_group[f'evt{idx}_1903']
         except Exception:
@@ -103,3 +115,5 @@ def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParamet
             pc.calibrate_z_position(detector_params.micromegas_time_bucket, detector_params.window_time_bucket, detector_params.detector_length)
 
         pc_dataset[:] = pc.cloud
+
+    spyral_info(__name__, 'Phase 1 complete')

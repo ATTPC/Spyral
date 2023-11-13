@@ -6,6 +6,7 @@ from .core.particle_id import load_particle_id, ParticleID
 from .core.cluster import Cluster
 from .solvers.solver_interp import solve_physics_interp, Guess
 from .parallel.status_message import StatusMessage, Phase
+from .core.spy_log import spyral_error, spyral_warn, spyral_info
 
 import h5py as h5
 import polars as pl
@@ -15,20 +16,25 @@ def phase_4_interp(run: int, ws: Workspace, solver_params: SolverParameters, nuc
 
     pid: ParticleID | None = load_particle_id(ws.get_gate_file_path(solver_params.particle_id_filename), nuclear_map)
     if pid is None:
-        queue.put(StatusMessage(run, Phase.WAIT, 100))
+        queue.put(StatusMessage(run, Phase.WAIT, 0))
+        spyral_warn(__name__, f'Particle ID {solver_params.particle_id_filename} does not exist, Solver will not run!')
         return
     
     cluster_path = ws.get_cluster_file_path(run)
     estimate_path = ws.get_estimate_file_path_parquet(run)
     if not cluster_path.exists() or not estimate_path.exists():
-        queue.put(StatusMessage(run, Phase.WAIT, 100))
+        queue.put(StatusMessage(run, Phase.WAIT, 0))
+        spyral_warn(__name__, f'Either clusters or esitmates do not exist for run {run} at phase 4. Skipping.')
         return
     
     result_path = ws.get_physics_file_path_parquet(run, pid.nucleus)
     cluster_file = h5.File(cluster_path, 'r')
     estimate_df = pl.scan_parquet(estimate_path)
 
-    cluster_group: h5.Group = cluster_file.get('cluster')
+    cluster_group: h5.Group = cluster_file['cluster']
+    if not isinstance(cluster_group, h5.Group):
+        spyral_error(__name__, f'Cluster group does not eixst for run {run} at phase 4!')
+        return
 
     #Select the particle group data, beam region of ic, convert to dictionary for row-wise operations
     #Select only the largest polar angle for a given event to avoid beam-like particles
@@ -43,7 +49,8 @@ def phase_4_interp(run: int, ws: Workspace, solver_params: SolverParameters, nuc
         .to_dict()
     
     if len(estimates_gated['event']) == 0:
-        queue.put(StatusMessage(run, Phase.WAIT, 100))
+        queue.put(StatusMessage(run, Phase.WAIT, 0))
+        spyral_warn(__name__, f'No events within PID for run {run}!')
         return
 
     flush_percent = 0.01
@@ -96,3 +103,4 @@ def phase_4_interp(run: int, ws: Workspace, solver_params: SolverParameters, nuc
 
     physics_df = pl.DataFrame(results)
     physics_df.write_parquet(result_path)
+    spyral_info(__name__, 'Phase 4 complete.')

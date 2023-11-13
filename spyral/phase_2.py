@@ -3,6 +3,7 @@ from .core.point_cloud import PointCloud
 from .core.clusterize import form_clusters, join_clusters_depth, cleanup_clusters
 from .core.workspace import Workspace
 from .parallel.status_message import StatusMessage, Phase
+from .core.spy_log import spyral_warn, spyral_error, spyral_info
 
 import h5py as h5
 from multiprocessing import SimpleQueue
@@ -11,6 +12,7 @@ def phase_2(run: int, ws: Workspace, cluster_params: ClusterParameters, queue: S
 
     point_path = ws.get_point_cloud_file_path(run)
     if not point_path.exists():
+        spyral_warn(__name__, f'Point cloud data does not exist for run {run} at phase 2. Skipping.')
         return
     
     cluster_path = ws.get_cluster_file_path(run)
@@ -18,7 +20,11 @@ def phase_2(run: int, ws: Workspace, cluster_params: ClusterParameters, queue: S
     point_file = h5.File(point_path, 'r')
     cluster_file = h5.File(cluster_path, 'w')
 
-    cloud_group: h5.Group = point_file.get('cloud')
+    cloud_group: h5.Group = point_file['cloud']
+    if not isinstance(cloud_group, h5.Group):
+        spyral_error(__name__, f'Point cloud group not present in run {run}!')
+        return
+    
     min_event: int = cloud_group.attrs['min_event']
     max_event: int = cloud_group.attrs['max_event']
     cluster_group: h5.Group = cluster_file.create_group('cluster')
@@ -38,7 +44,7 @@ def phase_2(run: int, ws: Workspace, cluster_params: ClusterParameters, queue: S
 
         cloud_data: h5.Dataset | None = None
         try:
-            cloud_data = cloud_group.get(f'cloud_{idx}')
+            cloud_data = cloud_group[f'cloud_{idx}']
         except Exception:
             continue
 
@@ -61,3 +67,5 @@ def phase_2(run: int, ws: Workspace, cluster_params: ClusterParameters, queue: S
             local_group = cluster_event_group.create_group(f'cluster_{cidx}')
             local_group.attrs['label'] = cluster.label
             local_group.create_dataset('cloud', data=cluster.data)
+
+    spyral_info(__name__, 'Phase 2 complete.')

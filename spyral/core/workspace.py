@@ -55,6 +55,10 @@ class Workspace:
         if not self.correction_path.exists():
             self.correction_path.mkdir()
 
+        self.log_path = self.workspace_path / 'log'
+        if not self.log_path.exists():
+            self.log_path.mkdir()
+
         self.pad_geometry_path = Path(params.pad_geometry_path)
         if not self.pad_geometry_path.exists() or not self.pad_geometry_path.is_file():
             raise Exception('Workspace encountered an error! Pad geometry path does not exist!')
@@ -120,4 +124,15 @@ class Workspace:
     
     def get_correction_file_path(self, name: str) -> Path:
         return self.correction_path / name
+    
+    def get_log_file_path(self, process_id: int) -> Path:
+        if process_id != -1:
+            return self.log_path / f'log_proc{process_id}.txt'
+        else:
+            return self.log_path / 'log_procParent.txt'
+    
+    def clear_log_path(self):
+        for item in self.log_path.iterdir():
+            if item.is_file():
+                item.unlink()
         

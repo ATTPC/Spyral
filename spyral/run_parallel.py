@@ -7,11 +7,13 @@ from .correction import generate_electron_correction
 from .parallel.status_message import StatusMessage, Phase
 from .parallel.run_stack import create_run_stacks
 from .run import run_spyral
+from .core.spy_log import init_spyral_logger_parent, spyral_info
 
 from multiprocessing import Process, SimpleQueue
 from copy import deepcopy
 from tqdm import tqdm
 from pathlib import Path
+from time import time
 
 def generate_shared_resources(config: Config):
     '''
@@ -24,6 +26,12 @@ def generate_shared_resources(config: Config):
 
     print('Checking to see if any shared resources need to be created...')
     ws = Workspace(config.workspace)
+
+    #Get rid of any old log files
+    ws.clear_log_path()
+    #initialize our logger for the parent process
+    init_spyral_logger_parent(ws)
+
     nuc_map = ws.get_nuclear_map()
     track_path = ws.get_track_file_path(config.solver.interp_file_name)
     ecorr_path = ws.get_correction_file_path(config.detector.efield_correction_name)
@@ -64,6 +72,8 @@ def run_spyral_parallel(config: Config):
     ## Parameters
     config: Config, the project configuration
     '''
+    #For housekeeping, track and log how long the execution takes
+    start = time()
 
     #Some data must be made and shared across processes through files.
     generate_shared_resources(config)
@@ -78,12 +88,13 @@ def run_spyral_parallel(config: Config):
 
     print('Optimally generating run lists for each process...')
     stacks = create_run_stacks(config, n_processes)
+    spyral_info(__name__, f'Run stacks: {stacks}')
     print('Done.')
 
     for s in range(0, len(stacks)):
         local_config = deepcopy(config)
         queues.append(SimpleQueue())
-        processes.append(Process(target=run_spyral, args=(local_config, stacks[s], queues[-1]), daemon=False))
+        processes.append(Process(target=run_spyral, args=(local_config, stacks[s], queues[-1], s), daemon=False))
         pbars.append(tqdm(total=100))
         stats.append(Phase.WAIT)
         runs.append(-1)
@@ -131,3 +142,9 @@ def run_spyral_parallel(config: Config):
 
     for process in processes:
         process.join()
+
+    stop = time()
+    duration = stop-start
+    hours, sec = divmod(duration, 3600)
+    minutes, sec = divmod(sec, 60)
+    spyral_info(__name__, f'Total ellapsed time: {int(hours)} hrs {int(minutes)} min {sec:.4} s')
