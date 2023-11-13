@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import Optional
 from matplotlib.pyplot import Axes
 from matplotlib.text import Text
-from matplotlib.colors import LogNorm, Colormap
+from matplotlib.colors import LogNorm
 from matplotlib.backend_bases import LocationEvent
 from matplotlib.collections import QuadMesh
 import matplotlib.pyplot as plt
@@ -249,7 +249,7 @@ class Histogrammer:
         self.connect_mpl_callbacks(axis)
             
         
-    def draw_hist2d(self, name: str, axis: Axes, log_z: bool = False, cmap = 'viridis') -> QuadMesh | None:
+    def draw_hist2d(self, name: str, axis: Axes, log_z: bool = False) -> QuadMesh | None:
         if name not in self.histograms:
             return None
         

@@ -69,18 +69,6 @@ class FribParameters:
     correct_ic_time: bool = True
 
 @dataclass
-class CrossTalkParameters:
-    '''
-    Parameters for cross talk analysis
-    '''
-    saturation_threshold: float = 2000.0
-    cross_talk_threshold: float = 1000.0
-    neighborhood_threshold: float = 1500.0
-    channel_range: int = 5
-    distance_range: float = 5.0
-    time_range: int =  10
-
-@dataclass
 class ClusterParameters:
     '''
     Parameters for clustering, cluster joining, and cluster cleaning
@@ -137,9 +125,6 @@ class Config:
     #FRIB data
     frib: FribParameters = field(default_factory=FribParameters)
 
-    #Cross talk
-    cross: CrossTalkParameters = field(default_factory=CrossTalkParameters)
-
     #Clustering settings
     cluster: ClusterParameters = field(default_factory=ClusterParameters)
 
@@ -190,13 +175,6 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
     config.frib.peak_threshold = json_data['frib_trace_peak_threshold']
     config.frib.ic_multiplicity = json_data['frib_event_ic_multiplicity']
     config.frib.correct_ic_time = json_data['frib_event_correct_ic_time']
-
-    config.cross.saturation_threshold = json_data['cross_talk_saturation_threshold']
-    config.cross.cross_talk_threshold = json_data['cross_talk_threshold']
-    config.cross.neighborhood_threshold = json_data['cross_talk_neighborhood_threshold']
-    config.cross.channel_range = json_data['cross_talk_channel_range']
-    config.cross.distance_range = json_data['cross_talk_distance_range(mm)']
-    config.cross.time_range = json_data['cross_talk_time_range(bucket)']
 
     config.cluster.smoothing_neighbor_distance = json_data['cluster_smoothing_neighbor_distance(mm)']
     config.cluster.min_size = json_data['cluster_minimum_size']

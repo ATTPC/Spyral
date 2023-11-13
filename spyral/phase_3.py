@@ -3,6 +3,7 @@ from .core.config import DetectorParameters, EstimateParameters
 from .core.estimator import estimate_physics
 from .core.workspace import Workspace
 from .parallel.status_message import StatusMessage, Phase
+from .core.spy_log import spyral_error, spyral_warn, spyral_info
 
 from polars import DataFrame
 import h5py as h5
@@ -13,12 +14,16 @@ def phase_3(run: int, ws: Workspace, estimate_params: EstimateParameters, detect
 
     cluster_path = ws.get_cluster_file_path(run)
     if not cluster_path.exists():
+        spyral_warn(__name__, f'Cluster file for run {run} not present for phase 3. Skipping.')
         return
     
     estimate_path = ws.get_estimate_file_path_parquet(run)
 
     cluster_file = h5.File(cluster_path, 'r')
-    cluster_group: h5.Group = cluster_file.get('cluster')
+    cluster_group: h5.Group = cluster_file['cluster']
+    if not isinstance(cluster_group, h5.Group):
+        spyral_error(__name__, f'Cluster group not present for run {run}!')
+        return
 
     min_event: int = cluster_group.attrs['min_event']
     max_event: int = cluster_group.attrs['max_event']
@@ -79,3 +84,4 @@ def phase_3(run: int, ws: Workspace, estimate_params: EstimateParameters, detect
 
     df = DataFrame(data)
     df.write_parquet(estimate_path)
+    spyral_info(__name__, 'Phase 3 complete.')

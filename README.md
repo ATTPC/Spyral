@@ -38,7 +38,7 @@ All dependencies for Spyral will then be installed to your virtual environment
 
 ## Requirements
 
-Python >= 3.10
+Python >= 3.10, < 3.13
 
 if using Anaconda: Anaconda >= 4.10.1
 
@@ -58,7 +58,6 @@ Configurations contain many parameters. These can be seen in the config.json exa
 - Detector parameters: detector conditions and configuration
 - Trace parameters: parameters which are used in the peak identification and baseline removal analysis
 - FRIB trace parameters: parameters used in the peak identification of FRIBDAQ signals (ion chamber, auxilary silicon, etc)
-- Cross-talk parameters: parameters used in cross-talk removal, after peaks have been identified
 - Clustering parameters: point cloud clustering parameters
 - Estimation parameters: used to generate estimates of physical observables
 - Solver parameters: used to control the physics solver
@@ -68,10 +67,14 @@ Configurations contain many parameters. These can be seen in the config.json exa
 To use Spyral, run the main.py script located at the top level of the repository with the virtual environment activated. Example:
 
 ```[bash]
-python main.py <your_config.json>
+python main.py CONFIG
 ```
 
-Replace `<your_config.json>` with the path to your configuration file.
+Replace `CONFIG` with the path to your configuration file. For complete list of options use
+
+```[bash]
+python main.py --help
+```
 
 ### Performance
 
@@ -95,9 +98,20 @@ As was mentioned previously, Spyral is capable of running multiple data files in
 
 Some notes about parallel processing:
 
+- In job environments (SLURM, etc.), you won't want to have the typical progress display provided by Spyral. Disable terminal output using the `--no-term` flag (i.e. `python main.py --no-term CONFIG`).
 - The number of processors should not exceed the number of physical cores in the system being used *MINUS* one (the extra one is the parent process which is monitoring the children). Doing so could result in extreme slow down and potential unresponsive behavior.
 - In general, it is best if the number of data files to be processed is evenly divisible by the number of processors. Otherwise, by necessity, the work load will be uneven across the processors.
 - Spyral will sometimes run fewer processes than requested. This is usually in the case where the number of requested processors is greater than the number of files to be processed.
+
+### Logs and Output
+
+Spyral creates a set of logfiles when it is run (located in the log directory of the workspace). These logfiles can contain critical information describing the state of Spyral. In particular, if Spyral has a crash, the logfiles can be useful for determining what went wrong. A logfile is created for each process (including the parent process). The files are labeld by process number (or as parent in the case of the parent).
+
+By default, Spyral prints some basic information to the terminal and provides progress monitoring in the form of a progress bar for each processor. This can be disabled by passing the `--no-term` option
+
+```[bash]
+python main.py --no-term CONFIG
+```
 
 ## Plotting
 
@@ -107,17 +121,17 @@ Spyral also bundles some helpful plotting tools for creating dataset histograms.
 To make a particle ID gate use
 
 ```[bash]
-python plotter.py --gate <your_config.json>
+python plotter.py --gate CONFIG
 ```
 
-where again you replace `<your_config.json>` with the path to your configuration file. You can draw a closed polygon around the particle group of interest. To save the gate, close the plot window and the gate will be automatically saved to the gate directory of your workspace with the name `pid_gate.json`. The PID file does need modified by the user before being used in Spyral. You will need to manually add the fields `Z` and `A` which are the proton and mass number of the particle associated with the group. The order in the JSON file does not matter, the fields simply need to have the correct name.
+where again you replace `CONFIG` with the path to your configuration file. You can draw a closed polygon around the particle group of interest. To save the gate, close the plot window and the gate will be automatically saved to the gate directory of your workspace with the name `pid_gate.json`. The PID file does need modified by the user before being used in Spyral. You will need to manually add the fields `Z` and `A` which are the proton and mass number of the particle associated with the group. The order in the JSON file does not matter, the fields simply need to have the correct name.
 
 ### Plot
 
 To make a set of useful plots use
 
 ```[bash]
-python plotter.py --plot <your_config.json>
+python plotter.py --plot CONFIG
 ```
 
 This will produce some useful plots like the particle ID plot, the ion chamber energy, and the kinematic correlation of energy and angle. It will make a set with and without the particle ID gate applied. Note that this requires a real PID gate to be given by the configuration.

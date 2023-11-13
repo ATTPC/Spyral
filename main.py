@@ -1,19 +1,46 @@
 from spyral.core.config import load_config
-# from spyral.run import run_spyral
 from spyral.run_parallel import run_spyral_parallel
-import sys
+
 from pathlib import Path
+import click
+import contextlib
+import os
 import time
 import datetime
 
-def main(config_path: str):
-    config = load_config(Path(config_path))
-    run_spyral_parallel(config)
+# Generated using https://www.asciiart.eu
+SPLASH: str = \
+r"""
+-------------------------------
+ ____                        _ 
+/ ___| _ __  _   _ _ __ __ _| |
+\___ \|  _ \| | | |  __/ _  | |
+ ___| | |_| | |_| | | | |_| | |
+|____/|  __/ \__  |_|  \__ _|_|
+      |_|    |___/             
+-------------------------------
+"""
+
+def show_splash():
+    print(SPLASH)
+
+@click.command()
+@click.option('--term/--no-term', default=True, help='Whether or not Spyral displays progress text to the terminal', show_default=True)
+@click.argument('config', type=click.Path(exists=True))
+def main(term: bool, config: Path):
+    '''
+    Spyral is an analysis framework for AT-TPC data. Provide a JSON configuration file CONFIG to control analysis settings.
+    '''
+    start = time.time()
+    configuration = load_config(config)
+    if not term:
+        with contextlib.redirect_stdout(open(os.devnull, 'w')):
+            run_spyral_parallel(configuration, no_progress=True)
+    else:
+        show_splash()
+        run_spyral_parallel(configuration)
+    print(f'Time elapsed: {time.time()-start} seconds (i.e. {str(datetime.timedelta(seconds = time.time()-start))})')
+        
 
 if __name__ == "__main__":
-    start = time.time()
-    if len(sys.argv) < 2:
-        print('spyral requires a configuration file!')
-    else:
-        main(sys.argv[1])
-    print(f'Time elapsed: {time.time()-start} seconds (i.e. {str(datetime.timedelta(seconds = time.time()-start))})')
+    main()
