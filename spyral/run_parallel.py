@@ -26,7 +26,6 @@ def generate_shared_resources(config: Config):
 
     print('Checking to see if any shared resources need to be created...')
     ws = Workspace(config.workspace)
-
     #Get rid of any old log files
     ws.clear_log_path()
     #initialize our logger for the parent process
@@ -64,7 +63,7 @@ def generate_shared_resources(config: Config):
         print('Done.')
     print('Shared resources are ready.')
 
-def run_spyral_parallel(config: Config):
+def run_spyral_parallel(config: Config, no_progress=False):
     '''
     This is the main function to be called to run Spyral. The configuration will be 
     used to generate a set of child processes to analyze the data range. 
@@ -95,7 +94,7 @@ def run_spyral_parallel(config: Config):
         local_config = deepcopy(config)
         queues.append(SimpleQueue())
         processes.append(Process(target=run_spyral, args=(local_config, stacks[s], queues[-1], s), daemon=False))
-        pbars.append(tqdm(total=100))
+        pbars.append(tqdm(total=100, disable=no_progress))
         stats.append(Phase.WAIT)
         runs.append(-1)
         pbars[-1].set_description(f'| Process {s} | { str(stats[-1]) } |')
@@ -128,12 +127,6 @@ def run_spyral_parallel(config: Config):
                 runs[idx] = msg.run
             pbars[idx].update(msg.progress)
     
-    # People get nervous if the bars don't reach 100%
-    for bar in pbars:
-        remain = bar.total - bar.last_print_n
-        if remain > 0:
-            bar.update(remain)
-
     for bar in pbars:
         bar.close()
 

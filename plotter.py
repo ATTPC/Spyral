@@ -1,38 +1,15 @@
 import polars
-from typing import Optional
-from matplotlib import pyplot, widgets, colormaps
-from matplotlib.colors import LinearSegmentedColormap, rgb2hex
+from matplotlib import pyplot, widgets
 from spyral.core.config import load_config, Config
 from spyral.core.workspace import Workspace
 from spyral.plot.cut import load_cut_json, write_cut_json, CutHandler
 from spyral.plot.histogram import Histogrammer
+
 import numpy as np
-import sys
 from pathlib import Path
+import click
 
 RAD2DEG = 180.0/np.pi
-
-#Additional colormaps with white backgrounds
-cmap_jet = colormaps.get_cmap("jet")
-white_jet = LinearSegmentedColormap.from_list('white_jet', [
-    (0, '#ffffff'),
-    (1e-20, rgb2hex(cmap_jet(1e-20))),
-    (0.2, rgb2hex(cmap_jet(0.2))),
-    (0.4, rgb2hex(cmap_jet(0.4))),
-    (0.6, rgb2hex(cmap_jet(0.6))),
-    (0.8, rgb2hex(cmap_jet(0.8))),
-    (1, rgb2hex(cmap_jet(0.9))),  
-], N = 256)
-
-white_viridis = LinearSegmentedColormap.from_list('white_viridis', [
-    (0, '#ffffff'),
-    (1e-20, '#440053'),
-    (0.2, '#404388'),
-    (0.4, '#2a788e'),
-    (0.6, '#21a784'),
-    (0.8, '#78d151'),
-    (1, '#fde624'),
-], N=256)
 
 def help_string() -> str:
     return\
@@ -127,7 +104,7 @@ def draw_gate(run_min: int, run_max: int, ws: Workspace):
     _fig, ax = pyplot.subplots(1,1)
     _selector = widgets.PolygonSelector(ax, handler.onselect)
 
-    mesh = grammer.draw_hist2d(name = 'pid', axis = ax, cmap = white_viridis, log_z = False)
+    mesh = grammer.draw_hist2d(name = 'pid', axis = ax, log_z = False)
 
     pyplot.colorbar(mesh, ax=ax)
     pyplot.tight_layout()
@@ -139,18 +116,27 @@ def draw_gate(run_min: int, run_max: int, ws: Workspace):
     except Exception:
         pass
 
-def main_gate(config: Config):
+def run_gate(config: Config):
     ws = Workspace(config.workspace)
     draw_gate(config.run.run_min, config.run.run_max, ws)
 
-def main_plot(config: Config):
+def run_plot(config: Config):
     ws = Workspace(config.workspace)
     plot(config.run.run_min, config.run.run_max, ws, config.solver.particle_id_filename)
 
+@click.command()
+@click.option('--gate/--plot', default=True, help='Switch between drawing a gate and plotting basic kinematics', show_default=True)
+@click.argument('config', type=click.Path(exists=True))
+def plotter(gate: bool, config: Path):
+    '''
+    Tool for exploring the results of Phase 3 of Spyral analysis. Generate 2D particle ID gates using the --gate option, or display
+    estimated kinematics using the --plot option. Configuration parameters are passed using a Spyral configuration file specified by CONFIG.
+    '''
+    configuration = load_config(config)
+    if gate:
+        run_gate(configuration)
+    else:
+        run_plot(configuration)
+
 if __name__ == '__main__':
-    if len(sys.argv) < 3:
-        print(help_string())
-    elif sys.argv[1] == '--gate':
-        main_gate(load_config(Path(sys.argv[2])))
-    elif sys.argv[1] == '--plot':
-        main_plot(load_config(Path(sys.argv[2])))
+    plotter()

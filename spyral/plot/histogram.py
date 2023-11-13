@@ -249,7 +249,7 @@ class Histogrammer:
         self.connect_mpl_callbacks(axis)
             
         
-    def draw_hist2d(self, name: str, axis: Axes, log_z: bool = False, cmap = 'viridis') -> QuadMesh | None:
+    def draw_hist2d(self, name: str, axis: Axes, log_z: bool = False) -> QuadMesh | None:
         if name not in self.histograms:
             return None
         

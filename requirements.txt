@@ -1,3 +1,4 @@
+click==8.1.7
 filterpy==1.4.5
 h5py==3.9.0
 lmfit==1.2.2
