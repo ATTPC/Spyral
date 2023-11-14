@@ -1,9 +1,10 @@
 from .guess import Guess
-from ..core.nuclear_data import NucleusData
 from ..core.cluster import Cluster
 from ..core.track_generator import TrackInterpolator, InitialState
 from ..core.constants import QBRHO_2_P
 from ..interpolate import LinearInterpolator
+
+from spyral_utils.nuclear import NucleusData
 
 from lmfit import Parameters, minimize, fit_report
 from lmfit.minimizer import MinimizerResult

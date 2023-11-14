@@ -1,13 +1,15 @@
 from .core.config import Config
 from .core.workspace import Workspace
 from .core.track_generator import generate_tracks, GeneratorParams
-from .core.target import Target
 from .core.particle_id import load_particle_id
 from .correction import generate_electron_correction
 from .parallel.status_message import StatusMessage, Phase
 from .parallel.run_stack import create_run_stacks
 from .run import run_spyral
 from .core.spy_log import init_spyral_logger_parent, spyral_info
+
+from spyral_utils.nuclear import NuclearDataMap
+from spyral_utils.nuclear.target import GasTarget, load_target
 
 from multiprocessing import Process, SimpleQueue
 from copy import deepcopy
@@ -31,7 +33,7 @@ def generate_shared_resources(config: Config):
     #initialize our logger for the parent process
     init_spyral_logger_parent(ws)
 
-    nuc_map = ws.get_nuclear_map()
+    nuc_map = NuclearDataMap()
     track_path = ws.get_track_file_path(config.solver.interp_file_name)
     ecorr_path = ws.get_correction_file_path(config.detector.efield_correction_name)
 
@@ -42,11 +44,15 @@ def generate_shared_resources(config: Config):
 
     if not track_path.exists() and config.run.do_phase4:
         print('Creating the interpolation scheme... This may take some time...')
-        target = Target(Path(config.solver.gas_data_path), nuc_map)
+        target = load_target(Path(config.solver.gas_data_path), nuc_map)
         pid = load_particle_id(ws.get_gate_file_path(config.solver.particle_id_filename), nuc_map)
         if pid is None:
             print('Could not create interpolation scheme, particle ID does not have the correct format!')
             print('Particle ID is required for running the solver stage (phase 4).')
+            raise Exception
+        if not isinstance(target, GasTarget):
+            print('Could not create interpolation scheme, target data does not have the correct format for a GasTarget!')
+            print('Gas Target is required for running the solver stage (phase 4).')
             raise Exception
         gen_params = GeneratorParams(
                     target, pid.nucleus, 
