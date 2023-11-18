@@ -13,7 +13,7 @@ import h5py as h5
 import polars as pl
 from multiprocessing import SimpleQueue
 
-def phase_4_interp(run: int, ws: Workspace, solver_params: SolverParameters, nuclear_map: NuclearDataMap, queue: SimpleQueue):
+def phase_solve(run: int, ws: Workspace, solver_params: SolverParameters, nuclear_map: NuclearDataMap, queue: SimpleQueue):
 
     pid: ParticleID | None = load_particle_id(ws.get_gate_file_path(solver_params.particle_id_filename), nuclear_map)
     if pid is None:

@@ -14,10 +14,10 @@
         "run_min": 17,
         "run_max": 17,
         "n_processes": 1,
-        "phase1": false,
-        "phase2": false,
-        "phase3": false,
-        "phase4": false
+        "phase_pointcloud": false,
+        "phase_cluster": false,
+        "phase_estimate": false,
+        "phase_solve": false
     },
     
     "Detector":

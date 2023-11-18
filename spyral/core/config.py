@@ -23,10 +23,10 @@ class RunParameters:
     run_min: int = -1
     run_max: int = -1
     n_processes: int = -1
-    do_phase1: bool = False
-    do_phase2: bool = False
-    do_phase3: bool = False
-    do_phase4: bool = False
+    do_pointcloud: bool = False
+    do_cluster: bool = False
+    do_estimate: bool = False
+    do_solve: bool = False
 
 @dataclass
 class DetectorParameters:
@@ -147,10 +147,10 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
     config.run.run_min = run_params['run_min']
     config.run.run_max = run_params['run_max']
     config.run.n_processes = run_params['n_processes']
-    config.run.do_phase1 = run_params['phase1']
-    config.run.do_phase2 = run_params['phase2']
-    config.run.do_phase3 = run_params['phase3']
-    config.run.do_phase4 = run_params['phase4']
+    config.run.do_pointcloud = run_params['phase_pointcloud']
+    config.run.do_cluster = run_params['phase_cluster']
+    config.run.do_estimate = run_params['phase_estimate']
+    config.run.do_solve = run_params['phase_solve']
 
     det_params = json_data['Detector']
     config.detector.magnetic_field = det_params['magnetic_field(T)']

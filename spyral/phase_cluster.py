@@ -8,7 +8,7 @@ from .core.spy_log import spyral_warn, spyral_error, spyral_info
 import h5py as h5
 from multiprocessing import SimpleQueue
 
-def phase_2(run: int, ws: Workspace, cluster_params: ClusterParameters, queue: SimpleQueue):
+def phase_cluster(run: int, ws: Workspace, cluster_params: ClusterParameters, queue: SimpleQueue):
 
     point_path = ws.get_point_cloud_file_path(run)
     if not point_path.exists():

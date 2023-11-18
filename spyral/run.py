@@ -1,10 +1,10 @@
 from .core.config import Config
 from .core.workspace import Workspace
 from .core.spy_log import init_spyral_logger_child, spyral_info
-from .phase_1 import phase_1
-from .phase_2 import phase_2
-from .phase_3 import phase_3
-from .phase_4_interp import phase_4_interp
+from .phase_pointcloud import phase_pointcloud
+from .phase_cluster import phase_cluster
+from .phase_estimate import phase_estimate
+from .phase_solve import phase_solve
 
 from spyral_utils.nuclear import NuclearDataMap
     
@@ -30,18 +30,18 @@ def run_spyral(config: Config, run_list: list[int], queue: SimpleQueue, process_
 
         spyral_info(__name__, f'Processing run {idx}')
 
-        if config.run.do_phase1:
-            spyral_info(__name__, 'Running phase 1')
-            phase_1(idx, ws, pad_map, config.trace, config.frib, config.detector, queue)
+        if config.run.do_pointcloud:
+            spyral_info(__name__, 'Running phase point cloud')
+            phase_pointcloud(idx, ws, pad_map, config.trace, config.frib, config.detector, queue)
 
-        if config.run.do_phase2:
-            spyral_info(__name__, 'Running phase 2')
-            phase_2(idx, ws, config.cluster, queue)
+        if config.run.do_cluster:
+            spyral_info(__name__, 'Running phase cluster')
+            phase_cluster(idx, ws, config.cluster, queue)
 
-        if config.run.do_phase3:
-            spyral_info(__name__, 'Running phase 3')
-            phase_3(idx, ws, config.estimate, config.detector, queue)
+        if config.run.do_estimate:
+            spyral_info(__name__, 'Running phase estimate')
+            phase_estimate(idx, ws, config.estimate, config.detector, queue)
 
-        if config.run.do_phase4:
-            spyral_info(__name__, 'Running phase 4')
-            phase_4_interp(idx, ws, config.solver, nuclear_map, queue)
+        if config.run.do_solve:
+            spyral_info(__name__, 'Running phase solve')
+            phase_solve(idx, ws, config.solver, nuclear_map, queue)

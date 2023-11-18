@@ -10,7 +10,7 @@ import h5py as h5
 from multiprocessing.queues import SimpleQueue
 
 
-def phase_3(run: int, ws: Workspace, estimate_params: EstimateParameters, detector_params: DetectorParameters, queue: SimpleQueue):
+def phase_estimate(run: int, ws: Workspace, estimate_params: EstimateParameters, detector_params: DetectorParameters, queue: SimpleQueue):
 
     cluster_path = ws.get_cluster_file_path(run)
     if not cluster_path.exists():
