@@ -1,7 +1,5 @@
 from .guess import Guess
 from ..core.config import DetectorParameters
-from ..core.target import Target
-from ..core.nuclear_data import NucleusData
 from ..core.cluster import Cluster
 from ..core.estimator import Direction
 from ..core.constants import MEV_2_JOULE, MEV_2_KG, C, E_CHARGE

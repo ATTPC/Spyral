@@ -1,7 +1,8 @@
-from .target import Target
-from .nuclear_data import NucleusData
 from .constants import MEV_2_JOULE, MEV_2_KG, C, E_CHARGE
 from ..interpolate import BilinearInterpolator, LinearInterpolator
+
+from spyral_utils.nuclear import NucleusData
+from spyral_utils.nuclear.target import GasTarget
 
 import math
 import numpy as np
@@ -46,7 +47,7 @@ class GeneratorParams:
     '''
     Wrapper for the general parameters required to generate an interpolation scheme
     '''
-    target: Target
+    target: GasTarget
     particle: NucleusData
     bfield: float #T
     efield: float #V
@@ -76,7 +77,7 @@ class GeneratorParams:
 
 #State = [x, y, z, vx, vy, vz]
 #Derivative = [vx, vy, vz, ax, ay, az] (returns)
-def equation_of_motion(t: float, state: np.ndarray, Bfield: float, Efield: float, target: Target, ejectile: NucleusData) -> np.ndarray:
+def equation_of_motion(t: float, state: np.ndarray, Bfield: float, Efield: float, target: GasTarget, ejectile: NucleusData) -> np.ndarray:
     '''
     The equations of motion for a charged particle in a static electromagnetic field which experiences energy loss through some material.
 

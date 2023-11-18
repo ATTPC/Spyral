@@ -1,10 +1,11 @@
-import polars
-from matplotlib import pyplot, widgets
 from spyral.core.config import load_config, Config
 from spyral.core.workspace import Workspace
-from spyral.plot.cut import load_cut_json, write_cut_json, CutHandler
-from spyral.plot.histogram import Histogrammer
 
+from spyral_utils.plot.cut import load_cut_json, write_cut_json, CutHandler
+from spyral_utils.plot.histogram import Histogrammer
+
+import polars
+from matplotlib import pyplot, widgets
 import numpy as np
 from pathlib import Path
 import click
@@ -24,7 +25,7 @@ Operations:
 # Example of plotting using histogrammer and a gate. Useful for testing gates, but
 # real analysis would need a custom solution.
 def plot(run_min: int, run_max: int, ws: Workspace, pid_file):
-    ede_cut = load_cut_json(str(ws.get_gate_file_path(pid_file)))
+    ede_cut = load_cut_json(ws.get_gate_file_path(pid_file))
     if ede_cut is None:
         print('Cut is invalid, plot failed')
         return
@@ -43,8 +44,7 @@ def plot(run_min: int, run_max: int, ws: Workspace, pid_file):
         df = polars.read_parquet(run_path)
         #df = df.filter((polars.col('ic_amplitude') > 0.0))
         #df = df.filter((polars.col('ic_amplitude') > 950.0) & (polars.col('ic_amplitude') < 1250.0))
-        df = df.filter((polars.col('ic_amplitude') > 1250.0) & (polars.col('ic_amplitude') < 1500.0))
-        df_ede = df.filter(polars.struct(['dEdx', 'brho']).map(ede_cut.is_cols_inside))
+        df_ede = df.filter(polars.struct(['dEdx', 'brho']).map_batches(ede_cut.is_cols_inside))
         grammer.fill_hist2d('ede', df.select('dEdx').to_numpy(), df.select('brho').to_numpy())
         grammer.fill_hist2d('ede_gated', df_ede.select('dEdx').to_numpy(), df_ede.select('brho').to_numpy())
         grammer.fill_hist2d('theta_brho', df.select('polar').to_numpy() * RAD2DEG, df.select('brho').to_numpy())
@@ -106,7 +106,7 @@ def draw_gate(run_min: int, run_max: int, ws: Workspace):
     _selector = widgets.PolygonSelector(ax, handler.onselect)
 
 
-    mesh = grammer.draw_hist2d(name = 'pid', axis = ax, cmap = white_viridis, log_z = True)
+    mesh = grammer.draw_hist2d(name = 'pid', axis = ax, log_z = True)
 
     #ax.set_xlabel('dEdx')
     #ax.set_ylabel('brho')

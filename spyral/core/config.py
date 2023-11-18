@@ -14,7 +14,6 @@ class WorkspaceParameters:
     pad_gain_path: str = ''
     pad_time_path: str = ''
     pad_electronics_path: str = ''
-    nuclear_data_path: str = ''
 
 @dataclass
 class RunParameters:
@@ -142,7 +141,6 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
     config.workspace.pad_gain_path = json_data['pad_gain_path']
     config.workspace.pad_time_path = json_data['pad_time_path']
     config.workspace.pad_electronics_path = json_data['pad_electronics_path']
-    config.workspace.nuclear_data_path = json_data['nuclear_data_path']
 
     config.run.run_min = json_data['run_min']
     config.run.run_max = json_data['run_max']

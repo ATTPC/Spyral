@@ -5,6 +5,8 @@ from .phase_1 import phase_1
 from .phase_2 import phase_2
 from .phase_3 import phase_3
 from .phase_4_interp import phase_4_interp
+
+from spyral_utils.nuclear import NuclearDataMap
     
 from multiprocessing import SimpleQueue
 
@@ -20,7 +22,7 @@ def run_spyral(config: Config, run_list: list[int], queue: SimpleQueue, process_
     '''
     ws = Workspace(config.workspace)
     pad_map = ws.get_pad_map()
-    nuclear_map = ws.get_nuclear_map()
+    nuclear_map = NuclearDataMap()
 
     init_spyral_logger_child(ws, process_id)
 

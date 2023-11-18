@@ -5,7 +5,6 @@
     "pad_gain_path": "/path/to/some/gain.csv",
     "pad_time_path": "/path/to/some/time.csv",
     "pad_electronics_path": "/path/to/some/electronics.csv",
-    "nuclear_data_path": "/path/to/some/nuclear.txt",
 
     "run_min": 17,
     "run_max": 17,

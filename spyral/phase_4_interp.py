@@ -1,12 +1,13 @@
-from .core.config import SolverParameters, DetectorParameters
+from .core.config import SolverParameters
 from .core.track_generator import create_interpolator
 from .core.workspace import Workspace
-from .core.nuclear_data import NuclearDataMap
 from .core.particle_id import load_particle_id, ParticleID
 from .core.cluster import Cluster
 from .solvers.solver_interp import solve_physics_interp, Guess
 from .parallel.status_message import StatusMessage, Phase
 from .core.spy_log import spyral_error, spyral_warn, spyral_info
+
+from spyral_utils.nuclear import NuclearDataMap
 
 import h5py as h5
 import polars as pl
@@ -39,7 +40,7 @@ def phase_4_interp(run: int, ws: Workspace, solver_params: SolverParameters, nuc
     #Select the particle group data, beam region of ic, convert to dictionary for row-wise operations
     #Select only the largest polar angle for a given event to avoid beam-like particles
     estimates_gated = estimate_df.filter(
-            pl.struct(['dEdx', 'brho']).map(pid.cut.is_cols_inside) & 
+            pl.struct(['dEdx', 'brho']).map_batches(pid.cut.is_cols_inside) & 
             (pl.col('ic_amplitude') > solver_params.ic_min_val) & 
             (pl.col('ic_amplitude') < solver_params.ic_max_val)
         ) \
