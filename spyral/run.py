@@ -32,7 +32,7 @@ def run_spyral(config: Config, run_list: list[int], queue: SimpleQueue, process_
 
         if config.run.do_pointcloud:
             spyral_info(__name__, 'Running phase point cloud')
-            phase_pointcloud(idx, ws, pad_map, config.trace, config.frib, config.detector, queue)
+            phase_pointcloud(idx, ws, pad_map, config.get, config.frib, config.detector, queue)
 
         if config.run.do_cluster:
             spyral_info(__name__, 'Running phase cluster')

@@ -1,20 +1,20 @@
 from .peak import Peak
 from ..core.constants import INVALID_PAD_ID, NUMBER_OF_TIME_BUCKETS
-from ..core.config import TraceParameters
+from ..core.config import GetParameters
 from ..core.hardware_id import HardwareID
 
 from scipy import signal
 import numpy as np
 
 class GetTrace:
-    def __init__(self, data: np.ndarray, id: HardwareID, params: TraceParameters):
+    def __init__(self, data: np.ndarray, id: HardwareID, params: GetParameters):
         self.raw_data: np.ndarray = np.empty(0, dtype=np.int32)
         self.peaks: list[Peak] = []
         self.hw_id: HardwareID = HardwareID()
         if  isinstance(data, np.ndarray) and id.pad_id != INVALID_PAD_ID:
             self.set_trace_data(data, id, params)
 
-    def set_trace_data(self, data: np.ndarray, id: HardwareID, params: TraceParameters):
+    def set_trace_data(self, data: np.ndarray, id: HardwareID, params: GetParameters):
         data_shape = np.shape(data)
         if data_shape[0] != NUMBER_OF_TIME_BUCKETS:
             print(f"GetTrace was given data that did not have the correct shape! Expected 512 time buckets, instead got {data_shape[0]}")

@@ -44,9 +44,9 @@ class DetectorParameters:
     efield_correction_name: str = ''
 
 @dataclass
-class TraceParameters:
+class GetParameters:
     '''
-    Parameters for trace baseline and peak finding
+    Parameters for GET traces
     '''
     baseline_window_scale: float = 20.0
     peak_separation: float = 50.0
@@ -57,7 +57,7 @@ class TraceParameters:
 @dataclass
 class FribParameters:
     '''
-    Parameters for data taken using the FRIBDAQ (IC, Si, etc)
+    Parameters for traces taken using the FRIBDAQ (IC, Si, etc)
     '''
     baseline_window_scale: float = 20.0
     peak_separation: float = 50.0
@@ -119,7 +119,7 @@ class Config:
     detector: DetectorParameters = field(default_factory=DetectorParameters)
 
     #Traces
-    trace: TraceParameters = field(default_factory=TraceParameters)
+    get: GetParameters = field(default_factory=GetParameters)
 
     #FRIB data
     frib: FribParameters = field(default_factory=FribParameters)
@@ -164,11 +164,11 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
     config.detector.efield_correction_name = det_params['electric_field_correction_file_name']
 
     get_params = json_data['GET']
-    config.trace.baseline_window_scale = get_params['baseline_window_scale']
-    config.trace.peak_separation = get_params['peak_separation']
-    config.trace.peak_prominence = get_params['peak_prominence']
-    config.trace.peak_max_width = get_params['peak_max_width']
-    config.trace.peak_threshold = get_params['peak_threshold']
+    config.get.baseline_window_scale = get_params['baseline_window_scale']
+    config.get.peak_separation = get_params['peak_separation']
+    config.get.peak_prominence = get_params['peak_prominence']
+    config.get.peak_max_width = get_params['peak_max_width']
+    config.get.peak_threshold = get_params['peak_threshold']
 
     frib_params = json_data['FRIB']
     config.frib.baseline_window_scale = frib_params['baseline_window_scale']
