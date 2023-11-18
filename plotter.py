@@ -12,16 +12,6 @@ import click
 
 RAD2DEG = 180.0/np.pi
 
-def help_string() -> str:
-    return\
-'''--- PC-Utils plotter ---
-Usage: python plotter.py <operation> <configuration.json>
-Operations:
-    --gate: Load the data specified by the configuration and generate a 2D particle ID histogram. The user then draws an appropriate gate on the histogram. The gate
-        is saved to the workspace. The gate has the default name pid_gate and is saved to a default pid_gate.json file in the cuts directory of the workspace.
-    --plot: Load the data specified by the workspace and generate a set of plots and histograms defined by the plot function in this script.
-'''
-
 # Example of plotting using histogrammer and a gate. Useful for testing gates, but
 # real analysis would need a custom solution.
 def plot(config: Config):
