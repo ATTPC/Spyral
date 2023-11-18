@@ -14,12 +14,11 @@ class PointCloud:
         self.event_number = event.number
         count = 0
         for trace in event.traces:
-            if trace.hw_id.cobo_id != 10:
-                count += trace.get_number_of_peaks()
+            count += trace.get_number_of_peaks()
         self.cloud = np.zeros((count, 7))
         idx = 0
         for trace in event.traces:
-            if trace.get_number_of_peaks() == 0 or trace.hw_id.cobo_id == 10:
+            if trace.get_number_of_peaks() == 0:
                 continue
             pad = pmap.get_pad_data(trace.hw_id.pad_id)
             if pad is None:
