@@ -37,12 +37,12 @@ def generate_shared_resources(config: Config):
     track_path = ws.get_track_file_path(config.solver.interp_file_name)
     ecorr_path = ws.get_correction_file_path(config.detector.efield_correction_name)
 
-    if not ecorr_path.exists() and config.run.do_phase1:
+    if not ecorr_path.exists() and config.run.do_pointcloud:
         print('Creating the electric field correction data... This may take some time...')
         generate_electron_correction(Path(config.detector.garfield_file_path), ecorr_path, config.detector)
         print('Done.')
 
-    if not track_path.exists() and config.run.do_phase4:
+    if not track_path.exists() and config.run.do_solve:
         print('Creating the interpolation scheme... This may take some time...')
         target = load_target(Path(config.solver.gas_data_path), nuc_map)
         pid = load_particle_id(ws.get_gate_file_path(config.solver.particle_id_filename), nuc_map)

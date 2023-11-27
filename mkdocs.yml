@@ -1,0 +1,34 @@
+site_name: Spyral
+site_url: https://example.com/
+repo_url: https://github.com/turinath/Spyral/
+site_description: Documentation for the Spyral AT-TPC analysis framework
+
+nav:
+  - Home: index.md
+  - Quick Start: quick_start.md
+  - User Guide:
+    - Getting Started: user_guide/getting_started.md
+    - Configuration:
+      - About Configurations: user_guide/config/about.md
+      - Workspace: user_guide/config/workspace.md
+      - Run: user_guide/config/run.md
+      - Detector: user_guide/config/detector.md
+      - GET & FRIB Traces: user_guide/config/traces.md
+      - Cluster: user_guide/config/cluster.md
+      - Estimate: user_guide/config/estimate.md
+      - Solver: user_guide/config/solver.md
+      - Extending the Config: user_guide/config/extending.md
+    - Analysis Phases:
+      - About Phases: user_guide/phases/about.md
+      - Point Cloud: user_guide/phases/point_cloud.md
+      - Cluster: user_guide/phases/cluster.md
+      - Estimate: user_guide/phases/estimate.md
+      - Solve: user_guide/phases/solve.md
+    - Parallel Processing: user_guide/parallel.md
+    - Notebooks: user_guide/notebooks.md
+    - After Spyral: user_guide/continuing.md
+
+theme:
+  name: material
+  palette:
+    scheme: slate

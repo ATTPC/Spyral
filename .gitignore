@@ -2,6 +2,7 @@ __pycache__/
 .venv/
 .vscode/
 .vs/
+site/
 *.csv
 *.h5
 *.json
