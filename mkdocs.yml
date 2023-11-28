@@ -24,6 +24,7 @@ nav:
       - Cluster: user_guide/phases/cluster.md
       - Estimate: user_guide/phases/estimate.md
       - Solve: user_guide/phases/solve.md
+    - Numba: user_guide/numba.md
     - Parallel Processing: user_guide/parallel.md
     - Notebooks: user_guide/notebooks.md
     - After Spyral: user_guide/continuing.md
@@ -32,3 +33,12 @@ theme:
   name: material
   palette:
     scheme: slate
+
+markdown_extensions:
+  - pymdownx.arithmatex:
+      generic: true
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
