@@ -86,6 +86,8 @@ These are the packages Spyral needs to run. Here we've listed the big dependenci
     - [matplotlib](https://matplotlib.org/)
     - [scipy](https://scipy.org/)
     - [numpy](https://numpy.org/)
+    - [polars](https://pola.rs)
+    - [pycatima](https://github.com/hrosiak/pycatima)
 - [scikit-learn](https://scikit-learn.org/stable/)
 - [click](https://click.palletsprojects.com/en/8.1.x/)
 - [filterpy](https://filterpy.readthedocs.io/en/latest/): Technically not required and not used, but...

@@ -28,12 +28,29 @@ nav:
     - Parallel Processing: user_guide/parallel.md
     - Notebooks: user_guide/notebooks.md
     - After Spyral: user_guide/continuing.md
+  - FAQ: faq.md
   - For Developers: for_devs.md
 
 theme:
   name: material
+  language: en
   palette:
-    scheme: slate
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: green
+      accent: green
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: lime
+      accent: lime
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
 
 markdown_extensions:
   - pymdownx.arithmatex:
