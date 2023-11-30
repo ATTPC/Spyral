@@ -1,4 +1,4 @@
-spyral-utils==0.1.1
+spyral-utils==0.1.2
 click==8.1.7
 filterpy==1.4.5
 h5py==3.9.0
