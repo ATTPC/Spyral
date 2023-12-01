@@ -46,7 +46,7 @@ theme:
     # Palette toggle for dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: lime
+      primary: deep purple
       accent: lime
       toggle:
         icon: material/brightness-4
