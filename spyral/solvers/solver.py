@@ -1,15 +1,16 @@
 from .guess import Guess
 from ..core.config import DetectorParameters
-from ..core.target import Target
 from ..core.nuclear_data import NucleusData
 from ..core.cluster import Cluster
 from ..core.estimator import Direction
 from ..core.constants import MEV_2_JOULE, MEV_2_KG, QBRHO_2_P, C, E_CHARGE
 
+from spyral_utils.nuclear.target import GasTarget
+from spyral_utils.nuclear import NucleusData
+
 from scipy import integrate
 import numpy as np
 import math
-from dataclasses import dataclass
 from lmfit import Parameters, minimize, fit_report
 from lmfit.minimizer import MinimizerResult
 
@@ -21,7 +22,7 @@ PRECISION: float = 2.0e-6
 
 #State = [x, y, z, vx, vy, vz]
 #Derivative = [vx, vy, vz, ax, ay, az] (returns)
-def equation_of_motion(t: float, state: np.ndarray, Bfield: float, Efield: float, target: Target, ejectile: NucleusData) -> np.ndarray:
+def equation_of_motion(t: float, state: np.ndarray, Bfield: float, Efield: float, target: GasTarget, ejectile: NucleusData) -> np.ndarray:
 
     speed = math.sqrt(state[3]**2.0 + state[4]**2.0 + state[5]**2.0)
     unit_vector = state[3:] / speed # direction
@@ -65,7 +66,7 @@ def get_sampling_steps(traj_data: np.ndarray, vertexX: float, vertexY: float, ve
             steps[idx] = steps[idx-1] + np.linalg.norm(point - traj_data[idx-1])
     return steps
 
-def generate_trajectory(fit_params: Parameters, Bfield: float, Efield: float, target: Target, ejectile: NucleusData) -> np.ndarray:
+def generate_trajectory(fit_params: Parameters, Bfield: float, Efield: float, target: GasTarget, ejectile: NucleusData) -> np.ndarray:
     #Convert guessed parameters into initial values for ODE x, v
     initial_value = np.zeros(6)
     initial_value[0] = fit_params['vertex_x'].value
@@ -83,7 +84,7 @@ def generate_trajectory(fit_params: Parameters, Bfield: float, Efield: float, ta
     return positions
 
 
-def objective_function(fit_params: Parameters, x: np.ndarray, Bfield: float, Efield: float, target: Target, ejectile: NucleusData, direction: Direction) -> np.ndarray:
+def objective_function(fit_params: Parameters, x: np.ndarray, Bfield: float, Efield: float, target: GasTarget, ejectile: NucleusData, direction: Direction) -> np.ndarray:
     trajectory = generate_trajectory(fit_params, Bfield, Efield, target, ejectile)
     errors = np.zeros(len(x))
 
@@ -148,7 +149,7 @@ def create_params(initial_value: Guess, ejectile: NucleusData, data: np.ndarray)
 
 
 #For testing, not for use in production
-def fit_model(cluster: Cluster, initial_value: Guess, detector_params: DetectorParameters, target: Target, ejectile: NucleusData) -> Parameters:
+def fit_model(cluster: Cluster, initial_value: Guess, detector_params: DetectorParameters, target: GasTarget, ejectile: NucleusData) -> Parameters:
     traj_data = cluster.data[:, :3] * 0.001
     fit_params = create_params(initial_value, ejectile, traj_data)
 
@@ -161,7 +162,7 @@ def fit_model(cluster: Cluster, initial_value: Guess, detector_params: DetectorP
     return result.params
         
 
-def solve_physics(cluster_index: int, cluster: Cluster, initial_value: Guess, detector_params: DetectorParameters, target: Target, ejectile: NucleusData, results: dict[str, list]):
+def solve_physics(cluster_index: int, cluster: Cluster, initial_value: Guess, detector_params: DetectorParameters, target: GasTarget, ejectile: NucleusData, results: dict[str, list]):
     traj_data = cluster.data[:, :3] * 0.001
     fit_params = create_params(initial_value, ejectile, traj_data)
 

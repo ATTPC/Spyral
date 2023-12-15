@@ -1,5 +1,5 @@
 from .get_trace import GetTrace
-from ..core.config import TraceParameters
+from ..core.config import GetParameters
 from ..core.constants import INVALID_EVENT_NAME, INVALID_EVENT_NUMBER
 from ..core.hardware_id import hardware_id_from_array
 import numpy as np
@@ -11,13 +11,13 @@ GET_DATA_TRACE_STOP: int = 512+5
 
 class GetEvent:
 
-    def __init__(self, raw_data: h5py.Dataset, event_number: int, trace_params: TraceParameters):
+    def __init__(self, raw_data: h5py.Dataset, event_number: int, trace_params: GetParameters):
         self.traces: list[GetTrace] = []
         self.name: str = INVALID_EVENT_NAME
         self.number: int = INVALID_EVENT_NUMBER
         self.load_traces(raw_data, event_number, trace_params)
 
-    def load_traces(self, raw_data: h5py.Dataset, event_number: int, trace_params: TraceParameters):
+    def load_traces(self, raw_data: h5py.Dataset, event_number: int, trace_params: GetParameters):
         self.name = str(raw_data.name)
         self.number = event_number
         trace_matrix = preprocess_traces(raw_data[:, GET_DATA_TRACE_START:GET_DATA_TRACE_STOP].copy(), trace_params.baseline_window_scale)

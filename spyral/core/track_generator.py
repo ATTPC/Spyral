@@ -1,7 +1,8 @@
-from .target import Target
-from .nuclear_data import NucleusData
 from .constants import MEV_2_JOULE, MEV_2_KG, C, E_CHARGE
 from ..interpolate import BilinearInterpolator, LinearInterpolator
+
+from spyral_utils.nuclear import NucleusData
+from spyral_utils.nuclear.target import GasTarget
 
 import math
 import numpy as np
@@ -16,8 +17,6 @@ from numba.typed import List
 from numba.experimental import jitclass
 
 TIME_WINDOW: float = 1.0e-6 #1us window
-SAMPLING_PERIOD: float = 2.0e-9 # seconds, converts time bucket interval to time
-SAMPLING_RANGE: np.ndarray = np.arange(0., TIME_WINDOW, SAMPLING_PERIOD)
 KE_LIMIT = 0.1
 DEG2RAD: float = np.pi / 180.0
 
@@ -46,10 +45,11 @@ class GeneratorParams:
     '''
     Wrapper for the general parameters required to generate an interpolation scheme
     '''
-    target: Target
+    target: GasTarget
     particle: NucleusData
     bfield: float #T
     efield: float #V
+    n_time_steps: int
     ke_min: float #MeV
     ke_max: float #MeV
     ke_bins: int 
@@ -64,6 +64,7 @@ class GeneratorParams:
                              'gas': obj.target.pretty_string,
                              'bfield': obj.bfield,
                              'efield': obj.efield,
+                             'time_steps': obj.n_time_steps,
                              'ke_min': obj.ke_min,
                              'ke_max': obj.ke_max,
                              'ke_bins': obj.ke_bins,
@@ -73,10 +74,10 @@ class GeneratorParams:
                          },
                          indent=4
                          )
-
+    
 #State = [x, y, z, vx, vy, vz]
 #Derivative = [vx, vy, vz, ax, ay, az] (returns)
-def equation_of_motion(t: float, state: np.ndarray, Bfield: float, Efield: float, target: Target, ejectile: NucleusData) -> np.ndarray:
+def equation_of_motion(t: float, state: np.ndarray, Bfield: float, Efield: float, target: GasTarget, ejectile: NucleusData) -> np.ndarray:
     '''
     The equations of motion for a charged particle in a static electromagnetic field which experiences energy loss through some material.
 
@@ -112,15 +113,19 @@ def equation_of_motion(t: float, state: np.ndarray, Bfield: float, Efield: float
 
     return results
 
-def check_tracks_exist(track_path: Path) -> bool:
+def check_tracks_need_generation(track_path: Path, params: GeneratorParams) -> bool:
     '''
-    Simple file-existance checker with a nice print message
+    Check if track meta data matches or if tracks don't exist
     '''
     if track_path.exists():
-        print(f'Track file {track_path} detected, this file will be used. If new tracks are needed, please delete the original file.')
-        return True
+        meta_path = track_path.parents[0] / f'{track_path.stem}.json'
+        if not meta_path.exists():
+            return True
+        with open(meta_path, 'r') as meta_file:
+            meta_str = meta_file.read()
+            return params.to_json_str() != meta_str
     else:
-        return False
+        return True
 
 def generate_tracks(params: GeneratorParams, track_path: Path):
     '''
@@ -132,12 +137,13 @@ def generate_tracks(params: GeneratorParams, track_path: Path):
     '''
     kes = np.linspace(params.ke_min, params.ke_max, params.ke_bins)
     polars = np.linspace(params.polar_min * DEG2RAD, params.polar_max * DEG2RAD, params.polar_bins)
+    time_steps = np.linspace(0.0, TIME_WINDOW, num=params.n_time_steps)
 
     track_meta_path = track_path.parents[0] / f'{track_path.stem}.json'
     with open(track_meta_path, 'w') as metafile:
         metafile.write(params.to_json_str())
 
-    data = np.zeros(shape=(len(SAMPLING_RANGE), 3,  params.ke_bins, params.polar_bins), dtype=np.float64)  #time x (x, y, z, vx, vy, vz) x ke x polar
+    data = np.zeros(shape=(params.n_time_steps, 3,  params.ke_bins, params.polar_bins), dtype=np.float64)  #time x (x, y, z, vx, vy, vz) x ke x polar
 
     initial_state = np.zeros(6)
 
@@ -164,7 +170,7 @@ def generate_tracks(params: GeneratorParams, track_path: Path):
             speed = momentum / params.particle.mass * C
             initial_state[3] = speed * math.sin(p)
             initial_state[5] = speed * math.cos(p)
-            result = solve_ivp(equation_of_motion, (0.0, TIME_WINDOW), initial_state, method='RK45', args=(bfield, efield, params.target, params.particle), t_eval=SAMPLING_RANGE)
+            result = solve_ivp(equation_of_motion, (0.0, TIME_WINDOW), initial_state, method='RK45', args=(bfield, efield, params.target, params.particle), t_eval=time_steps)
             data[:, :, eidx, pidx] = result.y.T[:, :3]
 
     print('\n')
@@ -250,6 +256,15 @@ class TrackInterpolator:
         trajectory = trajectory[removal]
         if len(trajectory) < 2:
             return None
+        
+        #Handle data > 90 deg. LinearInterpolator requires x data (z in our case) to be monotonically increasing
+        #So flip the array along axis 0 (flipud). Also trim data where sometimes particle starts going backward
+        #due to efield
+        if polar > np.pi*0.5:
+            trajectory = np.flipud(trajectory)
+            mask = np.diff(np.ascontiguousarray(trajectory[:, 2])) > 0
+            mask = np.append(mask, True)
+            trajectory = trajectory[mask]
 
         return LinearInterpolator(trajectory[:, 2], trajectory[:, :2].T)
     

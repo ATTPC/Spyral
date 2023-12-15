@@ -1,23 +1,32 @@
-from .core.config import SolverParameters, DetectorParameters
+from .core.config import SolverParameters
 from .core.track_generator import create_interpolator
 from .core.workspace import Workspace
-from .core.nuclear_data import NuclearDataMap
 from .core.particle_id import load_particle_id, ParticleID
 from .core.cluster import Cluster
 from .solvers.solver_interp import solve_physics_interp, Guess
 from .parallel.status_message import StatusMessage, Phase
 from .core.spy_log import spyral_error, spyral_warn, spyral_info
 
+from spyral_utils.nuclear import NuclearDataMap
+from spyral_utils.nuclear.target import load_target, GasTarget
+
 import h5py as h5
 import polars as pl
 from multiprocessing import SimpleQueue
+from pathlib import Path
 
-def phase_4_interp(run: int, ws: Workspace, solver_params: SolverParameters, nuclear_map: NuclearDataMap, queue: SimpleQueue):
+def phase_solve(run: int, ws: Workspace, solver_params: SolverParameters, nuclear_map: NuclearDataMap, queue: SimpleQueue):
 
+    # Need particle ID and target to select the correct data subset/interpolation scheme
     pid: ParticleID | None = load_particle_id(ws.get_gate_file_path(solver_params.particle_id_filename), nuclear_map)
     if pid is None:
         queue.put(StatusMessage(run, Phase.WAIT, 0))
         spyral_warn(__name__, f'Particle ID {solver_params.particle_id_filename} does not exist, Solver will not run!')
+        return
+    target = load_target(Path(solver_params.gas_data_path), nuclear_map)
+    if not isinstance(target, GasTarget):
+        queue.put(StatusMessage(run, Phase.WAIT, 0))
+        spyral_warn(__name__, f'Target {solver_params.gas_data_path} is not of the correct format, Solver will not run!')
         return
     
     cluster_path = ws.get_cluster_file_path(run)
@@ -39,7 +48,7 @@ def phase_4_interp(run: int, ws: Workspace, solver_params: SolverParameters, nuc
     #Select the particle group data, beam region of ic, convert to dictionary for row-wise operations
     #Select only the largest polar angle for a given event to avoid beam-like particles
     estimates_gated = estimate_df.filter(
-            pl.struct(['dEdx', 'brho']).map(pid.cut.is_cols_inside) & 
+            pl.struct(['dEdx', 'brho']).map_batches(pid.cut.is_cols_inside) & 
             (pl.col('ic_amplitude') > solver_params.ic_min_val) & 
             (pl.col('ic_amplitude') < solver_params.ic_max_val)
         ) \
@@ -76,7 +85,8 @@ def phase_4_interp(run: int, ws: Workspace, solver_params: SolverParameters, nuc
         'redchisq': []
     }
 
-    interp_path = ws.get_track_file_path(solver_params.interp_file_name)
+    # load the interpolator
+    interp_path = ws.get_track_file_path(pid.nucleus, target)
     interpolator = create_interpolator(interp_path)
 
     for row, event in enumerate(estimates_gated['event']):

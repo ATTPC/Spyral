@@ -1,9 +1,9 @@
-from ..core.target import Target
-from ..core.nuclear_data import NucleusData
+from spyral_utils.nuclear.target import GasTarget
+from spyral_utils.nuclear import NucleusData
 
 class KalmanArgs:
     def __init__(self):
-        self.target: Target | None = None
+        self.target: GasTarget | None = None
         self.ejectile: NucleusData | None = None
         self.bfield: float | None = None
         self.efield: float | None = None
@@ -12,7 +12,7 @@ class KalmanArgs:
 
 g_args = KalmanArgs()
 
-def set_kalman_args(target: Target, eject: NucleusData, bfield: float, efield: float):
+def set_kalman_args(target: GasTarget, eject: NucleusData, bfield: float, efield: float):
     global g_args
 
     g_args.target = target

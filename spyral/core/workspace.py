@@ -1,6 +1,9 @@
 from .config import WorkspaceParameters
 from .pad_map import PadMap
-from .nuclear_data import NuclearDataMap, NucleusData
+
+from spyral_utils.nuclear import NucleusData
+from spyral_utils.nuclear.target import GasTarget
+
 from pathlib import Path
 
 def form_run_string(run_number: int) -> str:
@@ -75,12 +78,7 @@ class Workspace:
         if not self.pad_electronics_path.exists() or not self.pad_electronics_path.is_file():
             raise Exception('Workspace encountered an error! Pad gain path does not exist!')
         
-        self.nuclear_data_path = Path(params.nuclear_data_path)
-        if not self.nuclear_data_path.exists() or not self.nuclear_data_path.is_file():
-            raise Exception('Workspace encountered an error! Nuclear data path does not exist!')
-        
         self.pad_map = PadMap(self.pad_geometry_path, self.pad_gain_path, self.pad_time_path, self.pad_electronics_path)
-        self.nuclear_map = NuclearDataMap(self.nuclear_data_path)
 
     def get_trace_file_path(self, run_number: int) -> Path:
         runstr = form_run_string(run_number)
@@ -116,14 +114,11 @@ class Workspace:
     def get_pad_map(self) -> PadMap:
         return self.pad_map
     
-    def get_nuclear_map(self) -> NuclearDataMap:
-        return self.nuclear_map
+    def get_track_file_path(self, projectile: NucleusData, target: GasTarget) -> Path:
+        return self.track_path / f"{projectile.isotopic_symbol}_in_{target.ugly_string.replace('(Gas)', '')}_{target.data.pressure}Torr.npy"
     
-    def get_track_file_path(self, name: str) -> Path:
-        return self.track_path / name
-    
-    def get_correction_file_path(self, name: str) -> Path:
-        return self.correction_path / name
+    def get_correction_file_path(self, garf_path: Path) -> Path:
+        return self.correction_path / f'{garf_path.stem}.npy'
     
     def get_log_file_path(self, process_id: int) -> Path:
         if process_id != -1:

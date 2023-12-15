@@ -1,0 +1,9 @@
+# Numba in Spyral
+
+Particularly for the solve phase, Spyral initially struggled to run quickly enough to be competitive with other AT-TPC analysis solutions. However, the addition of [Numba](https://numba.readthedocs.io/en/stable/) leveled Spyral up; solving is now the fastest phase!
+
+Numba is a just-in-time compiler, aimed at compatibility with Numpy. Numba examines code which has been decorated with any of the `@jit`, `@njit`, or `@jitclass` decorators, and compiles it at runtime. This results in the following behavior: the first pass of running jit-ted code typically is very slow, as the compiler is working. However, once the code is compiled, it becomes crazy fast compared to interpreted code! So much so that for Spyral, we experienced a factor 10 gain in time using Numba to jit our interpolation scheme instead of using the Python heavy implementations of scipy.
+
+However, to get the full performance of Numba there is a price that must be paid. Numba is only compatible with basic Python types (int, float, list, dict, tuple, str) and *some* parts of Numpy. That's it. If you use anything else, at best Numba will slow down your code by examining it and not compiling it. At worst it'll just crash with some crazy compiler errors.  As such, Numba is best suited to heavy numeric calculations such as our baseline removal and interpolation. Numba also typically won't give you any performance boosts when compared to a library that is just a thin python binding over C/C++/Rust code. Those libraries are already compiled, so they're already fast (presumably).
+
+If you're interested in using Numba with Spyral, please read through the Numba documentation first. There are a lot of details required to make Numba work effectively, and it is not suited to every problem. That said, when it does work, it is amazing!

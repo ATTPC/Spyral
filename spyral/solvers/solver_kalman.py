@@ -1,7 +1,7 @@
 from .kalman_args import get_kalman_args, set_kalman_args
 from .guess import Guess
-from ..core.target import Target
-from ..core.nuclear_data import NucleusData
+from spyral_utils.nuclear.target import GasTarget
+from spyral_utils.nuclear import NucleusData
 from ..core.constants import MEV_2_KG, MEV_2_JOULE, QBRHO_2_P, E_CHARGE, C
 from ..core.config import DetectorParameters
 from ..core.cluster import Cluster
@@ -84,7 +84,7 @@ def apply_kalman_filter(data: np.ndarray, dz: float, initial_guess: Guess) -> tu
     trajectory, traj_cov, _ = k_filter.rts_smoother(all_means, all_cov, dts=dz_set[:(cutoff+1)])
     return trajectory, traj_cov
 
-def solve_physics_kalman(cluster_index: int, cluster: Cluster, initial_guess: Guess, det_params: DetectorParameters, target: Target, ejectile: NucleusData, results: dict[str, list[float]]):
+def solve_physics_kalman(cluster_index: int, cluster: Cluster, initial_guess: Guess, det_params: DetectorParameters, target: GasTarget, ejectile: NucleusData, results: dict[str, list[float]]):
     bfield = -1.0 * det_params.magnetic_field
     efield = -1.0 * det_params.electric_field
 

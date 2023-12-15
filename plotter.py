@@ -1,30 +1,22 @@
-import polars
-from matplotlib import pyplot, widgets
 from spyral.core.config import load_config, Config
 from spyral.core.workspace import Workspace
-from spyral.plot.cut import load_cut_json, write_cut_json, CutHandler
-from spyral.plot.histogram import Histogrammer
 
+from spyral_utils.plot.cut import load_cut_json, write_cut_json, CutHandler
+from spyral_utils.plot.histogram import Histogrammer
+
+import polars
+from matplotlib import pyplot, widgets
 import numpy as np
 from pathlib import Path
 import click
 
 RAD2DEG = 180.0/np.pi
 
-def help_string() -> str:
-    return\
-'''--- PC-Utils plotter ---
-Usage: python plotter.py <operation> <configuration.json>
-Operations:
-    --gate: Load the data specified by the configuration and generate a 2D particle ID histogram. The user then draws an appropriate gate on the histogram. The gate
-        is saved to the workspace. The gate has the default name pid_gate and is saved to a default pid_gate.json file in the cuts directory of the workspace.
-    --plot: Load the data specified by the workspace and generate a set of plots and histograms defined by the plot function in this script.
-'''
-
 # Example of plotting using histogrammer and a gate. Useful for testing gates, but
 # real analysis would need a custom solution.
-def plot(run_min: int, run_max: int, ws: Workspace, pid_file):
-    ede_cut = load_cut_json(str(ws.get_gate_file_path(pid_file)))
+def plot(config: Config):
+    ws = Workspace(config.workspace)
+    ede_cut = load_cut_json(ws.get_gate_file_path(config.solver.particle_id_filename))
     if ede_cut is None:
         print('Cut is invalid, plot failed')
         return
@@ -36,15 +28,13 @@ def plot(run_min: int, run_max: int, ws: Workspace, pid_file):
     grammer.add_hist2d('theta_brho', (360, 200), ((0.0, 180.0), (0.0, 3.0)))
     grammer.add_hist1d('ic_amp', 4096, (0.0, 4096.0))
 
-    for run in range(run_min, run_max+1):
+    for run in range(config.run.run_min, config.run.run_max+1):
         run_path = ws.get_estimate_file_path_parquet(run)
         if not run_path.exists():
             continue
         df = polars.read_parquet(run_path)
-        #df = df.filter((polars.col('ic_amplitude') > 0.0))
-        #df = df.filter((polars.col('ic_amplitude') > 950.0) & (polars.col('ic_amplitude') < 1250.0))
-        df = df.filter((polars.col('ic_amplitude') > 1250.0) & (polars.col('ic_amplitude') < 1500.0))
-        df_ede = df.filter(polars.struct(['dEdx', 'brho']).map(ede_cut.is_cols_inside))
+        # df = df.filter((polars.col('ic_amplitude') > config.solver.ic_min_val) & (polars.col('ic_amplitude') < config.solver.ic_max_val))
+        df_ede = df.filter(polars.struct(['dEdx', 'brho']).map_batches(ede_cut.is_cols_inside))
         grammer.fill_hist2d('ede', df.select('dEdx').to_numpy(), df.select('brho').to_numpy())
         grammer.fill_hist2d('ede_gated', df_ede.select('dEdx').to_numpy(), df_ede.select('brho').to_numpy())
         grammer.fill_hist2d('theta_brho', df.select('polar').to_numpy() * RAD2DEG, df.select('brho').to_numpy())
@@ -52,7 +42,7 @@ def plot(run_min: int, run_max: int, ws: Workspace, pid_file):
         grammer.fill_hist1d('ic_amp', df.unique(subset=['event']).select('ic_amplitude').to_numpy())
 
     fig, ax = pyplot.subplots(1,2)
-    fig.suptitle(f'Runs {run_min} to {run_max} Gated')
+    fig.suptitle(f'Runs {config.run.run_min} to {config.run.run_max} Gated')
     mesh_1 = grammer.draw_hist2d('ede_gated', ax[0], log_z=False)
     mesh_2 = grammer.draw_hist2d('theta_brho_gated', ax[1], log_z=False)
     ax[0].set_xlabel('Energy Loss (channels)')
@@ -67,7 +57,7 @@ def plot(run_min: int, run_max: int, ws: Workspace, pid_file):
     pyplot.tight_layout()
 
     fig2, ax2 = pyplot.subplots(1,2)
-    fig2.suptitle(f'Runs {run_min} to {run_max}')
+    fig2.suptitle(f'Runs {config.run.run_min} to {config.run.run_max}')
     mesh_12 = grammer.draw_hist2d('ede', ax2[0], log_z=True)
     mesh_22 = grammer.draw_hist2d('theta_brho', ax2[1], log_z=True)
     ax2[0].set_xlabel('Energy Loss (channels)')
@@ -80,7 +70,7 @@ def plot(run_min: int, run_max: int, ws: Workspace, pid_file):
     pyplot.colorbar(mesh_22, ax=ax2[1])
 
     fig3, ax3 = pyplot.subplots(1,1)
-    fig3.suptitle(f'Runs {run_min} to {run_max} IC')
+    fig3.suptitle(f'Runs {config.run.run_min} to {config.run.run_max} IC')
     grammer.draw_hist1d('ic_amp', ax3)
     ax3.set_xlabel('IC Amplitude')
     ax3.set_yscale('log')
@@ -90,26 +80,27 @@ def plot(run_min: int, run_max: int, ws: Workspace, pid_file):
 
 # Example of scripted cut generation.
 # You have to close the plot window to save the cut
-def draw_gate(run_min: int, run_max: int, ws: Workspace):
+def draw_gate(config: Config):
+    ws = Workspace(config.workspace)
     handler = CutHandler()
     grammer = Histogrammer()
     grammer.add_hist2d('pid', (400, 300), ((-100.0, 5000.0), (0.0, 1.5)))
-    for run in range(run_min, run_max+1):
+    for run in range(config.run.run_min, config.run.run_max+1):
         run_path = ws.get_estimate_file_path_parquet(run)
         if not run_path.exists():
             continue
         df = polars.read_parquet(ws.get_estimate_file_path_parquet(run))
-        df = df.filter((polars.col('ic_amplitude') > 0.0))
+        # df = df.filter((polars.col('ic_amplitude') > config.solver.ic_min_val) & (polars.col('ic_amplitude') < config.solver.ic_max_val))
         grammer.fill_hist2d('pid', df.select('dEdx').to_numpy(), df.select('brho').to_numpy())
 
     _fig, ax = pyplot.subplots(1,1)
     _selector = widgets.PolygonSelector(ax, handler.onselect)
 
 
-    mesh = grammer.draw_hist2d(name = 'pid', axis = ax, cmap = white_viridis, log_z = True)
+    mesh = grammer.draw_hist2d(name = 'pid', axis = ax, log_z = True)
 
-    #ax.set_xlabel('dEdx')
-    #ax.set_ylabel('brho')
+    ax.set_xlabel('Energy loss (channels)')
+    ax.set_ylabel(r'B$\rho$ (Tm)')
 
     pyplot.colorbar(mesh, ax=ax)
     pyplot.tight_layout()
@@ -122,12 +113,10 @@ def draw_gate(run_min: int, run_max: int, ws: Workspace):
         pass
 
 def run_gate(config: Config):
-    ws = Workspace(config.workspace)
-    draw_gate(config.run.run_min, config.run.run_max, ws)
+    draw_gate(config)
 
 def run_plot(config: Config):
-    ws = Workspace(config.workspace)
-    plot(config.run.run_min, config.run.run_max, ws, config.solver.particle_id_filename)
+    plot(config)
 
 @click.command()
 @click.option('--gate/--plot', default=True, help='Switch between drawing a gate and plotting basic kinematics', show_default=True)

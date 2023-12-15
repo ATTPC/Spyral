@@ -1,9 +1,10 @@
 from .guess import Guess
-from ..core.nuclear_data import NucleusData
 from ..core.cluster import Cluster
 from ..core.track_generator import TrackInterpolator, InitialState
 from ..core.constants import QBRHO_2_P
 from ..interpolate import LinearInterpolator
+
+from spyral_utils.nuclear import NucleusData
 
 from lmfit import Parameters, minimize, fit_report
 from lmfit.minimizer import MinimizerResult
@@ -90,8 +91,9 @@ def create_params(guess: Guess, ejectile: NucleusData, interpolator: TrackInterp
     min_polar = interp_min_polar
     max_polar = interp_max_polar
     if guess.polar > np.pi * 0.5:
-        min_polar += np.pi * 0.5
-        max_polar += np.pi * 0.5
+        min_polar = np.pi * 0.5
+    else:
+        max_polar = np.pi * 0.5
 
     min_azimuthal = guess.azimuthal - np.pi*0.25
     max_azimuthal = guess.azimuthal + np.pi*0.25
@@ -127,7 +129,15 @@ def fit_model_interp(cluster: Cluster, guess: Guess, interpolator: TrackInterpol
     ## Returns
     Parameters | None: Returns the best fit Parameters upon success, or None upon failure
     '''
-    traj_data = cluster.data[:, :3] * 0.001
+    # We only use 90% of the trajectory data (closest to vertex).
+    # Since sorted in z, need to trim 10% from one end depending on direction
+    traj_data: np.ndarray
+    if guess.polar > np.pi*0.5:
+        traj_len = int(len(cluster.data) * 0.1)
+        traj_data = cluster.data[traj_len:, :3] * 0.001
+    else:
+        traj_len = int(len(cluster.data) * 0.9)
+        traj_data = cluster.data[:traj_len, :3] * 0.001
     momentum = QBRHO_2_P * (guess.brho * float(ejectile.Z))
     kinetic_energy = math.sqrt(momentum**2.0 + ejectile.mass**2.0) - ejectile.mass
     if not interpolator.check_values_in_range(kinetic_energy, guess.polar):
@@ -176,7 +186,16 @@ def solve_physics_interp(cluster_index: int, cluster: Cluster, guess: Guess, int
     interpolator: TrackInterpolator, the interpolation scheme to be used
     results: dict[str, list], storage for results from the fitting, which will later be written as a dataframe.
     '''
-    traj_data = cluster.data[:, :3] * 0.001
+    # We only use 90% of the trajectory data (closest to vertex).
+    # Since sorted in z, need to trim 10% from one end depending on direction
+    traj_data: np.ndarray
+    depth = 0
+    if guess.polar > np.pi*0.5:
+        traj_len = int(len(cluster.data) * 0.1)
+        traj_data = cluster.data[traj_len:, :3] * 0.001
+    else:
+        traj_len = int(len(cluster.data) * 0.9)
+        traj_data = cluster.data[:traj_len, :3] * 0.001
     momentum = QBRHO_2_P * (guess.brho * float(ejectile.Z))
     kinetic_energy = math.sqrt(momentum**2.0 + ejectile.mass**2.0) - ejectile.mass
     if not interpolator.check_values_in_range(kinetic_energy, guess.polar):
@@ -197,6 +216,9 @@ def solve_physics_interp(cluster_index: int, cluster: Cluster, guess: Guess, int
             fit_params['brho'].value += fit_params['brho'].value * 0.1
             continue
 
+        if depth > 50:
+            return
+
         traj_xy = trajectory.interpolate(traj_data[:, 2])
 
         if np.isnan(traj_xy[0, 0]):
@@ -205,6 +227,7 @@ def solve_physics_interp(cluster_index: int, cluster: Cluster, guess: Guess, int
             fit_params['brho'].value += fit_params['brho'].value * 0.01
         else:
             is_too_short = False
+        depth += 1
 
     best_fit: MinimizerResult = minimize(objective_function, fit_params, args = (traj_data, interpolator, ejectile))
 

@@ -1,4 +1,4 @@
-from .core.config import TraceParameters, DetectorParameters, FribParameters
+from .core.config import GetParameters, DetectorParameters, FribParameters
 from .core.pad_map import PadMap
 from .core.point_cloud import PointCloud
 from .core.workspace import Workspace
@@ -10,6 +10,7 @@ from .core.spy_log import spyral_info, spyral_error, spyral_warn
 
 import h5py as h5
 import numpy as np
+from pathlib import Path
 from multiprocessing import SimpleQueue
 
 def get_event_range(trace_file: h5.File) -> tuple[int, int]:
@@ -26,7 +27,7 @@ def get_event_range(trace_file: h5.File) -> tuple[int, int]:
     meta_data = meta_group.get('meta')
     return (int(meta_data[0]), int(meta_data[2]))
 
-def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParameters, frib_params: FribParameters, detector_params: DetectorParameters, queue: SimpleQueue):
+def phase_pointcloud(run: int, ws: Workspace, pad_map: PadMap, get_params: GetParameters, frib_params: FribParameters, detector_params: DetectorParameters, queue: SimpleQueue):
     trace_path = ws.get_trace_file_path(run)
     if not trace_path.exists():
         spyral_warn(__name__, f'Run {run} does not exist for phase 1, skipping.')
@@ -38,7 +39,7 @@ def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParamet
 
     min_event, max_event = get_event_range(trace_file)
 
-    corr_path = ws.get_correction_file_path(detector_params.efield_correction_name)
+    corr_path = ws.get_correction_file_path(Path(detector_params.garfield_file_path))
     corrector = create_electron_corrector(corr_path)
 
     event_group: h5.Group = trace_file['get']
@@ -76,7 +77,7 @@ def phase_1(run: int, ws: Workspace, pad_map: PadMap, trace_params: TraceParamet
         except Exception:
             continue
 
-        event = GetEvent(event_data, idx, trace_params)
+        event = GetEvent(event_data, idx, get_params)
         
         pc = PointCloud()
         pc.load_cloud_from_get_event(event, pad_map, corrector)

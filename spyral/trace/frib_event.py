@@ -4,6 +4,7 @@ from ..core.config import FribParameters
 
 import h5py as h5
 import numpy as np
+from numba import njit
 
 IC_COLUMN: int = 0
 SI_COLUMN: int = 2
@@ -105,7 +106,7 @@ class FribEvent:
         return (good_peak.centroid - earliest_ic.centroid) * get_frequency/SAMPLING_FREQUENCY
     
 
-
+@njit
 def preprocess_frib_traces(traces: np.ndarray, baseline_window_scale: float) -> np.ndarray:
     '''
         Method for pre-cleaning the trace data in bulk before doing trace analysis

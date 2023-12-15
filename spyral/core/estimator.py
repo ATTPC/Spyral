@@ -25,16 +25,16 @@ def estimate_physics(cluster_index: int, cluster: Cluster, ic_amplitude: float, 
     rhos = np.linalg.norm(cluster.data[:, :2], axis=1) #cylindrical coordinates rho
     direction = Direction.NONE
 
-    #Sample the beginning and the end of the trajectory radii
-    average_window_rho = np.mean(rhos[:5])
-    average_micromegas_rho = np.mean(rhos[-5:-1])
-
     vertex = np.array([0., 0., 0.]) #reaction vertex
     center = np.array([0., 0., 0.]) #spiral center
 
+    halfway = int(len(cluster.data) * 0.5)
+    _, _, begin_radius, _ = least_squares_circle(cluster.data[:halfway, 0], cluster.data[:halfway, 1])
+    _, _, end_radius, _ = least_squares_circle(cluster.data[halfway:, 0], cluster.data[halfway:, 1])
+
     #See if in-spiraling to the window or microgmegas, sets the direction and guess of z-vertex
     #If backward, flip the ordering of the cloud to simplify algorithm
-    if average_window_rho > average_micromegas_rho:
+    if begin_radius < end_radius:
         direction = Direction.BACKWARD
         rhos = np.flip(rhos, axis=0)
         cluster.data = np.flip(cluster.data, axis=0)

@@ -1,12 +1,14 @@
 import numpy as np
+from numba import njit
 
+@njit
 def generate_circle_points(center_x: float, center_y: float, radius: float) -> np.ndarray:
     theta = np.linspace(0., 2.0 * np.pi, 100000)
     array = np.zeros(shape=(len(theta), 2))
     array[:, 0] = center_x + np.cos(theta) * radius
     array[:, 1] = center_y + np.sin(theta) * radius
     return array
-
+@njit
 def least_squares_circle(x: np.ndarray, y: np.ndarray) -> tuple[float, float, float, float]:
     '''
     Implementation of analytic least squares circle fit. Taken from the scipy cookbooks.
