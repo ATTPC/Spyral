@@ -11,3 +11,6 @@ site/
 *.txt
 *.out
 *.npy
+*.png
+*.jpg
+*.svg
