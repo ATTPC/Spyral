@@ -25,10 +25,6 @@ def estimate_physics(cluster_index: int, cluster: Cluster, ic_amplitude: float, 
     rhos = np.linalg.norm(cluster.data[:, :2], axis=1) #cylindrical coordinates rho
     direction = Direction.NONE
 
-    #Sample the beginning and the end of the trajectory radii
-    average_window_rho = np.mean(rhos[:5])
-    average_micromegas_rho = np.mean(rhos[-5:-1])
-
     vertex = np.array([0., 0., 0.]) #reaction vertex
     center = np.array([0., 0., 0.]) #spiral center
 

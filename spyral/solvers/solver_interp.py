@@ -3,7 +3,6 @@ from ..core.cluster import Cluster
 from ..core.track_generator import TrackInterpolator, InitialState
 from ..core.constants import QBRHO_2_P
 from ..interpolate import LinearInterpolator
-from ..core.spy_log import spyral_info
 
 from spyral_utils.nuclear import NucleusData
 
