@@ -2,6 +2,7 @@ from .config import WorkspaceParameters
 from .pad_map import PadMap
 
 from spyral_utils.nuclear import NucleusData
+from spyral_utils.nuclear.target import GasTarget
 
 from pathlib import Path
 
@@ -113,11 +114,11 @@ class Workspace:
     def get_pad_map(self) -> PadMap:
         return self.pad_map
     
-    def get_track_file_path(self, name: str) -> Path:
-        return self.track_path / name
+    def get_track_file_path(self, projectile: NucleusData, target: GasTarget) -> Path:
+        return self.track_path / f"{projectile.isotopic_symbol}_in_{target.ugly_string.replace('(Gas)', '')}_{target.data.pressure}Torr.npy"
     
-    def get_correction_file_path(self, name: str) -> Path:
-        return self.correction_path / name
+    def get_correction_file_path(self, garf_path: Path) -> Path:
+        return self.correction_path / f'{garf_path.stem}.npy'
     
     def get_log_file_path(self, process_id: int) -> Path:
         if process_id != -1:

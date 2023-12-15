@@ -10,6 +10,7 @@ from .core.spy_log import spyral_info, spyral_error, spyral_warn
 
 import h5py as h5
 import numpy as np
+from pathlib import Path
 from multiprocessing import SimpleQueue
 
 def get_event_range(trace_file: h5.File) -> tuple[int, int]:
@@ -38,7 +39,7 @@ def phase_pointcloud(run: int, ws: Workspace, pad_map: PadMap, get_params: GetPa
 
     min_event, max_event = get_event_range(trace_file)
 
-    corr_path = ws.get_correction_file_path(detector_params.efield_correction_name)
+    corr_path = ws.get_correction_file_path(Path(detector_params.garfield_file_path))
     corrector = create_electron_corrector(corr_path)
 
     event_group: h5.Group = trace_file['get']

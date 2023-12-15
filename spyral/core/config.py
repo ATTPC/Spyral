@@ -41,7 +41,6 @@ class DetectorParameters:
     window_time_bucket: float = 0.0
     get_frequency: float = 0.0 #MHz
     garfield_file_path: str = ''
-    efield_correction_name: str = ''
 
 @dataclass
 class GetParameters:
@@ -96,7 +95,7 @@ class SolverParameters:
     particle_id_filename: str = ''
     ic_min_val: float = 0.0
     ic_max_val: float = 0.0
-    interp_file_name: str = ''
+    n_time_steps: int = 0
     interp_ke_min: float = 0.0
     interp_ke_max: float = 0.0
     interp_ke_bins: int = 0
@@ -161,7 +160,6 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
     config.detector.window_time_bucket = det_params['window_time_bucket']
     config.detector.get_frequency = det_params['get_frequency(MHz)']
     config.detector.garfield_file_path = det_params['electric_field_garfield_path']
-    config.detector.efield_correction_name = det_params['electric_field_correction_file_name']
 
     get_params = json_data['GET']
     config.get.baseline_window_scale = get_params['baseline_window_scale']
@@ -196,7 +194,7 @@ def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
     config.solver.particle_id_filename = solver_params['particle_id_file']
     config.solver.ic_min_val = solver_params['ic_min']
     config.solver.ic_max_val = solver_params['ic_max']
-    config.solver.interp_file_name = solver_params['interp_file_name']
+    config.solver.n_time_steps = solver_params['ode_n_time_steps']
     config.solver.interp_ke_min = solver_params['interp_ke_min(MeV)']
     config.solver.interp_ke_max = solver_params['interp_ke_max(MeV)']
     config.solver.interp_ke_bins = solver_params['interp_ke_bins']

@@ -1,6 +1,6 @@
 from .core.config import Config
 from .core.workspace import Workspace
-from .core.track_generator import generate_tracks, GeneratorParams
+from .core.track_generator import generate_tracks, GeneratorParams, check_tracks_need_generation
 from .core.particle_id import load_particle_id
 from .correction import generate_electron_correction
 from .parallel.status_message import StatusMessage, Phase
@@ -34,16 +34,15 @@ def generate_shared_resources(config: Config):
     init_spyral_logger_parent(ws)
 
     nuc_map = NuclearDataMap()
-    track_path = ws.get_track_file_path(config.solver.interp_file_name)
-    ecorr_path = ws.get_correction_file_path(config.detector.efield_correction_name)
 
-    if not ecorr_path.exists() and config.run.do_pointcloud:
-        print('Creating the electric field correction data... This may take some time...')
-        generate_electron_correction(Path(config.detector.garfield_file_path), ecorr_path, config.detector)
-        print('Done.')
+    if config.run.do_pointcloud:
+        ecorr_path = ws.get_correction_file_path(Path(config.detector.garfield_file_path))
+        if not ecorr_path.exists():
+            print('Creating the electric field correction data... This may take some time...')
+            generate_electron_correction(Path(config.detector.garfield_file_path), ecorr_path, config.detector)
+            print('Done.')
 
-    if not track_path.exists() and config.run.do_solve:
-        print('Creating the interpolation scheme... This may take some time...')
+    if config.run.do_solve:
         target = load_target(Path(config.solver.gas_data_path), nuc_map)
         pid = load_particle_id(ws.get_gate_file_path(config.solver.particle_id_filename), nuc_map)
         if pid is None:
@@ -55,18 +54,23 @@ def generate_shared_resources(config: Config):
             print('Gas Target is required for running the solver stage (phase 4).')
             raise Exception
         gen_params = GeneratorParams(
-                    target, pid.nucleus, 
-                    config.detector.magnetic_field, 
-                    config.detector.electric_field, 
-                    config.solver.interp_ke_min, 
-                    config.solver.interp_ke_max, 
-                    config.solver.interp_ke_bins, 
-                    config.solver.interp_polar_min, 
-                    config.solver.interp_polar_max, 
-                    config.solver.interp_polar_bins
-                )
-        generate_tracks(gen_params, track_path)
-        print('Done.')
+                        target, pid.nucleus, 
+                        config.detector.magnetic_field, 
+                        config.detector.electric_field,
+                        config.solver.n_time_steps, 
+                        config.solver.interp_ke_min, 
+                        config.solver.interp_ke_max, 
+                        config.solver.interp_ke_bins, 
+                        config.solver.interp_polar_min, 
+                        config.solver.interp_polar_max, 
+                        config.solver.interp_polar_bins
+                    )
+        track_path = ws.get_track_file_path(pid.nucleus, target)
+        do_gen = check_tracks_need_generation(track_path, gen_params)
+        if do_gen:
+            print('Creating the interpolation scheme... This may take some time...')
+            generate_tracks(gen_params, track_path)
+            print('Done.')
     print('Shared resources are ready.')
 
 def run_spyral_parallel(config: Config, no_progress=False):
