@@ -9,23 +9,22 @@ class PadData:
     y: float = 0.0
     gain: float = 1.0
     time_offset: float = 0.0
+    scale: float = 0.0
     hardware: HardwareID = field(default_factory=HardwareID)
 
-
-
 class PadMap:
-    def __init__(self, geometry_path: Path, gain_path: Path, time_correction_path: Path, electronics_path: Path):
+    def __init__(self, geometry_path: Path, gain_path: Path, time_correction_path: Path, electronics_path: Path, scale_path: Path):
         self.map: dict[int, PadData] = {}
         self.elec_map: dict[int, int] = {}
-        self.load(geometry_path, gain_path, time_correction_path, electronics_path)
+        self.load(geometry_path, gain_path, time_correction_path, electronics_path, scale_path)
 
-    def load(self, geometry_path: Path, gain_path: Path, time_correction_path: Path, electronics_path: Path):
+    def load(self, geometry_path: Path, gain_path: Path, time_correction_path: Path, electronics_path: Path, scale_path: Path):
         with open(geometry_path, "r") as geofile:
             geofile.readline() # Remove header
             lines = geofile.readlines()
             for pad_number, line in enumerate(lines):
                 entries = line.split(",")
-                self.map[pad_number] = PadData(float(entries[0]), float(entries[1]), 1.0)
+                self.map[pad_number] = PadData(x=float(entries[0]), y=float(entries[1]))
         with open(gain_path, 'r') as gainfile:
             gainfile.readline()
             lines = gainfile.readlines()
@@ -47,6 +46,13 @@ class PadMap:
                 hardware = HardwareID(int(entries[4]), int(entries[0]), int(entries[1]), int(entries[2]), int(entries[3]))
                 self.map[hardware.pad_id].hardware = hardware
                 self.elec_map[generate_electronics_id(hardware)] = hardware.pad_id
+        
+        with open(scale_path, "r") as scalefile:
+            scalefile.readline()
+            lines = scalefile.readlines()
+            for pad_number, line in enumerate(lines):
+                entries = line.split(",")
+                self.map[pad_number].scale = float(entries[0])
 
         
 

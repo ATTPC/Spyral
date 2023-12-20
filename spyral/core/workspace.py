@@ -78,7 +78,8 @@ class Workspace:
         if not self.pad_electronics_path.exists() or not self.pad_electronics_path.is_file():
             raise Exception('Workspace encountered an error! Pad gain path does not exist!')
         
-        self.pad_map = PadMap(self.pad_geometry_path, self.pad_gain_path, self.pad_time_path, self.pad_electronics_path)
+        self.pad_scale_path = Path(__file__).parents[0] / "../../etc/pad_scale.csv"
+        self.pad_map = PadMap(self.pad_geometry_path, self.pad_gain_path, self.pad_time_path, self.pad_electronics_path, self.pad_scale_path)
 
     def get_trace_file_path(self, run_number: int) -> Path:
         runstr = form_run_string(run_number)

@@ -105,7 +105,7 @@ def join_clusters(clusters: list[LabeledCloud], params: ClusterParameters) -> li
 
         new_cluster = LabeledCloud(g, PointCloud())
         new_cluster.point_cloud.event_number = event_number
-        new_cluster.point_cloud.cloud = np.zeros((0,7))
+        new_cluster.point_cloud.cloud = np.zeros((0,8))
         for idx in groups[g]:
             new_cluster.point_cloud.cloud = np.concatenate((new_cluster.point_cloud.cloud, clusters[idx].point_cloud.cloud), axis=0)
         new_clusters.append(new_cluster)
@@ -136,7 +136,12 @@ def form_clusters(pc: PointCloud, params: ClusterParameters) -> list[LabeledClou
     clusterizer = skcluster.HDBSCAN(min_cluster_size=params.min_size, min_samples=params.min_points)
 
     #Smooth out the point cloud by averaging over neighboring points within a distance, droping any duplicate points
-    pc.smooth_cloud(params.smoothing_neighbor_distance)
+    # pc.drop_outliers(25)
+    if len(pc.cloud) < 50:
+        return []
+    pc.smooth_cloud_neighborship(25)
+    # pc.smooth_cloud(params.smoothing_neighbor_distance)
+
 
     if len(pc.cloud) < params.min_size:
         return []

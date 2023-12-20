@@ -37,9 +37,10 @@ class Cluster:
         Copy point cloud data to the cluster
         '''
         cloud.sort_in_z()
-        self.data = np.zeros((len(cloud.cloud), 4))
-        self.data[:, :3] = cloud.cloud[:, :3]
-        self.data[:, 3] = cloud.cloud[:, 4]
+        self.data = np.zeros((len(cloud.cloud), 5))
+        self.data[:, :3] = cloud.cloud[:, :3] # position
+        self.data[:, 3] = cloud.cloud[:, 4] #integrated charge
+        self.data[:, 4] = cloud.cloud[:, 7] #scale
 
     def drop_outliers(self, neighbors=2):
         '''

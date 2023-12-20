@@ -89,8 +89,16 @@ def estimate_physics(cluster_index: int, cluster: Cluster, ic_amplitude: float, 
     brho = detector_params.magnetic_field * radius * 0.001 / (math.sin(polar))
     if np.isnan(brho):
         brho = 0.0
+    
+    # big_pads = np.where(first_arc[:, 4] >= 1.0)
+    first_big_pad_index = len(first_arc)
+    # # if len(big_pads) > 1:
+    # #     first_big_pad_index = big_pads[0][0]
+    # # if first_big_pad_index == 0:
+    # #     print("Oops all big pads")
+    # #     return
     arclength = 0.0
-    for idx in range(len(first_arc)-1):
+    for idx in range(first_big_pad_index - 1):
         arclength += np.linalg.norm(first_arc[idx+1, :3] - first_arc[idx, :3])
     charge_deposited = np.sum(first_arc[:, 3])
     dEdx = charge_deposited/arclength

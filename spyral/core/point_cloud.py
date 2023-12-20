@@ -2,7 +2,10 @@ from .pad_map import PadMap
 from .constants import INVALID_EVENT_NUMBER
 from ..correction import ElectronCorrector
 from ..trace.get_event import GetEvent
+
 import numpy as np
+from sklearn.neighbors import NearestNeighbors
+from sklearn.preprocessing import StandardScaler
 
 class PointCloud:
 
@@ -15,7 +18,7 @@ class PointCloud:
         count = 0
         for trace in event.traces:
             count += trace.get_number_of_peaks()
-        self.cloud = np.zeros((count, 7))
+        self.cloud = np.zeros((count, 8))
         idx = 0
         for trace in event.traces:
             if trace.get_number_of_peaks() == 0:
@@ -31,6 +34,7 @@ class PointCloud:
                 self.cloud[idx, 4] = peak.integral * pad.gain
                 self.cloud[idx, 5] = trace.hw_id.pad_id
                 self.cloud[idx, 6] = peak.centroid + pad.time_offset # Time bucket with correction
+                self.cloud[idx, 7] = pad.scale
                 self.cloud[idx] = corrector.correct_point(self.cloud[idx])
                 idx += 1
 
@@ -66,14 +70,26 @@ class PointCloud:
             if len(neighbors) < 2:
                 continue
             # Weight points
-            xs = np.sum(neighbors[:,0] * neighbors[:,4])
-            ys = np.sum(neighbors[:,1] * neighbors[:,4])
-            zs = np.sum(neighbors[:,2] * neighbors[:,4])
-            cs = np.sum(neighbors[:,3])
-            ics = np.sum(neighbors[:,4])
-            if np.isclose(ics, 0.0):
+            weighted_average = np.average(neighbors, axis=0, weights=neighbors[:, 4])
+            if np.isclose(weighted_average[4], 0.0):
                 continue
-            smoothed_cloud[idx] = np.array([xs/ics, ys/ics, zs/ics, cs/len(neighbors), ics/len(neighbors), point[5], point[6]])
+            smoothed_cloud[idx] = weighted_average
+        # Removes duplicate points
+        smoothed_cloud = smoothed_cloud[smoothed_cloud[:, 3] != 0.0]
+        _, indicies = np.unique(np.round(smoothed_cloud[:, :3], decimals=2), axis=0, return_index=True)
+        self.cloud = smoothed_cloud[indicies]
+
+    def smooth_cloud_neighborship(self, neighbors: int = 5):
+        smoothed_cloud = np.zeros(self.cloud.shape)
+        neigh = NearestNeighbors(n_neighbors=neighbors)
+        neigh.fit(self.cloud[:, :3])
+        _, regions = neigh.kneighbors(self.cloud[:, :3])
+        for idx, _ in enumerate(self.cloud):
+            region = self.cloud[regions[idx]]
+            weighted_avg = np.average(region, axis=0, weights=region[:, 4])
+            if np.isclose(weighted_avg[4], 0.0):
+                continue
+            smoothed_cloud[idx] = weighted_avg
         # Removes duplicate points
         smoothed_cloud = smoothed_cloud[smoothed_cloud[:, 3] != 0.0]
         _, indicies = np.unique(np.round(smoothed_cloud[:, :3], decimals=2), axis=0, return_index=True)
