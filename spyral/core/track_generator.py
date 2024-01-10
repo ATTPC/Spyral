@@ -117,9 +117,9 @@ class GeneratorParams:
     ke_bins: int
         The number of kinetic energy bins in the interpolation scheme
     polar_min: float
-      The minimum polar angle of the interpolation scheme in degrees
+        The minimum polar angle of the interpolation scheme in degrees
     polar_max: float
-      The maximum polar angle of the interpolation scheme in degrees
+        The maximum polar angle of the interpolation scheme in degrees
     polar_bins: int
         The number of polar angle bins in the interpolation scheme
 
@@ -261,7 +261,7 @@ def generate_tracks(params: GeneratorParams, track_path: Path):
     ----------
     params: GeneratorParams
         parameters which control the tracks
-    trackpath: Path
+    track_path: Path
         where to write the tracks to
     """
     kes = np.linspace(params.ke_min, params.ke_max, params.ke_bins)
@@ -452,9 +452,9 @@ class TrackInterpolator:
         ke_bins: int
             The number of kinetic energy bins in the interpolation scheme
         polar_min: float
-          The minimum polar angle of the interpolation scheme in degrees
+            The minimum polar angle of the interpolation scheme in degrees
         polar_max: float
-          The maximum polar angle of the interpolation scheme in degrees
+            The maximum polar angle of the interpolation scheme in degrees
         polar_bins: int
             The number of polar angle bins in the interpolation scheme
 
@@ -576,9 +576,9 @@ class TrackInterpolator:
         ke_bins: int
             The number of kinetic energy bins in the interpolation scheme
         polar_min: float
-          The minimum polar angle of the interpolation scheme in degrees
+            The minimum polar angle of the interpolation scheme in degrees
         polar_max: float
-          The maximum polar angle of the interpolation scheme in degrees
+            The maximum polar angle of the interpolation scheme in degrees
         polar_bins: int
             The number of polar angle bins in the interpolation scheme
 

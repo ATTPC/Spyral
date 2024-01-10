@@ -95,7 +95,7 @@ def generate_shared_resources(config: Config):
     print("Shared resources are ready.")
 
 
-def run_spyral_parallel(config: Config, no_progress=False):
+def run_spyral_parallel(config: Config, no_progress: bool = False):
     """Spyral's parent process function
 
     This is the main function to be called to run Spyral. The configuration will be
@@ -105,6 +105,8 @@ def run_spyral_parallel(config: Config, no_progress=False):
     ----------
     config: Config
         The project configuration
+    no_progress: bool
+        If this is True progress bars will not be displayed (default is False)
     """
     # For housekeeping, track and log how long the execution takes
     start = time()

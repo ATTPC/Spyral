@@ -80,6 +80,8 @@ def phase_estimate(
         "dE": [],
         "arclength": [],
         "direction": [],
+        "eloss": [],
+        "cutoff_index": [],
     }
 
     # Process data

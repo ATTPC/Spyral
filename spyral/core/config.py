@@ -160,12 +160,21 @@ class ClusterParameters:
 
     Attributes
     ----------
+    min_cloud_size: int
+        The minimum size for a point cloud to be clustered
     smoothing_neighbor_distance: float
         Size of neighborhood radius in mm for smoothing
-    min_size: int
-        min_cluster_size parameter in scikit-learn's HDBSCAN algorithm
     min_points: int
         min_samples parameter in scikit-learns' HDBSCAN algorithm
+    big_event_cutoff: int
+        the cutoff between big events and small events in units of points in the
+        point cloud
+    min_size_big_event: int
+        min_cluster_size parameter in scikit-learn's HDBSCAN algorithm for events with more
+        points than `big_event_cutoff`. The minimum size of a cluster.
+    min_size_small_event: int
+        min_cluster_size parameter in scikit-learn's HDBSCAN algorithm for events with fewer
+        points than `big_event_cutoff`. The minimum size of a cluster.
     circle_overlap_ratio: float
         minimum overlap ratio between two circles in the cluster joining algorithm
     fractional_charge_threshold: float
@@ -175,9 +184,12 @@ class ClusterParameters:
         Number of neighbors to use in scikit-learn's LocalOutlierFactor test
     """
 
+    min_cloud_size: int = 0
     smoothing_neighbor_distance: float = 0.0  # mm
     min_points: int = 0
-    min_size: int = 0
+    big_event_cutoff: int = 0
+    min_size_big_event: int = 0
+    min_size_small_event: int = 0
     circle_overlap_ratio: float = 0.0
     fractional_charge_threshold: float = 0.0
     n_neighbors_outiler_test: int = 0
@@ -343,10 +355,13 @@ def deserialize_config(json_data: dict[Any, Any]) -> Config:
     config.frib.correct_ic_time = frib_params["event_correct_ic_time"]
 
     cluster_params = json_data["Cluster"]
+    config.cluster.min_cloud_size = cluster_params["min_cloud_size"]
     config.cluster.smoothing_neighbor_distance = cluster_params[
         "smoothing_neighbor_distance(mm)"
     ]
-    config.cluster.min_size = cluster_params["minimum_size"]
+    config.cluster.big_event_cutoff = cluster_params["big_event_cutoff"]
+    config.cluster.min_size_big_event = cluster_params["minimum_size_big_event"]
+    config.cluster.min_size_small_event = cluster_params["minimum_size_small_event"]
     config.cluster.min_points = cluster_params["minimum_points"]
     config.cluster.circle_overlap_ratio = cluster_params["circle_overlap_ratio"]
     config.cluster.fractional_charge_threshold = cluster_params[

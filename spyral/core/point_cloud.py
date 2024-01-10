@@ -2,6 +2,7 @@ from .pad_map import PadMap
 from .constants import INVALID_EVENT_NUMBER
 from ..correction import ElectronCorrector
 from ..trace.get_event import GetEvent
+from .spy_log import spyral_warn
 
 import numpy as np
 from sklearn.neighbors import NearestNeighbors
@@ -81,7 +82,19 @@ class PointCloud:
         for trace in event.traces:
             if trace.get_number_of_peaks() == 0:
                 continue
-            pad = pmap.get_pad_data(trace.hw_id.pad_id)
+
+            pid = trace.hw_id.pad_id
+            check = pmap.get_pad_from_hardware(trace.hw_id)
+            if check is None:
+                spyral_warn(
+                    __name__,
+                    f"When checking pad number of hardware: {trace.hw_id}, recieved None!",
+                )
+                continue
+            if check != pid:
+                pid = check
+
+            pad = pmap.get_pad_data(check)
             if pad is None:
                 continue
             for peak in trace.get_peaks():
@@ -185,34 +198,6 @@ class PointCloud:
             if np.isclose(weighted_average[4], 0.0):
                 continue
             smoothed_cloud[idx] = weighted_average
-        # Removes duplicate points
-        smoothed_cloud = smoothed_cloud[smoothed_cloud[:, 3] != 0.0]
-        _, indicies = np.unique(
-            np.round(smoothed_cloud[:, :3], decimals=2), axis=0, return_index=True
-        )
-        self.cloud = smoothed_cloud[indicies]
-
-    def smooth_cloud_neighborship(self, neighbors: int = 5):
-        """Smooth the point cloud by averaging over nearest neighbors by number of neighbors, weighted by the integrated charge.
-
-        The neighborhood is defined to be the nearest n neighbors to the point being considered.
-        This modifies the underlying point cloud array
-
-        Parameters
-        ----------
-        neighbors: int
-            The number of neighboring points to consider
-        """
-        smoothed_cloud = np.zeros(self.cloud.shape)
-        neigh = NearestNeighbors(n_neighbors=neighbors)
-        neigh.fit(self.cloud[:, :3])
-        _, regions = neigh.kneighbors(self.cloud[:, :3])
-        for idx, _ in enumerate(self.cloud):
-            region = self.cloud[regions[idx]]
-            weighted_avg = np.average(region, axis=0, weights=region[:, 4])
-            if np.isclose(weighted_avg[4], 0.0):
-                continue
-            smoothed_cloud[idx] = weighted_avg
         # Removes duplicate points
         smoothed_cloud = smoothed_cloud[smoothed_cloud[:, 3] != 0.0]
         _, indicies = np.unique(

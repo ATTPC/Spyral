@@ -89,27 +89,32 @@ def estimate_physics(
     _, _, end_radius, _ = least_squares_circle(
         cluster.data[halfway:, 0], cluster.data[halfway:, 1]
     )
+    max_rho_index = np.argmax(rhos)
 
     # See if in-spiraling to the window or microgmegas, sets the direction and guess of z-vertex
     # If backward, flip the ordering of the cloud to simplify algorithm
-    if begin_radius < end_radius:
+    # First check if max rho is at the end of the track. If so, didn't make a complete arc
+    # Else use circle fits to begin/end
+    if max_rho_index > 0.9 * len(rhos):
+        if rhos[0] < rhos[-1]:
+            direction = Direction.FORWARD
+        else:
+            direction = Direction.BACKWARD
+    elif begin_radius < end_radius:
         direction = Direction.BACKWARD
-        rhos = np.flip(rhos, axis=0)
-        cluster.data = np.flip(cluster.data, axis=0)
     else:
         direction = Direction.FORWARD
+
+    if direction == Direction.BACKWARD:
+        rhos = np.flip(rhos, axis=0)
+        cluster.data = np.flip(cluster.data, axis=0)
 
     # Guess that the vertex is the first point; make sure to copy! not reference
     vertex[:] = cluster.data[0, :3]
 
-    # Find the first point that is furthest from the vertex in rho (local maximum) to get the first arc of the trajectory
+    # Find the first point that is furthest from the vertex in rho (maximum) to get the first arc of the trajectory
     rho_to_vertex = np.linalg.norm(cluster.data[1:, :2] - vertex[:2], axis=1)
-    maxima = argrelmax(rho_to_vertex, order=10)[0]
-    maximum = 0
-    if len(maxima) == 0:
-        maximum = len(cluster.data)
-    else:
-        maximum = maxima[0]
+    maximum = np.argmax(rho_to_vertex)
     first_arc = cluster.data[: (maximum + 1)]
 
     # Fit a circle to the first arc and extract some physics
@@ -150,19 +155,29 @@ def estimate_physics(
     if np.isnan(brho):
         brho = 0.0
 
-    # big_pads = np.where(first_arc[:, 4] >= 1.0)
-    first_big_pad_index = len(first_arc)
-    # # if len(big_pads) > 1:
-    # #     first_big_pad_index = big_pads[0][0]
-    # # if first_big_pad_index == 0:
-    # #     print("Oops all big pads")
-    # #     return
     arclength = 0.0
-    for idx in range(first_big_pad_index - 1):
+    for idx in range(len(first_arc) - 1):
         arclength += np.linalg.norm(first_arc[idx + 1, :3] - first_arc[idx, :3])
+    if arclength == 0.0:
+        return
     charge_deposited = np.sum(first_arc[:, 3])
     dEdx = charge_deposited / arclength
 
+    integral_len = np.linalg.norm(cluster.data[0, :3] - vertex)
+    eloss = cluster.data[0, 3]
+    cutoff = 700.0  # mm
+    index = 1
+    while True:
+        if index == len(cluster.data):
+            break
+        elif integral_len > cutoff:
+            break
+        eloss += cluster.data[index, 3]
+        integral_len += np.linalg.norm(
+            cluster.data[index, :3] - cluster.data[index - 1, :3]
+        )
+        index += 1
+    cutoff_index = index
     # fill in our map
     results["event"].append(cluster.event)
     results["cluster_index"].append(cluster_index)
@@ -183,3 +198,5 @@ def estimate_physics(
     results["dE"].append(charge_deposited)
     results["arclength"].append(arclength)
     results["direction"].append(direction.value)
+    results["eloss"].append(eloss)
+    results["cutoff_index"].append(cutoff_index)

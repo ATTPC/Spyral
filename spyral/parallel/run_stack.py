@@ -109,6 +109,9 @@ def create_run_stacks(config: Config, n_stacks: int) -> list[list[int]]:
         else:
             stack_index += 1
 
+    # Remove any unused processors
+    stacks = [s for s in stacks if len(s) != 0]
+
     print("Approximate data load per process:")
     for idx, load in enumerate(load_per_stack):
         print(f"Process {idx}: {float(load/total_load) * 100:.2f}%")

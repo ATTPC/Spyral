@@ -197,7 +197,7 @@ def form_clusters(pc: PointCloud, params: ClusterParameters) -> list[LabeledClou
     ----------
     pc: PointCloud
         The point cloud to be clustered
-    cluster_params: ClusterParameters
+    params: ClusterParameters
         Configuration parameters controlling the clustering algorithms
 
     Returns
@@ -205,19 +205,28 @@ def form_clusters(pc: PointCloud, params: ClusterParameters) -> list[LabeledClou
     list[LabeledCloud]
         List of clusters found by the algorithm with labels
     """
-    clusterizer = skcluster.HDBSCAN(
-        min_cluster_size=params.min_size, min_samples=params.min_points
-    )
+    if len(pc.cloud) < params.min_cloud_size:
+        return []
+    pc.smooth_cloud(params.smoothing_neighbor_distance)
+
+    clusterizer = None
+    n_points = len(pc.cloud)
+    if n_points > params.big_event_cutoff:
+        clusterizer = skcluster.HDBSCAN(
+            min_cluster_size=params.min_size_big_event,
+            min_samples=params.min_points,
+            allow_single_cluster=True,
+        )
+    elif n_points > params.min_size_small_event:
+        clusterizer = skcluster.HDBSCAN(
+            min_cluster_size=params.min_size_small_event,
+            min_samples=params.min_points,
+            allow_single_cluster=True,
+        )
+    else:
+        return []
 
     # Smooth out the point cloud by averaging over neighboring points within a distance, droping any duplicate points
-    # pc.drop_outliers(25)
-    if len(pc.cloud) < 50:
-        return []
-    pc.smooth_cloud_neighborship(25)
-    # pc.smooth_cloud(params.smoothing_neighbor_distance)
-
-    if len(pc.cloud) < params.min_size:
-        return []
 
     # Use spatial dimensions and integrated charge
     cluster_data = np.empty(shape=(len(pc.cloud), 4))

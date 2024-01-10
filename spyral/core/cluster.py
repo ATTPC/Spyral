@@ -113,6 +113,8 @@ class Cluster:
         neighbors: int
             The number of neighbors to compare to for the outlier test (default=2)
         """
+        if len(self.data) < neighbors:
+            print(f"Bad: {self.event}")
         test_data = self.data[:, :3].copy()
         neigh = LocalOutlierFactor(n_neighbors=neighbors)
         result = neigh.fit_predict(test_data)
