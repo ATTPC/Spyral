@@ -2,6 +2,7 @@ __pycache__/
 .venv/
 .vscode/
 .vs/
+.ipynb_checkpoints/
 site/
 *.csv
 *.h5
