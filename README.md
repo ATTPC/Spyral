@@ -11,9 +11,7 @@ To download the repository use `git clone https://github.com/attpc/Spyral.git`
 To install the required packages it is recommended to create a virtual environment with python/pip, detailed below.
 
 ### Pip
-
-Or if pip is prefered create a virtual environment using
-
+Create a virtual environment using
 ```[bash]
 python -m venv </some/path/to/your/new/environment>
 ```
