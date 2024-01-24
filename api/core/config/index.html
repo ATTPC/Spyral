@@ -1,0 +1,4581 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentation for the Spyral AT-TPC analysis framework">
+      
+      
+      
+        <link rel="canonical" href="https://example.com/api/core/config/">
+      
+      
+        <link rel="prev" href="../clusterize/">
+      
+      
+        <link rel="next" href="../constants/">
+      
+      
+      <link rel="icon" href="../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.5">
+    
+    
+      
+        <title>config - Spyral</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.50c56a3b.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#config-module" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../.." title="Spyral" class="md-header__button md-logo" aria-label="Spyral" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Spyral
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              config
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="lime"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/turinath/Spyral/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../.." title="Spyral" class="md-nav__button md-logo" aria-label="Spyral" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Spyral
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/turinath/Spyral/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../quick_start/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick Start
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    User Guide
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            User Guide
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_guide/getting_started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Configuration
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
+            <span class="md-nav__icon md-icon"></span>
+            Configuration
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_guide/config/about/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    About Configurations
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_guide/config/workspace/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Workspace
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_guide/config/run/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Run
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_guide/config/detector/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Detector
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_guide/config/traces/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GET & FRIB Traces
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_guide/config/cluster/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Cluster
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_guide/config/estimate/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Estimate
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_guide/config/solver/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Solver
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_guide/config/extending/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Extending the Config
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Analysis Phases
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            Analysis Phases
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_guide/phases/about/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    About Phases
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_guide/phases/point_cloud/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Point Cloud
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_guide/phases/cluster/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Cluster
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_guide/phases/estimate/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Estimate
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_guide/phases/solve/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Solve
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_guide/numba/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Numba
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_guide/parallel/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Parallel Processing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_guide/notebooks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Notebooks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../user_guide/continuing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    After Spyral
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    API Reference
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            API Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Spyral Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../run_parallel/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    run_parallel
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../run/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    run
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../phase_pointcloud/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    phase_pointcloud
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../phase_cluster/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    phase_cluster
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../phase_estimate/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    phase_estimate
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../phase_solve/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    phase_solve
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_8" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4_8" id="__nav_4_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    core
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_8_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_8">
+            <span class="md-nav__icon md-icon"></span>
+            core
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    About core
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cluster/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    cluster
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../clusterize/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    clusterize
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    config
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    config
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#spyral.core.config" class="md-nav__link">
+    <span class="md-ellipsis">
+      config
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spyral.core.config.ClusterParameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      ClusterParameters
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spyral.core.config.Config" class="md-nav__link">
+    <span class="md-ellipsis">
+      Config
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spyral.core.config.DetectorParameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      DetectorParameters
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spyral.core.config.EstimateParameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      EstimateParameters
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spyral.core.config.FribParameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      FribParameters
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spyral.core.config.GetParameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      GetParameters
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spyral.core.config.RunParameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      RunParameters
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spyral.core.config.SolverParameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      SolverParameters
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spyral.core.config.WorkspaceParameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      WorkspaceParameters
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spyral.core.config.deserialize_config" class="md-nav__link">
+    <span class="md-ellipsis">
+      deserialize_config
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spyral.core.config.load_config" class="md-nav__link">
+    <span class="md-ellipsis">
+      load_config
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../constants/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    constants
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../estimator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    estimator
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../hardware_id/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    hardware_id
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../pad_map/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    pad_map
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../particle_id/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    particle_id
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../point_cloud/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    point_cloud
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../spy_log/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    spy_log
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../track_generator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    track_generator
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workspace/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    workspace
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_9" id="__nav_4_9_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    correction
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_9">
+            <span class="md-nav__icon md-icon"></span>
+            correction
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../correction/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    About correction
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../correction/generate/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    generate
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../correction/electron_corrector/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    electron_corrector
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_10" id="__nav_4_10_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    geometry
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_10">
+            <span class="md-nav__icon md-icon"></span>
+            geometry
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometry/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    About geometry
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../geometry/circle/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    circle
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_11" id="__nav_4_11_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    interpolate
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_11">
+            <span class="md-nav__icon md-icon"></span>
+            interpolate
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../interpolate/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    About interpolate
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../interpolate/bilinear/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    bilinear
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../interpolate/linear/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    linear
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_12" id="__nav_4_12_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    parallel
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_12">
+            <span class="md-nav__icon md-icon"></span>
+            parallel
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../parallel/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    About parallel
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../parallel/run_stack/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    run_stack
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../parallel/status_message/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    status_message
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_13" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_13" id="__nav_4_13_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    solvers
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_13">
+            <span class="md-nav__icon md-icon"></span>
+            solvers
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../solvers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    About solvers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../solvers/guess/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    guess
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../solvers/solver_interp/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    solver_interp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_14" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_14" id="__nav_4_14_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    trace
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_14_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_14">
+            <span class="md-nav__icon md-icon"></span>
+            trace
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../trace/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    About trace
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../trace/get_event/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    get_event
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../trace/get_trace/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    get_trace
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../trace/frib_event/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    frib_event
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../trace/frib_trace/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    frib_trace
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../trace/peak/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    peak
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../faq/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    FAQ
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../for_devs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    For Developers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#spyral.core.config" class="md-nav__link">
+    <span class="md-ellipsis">
+      config
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spyral.core.config.ClusterParameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      ClusterParameters
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spyral.core.config.Config" class="md-nav__link">
+    <span class="md-ellipsis">
+      Config
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spyral.core.config.DetectorParameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      DetectorParameters
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spyral.core.config.EstimateParameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      EstimateParameters
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spyral.core.config.FribParameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      FribParameters
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spyral.core.config.GetParameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      GetParameters
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spyral.core.config.RunParameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      RunParameters
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spyral.core.config.SolverParameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      SolverParameters
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spyral.core.config.WorkspaceParameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      WorkspaceParameters
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spyral.core.config.deserialize_config" class="md-nav__link">
+    <span class="md-ellipsis">
+      deserialize_config
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#spyral.core.config.load_config" class="md-nav__link">
+    <span class="md-ellipsis">
+      load_config
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="config-module">config Module</h1>
+<p>The config module describes the Spyral configuration object and its sub-categories.</p>
+
+
+<div class="doc doc-object doc-module">
+
+
+
+<a id="spyral.core.config"></a>
+  <div class="doc doc-contents first">
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="spyral.core.config.ClusterParameters" class="doc doc-heading">
+          <code>ClusterParameters</code>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>Parameters for clustering, cluster joining, and cluster cleaning</p>
+
+
+
+  <p><strong>Attributes:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code><span title="spyral.core.config.ClusterParameters.min_cloud_size">min_cloud_size</span></code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The minimum size for a point cloud to be clustered</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.ClusterParameters.smoothing_neighbor_distance">smoothing_neighbor_distance</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Size of neighborhood radius in mm for smoothing</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.ClusterParameters.min_points">min_points</span></code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>min_samples parameter in scikit-learns' HDBSCAN algorithm</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.ClusterParameters.big_event_cutoff">big_event_cutoff</span></code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>the cutoff between big events and small events in units of points in the
+point cloud</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.ClusterParameters.min_size_big_event">min_size_big_event</span></code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>min_cluster_size parameter in scikit-learn's HDBSCAN algorithm for events with more
+points than <code>big_event_cutoff</code>. The minimum size of a cluster.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.ClusterParameters.min_size_small_event">min_size_small_event</span></code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>min_cluster_size parameter in scikit-learn's HDBSCAN algorithm for events with fewer
+points than <code>big_event_cutoff</code>. The minimum size of a cluster.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.ClusterParameters.circle_overlap_ratio">circle_overlap_ratio</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>minimum overlap ratio between two circles in the cluster joining algorithm</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.ClusterParameters.fractional_charge_threshold">fractional_charge_threshold</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The maximum allowed difference between two clusters mean charge (relative to the larger mean charge of the two)
+for them to be joined</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.ClusterParameters.n_neighbors_outlier_test">n_neighbors_outlier_test</span></code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Number of neighbors to use in scikit-learn's LocalOutlierFactor test</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+            <details class="quote">
+              <summary>Source code in <code>spyral/core/config.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">ClusterParameters</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parameters for clustering, cluster joining, and cluster cleaning</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    min_cloud_size: int</span>
+<span class="sd">        The minimum size for a point cloud to be clustered</span>
+<span class="sd">    smoothing_neighbor_distance: float</span>
+<span class="sd">        Size of neighborhood radius in mm for smoothing</span>
+<span class="sd">    min_points: int</span>
+<span class="sd">        min_samples parameter in scikit-learns&#39; HDBSCAN algorithm</span>
+<span class="sd">    big_event_cutoff: int</span>
+<span class="sd">        the cutoff between big events and small events in units of points in the</span>
+<span class="sd">        point cloud</span>
+<span class="sd">    min_size_big_event: int</span>
+<span class="sd">        min_cluster_size parameter in scikit-learn&#39;s HDBSCAN algorithm for events with more</span>
+<span class="sd">        points than `big_event_cutoff`. The minimum size of a cluster.</span>
+<span class="sd">    min_size_small_event: int</span>
+<span class="sd">        min_cluster_size parameter in scikit-learn&#39;s HDBSCAN algorithm for events with fewer</span>
+<span class="sd">        points than `big_event_cutoff`. The minimum size of a cluster.</span>
+<span class="sd">    circle_overlap_ratio: float</span>
+<span class="sd">        minimum overlap ratio between two circles in the cluster joining algorithm</span>
+<span class="sd">    fractional_charge_threshold: float</span>
+<span class="sd">        The maximum allowed difference between two clusters mean charge (relative to the larger mean charge of the two)</span>
+<span class="sd">        for them to be joined</span>
+<span class="sd">    n_neighbors_outlier_test: int</span>
+<span class="sd">        Number of neighbors to use in scikit-learn&#39;s LocalOutlierFactor test</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">min_cloud_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">smoothing_neighbor_distance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>  <span class="c1"># mm</span>
+    <span class="n">min_points</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">big_event_cutoff</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">min_size_big_event</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">min_size_small_event</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">circle_overlap_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">fractional_charge_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">n_neighbors_outiler_test</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="spyral.core.config.Config" class="doc doc-heading">
+          <code>Config</code>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>Container which holds all configuration parameters.</p>
+<p>Can be serialized/deserialized to json.</p>
+
+
+
+  <p><strong>Attributes:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code><span title="spyral.core.config.Config.workspace">workspace</span></code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="spyral.core.config.WorkspaceParameters" href="#spyral.core.config.WorkspaceParameters">WorkspaceParameters</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.Config.run">run</span></code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="spyral.core.config.RunParameters" href="#spyral.core.config.RunParameters">RunParameters</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.Config.detector">detector</span></code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="spyral.core.config.DetectorParameters" href="#spyral.core.config.DetectorParameters">DetectorParameters</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.Config.get">get</span></code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="spyral.core.config.GetParameters" href="#spyral.core.config.GetParameters">GetParameters</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.Config.frib">frib</span></code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="spyral.core.config.FribParameters" href="#spyral.core.config.FribParameters">FribParameters</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.Config.cluster">cluster</span></code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="spyral.core.config.ClusterParameters" href="#spyral.core.config.ClusterParameters">ClusterParameters</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.Config.estimate">estimate</span></code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="spyral.core.config.EstimateParameters" href="#spyral.core.config.EstimateParameters">EstimateParameters</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.Config.solver">solver</span></code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="spyral.core.config.SolverParameters" href="#spyral.core.config.SolverParameters">SolverParameters</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+            <details class="quote">
+              <summary>Source code in <code>spyral/core/config.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Container which holds all configuration parameters.</span>
+
+<span class="sd">    Can be serialized/deserialized to json.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    workspace: WorkspaceParameters</span>
+<span class="sd">    run: RunParameters</span>
+<span class="sd">    detector: DetectorParameters</span>
+<span class="sd">    get: GetParameters</span>
+<span class="sd">    frib: FribParameters</span>
+<span class="sd">    cluster: ClusterParameters</span>
+<span class="sd">    estimate: EstimateParameters</span>
+<span class="sd">    solver: SolverParameters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Workspace</span>
+    <span class="n">workspace</span><span class="p">:</span> <span class="n">WorkspaceParameters</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">WorkspaceParameters</span><span class="p">)</span>
+
+    <span class="c1"># Run</span>
+    <span class="n">run</span><span class="p">:</span> <span class="n">RunParameters</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">RunParameters</span><span class="p">)</span>
+
+    <span class="c1"># Detector</span>
+    <span class="n">detector</span><span class="p">:</span> <span class="n">DetectorParameters</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">DetectorParameters</span><span class="p">)</span>
+
+    <span class="c1"># Traces</span>
+    <span class="n">get</span><span class="p">:</span> <span class="n">GetParameters</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">GetParameters</span><span class="p">)</span>
+
+    <span class="c1"># FRIB data</span>
+    <span class="n">frib</span><span class="p">:</span> <span class="n">FribParameters</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">FribParameters</span><span class="p">)</span>
+
+    <span class="c1"># Clustering settings</span>
+    <span class="n">cluster</span><span class="p">:</span> <span class="n">ClusterParameters</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">ClusterParameters</span><span class="p">)</span>
+
+    <span class="c1"># Physics Estimate settings</span>
+    <span class="n">estimate</span><span class="p">:</span> <span class="n">EstimateParameters</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">EstimateParameters</span><span class="p">)</span>
+
+    <span class="c1"># Physics Solver</span>
+    <span class="n">solver</span><span class="p">:</span> <span class="n">SolverParameters</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">SolverParameters</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="spyral.core.config.DetectorParameters" class="doc doc-heading">
+          <code>DetectorParameters</code>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>Parameters describing the detector configuration</p>
+
+
+
+  <p><strong>Attributes:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code><span title="spyral.core.config.DetectorParameters.magnetic_field">magnetic_field</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The magnitude of the magnetic field in Tesla</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.DetectorParameters.electric_field">electric_field</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The magnitude of the electric field in V/m</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.DetectorParameters.detector_length">detector_length</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The detector length in mm</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.DetectorParameters.beam_region_radius">beam_region_radius</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The beam region radius in mm</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.DetectorParameters.micromegas_time_bucket">micromegas_time_bucket</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The micromegas time reference in GET time buckets</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.DetectorParameters.window_time_bucket">window_time_bucket</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The window time reference in GET time buckets</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.DetectorParameters.get_frequency">get_frequency</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The GET DAQ sampling frequency in MHz. Typically 3.125 or 6.25</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.DetectorParameters.garfield_file_path">garfield_file_path</span></code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Path to a Garfield simulation file containing electron drift corrections</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+            <details class="quote">
+              <summary>Source code in <code>spyral/core/config.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span>
+<span class="normal">90</span>
+<span class="normal">91</span>
+<span class="normal">92</span>
+<span class="normal">93</span>
+<span class="normal">94</span>
+<span class="normal">95</span>
+<span class="normal">96</span>
+<span class="normal">97</span>
+<span class="normal">98</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">DetectorParameters</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parameters describing the detector configuration</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    magnetic_field: float</span>
+<span class="sd">        The magnitude of the magnetic field in Tesla</span>
+<span class="sd">    electric_field: float</span>
+<span class="sd">        The magnitude of the electric field in V/m</span>
+<span class="sd">    detector_length: float</span>
+<span class="sd">        The detector length in mm</span>
+<span class="sd">    beam_region_radius: float</span>
+<span class="sd">        The beam region radius in mm</span>
+<span class="sd">    micromegas_time_bucket: float</span>
+<span class="sd">        The micromegas time reference in GET time buckets</span>
+<span class="sd">    window_time_bucket: float</span>
+<span class="sd">        The window time reference in GET time buckets</span>
+<span class="sd">    get_frequency: float</span>
+<span class="sd">        The GET DAQ sampling frequency in MHz. Typically 3.125 or 6.25</span>
+<span class="sd">    garfield_file_path: str</span>
+<span class="sd">        Path to a Garfield simulation file containing electron drift corrections</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">magnetic_field</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>  <span class="c1"># Tesla</span>
+    <span class="n">electric_field</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>  <span class="c1"># V/m</span>
+    <span class="n">detector_length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>  <span class="c1"># mm</span>
+    <span class="n">beam_region_radius</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>  <span class="c1"># mm</span>
+    <span class="n">micromegas_time_bucket</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">window_time_bucket</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">get_frequency</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>  <span class="c1"># MHz</span>
+    <span class="n">garfield_file_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="spyral.core.config.EstimateParameters" class="doc doc-heading">
+          <code>EstimateParameters</code>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>Parameters for physics estimation</p>
+
+
+
+  <p><strong>Attributes:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code><span title="spyral.core.config.EstimateParameters.min_total_trajectory_points">min_total_trajectory_points</span></code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>minimum number of points in a cluster for the cluster to be considered a particle trajectory</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.EstimateParameters.max_distance_from_beam_axis">max_distance_from_beam_axis</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>maximum distance from beam axis for a trajectory vertex to be considered valid</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+            <details class="quote">
+              <summary>Source code in <code>spyral/core/config.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">EstimateParameters</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parameters for physics estimation</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    min_total_trajectory_points: int</span>
+<span class="sd">        minimum number of points in a cluster for the cluster to be considered a particle trajectory</span>
+<span class="sd">    max_distance_from_beam_axis: float</span>
+<span class="sd">        maximum distance from beam axis for a trajectory vertex to be considered valid</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">min_total_trajectory_points</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">max_distance_from_beam_axis</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>  <span class="c1"># mm</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="spyral.core.config.FribParameters" class="doc doc-heading">
+          <code>FribParameters</code>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>Parameters for FRIBDAQ (IC, Si, etc) trace signal analysis</p>
+
+
+
+  <p><strong>Attributes:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code><span title="spyral.core.config.FribParameters.baseline_window_scale">baseline_window_scale</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The scale factor for the basline correction algorithm</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.FribParameters.peak_separation">peak_separation</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The peak separation parameter used in scipy.signal.find_peaks</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.FribParameters.peak_prominence">peak_prominence</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The peak prominence parameter used in scipy.signal.find_peaks</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.FribParameters.peak_max_width">peak_max_width</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The maximum peak width parameter used in scipy.signal.find_peaks</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.FribParameters.peak_threshold">peak_threshold</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The minimum amplitude of a valid peak</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.FribParameters.ic_multiplicity">ic_multiplicity</span></code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The maximum allowed ion chamber multiplicity</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.FribParameters.correct_ic_time">correct_ic_time</span></code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If true, the ion chamber time correction is used to correct the GET trace time</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+            <details class="quote">
+              <summary>Source code in <code>spyral/core/config.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">FribParameters</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parameters for FRIBDAQ (IC, Si, etc) trace signal analysis</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    baseline_window_scale: float</span>
+<span class="sd">        The scale factor for the basline correction algorithm</span>
+<span class="sd">    peak_separation: float</span>
+<span class="sd">        The peak separation parameter used in scipy.signal.find_peaks</span>
+<span class="sd">    peak_prominence: float</span>
+<span class="sd">        The peak prominence parameter used in scipy.signal.find_peaks</span>
+<span class="sd">    peak_max_width: float</span>
+<span class="sd">        The maximum peak width parameter used in scipy.signal.find_peaks</span>
+<span class="sd">    peak_threshold: float</span>
+<span class="sd">        The minimum amplitude of a valid peak</span>
+<span class="sd">    ic_multiplicity: int</span>
+<span class="sd">        The maximum allowed ion chamber multiplicity</span>
+<span class="sd">    correct_ic_time: bool</span>
+<span class="sd">        If true, the ion chamber time correction is used to correct the GET trace time</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">baseline_window_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">20.0</span>
+    <span class="n">peak_separation</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">50.0</span>
+    <span class="n">peak_prominence</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">20.0</span>
+    <span class="n">peak_max_width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100.0</span>
+    <span class="n">peak_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">25.0</span>
+    <span class="n">ic_multiplicity</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">correct_ic_time</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="spyral.core.config.GetParameters" class="doc doc-heading">
+          <code>GetParameters</code>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>Parameters for GET trace signal analysis</p>
+
+
+
+  <p><strong>Attributes:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code><span title="spyral.core.config.GetParameters.baseline_window_scale">baseline_window_scale</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The scale factor for the basline correction algorithm</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.GetParameters.peak_separation">peak_separation</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The peak separation parameter used in scipy.signal.find_peaks</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.GetParameters.peak_prominence">peak_prominence</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The peak prominence parameter used in scipy.signal.find_peaks</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.GetParameters.peak_max_width">peak_max_width</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The maximum peak width parameter used in scipy.signal.find_peaks</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.GetParameters.peak_threshold">peak_threshold</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The minimum amplitude of a valid peak</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+            <details class="quote">
+              <summary>Source code in <code>spyral/core/config.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">GetParameters</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parameters for GET trace signal analysis</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    baseline_window_scale: float</span>
+<span class="sd">        The scale factor for the basline correction algorithm</span>
+<span class="sd">    peak_separation: float</span>
+<span class="sd">        The peak separation parameter used in scipy.signal.find_peaks</span>
+<span class="sd">    peak_prominence: float</span>
+<span class="sd">        The peak prominence parameter used in scipy.signal.find_peaks</span>
+<span class="sd">    peak_max_width: float</span>
+<span class="sd">        The maximum peak width parameter used in scipy.signal.find_peaks</span>
+<span class="sd">    peak_threshold: float</span>
+<span class="sd">        The minimum amplitude of a valid peak</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">baseline_window_scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">20.0</span>
+    <span class="n">peak_separation</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">50.0</span>
+    <span class="n">peak_prominence</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">20.0</span>
+    <span class="n">peak_max_width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">100.0</span>
+    <span class="n">peak_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">25.0</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="spyral.core.config.RunParameters" class="doc doc-heading">
+          <code>RunParameters</code>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>Parameters describing the set of operations to be peformed by Spyral</p>
+
+
+
+  <p><strong>Attributes:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code><span title="spyral.core.config.RunParameters.run_min">run_min</span></code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The first run number, inclusive</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.RunParameters.run_max">run_max</span></code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The last run number, inclusive</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.RunParameters.n_processes">n_processes</span></code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of child processes</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.RunParameters.do_pointcloud">do_pointcloud</span></code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If true, data is run through the pointcloud phase</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.RunParameters.do_cluster">do_cluster</span></code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If true, data is run through the cluster phase</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.RunParameters.do_estimate">do_estimate</span></code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If true, data is run through the estimate phase</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.RunParameters.do_solve">do_solve</span></code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If true, data is run through the solve phase</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+            <details class="quote">
+              <summary>Source code in <code>spyral/core/config.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">RunParameters</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parameters describing the set of operations to be peformed by Spyral</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    run_min: int</span>
+<span class="sd">        The first run number, inclusive</span>
+<span class="sd">    run_max: int</span>
+<span class="sd">        The last run number, inclusive</span>
+<span class="sd">    n_processes: int</span>
+<span class="sd">        The number of child processes</span>
+<span class="sd">    do_pointcloud: bool</span>
+<span class="sd">        If true, data is run through the pointcloud phase</span>
+<span class="sd">    do_cluster: bool</span>
+<span class="sd">        If true, data is run through the cluster phase</span>
+<span class="sd">    do_estimate: bool</span>
+<span class="sd">        If true, data is run through the estimate phase</span>
+<span class="sd">    do_solve: bool</span>
+<span class="sd">        If true, data is run through the solve phase</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">run_min</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">run_max</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">n_processes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">do_pointcloud</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">do_cluster</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">do_estimate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">do_solve</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="spyral.core.config.SolverParameters" class="doc doc-heading">
+          <code>SolverParameters</code>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>Parameters for physics solving</p>
+
+
+
+  <p><strong>Attributes:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code><span title="spyral.core.config.SolverParameters.gas_data_path">gas_data_path</span></code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Path to a spyral-utils GasTarget file</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.SolverParameters.particle_id_filename">particle_id_filename</span></code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Name of a particle ID cut file</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.SolverParameters.ic_min_val">ic_min_val</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Low value the desired beam region of the ion chamber spectrum</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.SolverParameters.ic_max_value">ic_max_value</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>High value the desired beam region of the ion chamber spectrum</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.SolverParameters.n_time_steps">n_time_steps</span></code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of timesteps used in the ODE solver</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.SolverParameters.interp_ke_min">interp_ke_min</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The minimum value of kinetic energy used in the interpolation scheme in MeV</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.SolverParameters.interp_ke_max">interp_ke_max</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The maximum value of kinetic energy used in the interpolation scheme in MeV</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.SolverParameters.interp_ke_bins">interp_ke_bins</span></code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of kinetic energy bins used in the interpolation scheme</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.SolverParameters.interp_polar_min">interp_polar_min</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The minimum value of polar angle used in the interpolation scheme in degrees</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.SolverParameters.interp_polar_max">interp_polar_max</span></code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The maximum value of polar angle used in the interpolation scheme in degrees</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.SolverParameters.interp_polar_bins">interp_polar_bins</span></code></td>
+          <td>
+                <code>int</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The number of polar angle bins used in the interpolation scheme</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+            <details class="quote">
+              <summary>Source code in <code>spyral/core/config.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">SolverParameters</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parameters for physics solving</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    gas_data_path: str</span>
+<span class="sd">        Path to a spyral-utils GasTarget file</span>
+<span class="sd">    particle_id_filename: str</span>
+<span class="sd">        Name of a particle ID cut file</span>
+<span class="sd">    ic_min_val: float</span>
+<span class="sd">        Low value the desired beam region of the ion chamber spectrum</span>
+<span class="sd">    ic_max_value: float</span>
+<span class="sd">        High value the desired beam region of the ion chamber spectrum</span>
+<span class="sd">    n_time_steps: int</span>
+<span class="sd">        The number of timesteps used in the ODE solver</span>
+<span class="sd">    interp_ke_min: float</span>
+<span class="sd">        The minimum value of kinetic energy used in the interpolation scheme in MeV</span>
+<span class="sd">    interp_ke_max: float</span>
+<span class="sd">        The maximum value of kinetic energy used in the interpolation scheme in MeV</span>
+<span class="sd">    interp_ke_bins: int</span>
+<span class="sd">        The number of kinetic energy bins used in the interpolation scheme</span>
+<span class="sd">    interp_polar_min: float</span>
+<span class="sd">        The minimum value of polar angle used in the interpolation scheme in degrees</span>
+<span class="sd">    interp_polar_max: float</span>
+<span class="sd">        The maximum value of polar angle used in the interpolation scheme in degrees</span>
+<span class="sd">    interp_polar_bins: int</span>
+<span class="sd">        The number of polar angle bins used in the interpolation scheme</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">gas_data_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">particle_id_filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">ic_min_val</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">ic_max_val</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">n_time_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">interp_ke_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">interp_ke_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">interp_ke_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">interp_polar_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">interp_polar_max</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">interp_polar_bins</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="spyral.core.config.WorkspaceParameters" class="doc doc-heading">
+          <code>WorkspaceParameters</code>
+
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+
+  
+      <p>Parameters describing the core paths used by the Workspace</p>
+
+
+
+  <p><strong>Attributes:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code><span title="spyral.core.config.WorkspaceParameters.trace_data_path">trace_data_path</span></code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Path to the hdf5 files containing merged AT-TPC traces</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.WorkspaceParameters.workspace_path">workspace_path</span></code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Path to the project Workspace</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.WorkspaceParameters.pad_geometry_path">pad_geometry_path</span></code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Path to the csv file containing the pad geometry</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.WorkspaceParameters.pad_gain_path">pad_gain_path</span></code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Path to the csv file containing the relative pad gains</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.WorkspaceParameters.pad_time_path">pad_time_path</span></code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Path to the csv file containing the pad time corrections</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><code><span title="spyral.core.config.WorkspaceParameters.pad_electronics_path">pad_electronics_path</span></code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Path to the csv file containing the pad electronics ids</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+            <details class="quote">
+              <summary>Source code in <code>spyral/core/config.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">WorkspaceParameters</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Parameters describing the core paths used by the Workspace</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    trace_data_path: str</span>
+<span class="sd">        Path to the hdf5 files containing merged AT-TPC traces</span>
+<span class="sd">    workspace_path: str</span>
+<span class="sd">        Path to the project Workspace</span>
+<span class="sd">    pad_geometry_path: str</span>
+<span class="sd">        Path to the csv file containing the pad geometry</span>
+<span class="sd">    pad_gain_path: str</span>
+<span class="sd">        Path to the csv file containing the relative pad gains</span>
+<span class="sd">    pad_time_path: str</span>
+<span class="sd">        Path to the csv file containing the pad time corrections</span>
+<span class="sd">    pad_electronics_path: str</span>
+<span class="sd">        Path to the csv file containing the pad electronics ids</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">trace_data_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">workspace_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">pad_geometry_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">pad_gain_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">pad_time_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">pad_electronics_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+  </div>
+
+
+</div>
+
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="spyral.core.config.deserialize_config" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">deserialize_config</span><span class="p">(</span><span class="n">json_data</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Deserialize the Config from some json_data dictionary</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>json_data</code></td>
+          <td>
+                <code>dict[<span title="typing.Any">Any</span>, <span title="typing.Any">Any</span>]</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Dictionary made by a json.load operation</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="spyral.core.config.Config" href="#spyral.core.config.Config">Config</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The deserialized Config</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+          <details class="quote">
+            <summary>Source code in <code>spyral/core/config.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span>
+<span class="normal">356</span>
+<span class="normal">357</span>
+<span class="normal">358</span>
+<span class="normal">359</span>
+<span class="normal">360</span>
+<span class="normal">361</span>
+<span class="normal">362</span>
+<span class="normal">363</span>
+<span class="normal">364</span>
+<span class="normal">365</span>
+<span class="normal">366</span>
+<span class="normal">367</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">deserialize_config</span><span class="p">(</span><span class="n">json_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Config</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Deserialize the Config from some json_data dictionary</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    json_data: dict[Any, Any]</span>
+<span class="sd">        Dictionary made by a json.load operation</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Config</span>
+<span class="sd">        The deserialized Config</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">()</span>
+    <span class="n">ws_params</span> <span class="o">=</span> <span class="n">json_data</span><span class="p">[</span><span class="s2">&quot;Workspace&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">workspace</span><span class="o">.</span><span class="n">trace_data_path</span> <span class="o">=</span> <span class="n">ws_params</span><span class="p">[</span><span class="s2">&quot;trace_data_path&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">workspace</span><span class="o">.</span><span class="n">workspace_path</span> <span class="o">=</span> <span class="n">ws_params</span><span class="p">[</span><span class="s2">&quot;workspace_path&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">workspace</span><span class="o">.</span><span class="n">pad_geometry_path</span> <span class="o">=</span> <span class="n">ws_params</span><span class="p">[</span><span class="s2">&quot;pad_geometry_path&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">workspace</span><span class="o">.</span><span class="n">pad_gain_path</span> <span class="o">=</span> <span class="n">ws_params</span><span class="p">[</span><span class="s2">&quot;pad_gain_path&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">workspace</span><span class="o">.</span><span class="n">pad_time_path</span> <span class="o">=</span> <span class="n">ws_params</span><span class="p">[</span><span class="s2">&quot;pad_time_path&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">workspace</span><span class="o">.</span><span class="n">pad_electronics_path</span> <span class="o">=</span> <span class="n">ws_params</span><span class="p">[</span><span class="s2">&quot;pad_electronics_path&quot;</span><span class="p">]</span>
+
+    <span class="n">run_params</span> <span class="o">=</span> <span class="n">json_data</span><span class="p">[</span><span class="s2">&quot;Run&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">run_min</span> <span class="o">=</span> <span class="n">run_params</span><span class="p">[</span><span class="s2">&quot;run_min&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">run_max</span> <span class="o">=</span> <span class="n">run_params</span><span class="p">[</span><span class="s2">&quot;run_max&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">n_processes</span> <span class="o">=</span> <span class="n">run_params</span><span class="p">[</span><span class="s2">&quot;n_processes&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">do_pointcloud</span> <span class="o">=</span> <span class="n">run_params</span><span class="p">[</span><span class="s2">&quot;phase_pointcloud&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">do_cluster</span> <span class="o">=</span> <span class="n">run_params</span><span class="p">[</span><span class="s2">&quot;phase_cluster&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">do_estimate</span> <span class="o">=</span> <span class="n">run_params</span><span class="p">[</span><span class="s2">&quot;phase_estimate&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">do_solve</span> <span class="o">=</span> <span class="n">run_params</span><span class="p">[</span><span class="s2">&quot;phase_solve&quot;</span><span class="p">]</span>
+
+    <span class="n">det_params</span> <span class="o">=</span> <span class="n">json_data</span><span class="p">[</span><span class="s2">&quot;Detector&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">magnetic_field</span> <span class="o">=</span> <span class="n">det_params</span><span class="p">[</span><span class="s2">&quot;magnetic_field(T)&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">electric_field</span> <span class="o">=</span> <span class="n">det_params</span><span class="p">[</span><span class="s2">&quot;electric_field(V/m)&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">detector_length</span> <span class="o">=</span> <span class="n">det_params</span><span class="p">[</span><span class="s2">&quot;detector_length(mm)&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">beam_region_radius</span> <span class="o">=</span> <span class="n">det_params</span><span class="p">[</span><span class="s2">&quot;beam_region_radius(mm)&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">micromegas_time_bucket</span> <span class="o">=</span> <span class="n">det_params</span><span class="p">[</span><span class="s2">&quot;micromegas_time_bucket&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">window_time_bucket</span> <span class="o">=</span> <span class="n">det_params</span><span class="p">[</span><span class="s2">&quot;window_time_bucket&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">get_frequency</span> <span class="o">=</span> <span class="n">det_params</span><span class="p">[</span><span class="s2">&quot;get_frequency(MHz)&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">garfield_file_path</span> <span class="o">=</span> <span class="n">det_params</span><span class="p">[</span><span class="s2">&quot;electric_field_garfield_path&quot;</span><span class="p">]</span>
+
+    <span class="n">get_params</span> <span class="o">=</span> <span class="n">json_data</span><span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">baseline_window_scale</span> <span class="o">=</span> <span class="n">get_params</span><span class="p">[</span><span class="s2">&quot;baseline_window_scale&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">peak_separation</span> <span class="o">=</span> <span class="n">get_params</span><span class="p">[</span><span class="s2">&quot;peak_separation&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">peak_prominence</span> <span class="o">=</span> <span class="n">get_params</span><span class="p">[</span><span class="s2">&quot;peak_prominence&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">peak_max_width</span> <span class="o">=</span> <span class="n">get_params</span><span class="p">[</span><span class="s2">&quot;peak_max_width&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">peak_threshold</span> <span class="o">=</span> <span class="n">get_params</span><span class="p">[</span><span class="s2">&quot;peak_threshold&quot;</span><span class="p">]</span>
+
+    <span class="n">frib_params</span> <span class="o">=</span> <span class="n">json_data</span><span class="p">[</span><span class="s2">&quot;FRIB&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">frib</span><span class="o">.</span><span class="n">baseline_window_scale</span> <span class="o">=</span> <span class="n">frib_params</span><span class="p">[</span><span class="s2">&quot;baseline_window_scale&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">frib</span><span class="o">.</span><span class="n">peak_separation</span> <span class="o">=</span> <span class="n">frib_params</span><span class="p">[</span><span class="s2">&quot;peak_separation&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">frib</span><span class="o">.</span><span class="n">peak_prominence</span> <span class="o">=</span> <span class="n">frib_params</span><span class="p">[</span><span class="s2">&quot;peak_prominence&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">frib</span><span class="o">.</span><span class="n">peak_max_width</span> <span class="o">=</span> <span class="n">frib_params</span><span class="p">[</span><span class="s2">&quot;peak_max_width&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">frib</span><span class="o">.</span><span class="n">peak_threshold</span> <span class="o">=</span> <span class="n">frib_params</span><span class="p">[</span><span class="s2">&quot;peak_threshold&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">frib</span><span class="o">.</span><span class="n">ic_multiplicity</span> <span class="o">=</span> <span class="n">frib_params</span><span class="p">[</span><span class="s2">&quot;event_ic_multiplicity&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">frib</span><span class="o">.</span><span class="n">correct_ic_time</span> <span class="o">=</span> <span class="n">frib_params</span><span class="p">[</span><span class="s2">&quot;event_correct_ic_time&quot;</span><span class="p">]</span>
+
+    <span class="n">cluster_params</span> <span class="o">=</span> <span class="n">json_data</span><span class="p">[</span><span class="s2">&quot;Cluster&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">min_cloud_size</span> <span class="o">=</span> <span class="n">cluster_params</span><span class="p">[</span><span class="s2">&quot;min_cloud_size&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">smoothing_neighbor_distance</span> <span class="o">=</span> <span class="n">cluster_params</span><span class="p">[</span>
+        <span class="s2">&quot;smoothing_neighbor_distance(mm)&quot;</span>
+    <span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">big_event_cutoff</span> <span class="o">=</span> <span class="n">cluster_params</span><span class="p">[</span><span class="s2">&quot;big_event_cutoff&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">min_size_big_event</span> <span class="o">=</span> <span class="n">cluster_params</span><span class="p">[</span><span class="s2">&quot;minimum_size_big_event&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">min_size_small_event</span> <span class="o">=</span> <span class="n">cluster_params</span><span class="p">[</span><span class="s2">&quot;minimum_size_small_event&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">min_points</span> <span class="o">=</span> <span class="n">cluster_params</span><span class="p">[</span><span class="s2">&quot;minimum_points&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">circle_overlap_ratio</span> <span class="o">=</span> <span class="n">cluster_params</span><span class="p">[</span><span class="s2">&quot;circle_overlap_ratio&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">fractional_charge_threshold</span> <span class="o">=</span> <span class="n">cluster_params</span><span class="p">[</span>
+        <span class="s2">&quot;fractional_charge_threshold&quot;</span>
+    <span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">n_neighbors_outiler_test</span> <span class="o">=</span> <span class="n">cluster_params</span><span class="p">[</span><span class="s2">&quot;n_neighbors_outlier_test&quot;</span><span class="p">]</span>
+
+    <span class="n">est_params</span> <span class="o">=</span> <span class="n">json_data</span><span class="p">[</span><span class="s2">&quot;Estimate&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">estimate</span><span class="o">.</span><span class="n">min_total_trajectory_points</span> <span class="o">=</span> <span class="n">est_params</span><span class="p">[</span>
+        <span class="s2">&quot;mininum_total_trajectory_points&quot;</span>
+    <span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">estimate</span><span class="o">.</span><span class="n">max_distance_from_beam_axis</span> <span class="o">=</span> <span class="n">est_params</span><span class="p">[</span>
+        <span class="s2">&quot;maximum_distance_from_beam_axis&quot;</span>
+    <span class="p">]</span>
+
+    <span class="n">solver_params</span> <span class="o">=</span> <span class="n">json_data</span><span class="p">[</span><span class="s2">&quot;Solver&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">gas_data_path</span> <span class="o">=</span> <span class="n">solver_params</span><span class="p">[</span><span class="s2">&quot;gas_data_path&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">particle_id_filename</span> <span class="o">=</span> <span class="n">solver_params</span><span class="p">[</span><span class="s2">&quot;particle_id_file&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">ic_min_val</span> <span class="o">=</span> <span class="n">solver_params</span><span class="p">[</span><span class="s2">&quot;ic_min&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">ic_max_val</span> <span class="o">=</span> <span class="n">solver_params</span><span class="p">[</span><span class="s2">&quot;ic_max&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">n_time_steps</span> <span class="o">=</span> <span class="n">solver_params</span><span class="p">[</span><span class="s2">&quot;ode_n_time_steps&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">interp_ke_min</span> <span class="o">=</span> <span class="n">solver_params</span><span class="p">[</span><span class="s2">&quot;interp_ke_min(MeV)&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">interp_ke_max</span> <span class="o">=</span> <span class="n">solver_params</span><span class="p">[</span><span class="s2">&quot;interp_ke_max(MeV)&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">interp_ke_bins</span> <span class="o">=</span> <span class="n">solver_params</span><span class="p">[</span><span class="s2">&quot;interp_ke_bins&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">interp_polar_min</span> <span class="o">=</span> <span class="n">solver_params</span><span class="p">[</span><span class="s2">&quot;interp_polar_min(deg)&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">interp_polar_max</span> <span class="o">=</span> <span class="n">solver_params</span><span class="p">[</span><span class="s2">&quot;interp_polar_max(deg)&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">interp_polar_bins</span> <span class="o">=</span> <span class="n">solver_params</span><span class="p">[</span><span class="s2">&quot;interp_polar_bins&quot;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">config</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+<h2 id="spyral.core.config.load_config" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">load_config</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span></code>
+
+</h2>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Load a configuration from a file</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>file_path</code></td>
+          <td>
+                <code><span title="pathlib.Path">Path</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Path to a JSON file containing a Spyral configuration</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>Config</code></td>          <td>
+                <code><a class="autorefs autorefs-internal" title="spyral.core.config.Config" href="#spyral.core.config.Config">Config</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The Spyral configuration</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+          <details class="quote">
+            <summary>Source code in <code>spyral/core/config.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
+<span class="normal">403</span>
+<span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span>
+<span class="normal">410</span>
+<span class="normal">411</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_config</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Config</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load a configuration from a file</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    file_path: Path</span>
+<span class="sd">        Path to a JSON file containing a Spyral configuration</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Config:</span>
+<span class="sd">        The Spyral configuration</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">json_file</span><span class="p">:</span>
+        <span class="n">config_data</span> <span class="o">=</span> <span class="n">load</span><span class="p">(</span><span class="n">json_file</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">deserialize_config</span><span class="p">(</span><span class="n">config_data</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../../assets/javascripts/bundle.c18c5fb9.min.js"></script>
+      
+        <script src="../../../javascript/mathjax.js"></script>
+      
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
