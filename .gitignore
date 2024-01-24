@@ -3,7 +3,16 @@ ntuple_testing/
 .venv/
 .vscode/
 .vs/
+.ipynb_checkpoints/
+site/
 *.csv
 *.h5
 *.json
 *.yaml
+*.ipynb
+*.txt
+*.out
+*.npy
+*.png
+*.jpg
+*.svg

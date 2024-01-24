@@ -1,0 +1,73 @@
+{
+    "Workspace": {
+        "trace_data_path": "/path/to/some/traces/",
+        "workspace_path": "/path/to/some/workspace/",
+        "pad_geometry_path": "/path/to/some/geometry.csv",
+        "pad_gain_path": "/path/to/some/gain.csv",
+        "pad_time_path": "/path/to/some/time.csv",
+        "pad_electronics_path": "/path/to/some/electronics.csv"
+    },
+    "Run": {
+        "run_min": 17,
+        "run_max": 17,
+        "n_processes": 1,
+        "phase_pointcloud": false,
+        "phase_cluster": false,
+        "phase_estimate": false,
+        "phase_solve": false
+    },
+    "Detector": {
+        "magnetic_field(T)": 2.85,
+        "electric_field(V/m)": 45000.0,
+        "detector_length(mm)": 1000.0,
+        "beam_region_radius(mm)": 25.0,
+        "micromegas_time_bucket": 10.0,
+        "window_time_bucket": 560.0,
+        "get_frequency(MHz)": 6.25,
+        "electric_field_garfield_path": "/path/to/some/garfield.txt"
+    },
+    "GET": {
+        "baseline_window_scale": 20.0,
+        "peak_separation": 50.0,
+        "peak_prominence": 20.0,
+        "peak_max_width": 100.0,
+        "peak_threshold": 25.0
+    },
+    "FRIB": {
+        "baseline_window_scale": 100.0,
+        "peak_separation": 50.0,
+        "peak_prominence": 20.0,
+        "peak_max_width": 500.0,
+        "peak_threshold": 100.0,
+        "event_ic_multiplicity": 1,
+        "event_correct_ic_time": true
+    },
+    "Cluster": {
+        "min_cloud_size": 50,
+        "smoothing_neighbor_distance(mm)": 10.0,
+        "minimum_points": 3,
+        "big_event_cutoff": 300,
+        "minimum_size_big_event": 50,
+        "minimum_size_small_event": 10,
+        "circle_overlap_ratio": 0.75,
+        "fractional_charge_threshold": 0.75,
+        "n_neighbors_outlier_test": 5
+    },
+    "Estimate": {
+        "mininum_total_trajectory_points": 50,
+        "maximum_distance_from_beam_axis": 30.0
+    },
+    "Solver": {
+        "gas_data_path": "/path/to/some/gas.json",
+        "particle_id_file": "some_pid.json",
+        "ic_min": 950.0,
+        "ic_max": 1350.0,
+        "ode_n_time_steps": 1000,
+        "interp_ke_min(MeV)": 0.1,
+        "interp_ke_max(MeV)": 70.0,
+        "interp_ke_bins": 350,
+        "interp_polar_min(deg)": 5.0,
+        "interp_polar_max(deg)": 88.0,
+        "interp_polar_bins": 166
+    }
+}

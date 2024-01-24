@@ -1,0 +1,118 @@
+site_name: Spyral
+site_url: https://example.com/
+repo_url: https://github.com/turinath/Spyral/
+site_description: Documentation for the Spyral AT-TPC analysis framework
+
+nav:
+  - Home: index.md
+  - Quick Start: quick_start.md
+  - User Guide:
+    - Getting Started: user_guide/getting_started.md
+    - Configuration:
+      - About Configurations: user_guide/config/about.md
+      - Workspace: user_guide/config/workspace.md
+      - Run: user_guide/config/run.md
+      - Detector: user_guide/config/detector.md
+      - GET & FRIB Traces: user_guide/config/traces.md
+      - Cluster: user_guide/config/cluster.md
+      - Estimate: user_guide/config/estimate.md
+      - Solver: user_guide/config/solver.md
+      - Extending the Config: user_guide/config/extending.md
+    - Analysis Phases:
+      - About Phases: user_guide/phases/about.md
+      - Point Cloud: user_guide/phases/point_cloud.md
+      - Cluster: user_guide/phases/cluster.md
+      - Estimate: user_guide/phases/estimate.md
+      - Solve: user_guide/phases/solve.md
+    - Numba: user_guide/numba.md
+    - Parallel Processing: user_guide/parallel.md
+    - Notebooks: user_guide/notebooks.md
+    - After Spyral: user_guide/continuing.md
+  - API Reference:
+    - Spyral Reference: api/index.md
+    - run_parallel: api/run_parallel.md
+    - run: api/run.md
+    - phase_pointcloud: api/phase_pointcloud.md
+    - phase_cluster: api/phase_cluster.md
+    - phase_estimate: api/phase_estimate.md
+    - phase_solve: api/phase_solve.md
+    - core:
+      - About core: api/core/index.md
+      - cluster: api/core/cluster.md
+      - clusterize: api/core/clusterize.md
+      - config: api/core/config.md
+      - constants: api/core/constants.md
+      - estimator: api/core/estimator.md
+      - hardware_id: api/core/hardware_id.md
+      - pad_map: api/core/pad_map.md
+      - particle_id: api/core/particle_id.md
+      - point_cloud: api/core/point_cloud.md
+      - spy_log: api/core/spy_log.md
+      - track_generator: api/core/track_generator.md
+      - workspace: api/core/workspace.md
+    - correction:
+      - About correction: api/correction/index.md
+      - generate: api/correction/generate.md
+      - electron_corrector: api/correction/electron_corrector.md
+    - geometry:
+      - About geometry: api/geometry/index.md
+      - circle: api/geometry/circle.md
+    - interpolate:
+      - About interpolate: api/interpolate/index.md
+      - bilinear: api/interpolate/bilinear.md
+      - linear: api/interpolate/linear.md
+    - parallel:
+      - About parallel: api/parallel/index.md
+      - run_stack: api/parallel/run_stack.md
+      - status_message: api/parallel/status_message.md
+    - solvers:
+      - About solvers: api/solvers/index.md
+      - guess: api/solvers/guess.md
+      - solver_interp: api/solvers/solver_interp.md
+    - trace:
+      - About trace: api/trace/index.md
+      - get_event: api/trace/get_event.md
+      - get_trace: api/trace/get_trace.md
+      - frib_event: api/trace/frib_event.md
+      - frib_trace: api/trace/frib_trace.md
+      - peak: api/trace/peak.md
+  - FAQ: faq.md
+  - For Developers: for_devs.md
+
+theme:
+  name: material
+  language: en
+  palette:
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: green
+      accent: green
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep purple
+      accent: lime
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+plugins:
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            allow_inspection: true
+            docstring_style: numpy
+
+markdown_extensions:
+  - pymdownx.arithmatex:
+      generic: true
+
+extra_javascript:
+  - javascript/mathjax.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
