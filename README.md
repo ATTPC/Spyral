@@ -6,24 +6,12 @@ Spyral is an analysis application for data from the Active Target Time Projectio
 
 ### Download
 
-To download the repository use `git clone https://github.com/turinath/Spyral.git`
+To download the repository use `git clone https://github.com/attpc/Spyral.git`
 
-To install the required packages it is recommended to create a virtual environment with either Anaconda or python/pip, detailed below.
-
-### Anaconda
-
-On the same directory as this package, run:
-
-```[bash]
-conda env create -f environment.yml
-```
-
-This creates an Anaconda environment with the name "spyral-env" with all of the necessary libraries and versions.
+To install the required packages it is recommended to create a virtual environment with python/pip, detailed below.
 
 ### Pip
-
-Or if pip is prefered create a virtual environment using
-
+Create a virtual environment using
 ```[bash]
 python -m venv </some/path/to/your/new/environment>
 ```
@@ -39,8 +27,6 @@ All dependencies for Spyral will then be installed to your virtual environment
 ## Requirements
 
 Python >= 3.10, < 3.13
-
-if using Anaconda: Anaconda >= 4.10.1
 
 Spyral aims to be cross platform and to support Linux, MacOS, and Windows. Currently Spyral has been tested and confirmed on MacOS and Ubuntu 22.04 Linux. Other platforms
 are not guaranteed to work; if there is a problem please make an issue on the GitHub page, and it will be resolved as quickly as possible.
@@ -113,25 +99,7 @@ By default, Spyral prints some basic information to the terminal and provides pr
 python main.py --no-term CONFIG
 ```
 
-## Plotting
+## Notebooks
 
-Spyral also bundles some helpful plotting tools for creating dataset histograms. The default numpy/scipy/matplotlib histogramming solution is not terribly useful for larger datasets. The tools included in spyral/plot can help generate histograms of large datasets as well as generate gates for use with various analyses. The plotter.py file contains an example of how to generate a particle ID gate and then apply it to a dataset. The example plotter can be run in two modes, gating and plotting. 
+The notebook directory of Spyral contains several useful Jupyter notebooks for data visualization, including making particle ID gates.
 
-### Gating
-To make a particle ID gate use
-
-```[bash]
-python plotter.py --gate CONFIG
-```
-
-where again you replace `CONFIG` with the path to your configuration file. You can draw a closed polygon around the particle group of interest. To save the gate, close the plot window and the gate will be automatically saved to the gate directory of your workspace with the name `pid_gate.json`. The PID file does need modified by the user before being used in Spyral. You will need to manually add the fields `Z` and `A` which are the proton and mass number of the particle associated with the group. The order in the JSON file does not matter, the fields simply need to have the correct name.
-
-### Plot
-
-To make a set of useful plots use
-
-```[bash]
-python plotter.py --plot CONFIG
-```
-
-This will produce some useful plots like the particle ID plot, the ion chamber energy, and the kinematic correlation of energy and angle. It will make a set with and without the particle ID gate applied. Note that this requires a real PID gate to be given by the configuration.

@@ -10,7 +10,7 @@ If you need to access the point clouds or clusters, see the relevant directories
 
 ## Can I use any of the tools from Spyral
 
-The [spyral-utils](https://github.com/gwm17/spyral-utils/) library is a subset of the original Spyral code that we extracted and packaged because we found it really useful for analyzing all kinds of data not just Spyral. This contains things like nuclear masses, energy loss through the [pycatima](https://pypi.org/project/pycatima/) library for both gas and solid materials, very basic four-vector analysis, and some histogramming utilities. Spyral also does have a [notebook](notebooks.md) that shows how we use some of these tools. The plotter also showcases some of this as well.
+The [spyral-utils](https://github.com/gwm17/spyral-utils/) library is a subset of the original Spyral code that we extracted and packaged because we found it really useful for analyzing all kinds of data not just Spyral. This contains things like nuclear masses, energy loss through the [pycatima](https://pypi.org/project/pycatima/) library for both gas and solid materials, very basic four-vector analysis, and some histogramming utilities. Spyral also does have a [notebook](notebooks.md) that shows how we use some of these tools.
 
 ## Final Thoughts
 

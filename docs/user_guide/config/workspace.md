@@ -40,7 +40,7 @@ This is the path at which Spyral will create it's workspace. This is one of the 
    |-- gates
 ```
 
-The `clouds`, `clusters`, `estimates`, and `physics` directories are where the output of the various analysis phases are stored (either HDF5 files or Apache [parquet](https://parquet.apache.org/) files). `correction` and `tracks` store the result of interpolation meshes generated for the electric field correction and ODE fitting respectively. `gates` stores particle ID gates, typically generated using the plotter tool. Finally, `log` contains log files which Spyral writes to. The default value from `config.json` *is not valid* and should *always* be modified. It is recommended to create a workspace for each experiment.
+The `clouds`, `clusters`, `estimates`, and `physics` directories are where the output of the various analysis phases are stored (either HDF5 files or Apache [parquet](https://parquet.apache.org/) files). `correction` and `tracks` store the result of interpolation meshes generated for the electric field correction and ODE fitting respectively. `gates` stores particle ID gates, typically generated using the particle ID notebook. Finally, `log` contains log files which Spyral writes to. The default value from `config.json` *is not valid* and should *always* be modified. It is recommended to create a workspace for each experiment.
 
 Note: Spyral will *always* create this directory structure, even if you accidentally use the wrong path or some invalid path and it can be annoying to cleanup if done incorrectly. So be careful to set the workspace location correctly before running Spyral!
 
