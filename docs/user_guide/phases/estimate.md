@@ -41,44 +41,17 @@ Finally, we extract the stopping power (dE/dx) by adding the integrated charge a
 
 ## Plotting and Particle ID
 
-Once estimation is done, you can check the progress of the work and see how well Spyral is doing from a physics perspective. This involves plotting the B&rho; vs. dE/dx relationship to examine particle groups as well as kinematics in the relationship B&rho; vs. &theta;. To help with this Spyral ships with a plotter tool in `plotter.py`. The plotter has two modes, `--gate` and `--plot`. `--gate` is used to draw particle ID gates on the B&rho; vs dE/dx spectrum, while `--plot` is used to draw kinematics and show the effect of the chosen particle ID gate. To run plotter use the following structure
+Once estimation is done, you can check the progress of the work and see how well Spyral is doing from a physics perspective. This involves plotting the B&rho; vs. dE/dx relationship to examine particle groups as well as kinematics in the relationship B&rho; vs. &theta;. To help with this Spyral ships with a notebook `particle_id.ipynb` which will allow you to plot and gate on particle groups. To launch the notebook use the following command from the Spyral repo:
 
 ```bash
-python plotter.py --plot local_config.json
+jupyter-lab --notebook-dir=./notebooks
 ```
 
-or to gate use
-
-```bash
-python plotter.py --gate local_config.json
-```
-
-you can also use
-
-```bash
-python plotter.py --help
-```
-
-to get help information. Be sure your Spyral virtualenv is active to run this. Replace `local_config.json` with your configuration file.
+Be sure your Spyral virtualenv is active to run this.
 
 Some important notes about gate drawing
 
-Gates are drawn via matplotlib. A gate is completed when the polygon is closed, and is saved to the default `pid_gate.json` in your workspaces' `gate` directory. However, you need to modify the `pid_gate.json` to specify what type of particle it selects. By default the `pid_gate.json` will have something like
-
-```json
-{
-    "name": "my_pid",
-    "vertices": [
-        [0.0, 0.0],
-        [1.0, 0.0],
-        [1.0, 1.0],
-        [0.0, 1.0],
-        [0.0, 0.0]
-    ]
-}
-```
-
-It is a set of vertices representing the polygon and a name, however it has no information about particle type. You will need to add the `Z` and `A` fields to specify the atomic and mass numbers of the particle in the gate. An example:
+Gates are drawn via plotly's Lasso Tool. Settings can be altered within the notebook to change file names and other properties. The format for a particle ID gate is the following in JSON:
 
 ```json
 {
@@ -95,9 +68,9 @@ It is a set of vertices representing the polygon and a name, however it has no i
 }
 ```
 
-Here the gate is specified to be for protons. A particle ID gate is *required* to move on to the final phase. You do not need to use the plotter to make a particle ID gate. You simply need to have a JSON file of the correct format. If using the plotter it is also recommended to rename the default gate file name to something else (i.e. change `pid_gate.json` to `proton_gate.json`).
+Here the gate is specified to be for protons. A particle ID gate is *required* to move on to the final phase. You do not need to use the notebook to make a particle ID gate. You simply need to have a JSON file of the correct format.
 
-`plotter.py` will typically need tweaking from experiment to experiment. The histogram ranges often need extending/shrinking, and the number of bins will vary depending on total statistics. It also gives users a chance to see some of the [spyral-utils](https://github.com/gwm17/spyral-utils/) package, which can be used outside of Spyral to do further analysis.
+The notebook will typically need tweaking from experiment to experiment. The histogram ranges often need extending/shrinking, and the number of bins will vary depending on total statistics. It also gives users a chance to see some of the [spyral-utils](https://github.com/gwm17/spyral-utils/) package, which can be used outside of Spyral to do further analysis.
 
 ## Final Thoughts
 

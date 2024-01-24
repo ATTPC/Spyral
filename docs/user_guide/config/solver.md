@@ -58,7 +58,7 @@ Name of a JSON file containing the following format
 }
 ```
 
-`name` is the name of the gate, `Z` is the atomic number of the particle in the gate, `A` is the mass number, and `verticies` is a list of points which form a closed polygon in B&rho;-dEdx. The above data describes protons in a very silly box. Note that the first and last point in verticies should be the same. Typically gates are made using the plotter tool.
+`name` is the name of the gate, `Z` is the atomic number of the particle in the gate, `A` is the mass number, and `verticies` is a list of points which form a closed polygon in B&rho;-dEdx. The above data describes protons in a very silly box. Note that the first and last point in verticies should be the same. Typically gates are made using the particle ID notebook.
 
 ## ic_min
 

@@ -7,7 +7,7 @@ Here we'll walk through the basic installation and running of Spyral. This won't
 To download Spyral it is recommend to use `git`
 
 ```bash
-git clone https://github.com/turinath/Spyral.git
+git clone https://github.com/attpc/Spyral.git
 ```
 
 This will download the Spyral source code and install it to a directory named `Spyral`. To install all of the necessary dependencies it is recommended to create a virtual environment and use pip. To create a new virtual environment navigate to the Spyral directory and run the following command:
