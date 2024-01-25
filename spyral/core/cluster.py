@@ -100,8 +100,8 @@ class Cluster:
         cloud.sort_in_z()
         self.data = np.zeros((len(cloud.cloud), 5))
         self.data[:, :3] = cloud.cloud[:, :3]  # position
-        self.data[:, 3] = cloud.cloud[:, 4]  # integrated charge
-        self.data[:, 4] = cloud.cloud[:, 7]  # scale
+        self.data[:, 3] = cloud.cloud[:, 3]  # peak height
+        self.data[:, 4] = cloud.cloud[:, 7]  # scale (big or small)
 
     def drop_outliers(self, neighbors=2):
         """Use scikit-learn LocalOutlierFactor to test the cluster for spatial outliers.
@@ -113,8 +113,6 @@ class Cluster:
         neighbors: int
             The number of neighbors to compare to for the outlier test (default=2)
         """
-        if len(self.data) < neighbors:
-            print(f"Bad: {self.event}")
         test_data = self.data[:, :3].copy()
         neigh = LocalOutlierFactor(n_neighbors=neighbors)
         result = neigh.fit_predict(test_data)
