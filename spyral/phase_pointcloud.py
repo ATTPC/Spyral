@@ -4,7 +4,7 @@ from .core.point_cloud import PointCloud
 from .core.workspace import Workspace
 from .trace.frib_event import FribEvent
 from .trace.get_event import GetEvent
-from .correction import create_electron_corrector
+from .correction import create_electron_corrector, ElectronCorrector
 from .parallel.status_message import StatusMessage, Phase
 from .core.spy_log import spyral_info, spyral_error, spyral_warn
 
@@ -80,8 +80,12 @@ def phase_pointcloud(
     min_event, max_event = get_event_range(trace_file)
 
     # Load electric field correction
-    corr_path = ws.get_correction_file_path(Path(detector_params.garfield_file_path))
-    corrector = create_electron_corrector(corr_path)
+    corrector: ElectronCorrector | None = None
+    if detector_params.do_garfield_correction:
+        corr_path = ws.get_correction_file_path(
+            Path(detector_params.garfield_file_path)
+        )
+        corrector = create_electron_corrector(corr_path)
 
     # Some checks for existance
     event_group: h5.Group = trace_file["get"]
@@ -170,8 +174,9 @@ def phase_pointcloud(
         pc_dataset.attrs["ic_centroid"] = ic_peak.centroid
 
         # Apply IC correction to time calibration, if on
-        if frib_params.correct_ic_time:
-            ic_cor = frib_event.correct_ic_time(ic_peak, detector_params.get_frequency)
+        # and correction is less than the total length of the GET window in TB
+        ic_cor = frib_event.correct_ic_time(ic_peak, detector_params.get_frequency)
+        if frib_params.correct_ic_time and ic_cor < 512.0:
             pc.calibrate_z_position(
                 detector_params.micromegas_time_bucket,
                 detector_params.window_time_bucket,

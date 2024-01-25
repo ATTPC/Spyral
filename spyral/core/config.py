@@ -96,6 +96,7 @@ class DetectorParameters:
     window_time_bucket: float = 0.0
     get_frequency: float = 0.0  # MHz
     garfield_file_path: str = ""
+    do_garfield_correction: bool = False
 
 
 @dataclass
@@ -337,6 +338,7 @@ def deserialize_config(json_data: dict[Any, Any]) -> Config:
     config.detector.window_time_bucket = det_params["window_time_bucket"]
     config.detector.get_frequency = det_params["get_frequency(MHz)"]
     config.detector.garfield_file_path = det_params["electric_field_garfield_path"]
+    config.detector.do_garfield_correction = det_params["do_garfield_correction"]
 
     get_params = json_data["GET"]
     config.get.baseline_window_scale = get_params["baseline_window_scale"]
