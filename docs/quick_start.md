@@ -94,7 +94,7 @@ Here we've set Spyral to analyze one run (17) with one process, and to only perf
     "window_time_bucket": 560.0,
     "get_frequency(MHz)": 6.25,
     "electric_field_garfield_path": "/home/user/Spyral/etc/electrons.txt",
-    "electric_field_correction_file_name": "h2_300torr.npy"
+    "do_electric_field_correction": false
 },
 ```
 

@@ -38,8 +38,6 @@ class PointCloud:
         Calibrate the cloud z-position from the micromegas and window time references
     smooth_cloud(max_distance: float = 10.0)
         Smooth the point cloud data using an neighborhood of radius max_distance
-    smooth_cloud_neighborship(neighbors: int = 5)
-        Smooth the point cloud data using an neighborship of neighbors
     sort_in_z()
         Sort the internal point cloud array by z-position
     """
@@ -56,7 +54,7 @@ class PointCloud:
         self.cloud: np.ndarray = np.empty(0, dtype=np.float64)
 
     def load_cloud_from_get_event(
-        self, event: GetEvent, pmap: PadMap, corrector: ElectronCorrector
+        self, event: GetEvent, pmap: PadMap, corrector: ElectronCorrector | None = None
     ):
         """Load a point cloud from a GetEvent
 
@@ -70,8 +68,8 @@ class PointCloud:
             The GetEvent whose data should be loaded
         pmap: PadMap
             The PadMap used to get pad correction values
-        corrector: ElectronCorrector
-            The Garfield electron drift correction
+        corrector: ElectronCorrector | None
+            The optional Garfield electron drift correction
         """
         self.event_number = event.number
         count = 0
@@ -110,7 +108,9 @@ class PointCloud:
                     peak.centroid + pad.time_offset
                 )  # Time bucket with correction
                 self.cloud[idx, 7] = pad.scale
-                self.cloud[idx] = corrector.correct_point(self.cloud[idx])
+                # Apply correction if requested
+                if corrector is not None:
+                    self.cloud[idx] = corrector.correct_point(self.cloud[idx])
                 idx += 1
 
     def load_cloud_from_hdf5_data(self, data: np.ndarray, event_number: int):
@@ -194,7 +194,7 @@ class PointCloud:
             if len(neighbors) < 2:
                 continue
             # Weight points
-            weighted_average = np.average(neighbors, axis=0, weights=neighbors[:, 4])
+            weighted_average = np.average(neighbors, axis=0, weights=neighbors[:, 3])
             if np.isclose(weighted_average[4], 0.0):
                 continue
             smoothed_cloud[idx] = weighted_average

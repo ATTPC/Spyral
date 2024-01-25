@@ -13,7 +13,7 @@ The Detector parameters control the hardware setup of the AT-TPC used for the an
     "window_time_bucket": 560.0,
     "get_frequency(MHz)": 6.25,
     "electric_field_garfield_path": "/path/to/some/garfield.txt",
-    "electric_field_correction_file_name": "some_correction.npy"
+    "do_electric_field_correction": false
 },
 ```
 
@@ -51,8 +51,8 @@ The sampling frequency of the GET acquistion. This is used to correlate data bet
 
 ## electric_field_garfield_path
 
-The path to a file containing electron drift calculations from [Garfield++](https://gitlab.cern.ch/garfield/garfieldpp). The default value from `config.json` *is not valid* and should *always* be modified. Spyral does ship with an example file in the `etc/` directory, `electrons.txt`. The example file is not always safe to use. It was calculated for 300 Torr of H<sub>2</sub> gas, and as such may not be accurate. It is also not well tested what impact this correction has in various detector configurations.
+The path to a file containing electron drift calculations from [Garfield++](https://gitlab.cern.ch/garfield/garfieldpp). The default value from `config.json` *is not valid* and should be modified if the `do_electric_field_correction` parameter is set to true. Spyral does ship with an example file in the `etc/` directory, `electrons.txt`. The example file is not always safe to use. It was calculated for 300 Torr of H<sub>2</sub> gas, and as such may not be accurate. It is also not well tested what impact this correction has in various detector configurations.
 
-## electric_field_correction_file_name
+## do_electric_field_correction
 
-The name for the mesh generated for the electric field correction. The default value from `config.json` *is not valid* and should *always* be modified. The name should be of a `.npy` extension and should indicate the type of correction (i.e. `h2_300torr_corr.npy`).
+This is a flag which indiciates whether or not to apply the electric field correction to the point clouds
