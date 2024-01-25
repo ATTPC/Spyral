@@ -174,8 +174,9 @@ def phase_pointcloud(
         pc_dataset.attrs["ic_centroid"] = ic_peak.centroid
 
         # Apply IC correction to time calibration, if on
-        if frib_params.correct_ic_time:
-            ic_cor = frib_event.correct_ic_time(ic_peak, detector_params.get_frequency)
+        # and correction is less than the total length of the GET window in TB
+        ic_cor = frib_event.correct_ic_time(ic_peak, detector_params.get_frequency)
+        if frib_params.correct_ic_time and ic_cor < 512.0:
             pc.calibrate_z_position(
                 detector_params.micromegas_time_bucket,
                 detector_params.window_time_bucket,
