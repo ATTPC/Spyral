@@ -1,7 +1,6 @@
 spyral-utils==0.2.2
 click==8.1.7
 contourpy==1.2.0
-filterpy==1.4.5
 h5py==3.9.0
 ipywidgets==8.1.1
 jupyterlab==4.0.10
