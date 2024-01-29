@@ -4,7 +4,7 @@ contourpy==1.2.0
 filterpy==1.4.5
 h5py==3.9.0
 ipywidgets==8.1.1
-jupyterlab==4.0.10
+jupyterlab==4.0.11
 lmfit==1.2.2
 nbformat==5.9.2
 numba==0.58.1
