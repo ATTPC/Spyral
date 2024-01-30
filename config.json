@@ -47,9 +47,8 @@
         "min_cloud_size": 50,
         "smoothing_neighbor_distance(mm)": 10.0,
         "minimum_points": 3,
-        "big_event_cutoff": 300,
-        "minimum_size_big_event": 50,
-        "minimum_size_small_event": 10,
+        "minimum_size_scale_factor": 0.06,
+        "minimum_size_lower_cutoff": 10,
         "circle_overlap_ratio": 0.75,
         "fractional_charge_threshold": 0.75,
         "n_neighbors_outlier_test": 5
