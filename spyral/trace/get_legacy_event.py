@@ -11,15 +11,18 @@ GET_DATA_TRACE_START: int = 5
 GET_DATA_TRACE_STOP: int = 512 + 5
 
 
-class GetEvent:
-    """Class representing an event in the GET DAQ
+class GetLegacyEvent:
+    """Class representing a legacy event in the GET DAQ
 
-    Contains traces (GetTraces) from the AT-TPC pad plane.
+    Contains traces (GetTraces) from the AT-TPC pad plane as well
+    as external signals in CoBo 10
 
     Attributes
     ----------
     traces: list[GetTrace]
         The pad plane traces from the event
+    external_traces: list[GetTrace]
+        Traces from external (non-pad plane) sources
     name: str
         The event name
     number:
@@ -35,7 +38,12 @@ class GetEvent:
         Check if the event is valid
     """
 
-    def __init__(self, raw_data: h5.Dataset, event_number: int, params: GetParameters):
+    def __init__(
+        self,
+        raw_data: h5.Dataset,
+        event_number: int,
+        params: GetParameters,
+    ):
         """Construct the event and process traces
 
         Parameters
@@ -58,7 +66,10 @@ class GetEvent:
         self.load_traces(raw_data, event_number, params)
 
     def load_traces(
-        self, raw_data: h5.Dataset, event_number: int, params: GetParameters
+        self,
+        raw_data: h5.Dataset,
+        event_number: int,
+        params: GetParameters,
     ):
         """Process the traces
 
@@ -81,6 +92,12 @@ class GetEvent:
             GetTrace(trace_matrix[idx], hardware_id_from_array(row[0:5]), params)
             for idx, row in enumerate(raw_data)
         ]
+        # Legacy data where external data was stored in CoBo 10 (IC, mesh)
+        # Remove CoBo 10 from our normal traces and place into external container
+        self.external_traces = [
+            trace for trace in self.traces if trace.hw_id.cobo_id == 10
+        ]
+        self.traces = [trace for trace in self.traces if trace.hw_id.cobo_id != 10]
 
     def is_valid(self) -> bool:
         return self.name != INVALID_EVENT_NAME and self.number != INVALID_EVENT_NUMBER

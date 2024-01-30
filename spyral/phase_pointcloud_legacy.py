@@ -2,8 +2,7 @@ from .core.config import GetParameters, DetectorParameters, FribParameters
 from .core.pad_map import PadMap
 from .core.point_cloud import PointCloud
 from .core.workspace import Workspace
-from .trace.frib_event import FribEvent
-from .trace.get_event import GetEvent
+from .trace.get_legacy_event import GetLegacyEvent
 from .correction import create_electron_corrector, ElectronCorrector
 from .parallel.status_message import StatusMessage, Phase
 from .core.spy_log import spyral_info, spyral_error, spyral_warn
@@ -114,7 +113,7 @@ def phase_pointcloud_legacy(
         except Exception:
             continue
 
-        event = GetEvent(event_data, idx, get_params, is_legacy=True)
+        event = GetLegacyEvent(event_data, idx, get_params)
 
         pc = PointCloud()
         pc.load_cloud_from_get_event(event, pad_map, corrector)
