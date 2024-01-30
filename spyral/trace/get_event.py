@@ -35,7 +35,13 @@ class GetEvent:
         Check if the event is valid
     """
 
-    def __init__(self, raw_data: h5.Dataset, event_number: int, params: GetParameters):
+    def __init__(
+        self,
+        raw_data: h5.Dataset,
+        event_number: int,
+        params: GetParameters,
+        is_legacy: bool = False,
+    ):
         """Construct the event and process traces
 
         Parameters
@@ -55,10 +61,14 @@ class GetEvent:
         self.traces: list[GetTrace] = []
         self.name: str = INVALID_EVENT_NAME
         self.number: int = INVALID_EVENT_NUMBER
-        self.load_traces(raw_data, event_number, params)
+        self.load_traces(raw_data, event_number, params, is_legacy)
 
     def load_traces(
-        self, raw_data: h5.Dataset, event_number: int, params: GetParameters
+        self,
+        raw_data: h5.Dataset,
+        event_number: int,
+        params: GetParameters,
+        is_legacy: bool,
     ):
         """Process the traces
 
@@ -81,6 +91,13 @@ class GetEvent:
             GetTrace(trace_matrix[idx], hardware_id_from_array(row[0:5]), params)
             for idx, row in enumerate(raw_data)
         ]
+        # Legacy data where external data was stored in CoBo 10 (IC, mesh)
+        # Remove CoBo 10 from our normal traces and place into legacy container
+        if is_legacy:
+            self.legacy_traces = [
+                trace for trace in self.traces if trace.hw_id.cobo_id == 10
+            ]
+            self.traces = [trace for trace in self.traces if trace.hw_id.cobo_id != 10]
 
     def is_valid(self) -> bool:
         return self.name != INVALID_EVENT_NAME and self.number != INVALID_EVENT_NUMBER

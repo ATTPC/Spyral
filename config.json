@@ -14,7 +14,8 @@
         "phase_pointcloud": false,
         "phase_cluster": false,
         "phase_estimate": false,
-        "phase_solve": false
+        "phase_solve": false,
+        "is_legacy": false
     },
     "Detector": {
         "magnetic_field(T)": 2.85,

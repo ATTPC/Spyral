@@ -52,6 +52,9 @@ class RunParameters:
         If true, data is run through the estimate phase
     do_solve: bool
         If true, data is run through the solve phase
+    is_legacy: bool
+        If true, data is considered AT-TPC legacy format,
+        before the introduction of the FRIBDAQ.
     """
 
     run_min: int = -1
@@ -61,6 +64,7 @@ class RunParameters:
     do_cluster: bool = False
     do_estimate: bool = False
     do_solve: bool = False
+    is_legacy: bool = False
 
 
 @dataclass
@@ -327,6 +331,7 @@ def deserialize_config(json_data: dict[Any, Any]) -> Config:
     config.run.do_cluster = run_params["phase_cluster"]
     config.run.do_estimate = run_params["phase_estimate"]
     config.run.do_solve = run_params["phase_solve"]
+    config.run.is_legacy = run_params["is_legacy"]
 
     det_params = json_data["Detector"]
     config.detector.magnetic_field = det_params["magnetic_field(T)"]
