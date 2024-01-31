@@ -87,54 +87,71 @@ class GetEvent:
 
         if params.do_sat_fit == True:
             self.raw_traces = [
-                GetTrace(raw_data[idx, GET_DATA_TRACE_START:GET_DATA_TRACE_STOP].copy(),
-                hardware_id_from_array(row[0:5]), params)
+                GetTrace(
+                    raw_data[idx, GET_DATA_TRACE_START:GET_DATA_TRACE_STOP].copy(),
+                    hardware_id_from_array(row[0:5]),
+                    params,
+                )
                 for idx, row in enumerate(raw_data)
             ]
-            self.traces = fix_sat_peaks(self.raw_traces.copy(), self.traces.copy(), params.saturation_threshold, params)
+            self.traces = fix_sat_peaks(
+                self.raw_traces.copy(),
+                self.traces.copy(),
+                params.saturation_threshold,
+                params,
+            )
 
     def is_valid(self) -> bool:
         return self.name != INVALID_EVENT_NAME and self.number != INVALID_EVENT_NUMBER
-    
+
+
 # Function for fixing saturated peaks
-def fix_sat_peaks(raw_traces: list[GetTrace], adj_traces: list[GetTrace], sat_thresh: float, params: GetParameters):
+def fix_sat_peaks(
+    raw_traces: list[GetTrace],
+    adj_traces: list[GetTrace],
+    sat_thresh: float,
+    params: GetParameters,
+):
     tb_grid = np.arange(512)
-    
+
     # Find saturated points in each trace
     mask = [(trace_i.trace > sat_thresh) for trace_i in raw_traces]
 
     # Define fit function
     def SkewedGaussian(x, A, sigma, alpha, shift):
-        return A * np.exp(-((x-shift)**2)/2/sigma) * (1 + erf(alpha * (x-shift) / sigma))
-    
+        return (
+            A
+            * np.exp(-((x - shift) ** 2) / 2 / sigma)
+            * (1 + erf(alpha * (x - shift) / sigma))
+        )
+
     # Loop over all rows in mask
     for i in range(len(mask)):
         # If the row is all false (i.e no saturation) then continue
         if ~mask[i].any():
             continue
-            
+
         # Else the row has a saturated point
         else:
             # Calculate an initial guess for the fit parameters
-            guess = [
-                max(adj_traces[i].trace), 
-                2, 
-                0, 
-                np.mean(tb_grid[mask[i]])
-            ]
-            
+            guess = [max(adj_traces[i].trace), 2, 0, np.mean(tb_grid[mask[i]])]
+
             try:
                 # Fit the portion of the trace without the saturated points
-                popt, pcov = curve_fit(SkewedGaussian, tb_grid[~mask[i]], adj_traces[i].trace[~mask[i]], 
-                                       p0 = guess,
-                                       bounds = ([0, 0.01, -np.inf, 0], [np.inf, np.inf, np.inf, 512]))
+                popt, pcov = curve_fit(
+                    SkewedGaussian,
+                    tb_grid[~mask[i]],
+                    adj_traces[i].trace[~mask[i]],
+                    p0=guess,
+                    bounds=([0, 0.01, -np.inf, 0], [np.inf, np.inf, np.inf, 512]),
+                )
             except RuntimeError:
                 return adj_traces
-            
+
             # Replace saturated points with fit points
             adj_traces[i].trace[mask[i]] = SkewedGaussian(tb_grid, *popt)[mask[i]]
             adj_traces[i].find_peaks(params)
-    
+
     return adj_traces
 
 
