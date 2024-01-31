@@ -192,7 +192,7 @@ class ClusterParameters:
     min_size_lower_cutoff: int = 0
     circle_overlap_ratio: float = 0.0
     fractional_charge_threshold: float = 0.0
-    n_neighbors_outiler_test: int = 0
+    n_neighbors_outlier_test: int = 0
 
 
 @dataclass
@@ -367,7 +367,7 @@ def deserialize_config(json_data: dict[Any, Any]) -> Config:
     config.cluster.fractional_charge_threshold = cluster_params[
         "fractional_charge_threshold"
     ]
-    config.cluster.n_neighbors_outiler_test = cluster_params["n_neighbors_outlier_test"]
+    config.cluster.n_neighbors_outlier_test = cluster_params["n_neighbors_outlier_test"]
 
     est_params = json_data["Estimate"]
     config.estimate.min_total_trajectory_points = est_params[

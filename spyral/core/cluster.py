@@ -84,7 +84,7 @@ class Cluster:
         self.event = cloud.point_cloud.event_number
         self.label = cloud.label
         self.copy_cloud(cloud.point_cloud)
-        self.drop_outliers(params.n_neighbors_outiler_test)
+        self.drop_outliers(params.n_neighbors_outlier_test)
 
     def copy_cloud(self, cloud: PointCloud):
         """Copy PointCloud data to the cluster
