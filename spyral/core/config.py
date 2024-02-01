@@ -115,6 +115,10 @@ class GetParameters:
         The maximum peak width parameter used in scipy.signal.find_peaks
     peak_threshold: float
         The minimum amplitude of a valid peak
+    do_sat_fit: bool
+        If true, fits saturated peaks
+    saturation_threshold: float
+        The threshold above which a trace is flagged as saturated.
     """
 
     baseline_window_scale: float = 20.0
@@ -122,6 +126,8 @@ class GetParameters:
     peak_prominence: float = 20.0
     peak_max_width: float = 100.0
     peak_threshold: float = 25.0
+    do_sat_fit: bool = True
+    saturation_threshold: float = 4090.0
 
 
 @dataclass
@@ -346,6 +352,8 @@ def deserialize_config(json_data: dict[Any, Any]) -> Config:
     config.get.peak_prominence = get_params["peak_prominence"]
     config.get.peak_max_width = get_params["peak_max_width"]
     config.get.peak_threshold = get_params["peak_threshold"]
+    config.get.do_sat_fit = get_params["do_sat_fit"]
+    config.get.saturation_threshold = get_params["saturation_threshold"]
 
     frib_params = json_data["FRIB"]
     config.frib.baseline_window_scale = frib_params["baseline_window_scale"]
