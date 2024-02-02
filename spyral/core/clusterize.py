@@ -4,7 +4,7 @@ from .config import ClusterParameters
 from ..geometry.circle import least_squares_circle
 
 import sklearn.cluster as skcluster
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import numpy as np
 
 
@@ -181,6 +181,7 @@ def cleanup_clusters(
         convert_labeled_to_cluster(cluster, params)
         for cluster in clusters
         if cluster.label != -1
+        and len(cluster.point_cloud.cloud) > params.n_neighbors_outlier_test
     ]
 
 
@@ -207,34 +208,31 @@ def form_clusters(pc: PointCloud, params: ClusterParameters) -> list[LabeledClou
     """
     if len(pc.cloud) < params.min_cloud_size:
         return []
+    # Smooth out the point cloud by averaging over neighboring points within a distance, droping any duplicate points
     pc.smooth_cloud(params.smoothing_neighbor_distance)
 
-    clusterizer = None
     n_points = len(pc.cloud)
-    if n_points > params.big_event_cutoff:
-        clusterizer = skcluster.HDBSCAN(
-            min_cluster_size=params.min_size_big_event,
-            min_samples=params.min_points,
-            allow_single_cluster=True,
-        )
-    elif n_points > params.min_size_small_event:
-        clusterizer = skcluster.HDBSCAN(
-            min_cluster_size=params.min_size_small_event,
-            min_samples=params.min_points,
-            allow_single_cluster=True,
-        )
-    else:
-        return []
-
-    # Smooth out the point cloud by averaging over neighboring points within a distance, droping any duplicate points
+    min_size = int(params.min_size_scale_factor * n_points)
+    if min_size < params.min_size_lower_cutoff:
+        min_size = params.min_size_lower_cutoff
+    clusterizer = skcluster.HDBSCAN(
+        min_cluster_size=min_size,
+        min_samples=params.min_points,
+        allow_single_cluster=True,
+    )
 
     # Use spatial dimensions and integrated charge
     cluster_data = np.empty(shape=(len(pc.cloud), 4))
     cluster_data[:, :3] = pc.cloud[:, :3]
-    cluster_data[:, 3] = pc.cloud[:, 4]
+    cluster_data[:, 3] = pc.cloud[:, 3]
 
     # Unfiy feature ranges to their means and std deviations. StandardScaler calculates mean, and std for each feature
-    cluster_data = StandardScaler().fit(cluster_data).transform(cluster_data)
+    cluster_data[:, :3] = (
+        StandardScaler().fit(cluster_data[:, :3]).transform(cluster_data[:, :3])
+    )
+    cluster_data[:, 3] = (
+        MinMaxScaler().fit_transform(cluster_data[:, 3].reshape(-1, 1)).flatten()
+    )
 
     fitted_clusters = clusterizer.fit(cluster_data)
     labels = np.unique(fitted_clusters.labels_)

@@ -36,9 +36,7 @@ def interpolate_trajectory(
     state.vertex_y = fit_params["vertex_y"].value
     state.vertex_z = fit_params["vertex_z"].value
     momentum = QBRHO_2_P * (fit_params["brho"].value * float(ejectile.Z))
-    state.kinetic_energy = (
-        math.sqrt(momentum**2.0 + ejectile.mass**2.0) - ejectile.mass
-    )
+    state.kinetic_energy = math.sqrt(momentum**2.0 + ejectile.mass**2.0) - ejectile.mass
     state.polar = fit_params["polar"].value
     state.azimuthal = fit_params["azimuthal"].value
 
