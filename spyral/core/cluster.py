@@ -100,7 +100,7 @@ class Cluster:
         cloud.sort_in_z()
         self.data = np.zeros((len(cloud.cloud), 5))
         self.data[:, :3] = cloud.cloud[:, :3]  # position
-        self.data[:, 3] = cloud.cloud[:, 3]  # peak height
+        self.data[:, 3] = cloud.cloud[:, 4]  # peak integral
         self.data[:, 4] = cloud.cloud[:, 7]  # scale (big or small)
 
     def drop_outliers(self, neighbors=2):
