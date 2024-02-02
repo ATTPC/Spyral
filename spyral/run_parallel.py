@@ -43,7 +43,7 @@ def generate_shared_resources(config: Config):
 
     nuc_map = NuclearDataMap()
 
-    if config.run.do_pointcloud:
+    if config.run.do_pointcloud and config.detector.do_garfield_correction:
         ecorr_path = ws.get_correction_file_path(
             Path(config.detector.garfield_file_path)
         )
