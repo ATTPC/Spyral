@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.5">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.6">
     
     
       
@@ -2197,12 +2197,12 @@
 <h2 id="initial-clustering-with-hdbscan">Initial Clustering with HDBSCAN</h2>
 <p>In some ways AT-TPC data doesn't fit very neatly into many of the clustering algorithms. The data is in general noisy, trajectories are not isolated spatially, and the density of the points can vary within a single trajectory due to the small/large pads on the pad plane. Additionally, there can be gaps in the trajectory due to the hole in the pad plane. Thankfully, there is an algorithm, <a href="https://scikit-learn.org/stable/modules/clustering.html#hdbscan">HDBSCAN</a> which covers most of our bases.</p>
 <p>HDBSCAN is a modified DBSCAN algorithm; DBSCAN stands for Density-Based Spatial Clustering of Applications wth Noise, and is a powerful clustering algorithm for noisy data. It clusters points based on their density (closeness to neighbors), but it assumes a <em>global</em> density. This means that DBSCAN assumes all clusters have the same density of points. As we mentioned before, this is not so good for AT-TPC data which can change density quite a bit. HDBSCAN however does not have this limitation. HDBSCAN scans density values forming clusters over different densities; the way it does this is fairly involved and we direct you to the <a href="https://scikit-learn.org/stable/modules/clustering.html#hdbscan">scikit-learn docs</a> for more details.</p>
-<p>We cluster on four features: the spatial coordinates (x, y, z) and the integrated charge. Charge is included as this allows us to reject cross talk noise more effectively. However, for some datasets, it may be necessary to turn off the charge feature, particularly if the charge is very noisy. HDBSCAN, as implemented in scikit-learn, is also very fast, which is great cause we have to do a lot of clustering!</p>
+<p>We cluster on four features: the spatial coordinates (x, y, z) and the charge amplitude. Charge is included as this allows us to reject cross talk noise more effectively. However, for some datasets, it may be necessary to turn off the charge feature, particularly if the charge is very noisy. HDBSCAN, as implemented in scikit-learn, is also very fast, which is great because we have to do a lot of clustering!</p>
 <p>However, this doesn't perfectly cluster our data right off the bat. HDBSCAN will make clusters over all the densities, but each density will get it's own cluster! This is not exactly what we want; we need to connect these pieces together to form the total trajectory.</p>
 <p>The code for this is found in <code>spyral/core/clusterize.py</code> in the function <code>form_clusters</code>. There are several parameters to HDBSCAN that are exposed in the <a href="../../config/cluster/">configuration</a> of Spyral.</p>
 <h2 id="joining-of-clusters">Joining of Clusters</h2>
 <p>The core method of joining is relatively simple: each initial cluster is fit with a circle in the X-Y plane. If the circles overlap significantly they are taken to be from the same trajectory. The required amount of overlap is a <a href="../../config/cluster/">configuration</a> parameter to be tuned for each experiment. A secondary joining parameter is the relative mean charge of the two clusters to be joined; the two clusters should have a similar mean charge otherwise they do not belong together. Again, the threshold is a tunable parameter in the configuration.</p>
-<p>Joining is repeated until no more clusters can be joined together. These clusters are then taken to represent the complete detected particle trajectories for that event.</p>
+<p>Joining is repeated until clusters can no longer be joined together. These clusters are then taken to represent the complete detected particle trajectories for that event.</p>
 <p>The code for this is found in <code>spyral/core/clusterize.py</code> in the functions <code>join_clusters</code> and <code>join_clusters_depth</code>.</p>
 <h2 id="cleanup-of-the-final-clusters">Cleanup of the Final Clusters</h2>
 <p>As a last stage, a final noise removal is applied to each cluster. The <a href="https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.LocalOutlierFactor.html#sklearn.neighbors.LocalOutlierFactor">Local Outlier Factor</a> is an outlier test which compares the distance to nearest neighbors (neighbor density) to determine outlier points. The number of neighbors to use is an exposed <a href="../../config/cluster/">configuration</a> parameter.</p>
@@ -2259,7 +2259,7 @@
     <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.c18c5fb9.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.e1c3ead8.min.js"></script>
       
         <script src="../../../javascript/mathjax.js"></script>
       

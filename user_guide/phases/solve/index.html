@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.5">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.6">
     
     
       
@@ -2176,7 +2176,7 @@
 <p>Below we'll break down each of these steps</p>
 <h2 id="generating-the-interpolation-mesh">Generating the Interpolation Mesh</h2>
 <p>Before Spyral does anything, it will check to see if you're planning to run the solve phase. If you are, it will check to see if the interpolation mesh you requested (see the <a href="../../config/solver/">configuration</a>); if the mesh does not exist, it will generate one.</p>
-<p>In the <a href="../../config/solver/">configuration</a> you can specify the coarseness of the mesh; the particle species is taken from the given particle ID gate. Spyral walks through the kinetic energy, polar angle range at the steps needed for the number of bins requested, making a complete trajectory for each energy, angle. Each trajectory is 500 points long (1.0 &mu;s total time, 2 ns steps), with 3 double precision floats per point (x,y,z). As such, each trajectory is 12 kB of data. Multiply this by the total number of bins (energy bins x angle bins) to get the total size of the mesh in kB. Even trajectories which stop before the 1.0 &mu;s time window have the same total data size.</p>
+<p>In the <a href="../../config/solver/">configuration</a> you can specify the coarseness of the mesh; the particle species is taken from the given particle ID gate. Spyral walks through the kinetic energy, polar angle range at the steps needed for the number of bins requested, making a complete trajectory for each energy, angle. The time window range for the ODE solver is 1 &mu;s. The number of time steps is a configuration parameter and can be used to optimize resolution. Each step saves 3 double precision floats (8 bytes) for 24 bytes per point. Multiply this by the total number of bins (energy bins x angle bins x timesteps) to get the total size of the mesh in bytes. Even trajectories which stop before the 1.0 &mu;s time window have the same total data size. This will give you an idea of what the size of your mesh will be.</p>
 <p>The mesh size is important for several reasons. First is, obviously, a finer mesh (more bins) gives better results, as it reduces the degree of interpolation. But since a finer mesh is bigger, the computational strain is larger. The interpolation is a bilinear interpolation; it requires the <em>entire</em> mesh be loaded into memory. This limits the size of the mesh to the amount of memory in your machine divided by the number of parallel processes.</p>
 <p>Finally, when a trajectory is requested, Spyral interpolates on energy and angle to get a trajectory of 500 points or fewer (points where the particle stopped are trimmed). Spyral then interpolates the trajectory in z, returning an interpolated (x,y) for a given z value.</p>
 <p>When a trajectory is requested, the full energy, polar angle, azimuthal angle, and reaction vertex must be given. The azimuthal angle and vertex are used to rotate and translate the trajectory to the proper orientation (this reduces the phase space of the interpolation mesh).</p>
@@ -2241,7 +2241,7 @@
     <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.c18c5fb9.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.e1c3ead8.min.js"></script>
       
         <script src="../../../javascript/mathjax.js"></script>
       

@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.5">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.6">
     
     
       
@@ -1187,9 +1187,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#spyral.core.estimator.estimate_physics" class="md-nav__link">
+  <a href="#spyral.core.estimator.estimate_physics_pass" class="md-nav__link">
     <span class="md-ellipsis">
-      estimate_physics
+      estimate_physics_pass
     </span>
   </a>
   
@@ -2141,9 +2141,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#spyral.core.estimator.estimate_physics" class="md-nav__link">
+  <a href="#spyral.core.estimator.estimate_physics_pass" class="md-nav__link">
     <span class="md-ellipsis">
-      estimate_physics
+      estimate_physics_pass
     </span>
   </a>
   
@@ -2318,8 +2318,8 @@
 
 
 
-<h2 id="spyral.core.estimator.estimate_physics" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">estimate_physics</span><span class="p">(</span><span class="n">cluster_index</span><span class="p">,</span> <span class="n">cluster</span><span class="p">,</span> <span class="n">ic_amplitude</span><span class="p">,</span> <span class="n">ic_centroid</span><span class="p">,</span> <span class="n">ic_integral</span><span class="p">,</span> <span class="n">estimate_params</span><span class="p">,</span> <span class="n">detector_params</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span></code>
+<h2 id="spyral.core.estimator.estimate_physics_pass" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">estimate_physics_pass</span><span class="p">(</span><span class="n">cluster_index</span><span class="p">,</span> <span class="n">cluster</span><span class="p">,</span> <span class="n">ic_amplitude</span><span class="p">,</span> <span class="n">ic_centroid</span><span class="p">,</span> <span class="n">ic_integral</span><span class="p">,</span> <span class="n">estimate_params</span><span class="p">,</span> <span class="n">detector_params</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">chosen_direction</span><span class="o">=</span><span class="n">Direction</span><span class="o">.</span><span class="n">NONE</span><span class="p">)</span></code>
 
 </h2>
 
@@ -2460,88 +2460,7 @@ manipulation of the data.</p>
 
           <details class="quote">
             <summary>Source code in <code>spyral/core/estimator.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 30</span>
-<span class="normal"> 31</span>
-<span class="normal"> 32</span>
-<span class="normal"> 33</span>
-<span class="normal"> 34</span>
-<span class="normal"> 35</span>
-<span class="normal"> 36</span>
-<span class="normal"> 37</span>
-<span class="normal"> 38</span>
-<span class="normal"> 39</span>
-<span class="normal"> 40</span>
-<span class="normal"> 41</span>
-<span class="normal"> 42</span>
-<span class="normal"> 43</span>
-<span class="normal"> 44</span>
-<span class="normal"> 45</span>
-<span class="normal"> 46</span>
-<span class="normal"> 47</span>
-<span class="normal"> 48</span>
-<span class="normal"> 49</span>
-<span class="normal"> 50</span>
-<span class="normal"> 51</span>
-<span class="normal"> 52</span>
-<span class="normal"> 53</span>
-<span class="normal"> 54</span>
-<span class="normal"> 55</span>
-<span class="normal"> 56</span>
-<span class="normal"> 57</span>
-<span class="normal"> 58</span>
-<span class="normal"> 59</span>
-<span class="normal"> 60</span>
-<span class="normal"> 61</span>
-<span class="normal"> 62</span>
-<span class="normal"> 63</span>
-<span class="normal"> 64</span>
-<span class="normal"> 65</span>
-<span class="normal"> 66</span>
-<span class="normal"> 67</span>
-<span class="normal"> 68</span>
-<span class="normal"> 69</span>
-<span class="normal"> 70</span>
-<span class="normal"> 71</span>
-<span class="normal"> 72</span>
-<span class="normal"> 73</span>
-<span class="normal"> 74</span>
-<span class="normal"> 75</span>
-<span class="normal"> 76</span>
-<span class="normal"> 77</span>
-<span class="normal"> 78</span>
-<span class="normal"> 79</span>
-<span class="normal"> 80</span>
-<span class="normal"> 81</span>
-<span class="normal"> 82</span>
-<span class="normal"> 83</span>
-<span class="normal"> 84</span>
-<span class="normal"> 85</span>
-<span class="normal"> 86</span>
-<span class="normal"> 87</span>
-<span class="normal"> 88</span>
-<span class="normal"> 89</span>
-<span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
-<span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
-<span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">111</span>
 <span class="normal">112</span>
 <span class="normal">113</span>
 <span class="normal">114</span>
@@ -2632,7 +2551,80 @@ manipulation of the data.</p>
 <span class="normal">199</span>
 <span class="normal">200</span>
 <span class="normal">201</span>
-<span class="normal">202</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">estimate_physics</span><span class="p">(</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
+<span class="normal">241</span>
+<span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">estimate_physics_pass</span><span class="p">(</span>
     <span class="n">cluster_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">cluster</span><span class="p">:</span> <span class="n">Cluster</span><span class="p">,</span>
     <span class="n">ic_amplitude</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -2641,7 +2633,8 @@ manipulation of the data.</p>
     <span class="n">estimate_params</span><span class="p">:</span> <span class="n">EstimateParameters</span><span class="p">,</span>
     <span class="n">detector_params</span><span class="p">:</span> <span class="n">DetectorParameters</span><span class="p">,</span>
     <span class="n">results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span>
-<span class="p">):</span>
+    <span class="n">chosen_direction</span><span class="p">:</span> <span class="n">Direction</span> <span class="o">=</span> <span class="n">Direction</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Direction</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Estimate the physics parameters for a cluster which could represent a particle trajectory</span>
 
 <span class="sd">    Estimation is an imprecise process (by definition), and as such this algorithm requires a lot of</span>
@@ -2669,7 +2662,7 @@ manipulation of the data.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Do some cleanup, reject clusters which have too few points</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cluster</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">estimate_params</span><span class="o">.</span><span class="n">min_total_trajectory_points</span><span class="p">:</span>
-        <span class="k">return</span>
+        <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">Direction</span><span class="o">.</span><span class="n">NONE</span><span class="p">)</span>
     <span class="n">beam_region_fraction</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
         <span class="nb">len</span><span class="p">(</span>
             <span class="n">cluster</span><span class="o">.</span><span class="n">data</span><span class="p">[</span>
@@ -2679,39 +2672,17 @@ manipulation of the data.</p>
         <span class="p">)</span>
     <span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cluster</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">beam_region_fraction</span> <span class="o">&gt;</span> <span class="mf">0.9</span><span class="p">:</span>
-        <span class="k">return</span>
+        <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">Direction</span><span class="o">.</span><span class="n">NONE</span><span class="p">)</span>
 
-    <span class="n">rhos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">cluster</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># cylindrical coordinates rho</span>
-    <span class="n">direction</span> <span class="o">=</span> <span class="n">Direction</span><span class="o">.</span><span class="n">NONE</span>
-
+    <span class="n">direction</span> <span class="o">=</span> <span class="n">chosen_direction</span>
     <span class="n">vertex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>  <span class="c1"># reaction vertex</span>
     <span class="n">center</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span>  <span class="c1"># spiral center</span>
-
-    <span class="n">halfway</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cluster</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">)</span>
-    <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">begin_radius</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">least_squares_circle</span><span class="p">(</span>
-        <span class="n">cluster</span><span class="o">.</span><span class="n">data</span><span class="p">[:</span><span class="n">halfway</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">cluster</span><span class="o">.</span><span class="n">data</span><span class="p">[:</span><span class="n">halfway</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
-    <span class="p">)</span>
-    <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">end_radius</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">least_squares_circle</span><span class="p">(</span>
-        <span class="n">cluster</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">halfway</span><span class="p">:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">cluster</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">halfway</span><span class="p">:,</span> <span class="mi">1</span><span class="p">]</span>
-    <span class="p">)</span>
-    <span class="n">max_rho_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">rhos</span><span class="p">)</span>
-
-    <span class="c1"># See if in-spiraling to the window or microgmegas, sets the direction and guess of z-vertex</span>
-    <span class="c1"># If backward, flip the ordering of the cloud to simplify algorithm</span>
-    <span class="c1"># First check if max rho is at the end of the track. If so, didn&#39;t make a complete arc</span>
-    <span class="c1"># Else use circle fits to begin/end</span>
-    <span class="k">if</span> <span class="n">max_rho_index</span> <span class="o">&gt;</span> <span class="mf">0.9</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">rhos</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">rhos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">rhos</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
-            <span class="n">direction</span> <span class="o">=</span> <span class="n">Direction</span><span class="o">.</span><span class="n">FORWARD</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">direction</span> <span class="o">=</span> <span class="n">Direction</span><span class="o">.</span><span class="n">BACKWARD</span>
-    <span class="k">elif</span> <span class="n">begin_radius</span> <span class="o">&lt;</span> <span class="n">end_radius</span><span class="p">:</span>
-        <span class="n">direction</span> <span class="o">=</span> <span class="n">Direction</span><span class="o">.</span><span class="n">BACKWARD</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">direction</span> <span class="o">=</span> <span class="n">Direction</span><span class="o">.</span><span class="n">FORWARD</span>
+    <span class="c1"># If chosen direction is set to NONE, we want to have the algorithm</span>
+    <span class="c1"># try to decide which direction the trajectory is going</span>
+    <span class="k">if</span> <span class="n">direction</span> <span class="o">==</span> <span class="n">Direction</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span>
+        <span class="n">direction</span> <span class="o">=</span> <span class="n">choose_direction</span><span class="p">(</span><span class="n">cluster</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">direction</span> <span class="o">==</span> <span class="n">Direction</span><span class="o">.</span><span class="n">BACKWARD</span><span class="p">:</span>
-        <span class="n">rhos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">rhos</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">cluster</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flip</span><span class="p">(</span><span class="n">cluster</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="c1"># Guess that the vertex is the first point; make sure to copy! not reference</span>
@@ -2726,7 +2697,8 @@ manipulation of the data.</p>
     <span class="n">center</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">center</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">radius</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">least_squares_circle</span><span class="p">(</span>
         <span class="n">first_arc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">first_arc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
     <span class="p">)</span>
-    <span class="n">circle</span> <span class="o">=</span> <span class="n">generate_circle_points</span><span class="p">(</span><span class="n">center</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">center</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">radius</span><span class="p">)</span>
+    <span class="n">better_radius</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">cluster</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">center</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">circle</span> <span class="o">=</span> <span class="n">generate_circle_points</span><span class="p">(</span><span class="n">center</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">center</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">better_radius</span><span class="p">)</span>
     <span class="c1"># Re-estimate vertex using the fitted circle. Extrapolate back to point closest to beam axis</span>
     <span class="n">vertex_estimate_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">circle</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">vertex</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">circle</span><span class="p">[</span><span class="n">vertex_estimate_index</span><span class="p">]</span>
@@ -2735,6 +2707,7 @@ manipulation of the data.</p>
 
     <span class="c1"># Do a linear fit to small segment of trajectory to extract rho vs. z and extrapolate vertex z</span>
     <span class="n">test_index</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">maximum</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">))</span>
+    <span class="c1"># test_index = 10</span>
     <span class="n">fit</span> <span class="o">=</span> <span class="n">linregress</span><span class="p">(</span><span class="n">cluster</span><span class="o">.</span><span class="n">data</span><span class="p">[:</span><span class="n">test_index</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">rho_to_vertex</span><span class="p">[:</span><span class="n">test_index</span><span class="p">])</span>
     <span class="n">vertex_rho</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">vertex</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
     <span class="n">vertex</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">vertex_rho</span> <span class="o">-</span> <span class="n">fit</span><span class="o">.</span><span class="n">intercept</span><span class="p">)</span> <span class="o">/</span> <span class="n">fit</span><span class="o">.</span><span class="n">slope</span>
@@ -2742,10 +2715,18 @@ manipulation of the data.</p>
 
     <span class="c1"># Toss tracks whose verticies are not close to the origin in x,y</span>
     <span class="k">if</span> <span class="n">vertex_rho</span> <span class="o">&gt;</span> <span class="n">estimate_params</span><span class="o">.</span><span class="n">max_distance_from_beam_axis</span><span class="p">:</span>
-        <span class="k">return</span>
+        <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">Direction</span><span class="o">.</span><span class="n">NONE</span><span class="p">)</span>
 
     <span class="n">polar</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan</span><span class="p">(</span><span class="n">fit</span><span class="o">.</span><span class="n">slope</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">direction</span> <span class="ow">is</span> <span class="n">Direction</span><span class="o">.</span><span class="n">BACKWARD</span><span class="p">:</span>
+    <span class="c1"># We have a self consistency case here. Polar should match chosen Direction</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">polar</span> <span class="o">&gt;</span> <span class="mf">0.0</span> <span class="ow">and</span> <span class="n">direction</span> <span class="o">==</span> <span class="n">Direction</span><span class="o">.</span><span class="n">BACKWARD</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+        <span class="n">polar</span> <span class="o">&lt;</span> <span class="mf">0.0</span> <span class="ow">and</span> <span class="n">direction</span> <span class="o">==</span> <span class="n">Direction</span><span class="o">.</span><span class="n">FORWARD</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="kc">False</span><span class="p">,</span>
+            <span class="n">direction</span><span class="p">,</span>
+        <span class="p">)</span>  <span class="c1"># Our direction guess was bad, we need to try again with the other direction</span>
+    <span class="k">elif</span> <span class="n">direction</span> <span class="ow">is</span> <span class="n">Direction</span><span class="o">.</span><span class="n">BACKWARD</span><span class="p">:</span>
         <span class="n">polar</span> <span class="o">+=</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span>
 
     <span class="c1"># From the trigonometry of the system to the center</span>
@@ -2756,7 +2737,9 @@ manipulation of the data.</p>
     <span class="k">if</span> <span class="n">azimuthal</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">azimuthal</span> <span class="o">+=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span>
 
-    <span class="n">brho</span> <span class="o">=</span> <span class="n">detector_params</span><span class="o">.</span><span class="n">magnetic_field</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">*</span> <span class="mf">0.001</span> <span class="o">/</span> <span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">polar</span><span class="p">))</span>
+    <span class="n">brho</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">detector_params</span><span class="o">.</span><span class="n">magnetic_field</span> <span class="o">*</span> <span class="n">better_radius</span> <span class="o">*</span> <span class="mf">0.001</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">polar</span><span class="p">))</span>
+    <span class="p">)</span>  <span class="c1"># Sometimes our angle is in the wrong quadrant</span>
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">brho</span><span class="p">):</span>
         <span class="n">brho</span> <span class="o">=</span> <span class="mf">0.0</span>
 
@@ -2764,7 +2747,7 @@ manipulation of the data.</p>
     <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">first_arc</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
         <span class="n">arclength</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">first_arc</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">first_arc</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">])</span>
     <span class="k">if</span> <span class="n">arclength</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
-        <span class="k">return</span>
+        <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">Direction</span><span class="o">.</span><span class="n">NONE</span><span class="p">)</span>
     <span class="n">charge_deposited</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">first_arc</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">])</span>
     <span class="n">dEdx</span> <span class="o">=</span> <span class="n">charge_deposited</span> <span class="o">/</span> <span class="n">arclength</span>
 
@@ -2805,6 +2788,7 @@ manipulation of the data.</p>
     <span class="n">results</span><span class="p">[</span><span class="s2">&quot;direction&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">direction</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
     <span class="n">results</span><span class="p">[</span><span class="s2">&quot;eloss&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eloss</span><span class="p">)</span>
     <span class="n">results</span><span class="p">[</span><span class="s2">&quot;cutoff_index&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cutoff_index</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">direction</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -2867,7 +2851,7 @@ manipulation of the data.</p>
     <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.c18c5fb9.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.e1c3ead8.min.js"></script>
       
         <script src="../../../javascript/mathjax.js"></script>
       

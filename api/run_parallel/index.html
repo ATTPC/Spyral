@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.5">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.6">
     
     
       
@@ -2328,7 +2328,7 @@ processors are started. Otherwise, there may be race conditions.</p>
 
     <span class="n">nuc_map</span> <span class="o">=</span> <span class="n">NuclearDataMap</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">do_pointcloud</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">do_pointcloud</span> <span class="ow">and</span> <span class="n">config</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">do_garfield_correction</span><span class="p">:</span>
         <span class="n">ecorr_path</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">get_correction_file_path</span><span class="p">(</span>
             <span class="n">Path</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">garfield_file_path</span><span class="p">)</span>
         <span class="p">)</span>
@@ -2698,7 +2698,7 @@ used to generate a set of child processes to analyze the data range.</p>
     <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.c18c5fb9.min.js"></script>
+      <script src="../../assets/javascripts/bundle.e1c3ead8.min.js"></script>
       
         <script src="../../javascript/mathjax.js"></script>
       

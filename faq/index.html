@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.5">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.6">
     
     
       
@@ -2058,7 +2058,7 @@
         <li class="md-nav__item">
   <a href="#i-just-downloaded-spyral-and-nothing-is-working" class="md-nav__link">
     <span class="md-ellipsis">
-      I just downloaded Spyral and nothing is working!
+      I just downloaded Spyral and nothing is working
     </span>
   </a>
   
@@ -2068,6 +2068,15 @@
   <a href="#what-do-all-these-configuration-parameters-mean" class="md-nav__link">
     <span class="md-ellipsis">
       What do all these configuration parameters mean?
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-cant-i-install-spyral-with-pip-ie-pip-install-spyral-why-cant-i-import-spyral" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why can't I install Spyral with pip (i.e. pip install spyral)? Why can't I import spyral?
     </span>
   </a>
   
@@ -2148,7 +2157,7 @@
         <li class="md-nav__item">
   <a href="#i-just-downloaded-spyral-and-nothing-is-working" class="md-nav__link">
     <span class="md-ellipsis">
-      I just downloaded Spyral and nothing is working!
+      I just downloaded Spyral and nothing is working
     </span>
   </a>
   
@@ -2158,6 +2167,15 @@
   <a href="#what-do-all-these-configuration-parameters-mean" class="md-nav__link">
     <span class="md-ellipsis">
       What do all these configuration parameters mean?
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-cant-i-install-spyral-with-pip-ie-pip-install-spyral-why-cant-i-import-spyral" class="md-nav__link">
+    <span class="md-ellipsis">
+      Why can't I install Spyral with pip (i.e. pip install spyral)? Why can't I import spyral?
     </span>
   </a>
   
@@ -2187,10 +2205,15 @@
 <p>Spyral has docstrings and comments extensively in the code. If you are writing or using Spyral and want to know what is happening in a specific part, the documentation on this site can give you an overview, but the real fine-grained details will be self documented in the code.</p>
 <h2 id="how-can-i-contriubte-to-spyral">How can I contriubte to Spyral?</h2>
 <p>See <a href="../for_devs/">For Developers</a></p>
-<h2 id="i-just-downloaded-spyral-and-nothing-is-working">I just downloaded Spyral and nothing is working!</h2>
+<h2 id="i-just-downloaded-spyral-and-nothing-is-working">I just downloaded Spyral and nothing is working</h2>
 <p>See the <a href="../user_guide/getting_started/">User Guide</a></p>
 <h2 id="what-do-all-these-configuration-parameters-mean">What do all these configuration parameters mean?</h2>
 <p>See <a href="../user_guide/config/about/">Configuration</a></p>
+<h2 id="why-cant-i-install-spyral-with-pip-ie-pip-install-spyral-why-cant-i-import-spyral">Why can't I install Spyral with pip (i.e. <code>pip install spyral</code>)? Why can't I <code>import spyral</code>?</h2>
+<p>Spyral is <em>not</em> a library/package. Spyral is an application, intended to be run by users through the provided entry points (notebooks or scripts). This is also reflected in the way Spyral handles dependencies. We pin versions explicitly, to ensure that the code will run identically in whatever environment it is installed to.</p>
+<p>More importantly, it will be extremely rare that Spyral works perfectly right out of the box for any analysis; the AT-TPC is such a powerful tool, that can be used to take such a wide range of data, that no one single analysis will work perfectly for all of these use cases. A good example of this is the so-called estimation phase of AT-TPC analysis where we attempt to guess the physical properties of a trajectory for use in the final fitting/solving phase. This phase is extremely sensitive to the shape/size of the data being analyzed. As such, even more so than an application, Spyral is a <em>framework</em>, a ground floor providing the basic building blocks of AT-TPC analysis. We want users to have access to the source code, and be able to modify the behavior to fit their needs without having to be restricted by our design choices, because we cannot predict every use case.</p>
+<p>This may change in the future, in particular as Spyral matures and becomes more tested, it may become clear that a more rigid analysis environment will provide users with a better access point to AT-TPC analysis. In such as case, Spyral may migrate to an installable package.</p>
+<p>Please let us know what you think on this topic! User feedback will be critical for determining the path forward for Spyral.</p>
 
 
 
@@ -2240,7 +2263,7 @@
     <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.c18c5fb9.min.js"></script>
+      <script src="../assets/javascripts/bundle.e1c3ead8.min.js"></script>
       
         <script src="../javascript/mathjax.js"></script>
       

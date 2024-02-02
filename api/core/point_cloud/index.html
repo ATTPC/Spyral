@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.5">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.6">
     
     
       
@@ -2451,14 +2451,6 @@ Each row is [x,y,z,amplitude,integral,pad id,time,scale]</p>
             </td>
           </tr>
           <tr>
-            <td><code><span title="spyral.core.point_cloud.PointCloud.smooth_cloud_neighborship">smooth_cloud_neighborship</span></code></td>
-            <td>
-              <div class="doc-md-description">
-                <p>Smooth the point cloud data using an neighborship of neighbors</p>
-              </div>
-            </td>
-          </tr>
-          <tr>
             <td><code><a class="autorefs autorefs-internal" title="spyral.core.point_cloud.PointCloud.sort_in_z" href="#spyral.core.point_cloud.PointCloud.sort_in_z">sort_in_z</a></code></td>
             <td>
               <div class="doc-md-description">
@@ -2701,8 +2693,6 @@ Each row is [x,y,z,amplitude,integral,pad id,time,scale]</p>
 <span class="sd">        Calibrate the cloud z-position from the micromegas and window time references</span>
 <span class="sd">    smooth_cloud(max_distance: float = 10.0)</span>
 <span class="sd">        Smooth the point cloud data using an neighborhood of radius max_distance</span>
-<span class="sd">    smooth_cloud_neighborship(neighbors: int = 5)</span>
-<span class="sd">        Smooth the point cloud data using an neighborship of neighbors</span>
 <span class="sd">    sort_in_z()</span>
 <span class="sd">        Sort the internal point cloud array by z-position</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -2719,7 +2709,7 @@ Each row is [x,y,z,amplitude,integral,pad id,time,scale]</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">load_cloud_from_get_event</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">GetEvent</span><span class="p">,</span> <span class="n">pmap</span><span class="p">:</span> <span class="n">PadMap</span><span class="p">,</span> <span class="n">corrector</span><span class="p">:</span> <span class="n">ElectronCorrector</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">GetEvent</span><span class="p">,</span> <span class="n">pmap</span><span class="p">:</span> <span class="n">PadMap</span><span class="p">,</span> <span class="n">corrector</span><span class="p">:</span> <span class="n">ElectronCorrector</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Load a point cloud from a GetEvent</span>
 
@@ -2733,8 +2723,8 @@ Each row is [x,y,z,amplitude,integral,pad id,time,scale]</p>
 <span class="sd">            The GetEvent whose data should be loaded</span>
 <span class="sd">        pmap: PadMap</span>
 <span class="sd">            The PadMap used to get pad correction values</span>
-<span class="sd">        corrector: ElectronCorrector</span>
-<span class="sd">            The Garfield electron drift correction</span>
+<span class="sd">        corrector: ElectronCorrector | None</span>
+<span class="sd">            The optional Garfield electron drift correction</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">event_number</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">number</span>
         <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
@@ -2773,7 +2763,9 @@ Each row is [x,y,z,amplitude,integral,pad id,time,scale]</p>
                     <span class="n">peak</span><span class="o">.</span><span class="n">centroid</span> <span class="o">+</span> <span class="n">pad</span><span class="o">.</span><span class="n">time_offset</span>
                 <span class="p">)</span>  <span class="c1"># Time bucket with correction</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">pad</span><span class="o">.</span><span class="n">scale</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">corrector</span><span class="o">.</span><span class="n">correct_point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+                <span class="c1"># Apply correction if requested</span>
+                <span class="k">if</span> <span class="n">corrector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">corrector</span><span class="o">.</span><span class="n">correct_point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
                 <span class="n">idx</span> <span class="o">+=</span> <span class="mi">1</span>
 
     <span class="k">def</span> <span class="nf">load_cloud_from_hdf5_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">event_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
@@ -2857,7 +2849,7 @@ Each row is [x,y,z,amplitude,integral,pad id,time,scale]</p>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">neighbors</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="k">continue</span>
             <span class="c1"># Weight points</span>
-            <span class="n">weighted_average</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">neighbors</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">neighbors</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">])</span>
+            <span class="n">weighted_average</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">neighbors</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">neighbors</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">weighted_average</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">):</span>
                 <span class="k">continue</span>
             <span class="n">smoothed_cloud</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">weighted_average</span>
@@ -2928,16 +2920,16 @@ Each row is [x,y,z,amplitude,integral,pad id,time,scale]</p>
 
           <details class="quote">
             <summary>Source code in <code>spyral/core/point_cloud.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">47</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
 <span class="normal">48</span>
 <span class="normal">49</span>
 <span class="normal">50</span>
 <span class="normal">51</span>
 <span class="normal">52</span>
 <span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">54</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create an empty point cloud</span>
 
 <span class="sd">    Returns</span>
@@ -3170,7 +3162,7 @@ Each row is [x,y,z,amplitude,integral,pad id,time,scale]</p>
 
 
 <h3 id="spyral.core.point_cloud.PointCloud.load_cloud_from_get_event" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">load_cloud_from_get_event</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">pmap</span><span class="p">,</span> <span class="n">corrector</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">load_cloud_from_get_event</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">pmap</span><span class="p">,</span> <span class="n">corrector</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 </h3>
 
@@ -3226,15 +3218,15 @@ and the pad time correction</p>
         <tr>
           <td><code>corrector</code></td>
           <td>
-                <code><a class="autorefs autorefs-internal" title="spyral.correction.ElectronCorrector" href="../../correction/electron_corrector/#spyral.correction.electron_corrector.ElectronCorrector">ElectronCorrector</a></code>
+                <code><a class="autorefs autorefs-internal" title="spyral.correction.ElectronCorrector" href="../../correction/electron_corrector/#spyral.correction.electron_corrector.ElectronCorrector">ElectronCorrector</a> | None</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>The Garfield electron drift correction</p>
+              <p>The optional Garfield electron drift correction</p>
             </div>
           </td>
           <td>
-              <em>required</em>
+                <code>None</code>
           </td>
         </tr>
     </tbody>
@@ -3242,7 +3234,9 @@ and the pad time correction</p>
 
           <details class="quote">
             <summary>Source code in <code>spyral/core/point_cloud.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 58</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
 <span class="normal"> 59</span>
 <span class="normal"> 60</span>
 <span class="normal"> 61</span>
@@ -3299,7 +3293,7 @@ and the pad time correction</p>
 <span class="normal">112</span>
 <span class="normal">113</span>
 <span class="normal">114</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_cloud_from_get_event</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">GetEvent</span><span class="p">,</span> <span class="n">pmap</span><span class="p">:</span> <span class="n">PadMap</span><span class="p">,</span> <span class="n">corrector</span><span class="p">:</span> <span class="n">ElectronCorrector</span>
+    <span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="n">GetEvent</span><span class="p">,</span> <span class="n">pmap</span><span class="p">:</span> <span class="n">PadMap</span><span class="p">,</span> <span class="n">corrector</span><span class="p">:</span> <span class="n">ElectronCorrector</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Load a point cloud from a GetEvent</span>
 
@@ -3313,8 +3307,8 @@ and the pad time correction</p>
 <span class="sd">        The GetEvent whose data should be loaded</span>
 <span class="sd">    pmap: PadMap</span>
 <span class="sd">        The PadMap used to get pad correction values</span>
-<span class="sd">    corrector: ElectronCorrector</span>
-<span class="sd">        The Garfield electron drift correction</span>
+<span class="sd">    corrector: ElectronCorrector | None</span>
+<span class="sd">        The optional Garfield electron drift correction</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">event_number</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">number</span>
     <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
@@ -3353,7 +3347,9 @@ and the pad time correction</p>
                 <span class="n">peak</span><span class="o">.</span><span class="n">centroid</span> <span class="o">+</span> <span class="n">pad</span><span class="o">.</span><span class="n">time_offset</span>
             <span class="p">)</span>  <span class="c1"># Time bucket with correction</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="n">pad</span><span class="o">.</span><span class="n">scale</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">corrector</span><span class="o">.</span><span class="n">correct_point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+            <span class="c1"># Apply correction if requested</span>
+            <span class="k">if</span> <span class="n">corrector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">corrector</span><span class="o">.</span><span class="n">correct_point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
             <span class="n">idx</span> <span class="o">+=</span> <span class="mi">1</span>
 </code></pre></div></td></tr></table></div>
           </details>
@@ -3615,7 +3611,7 @@ This modifies the underlying point cloud array</p>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">neighbors</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
             <span class="k">continue</span>
         <span class="c1"># Weight points</span>
-        <span class="n">weighted_average</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">neighbors</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">neighbors</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">])</span>
+        <span class="n">weighted_average</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">neighbors</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">neighbors</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">weighted_average</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">):</span>
             <span class="k">continue</span>
         <span class="n">smoothed_cloud</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">weighted_average</span>
@@ -3727,7 +3723,7 @@ This modifies the underlying point cloud array</p>
     <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.c18c5fb9.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.e1c3ead8.min.js"></script>
       
         <script src="../../../javascript/mathjax.js"></script>
       

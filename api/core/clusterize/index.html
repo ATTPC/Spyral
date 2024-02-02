@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.5">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.6">
     
     
       
@@ -2332,7 +2332,8 @@
 <span class="normal">181</span>
 <span class="normal">182</span>
 <span class="normal">183</span>
-<span class="normal">184</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">cleanup_clusters</span><span class="p">(</span>
+<span class="normal">184</span>
+<span class="normal">185</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">cleanup_clusters</span><span class="p">(</span>
     <span class="n">clusters</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">LabeledCloud</span><span class="p">],</span> <span class="n">params</span><span class="p">:</span> <span class="n">ClusterParameters</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Cluster</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Converts the LabeledClouds to Clusters and bins the data in z</span>
@@ -2353,6 +2354,7 @@
         <span class="n">convert_labeled_to_cluster</span><span class="p">(</span><span class="n">cluster</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">cluster</span> <span class="ow">in</span> <span class="n">clusters</span>
         <span class="k">if</span> <span class="n">cluster</span><span class="o">.</span><span class="n">label</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">cluster</span><span class="o">.</span><span class="n">point_cloud</span><span class="o">.</span><span class="n">cloud</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">params</span><span class="o">.</span><span class="n">n_neighbors_outlier_test</span>
     <span class="p">]</span>
 </code></pre></div></td></tr></table></div>
           </details>
@@ -2450,8 +2452,7 @@ clustered by HDBSCAN and the clusters are returned.</p>
 
           <details class="quote">
             <summary>Source code in <code>spyral/core/clusterize.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">187</span>
-<span class="normal">188</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">188</span>
 <span class="normal">189</span>
 <span class="normal">190</span>
 <span class="normal">191</span>
@@ -2511,9 +2512,7 @@ clustered by HDBSCAN and the clusters are returned.</p>
 <span class="normal">245</span>
 <span class="normal">246</span>
 <span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">form_clusters</span><span class="p">(</span><span class="n">pc</span><span class="p">:</span> <span class="n">PointCloud</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">ClusterParameters</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">LabeledCloud</span><span class="p">]:</span>
+<span class="normal">248</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">form_clusters</span><span class="p">(</span><span class="n">pc</span><span class="p">:</span> <span class="n">PointCloud</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">ClusterParameters</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">LabeledCloud</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply the HDBSCAN clustering algorithm to a PointCloud</span>
 
 <span class="sd">    Analyze a point cloud, and group the points into clusters which in principle should correspond to particle trajectories. This analysis contains several steps,</span>
@@ -2536,34 +2535,31 @@ clustered by HDBSCAN and the clusters are returned.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pc</span><span class="o">.</span><span class="n">cloud</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">params</span><span class="o">.</span><span class="n">min_cloud_size</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">[]</span>
+    <span class="c1"># Smooth out the point cloud by averaging over neighboring points within a distance, droping any duplicate points</span>
     <span class="n">pc</span><span class="o">.</span><span class="n">smooth_cloud</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">smoothing_neighbor_distance</span><span class="p">)</span>
 
-    <span class="n">clusterizer</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">n_points</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pc</span><span class="o">.</span><span class="n">cloud</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">n_points</span> <span class="o">&gt;</span> <span class="n">params</span><span class="o">.</span><span class="n">big_event_cutoff</span><span class="p">:</span>
-        <span class="n">clusterizer</span> <span class="o">=</span> <span class="n">skcluster</span><span class="o">.</span><span class="n">HDBSCAN</span><span class="p">(</span>
-            <span class="n">min_cluster_size</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">min_size_big_event</span><span class="p">,</span>
-            <span class="n">min_samples</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">min_points</span><span class="p">,</span>
-            <span class="n">allow_single_cluster</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="p">)</span>
-    <span class="k">elif</span> <span class="n">n_points</span> <span class="o">&gt;</span> <span class="n">params</span><span class="o">.</span><span class="n">min_size_small_event</span><span class="p">:</span>
-        <span class="n">clusterizer</span> <span class="o">=</span> <span class="n">skcluster</span><span class="o">.</span><span class="n">HDBSCAN</span><span class="p">(</span>
-            <span class="n">min_cluster_size</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">min_size_small_event</span><span class="p">,</span>
-            <span class="n">min_samples</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">min_points</span><span class="p">,</span>
-            <span class="n">allow_single_cluster</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">[]</span>
-
-    <span class="c1"># Smooth out the point cloud by averaging over neighboring points within a distance, droping any duplicate points</span>
+    <span class="n">min_size</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">min_size_scale_factor</span> <span class="o">*</span> <span class="n">n_points</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">min_size</span> <span class="o">&lt;</span> <span class="n">params</span><span class="o">.</span><span class="n">min_size_lower_cutoff</span><span class="p">:</span>
+        <span class="n">min_size</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">min_size_lower_cutoff</span>
+    <span class="n">clusterizer</span> <span class="o">=</span> <span class="n">skcluster</span><span class="o">.</span><span class="n">HDBSCAN</span><span class="p">(</span>
+        <span class="n">min_cluster_size</span><span class="o">=</span><span class="n">min_size</span><span class="p">,</span>
+        <span class="n">min_samples</span><span class="o">=</span><span class="n">params</span><span class="o">.</span><span class="n">min_points</span><span class="p">,</span>
+        <span class="n">allow_single_cluster</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="c1"># Use spatial dimensions and integrated charge</span>
     <span class="n">cluster_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pc</span><span class="o">.</span><span class="n">cloud</span><span class="p">),</span> <span class="mi">4</span><span class="p">))</span>
     <span class="n">cluster_data</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">cloud</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span>
-    <span class="n">cluster_data</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">cloud</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span>
+    <span class="n">cluster_data</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">cloud</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
 
     <span class="c1"># Unfiy feature ranges to their means and std deviations. StandardScaler calculates mean, and std for each feature</span>
-    <span class="n">cluster_data</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">cluster_data</span><span class="p">)</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">cluster_data</span><span class="p">)</span>
+    <span class="n">cluster_data</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">StandardScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">cluster_data</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">])</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">cluster_data</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+    <span class="p">)</span>
+    <span class="n">cluster_data</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">MinMaxScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">cluster_data</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="p">)</span>
 
     <span class="n">fitted_clusters</span> <span class="o">=</span> <span class="n">clusterizer</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">cluster_data</span><span class="p">)</span>
     <span class="n">labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">fitted_clusters</span><span class="o">.</span><span class="n">labels_</span><span class="p">)</span>
@@ -3117,7 +3113,7 @@ fractured or contain regions of varying density which causes clustering algorith
     <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.c18c5fb9.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.e1c3ead8.min.js"></script>
       
         <script src="../../../javascript/mathjax.js"></script>
       

@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.5">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.6">
     
     
       
@@ -2167,7 +2167,7 @@ processor 2: &lt;- 2 &lt;- 1 =&gt; [2,1]
 <p>Each processor (including the parent) writes its own log file, which can be found in the <code>log/</code> directory of the workspace. This allows for error reporting and finer grained messaging, so that way when something goes wrong you can find out why!</p>
 <h2 id="optimizing-performance">Optimizing Performance</h2>
 <p>To get the best performance, the number of runs to be analyzed should be evenly divisible by the number of processors. Otherwise, by necessity some of the processors will  generally <em>have</em> to run longer.  Also its best if runs are all of uniform size (but that's not usually within our control).</p>
-<p>In general more processors is more better, but this isn't always the case. The first limit is the total number of cores in your machine. You need <code>n_processors</code>+1 physical cores, otherwise things are guaranteed to slow down. Another consideration is your CPU architecture. Intel i-series and Apple ARM use P-core and E-core packages. P-cores are performance cores which hit higher clock speeds and are optimized for expensive tasks. E-cores are efficiency cores, which run slower but are less power hungry, best suited to background tasks. Spyral is best suited to P-cores; as such you should use only P-cores as the number of processors available. You can use the E-cores if you wish, but they'll be much slower.</p>
+<p>In general more processors is more better, but this isn't always the case. The first limit is the total number of cores in your machine. You need <code>n_processors</code>+1 physical cores, otherwise things are guaranteed to slow down. Another consideration is your CPU architecture. Intel i-series and Apple ARM use P-core and E-core packages. P-cores are performance cores which hit higher clock speeds and are optimized for expensive tasks. E-cores are efficiency cores, which run slower but are less power hungry, best suited to background tasks. Spyral is best suited to P-cores; as such you should use only P-cores as the number of processors available.</p>
 <p>The final consideration is memory. This is mostly important for the solving phase. The interpolation mesh can be quite large (somtimes GBs) and needs to be stored in active memory <em>for each processor</em>. You need enough system memory (RAM) for each processor to completely load the mesh.</p>
 <p>If you are using Spyral in a job environment (SLURM, etc), you can run with the <code>--no-term</code> option to disable printing to the terminal</p>
 <pre><code class="language-bash">python main.py --no-term local_config.json
@@ -2221,7 +2221,7 @@ processor 2: &lt;- 2 &lt;- 1 =&gt; [2,1]
     <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.c18c5fb9.min.js"></script>
+      <script src="../../assets/javascripts/bundle.e1c3ead8.min.js"></script>
       
         <script src="../../javascript/mathjax.js"></script>
       

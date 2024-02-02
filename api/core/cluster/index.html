@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.5">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.6">
     
     
       
@@ -2498,9 +2498,7 @@
 <span class="normal">116</span>
 <span class="normal">117</span>
 <span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Cluster</span><span class="p">:</span>
+<span class="normal">119</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Cluster</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Representation of trajectory cluster data.</span>
 
 <span class="sd">    Attributes</span>
@@ -2563,7 +2561,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">event</span> <span class="o">=</span> <span class="n">cloud</span><span class="o">.</span><span class="n">point_cloud</span><span class="o">.</span><span class="n">event_number</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">cloud</span><span class="o">.</span><span class="n">label</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">copy_cloud</span><span class="p">(</span><span class="n">cloud</span><span class="o">.</span><span class="n">point_cloud</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">drop_outliers</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">n_neighbors_outiler_test</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">drop_outliers</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">n_neighbors_outlier_test</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">copy_cloud</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cloud</span><span class="p">:</span> <span class="n">PointCloud</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Copy PointCloud data to the cluster</span>
@@ -2579,8 +2577,8 @@
         <span class="n">cloud</span><span class="o">.</span><span class="n">sort_in_z</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">cloud</span><span class="o">.</span><span class="n">cloud</span><span class="p">),</span> <span class="mi">5</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">cloud</span><span class="o">.</span><span class="n">cloud</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span>  <span class="c1"># position</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">cloud</span><span class="o">.</span><span class="n">cloud</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span>  <span class="c1"># integrated charge</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">cloud</span><span class="o">.</span><span class="n">cloud</span><span class="p">[:,</span> <span class="mi">7</span><span class="p">]</span>  <span class="c1"># scale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">cloud</span><span class="o">.</span><span class="n">cloud</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span>  <span class="c1"># peak integral</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">cloud</span><span class="o">.</span><span class="n">cloud</span><span class="p">[:,</span> <span class="mi">7</span><span class="p">]</span>  <span class="c1"># scale (big or small)</span>
 
     <span class="k">def</span> <span class="nf">drop_outliers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">neighbors</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Use scikit-learn LocalOutlierFactor to test the cluster for spatial outliers.</span>
@@ -2592,8 +2590,6 @@
 <span class="sd">        neighbors: int</span>
 <span class="sd">            The number of neighbors to compare to for the outlier test (default=2)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">neighbors</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bad: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">test_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">neigh</span> <span class="o">=</span> <span class="n">LocalOutlierFactor</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="n">neighbors</span><span class="p">)</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">neigh</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">test_data</span><span class="p">)</span>
@@ -2845,8 +2841,8 @@ Only keep position, integrated charge</p>
     <span class="n">cloud</span><span class="o">.</span><span class="n">sort_in_z</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">cloud</span><span class="o">.</span><span class="n">cloud</span><span class="p">),</span> <span class="mi">5</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">cloud</span><span class="o">.</span><span class="n">cloud</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span>  <span class="c1"># position</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">cloud</span><span class="o">.</span><span class="n">cloud</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span>  <span class="c1"># integrated charge</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">cloud</span><span class="o">.</span><span class="n">cloud</span><span class="p">[:,</span> <span class="mi">7</span><span class="p">]</span>  <span class="c1"># scale</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">cloud</span><span class="o">.</span><span class="n">cloud</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span>  <span class="c1"># peak integral</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">cloud</span><span class="o">.</span><span class="n">cloud</span><span class="p">[:,</span> <span class="mi">7</span><span class="p">]</span>  <span class="c1"># scale (big or small)</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -2913,9 +2909,7 @@ Only keep position, integrated charge</p>
 <span class="normal">116</span>
 <span class="normal">117</span>
 <span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">drop_outliers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">neighbors</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="normal">119</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">drop_outliers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">neighbors</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Use scikit-learn LocalOutlierFactor to test the cluster for spatial outliers.</span>
 
 <span class="sd">    This helps reduce noise when fitting the data.</span>
@@ -2925,8 +2919,6 @@ Only keep position, integrated charge</p>
 <span class="sd">    neighbors: int</span>
 <span class="sd">        The number of neighbors to compare to for the outlier test (default=2)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">neighbors</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bad: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">event</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">test_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">neigh</span> <span class="o">=</span> <span class="n">LocalOutlierFactor</span><span class="p">(</span><span class="n">n_neighbors</span><span class="o">=</span><span class="n">neighbors</span><span class="p">)</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">neigh</span><span class="o">.</span><span class="n">fit_predict</span><span class="p">(</span><span class="n">test_data</span><span class="p">)</span>
@@ -3024,7 +3016,7 @@ Only keep position, integrated charge</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">event</span> <span class="o">=</span> <span class="n">cloud</span><span class="o">.</span><span class="n">point_cloud</span><span class="o">.</span><span class="n">event_number</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">cloud</span><span class="o">.</span><span class="n">label</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">copy_cloud</span><span class="p">(</span><span class="n">cloud</span><span class="o">.</span><span class="n">point_cloud</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">drop_outliers</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">n_neighbors_outiler_test</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">drop_outliers</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">n_neighbors_outlier_test</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -3236,7 +3228,9 @@ Only keep position, integrated charge</p>
 
           <details class="quote">
             <summary>Source code in <code>spyral/core/cluster.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">124</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
 <span class="normal">125</span>
 <span class="normal">126</span>
 <span class="normal">127</span>
@@ -3253,9 +3247,7 @@ Only keep position, integrated charge</p>
 <span class="normal">138</span>
 <span class="normal">139</span>
 <span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span>
-<span class="normal">143</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">convert_labeled_to_cluster</span><span class="p">(</span>
+<span class="normal">141</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">convert_labeled_to_cluster</span><span class="p">(</span>
     <span class="n">cloud</span><span class="p">:</span> <span class="n">LabeledCloud</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">ClusterParameters</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Cluster</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Function which takes in a LabeledCloud and ClusterParamters and returns a Cluster</span>
@@ -3337,7 +3329,7 @@ Only keep position, integrated charge</p>
     <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.c18c5fb9.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.e1c3ead8.min.js"></script>
       
         <script src="../../../javascript/mathjax.js"></script>
       

@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.5">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.6">
     
     
       
@@ -2429,26 +2429,26 @@ point cloud</p>
           </td>
         </tr>
         <tr>
-          <td><code><span title="spyral.core.config.ClusterParameters.min_size_big_event">min_size_big_event</span></code></td>
+          <td><code><span title="spyral.core.config.ClusterParameters.min_size_scale_factor">min_size_scale_factor</span></code></td>
           <td>
                 <code>int</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>min_cluster_size parameter in scikit-learn's HDBSCAN algorithm for events with more
-points than <code>big_event_cutoff</code>. The minimum size of a cluster.</p>
+              <p>Factor which is multiplied by the number of points in a point cloud to set
+the min_cluster_size parameter in scikit-learn's HDBSCAN algorithm</p>
             </div>
           </td>
         </tr>
         <tr>
-          <td><code><span title="spyral.core.config.ClusterParameters.min_size_small_event">min_size_small_event</span></code></td>
+          <td><code><span title="spyral.core.config.ClusterParameters.min_size_lower_cutoff">min_size_lower_cutoff</span></code></td>
           <td>
                 <code>int</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>min_cluster_size parameter in scikit-learn's HDBSCAN algorithm for events with fewer
-points than <code>big_event_cutoff</code>. The minimum size of a cluster.</p>
+              <p>min_cluster_size parameter in scikit-learn's HDBSCAN algorithm for events where n_points * min_size_scale_factor
+are less than this value.</p>
             </div>
           </td>
         </tr>
@@ -2491,8 +2491,7 @@ for them to be joined</p>
 
             <details class="quote">
               <summary>Source code in <code>spyral/core/config.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">157</span>
-<span class="normal">158</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">158</span>
 <span class="normal">159</span>
 <span class="normal">160</span>
 <span class="normal">161</span>
@@ -2544,12 +2543,12 @@ for them to be joined</p>
 <span class="sd">    big_event_cutoff: int</span>
 <span class="sd">        the cutoff between big events and small events in units of points in the</span>
 <span class="sd">        point cloud</span>
-<span class="sd">    min_size_big_event: int</span>
-<span class="sd">        min_cluster_size parameter in scikit-learn&#39;s HDBSCAN algorithm for events with more</span>
-<span class="sd">        points than `big_event_cutoff`. The minimum size of a cluster.</span>
-<span class="sd">    min_size_small_event: int</span>
-<span class="sd">        min_cluster_size parameter in scikit-learn&#39;s HDBSCAN algorithm for events with fewer</span>
-<span class="sd">        points than `big_event_cutoff`. The minimum size of a cluster.</span>
+<span class="sd">    min_size_scale_factor: int</span>
+<span class="sd">        Factor which is multiplied by the number of points in a point cloud to set</span>
+<span class="sd">        the min_cluster_size parameter in scikit-learn&#39;s HDBSCAN algorithm</span>
+<span class="sd">    min_size_lower_cutoff: int</span>
+<span class="sd">        min_cluster_size parameter in scikit-learn&#39;s HDBSCAN algorithm for events where n_points * min_size_scale_factor</span>
+<span class="sd">        are less than this value.</span>
 <span class="sd">    circle_overlap_ratio: float</span>
 <span class="sd">        minimum overlap ratio between two circles in the cluster joining algorithm</span>
 <span class="sd">    fractional_charge_threshold: float</span>
@@ -2562,12 +2561,11 @@ for them to be joined</p>
     <span class="n">min_cloud_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">smoothing_neighbor_distance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>  <span class="c1"># mm</span>
     <span class="n">min_points</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">big_event_cutoff</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">min_size_big_event</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">min_size_small_event</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">min_size_scale_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">min_size_lower_cutoff</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">circle_overlap_ratio</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="n">fractional_charge_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
-    <span class="n">n_neighbors_outiler_test</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">n_neighbors_outlier_test</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
 </code></pre></div></td></tr></table></div>
             </details>
 
@@ -2980,7 +2978,8 @@ for them to be joined</p>
 <span class="normal">95</span>
 <span class="normal">96</span>
 <span class="normal">97</span>
-<span class="normal">98</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="normal">98</span>
+<span class="normal">99</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">DetectorParameters</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parameters describing the detector configuration</span>
 
@@ -3013,6 +3012,7 @@ for them to be joined</p>
     <span class="n">window_time_bucket</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="n">get_frequency</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>  <span class="c1"># MHz</span>
     <span class="n">garfield_file_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">do_garfield_correction</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 </code></pre></div></td></tr></table></div>
             </details>
 
@@ -3261,8 +3261,7 @@ for them to be joined</p>
 
             <details class="quote">
               <summary>Source code in <code>spyral/core/config.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">126</span>
-<span class="normal">127</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">127</span>
 <span class="normal">128</span>
 <span class="normal">129</span>
 <span class="normal">130</span>
@@ -3289,7 +3288,8 @@ for them to be joined</p>
 <span class="normal">151</span>
 <span class="normal">152</span>
 <span class="normal">153</span>
-<span class="normal">154</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="normal">154</span>
+<span class="normal">155</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">FribParameters</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parameters for FRIBDAQ (IC, Si, etc) trace signal analysis</span>
 
@@ -3434,8 +3434,7 @@ for them to be joined</p>
 
             <details class="quote">
               <summary>Source code in <code>spyral/core/config.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">101</span>
-<span class="normal">102</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">102</span>
 <span class="normal">103</span>
 <span class="normal">104</span>
 <span class="normal">105</span>
@@ -3456,7 +3455,8 @@ for them to be joined</p>
 <span class="normal">120</span>
 <span class="normal">121</span>
 <span class="normal">122</span>
-<span class="normal">123</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="normal">123</span>
+<span class="normal">124</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">GetParameters</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parameters for GET trace signal analysis</span>
 
@@ -4344,6 +4344,7 @@ for them to be joined</p>
     <span class="n">config</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">window_time_bucket</span> <span class="o">=</span> <span class="n">det_params</span><span class="p">[</span><span class="s2">&quot;window_time_bucket&quot;</span><span class="p">]</span>
     <span class="n">config</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">get_frequency</span> <span class="o">=</span> <span class="n">det_params</span><span class="p">[</span><span class="s2">&quot;get_frequency(MHz)&quot;</span><span class="p">]</span>
     <span class="n">config</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">garfield_file_path</span> <span class="o">=</span> <span class="n">det_params</span><span class="p">[</span><span class="s2">&quot;electric_field_garfield_path&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">do_garfield_correction</span> <span class="o">=</span> <span class="n">det_params</span><span class="p">[</span><span class="s2">&quot;do_garfield_correction&quot;</span><span class="p">]</span>
 
     <span class="n">get_params</span> <span class="o">=</span> <span class="n">json_data</span><span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">]</span>
     <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="o">.</span><span class="n">baseline_window_scale</span> <span class="o">=</span> <span class="n">get_params</span><span class="p">[</span><span class="s2">&quot;baseline_window_scale&quot;</span><span class="p">]</span>
@@ -4366,15 +4367,14 @@ for them to be joined</p>
     <span class="n">config</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">smoothing_neighbor_distance</span> <span class="o">=</span> <span class="n">cluster_params</span><span class="p">[</span>
         <span class="s2">&quot;smoothing_neighbor_distance(mm)&quot;</span>
     <span class="p">]</span>
-    <span class="n">config</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">big_event_cutoff</span> <span class="o">=</span> <span class="n">cluster_params</span><span class="p">[</span><span class="s2">&quot;big_event_cutoff&quot;</span><span class="p">]</span>
-    <span class="n">config</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">min_size_big_event</span> <span class="o">=</span> <span class="n">cluster_params</span><span class="p">[</span><span class="s2">&quot;minimum_size_big_event&quot;</span><span class="p">]</span>
-    <span class="n">config</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">min_size_small_event</span> <span class="o">=</span> <span class="n">cluster_params</span><span class="p">[</span><span class="s2">&quot;minimum_size_small_event&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">min_size_scale_factor</span> <span class="o">=</span> <span class="n">cluster_params</span><span class="p">[</span><span class="s2">&quot;minimum_size_scale_factor&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">min_size_lower_cutoff</span> <span class="o">=</span> <span class="n">cluster_params</span><span class="p">[</span><span class="s2">&quot;minimum_size_lower_cutoff&quot;</span><span class="p">]</span>
     <span class="n">config</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">min_points</span> <span class="o">=</span> <span class="n">cluster_params</span><span class="p">[</span><span class="s2">&quot;minimum_points&quot;</span><span class="p">]</span>
     <span class="n">config</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">circle_overlap_ratio</span> <span class="o">=</span> <span class="n">cluster_params</span><span class="p">[</span><span class="s2">&quot;circle_overlap_ratio&quot;</span><span class="p">]</span>
     <span class="n">config</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">fractional_charge_threshold</span> <span class="o">=</span> <span class="n">cluster_params</span><span class="p">[</span>
         <span class="s2">&quot;fractional_charge_threshold&quot;</span>
     <span class="p">]</span>
-    <span class="n">config</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">n_neighbors_outiler_test</span> <span class="o">=</span> <span class="n">cluster_params</span><span class="p">[</span><span class="s2">&quot;n_neighbors_outlier_test&quot;</span><span class="p">]</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">cluster</span><span class="o">.</span><span class="n">n_neighbors_outlier_test</span> <span class="o">=</span> <span class="n">cluster_params</span><span class="p">[</span><span class="s2">&quot;n_neighbors_outlier_test&quot;</span><span class="p">]</span>
 
     <span class="n">est_params</span> <span class="o">=</span> <span class="n">json_data</span><span class="p">[</span><span class="s2">&quot;Estimate&quot;</span><span class="p">]</span>
     <span class="n">config</span><span class="o">.</span><span class="n">estimate</span><span class="o">.</span><span class="n">min_total_trajectory_points</span> <span class="o">=</span> <span class="n">est_params</span><span class="p">[</span>
@@ -4568,7 +4568,7 @@ for them to be joined</p>
     <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.c18c5fb9.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.e1c3ead8.min.js"></script>
       
         <script src="../../../javascript/mathjax.js"></script>
       
