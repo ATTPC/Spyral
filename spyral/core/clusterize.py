@@ -181,7 +181,7 @@ def cleanup_clusters(
         convert_labeled_to_cluster(cluster, params)
         for cluster in clusters
         if cluster.label != -1
-        and len(cluster.point_cloud.cloud) > params.n_neighbors_outiler_test
+        and len(cluster.point_cloud.cloud) > params.n_neighbors_outlier_test
     ]
 
 
