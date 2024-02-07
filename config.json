@@ -24,7 +24,8 @@
         "micromegas_time_bucket": 10.0,
         "window_time_bucket": 560.0,
         "get_frequency(MHz)": 6.25,
-        "electric_field_garfield_path": "/path/to/some/garfield.txt"
+        "electric_field_garfield_path": "/path/to/some/garfield.txt",
+        "do_garfield_correction": false
     },
     "GET": {
         "baseline_window_scale": 20.0,
