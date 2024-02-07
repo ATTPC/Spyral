@@ -33,7 +33,7 @@
         "peak_prominence": 20.0,
         "peak_max_width": 100.0,
         "peak_threshold": 25.0,
-        "do_sat_fit": true,
+        "do_sat_fit": false,
         "saturation_threshold": 4090.0
     },
     "FRIB": {

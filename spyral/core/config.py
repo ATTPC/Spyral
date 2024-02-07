@@ -126,7 +126,7 @@ class GetParameters:
     peak_prominence: float = 20.0
     peak_max_width: float = 100.0
     peak_threshold: float = 25.0
-    do_sat_fit: bool = True
+    do_sat_fit: bool = False
     saturation_threshold: float = 4090.0
 
 
