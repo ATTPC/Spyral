@@ -80,12 +80,12 @@ def join_clusters_step(
         # Reject noise
         if cluster.label == -1 or np.isnan(center[0]) or center[2] < 10.0:
             continue
-        radius: float = np.linalg.norm(center[:2])
+        radius = center[2]
         area = np.pi * radius**2.0
 
         for cidx, comp_cluster in enumerate(clusters):
             comp_center = centers[cidx]
-            comp_radius = np.linalg.norm(comp_center[:2])
+            comp_radius = comp_center[2]
             comp_area = np.pi * comp_radius**2.0
             if (
                 comp_cluster.label == -1
@@ -107,23 +107,30 @@ def join_clusters_step(
             term2 = (center_distance**2.0 + comp_radius**2.0 - radius**2.0) / (
                 2.0 * center_distance * comp_radius
             )
-            term3 = (
-                (-center_distance + radius + comp_radius)
-                * (center_distance + radius - comp_radius)
-                * (center_distance - radius + comp_radius)
-                * (center_distance + radius + comp_radius)
-            )
-            if term3 < 0.0:  # term3 cant be negative, inside sqrt
+            c1 = -center_distance + radius + comp_radius
+            c2 = center_distance + radius - comp_radius
+            c3 = center_distance - radius + comp_radius
+            c4 = center_distance + radius + comp_radius
+            term3 = c1 * c2 * c3 * c4
+            area_overlap = 0.0
+            # term3 cant be negative, inside sqrt.
+            if term3 < 0.0 and c1 < 0.0:
+                # Cannot possibly overlap, too far apart
                 continue
-            term1 = min(
-                1.0, max(-1.0, term1)
-            )  # clamp to arccos range to avoid silly floating point precision errors
-            term2 = min(1.0, max(-1.0, term2))
-            area_overlap = (
-                radius**2.0 * np.arccos(term1)
-                + comp_radius**2.0 * np.arccos(term2)
-                - 0.5 * np.sqrt(term3)
-            )
+            elif term3 < 0.0 and (c2 < 0.0 or c3 < 0.0):
+                # Entirely overlap one circle inside of the other
+                area_overlap = min(area, comp_area)
+            else:
+                # Circles only somewhat overlap
+                term1 = min(
+                    1.0, max(-1.0, term1)
+                )  # clamp to arccos range to avoid silly floating point precision errors
+                term2 = min(1.0, max(-1.0, term2))
+                area_overlap = (
+                    radius**2.0 * np.arccos(term1)
+                    + comp_radius**2.0 * np.arccos(term2)
+                    - 0.5 * np.sqrt(term3)
+                )
 
             smaller_area = min(area, comp_area)
             comp_mean_charge = np.mean(comp_cluster.point_cloud.cloud[:, 4], axis=0)
@@ -206,10 +213,11 @@ def form_clusters(pc: PointCloud, params: ClusterParameters) -> list[LabeledClou
     list[LabeledCloud]
         List of clusters found by the algorithm with labels
     """
-    if len(pc.cloud) < params.min_cloud_size:
-        return []
+
     # Smooth out the point cloud by averaging over neighboring points within a distance, droping any duplicate points
     pc.smooth_cloud(params.smoothing_neighbor_distance)
+    if len(pc.cloud) < params.min_cloud_size:
+        return []
 
     n_points = len(pc.cloud)
     min_size = int(params.min_size_scale_factor * n_points)

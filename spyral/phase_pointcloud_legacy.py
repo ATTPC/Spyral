@@ -37,6 +37,7 @@ def phase_pointcloud_legacy(
     ws: Workspace,
     pad_map: PadMap,
     get_params: GetParameters,
+    ic_params: FribParameters,
     detector_params: DetectorParameters,
     queue: SimpleQueue,
 ):
@@ -113,10 +114,15 @@ def phase_pointcloud_legacy(
         except Exception:
             continue
 
-        event = GetLegacyEvent(event_data, idx, get_params)
+        event = GetLegacyEvent(event_data, idx, get_params, ic_params)
 
         pc = PointCloud()
         pc.load_cloud_from_get_event(event, pad_map, corrector)
+        pc.calibrate_z_position(
+            detector_params.micromegas_time_bucket,
+            detector_params.window_time_bucket,
+            detector_params.detector_length,
+        )
 
         pc_dataset = cloud_group.create_dataset(
             f"cloud_{pc.event_number}", shape=pc.cloud.shape, dtype=np.float64
@@ -126,6 +132,19 @@ def phase_pointcloud_legacy(
         pc_dataset.attrs["ic_amplitude"] = -1.0
         pc_dataset.attrs["ic_integral"] = -1.0
         pc_dataset.attrs["ic_centroid"] = -1.0
+        pc_dataset.attrs["ic_multiplicity"] = -1.0
+
+        # Set IC if present; take first non-garbage peak
+        if event.ic_trace is not None:
+            # No way to disentangle multiplicity
+            for peak in event.ic_trace.get_peaks():
+                pc_dataset.attrs["ic_amplitude"] = peak.amplitude
+                pc_dataset.attrs["ic_integral"] = peak.integral
+                pc_dataset.attrs["ic_centroid"] = peak.centroid
+                pc_dataset.attrs["ic_multiplicity"] = (
+                    event.ic_trace.get_number_of_peaks()
+                )
+                break
 
         pc_dataset[:] = pc.cloud
 

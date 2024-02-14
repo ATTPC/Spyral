@@ -49,7 +49,7 @@ def run_spyral(
             elif config.run.do_pointcloud:
                 spyral_info(__name__, "Running phase point cloud with legacy extension")
                 phase_pointcloud_legacy(
-                    idx, ws, pad_map, config.get, config.detector, queue
+                    idx, ws, pad_map, config.get, config.frib, config.detector, queue
                 )
 
             if config.run.do_cluster:

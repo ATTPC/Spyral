@@ -1,5 +1,5 @@
 from .get_trace import GetTrace
-from ..core.config import GetParameters
+from ..core.config import GetParameters, FribParameters
 from ..core.constants import INVALID_EVENT_NAME, INVALID_EVENT_NUMBER
 from ..core.hardware_id import hardware_id_from_array
 
@@ -42,7 +42,8 @@ class GetLegacyEvent:
         self,
         raw_data: h5.Dataset,
         event_number: int,
-        params: GetParameters,
+        get_params: GetParameters,
+        ic_params: FribParameters,
     ):
         """Construct the event and process traces
 
@@ -61,15 +62,17 @@ class GetLegacyEvent:
             An instance of the class
         """
         self.traces: list[GetTrace] = []
+        self.ic_trace: GetTrace | None = None
         self.name: str = INVALID_EVENT_NAME
         self.number: int = INVALID_EVENT_NUMBER
-        self.load_traces(raw_data, event_number, params)
+        self.load_traces(raw_data, event_number, get_params, ic_params)
 
     def load_traces(
         self,
         raw_data: h5.Dataset,
         event_number: int,
-        params: GetParameters,
+        get_params: GetParameters,
+        ic_params: FribParameters,
     ):
         """Process the traces
 
@@ -86,17 +89,24 @@ class GetLegacyEvent:
         self.number = event_number
         trace_matrix = preprocess_traces(
             raw_data[:, GET_DATA_TRACE_START:GET_DATA_TRACE_STOP].copy(),
-            params.baseline_window_scale,
+            get_params.baseline_window_scale,
         )
         self.traces = [
-            GetTrace(trace_matrix[idx], hardware_id_from_array(row[0:5]), params)
+            GetTrace(trace_matrix[idx], hardware_id_from_array(row[0:5]), get_params)
             for idx, row in enumerate(raw_data)
         ]
         # Legacy data where external data was stored in CoBo 10 (IC, mesh)
-        # Remove CoBo 10 from our normal traces and place into external container
-        self.external_traces = [
-            trace for trace in self.traces if trace.hw_id.cobo_id == 10
-        ]
+        for trace in self.traces:
+            # Extract IC
+            if (
+                trace.hw_id.cobo_id == 10
+                and trace.hw_id.aget_id == 1
+                and trace.hw_id.aget_channel == 0
+            ):
+                self.ic_trace = trace
+                self.ic_trace.find_peaks(ic_params, rel_height=0.8)
+                break
+        # Remove CoBo 10 from our normal traces
         self.traces = [trace for trace in self.traces if trace.hw_id.cobo_id != 10]
 
     def is_valid(self) -> bool:
