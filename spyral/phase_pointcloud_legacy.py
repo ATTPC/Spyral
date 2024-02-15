@@ -2,8 +2,7 @@ from .core.config import GetParameters, DetectorParameters, FribParameters
 from .core.pad_map import PadMap
 from .core.point_cloud import PointCloud
 from .core.workspace import Workspace
-from .trace.frib_event import FribEvent
-from .trace.get_event import GetEvent
+from .trace.get_legacy_event import GetLegacyEvent
 from .correction import create_electron_corrector, ElectronCorrector
 from .parallel.status_message import StatusMessage, Phase
 from .core.spy_log import spyral_info, spyral_error, spyral_warn
@@ -33,12 +32,12 @@ def get_event_range(trace_file: h5.File) -> tuple[int, int]:
     return (int(meta_data[0]), int(meta_data[2]))
 
 
-def phase_pointcloud(
+def phase_pointcloud_legacy(
     run: int,
     ws: Workspace,
     pad_map: PadMap,
     get_params: GetParameters,
-    frib_params: FribParameters,
+    ic_params: FribParameters,
     detector_params: DetectorParameters,
     queue: SimpleQueue,
 ):
@@ -58,8 +57,8 @@ def phase_pointcloud(
         A map of pad number to geometry/hardware/calibrations
     get_params: GetParameters
         Configuration parameters for GET data signal analysis (AT-TPC pads)
-    frib_params: FribParameters
-        Configuration parameters for FRIBDAQ data signal analysis (ion chamber, silicon, etc.)
+    ic_params: GetParameters
+        Configuration parameters for legacy IC data signal analysis
     detector_params: DetectorParameters
         Configuration parameters for physical detector properties
     queue: SimpleQueue
@@ -88,25 +87,11 @@ def phase_pointcloud(
         corrector = create_electron_corrector(corr_path)
 
     # Some checks for existance
-    event_group: h5.Group = trace_file["get"]
+    event_group = trace_file["get"]
     if not isinstance(event_group, h5.Group):
         spyral_error(
             __name__,
             f"GET event group does not exist in run {run}, phase 1 cannot be run!",
-        )
-        return
-
-    frib_group: h5.Group = trace_file["frib"]
-    if not isinstance(frib_group, h5.Group):
-        spyral_error(
-            __name__, f"FRIB group does not exist in run {run}, phase 1 cannot be run!"
-        )
-        return
-    frib_evt_group: h5.Group = frib_group["evt"]
-    if not isinstance(frib_evt_group, h5.Group):
-        spyral_error(
-            __name__,
-            f"FRIB event data group does not exist in run {run}, phase 1 cannot be run!",
         )
         return
 
@@ -131,10 +116,15 @@ def phase_pointcloud(
         except Exception:
             continue
 
-        event = GetEvent(event_data, idx, get_params)
+        event = GetLegacyEvent(event_data, idx, get_params, ic_params)
 
         pc = PointCloud()
         pc.load_cloud_from_get_event(event, pad_map, corrector)
+        pc.calibrate_z_position(
+            detector_params.micromegas_time_bucket,
+            detector_params.window_time_bucket,
+            detector_params.detector_length,
+        )
 
         pc_dataset = cloud_group.create_dataset(
             f"cloud_{pc.event_number}", shape=pc.cloud.shape, dtype=np.float64
@@ -146,53 +136,17 @@ def phase_pointcloud(
         pc_dataset.attrs["ic_centroid"] = -1.0
         pc_dataset.attrs["ic_multiplicity"] = -1.0
 
-        # Now analyze FRIBDAQ data
-        frib_data: h5.Dataset
-        try:
-            frib_data = frib_evt_group[f"evt{idx}_1903"]
-        except Exception:
-            pc.calibrate_z_position(
-                detector_params.micromegas_time_bucket,
-                detector_params.window_time_bucket,
-                detector_params.detector_length,
-            )
-            pc_dataset[:] = pc.cloud
-            continue
-
-        frib_event = FribEvent(frib_data, idx, frib_params)
-
-        ic_peak = frib_event.get_good_ic_peak(frib_params)
-        if ic_peak is None:
-            pc.calibrate_z_position(
-                detector_params.micromegas_time_bucket,
-                detector_params.window_time_bucket,
-                detector_params.detector_length,
-            )
-            pc_dataset[:] = pc.cloud
-            continue
-        pc_dataset.attrs["ic_amplitude"] = ic_peak.amplitude
-        pc_dataset.attrs["ic_integral"] = ic_peak.integral
-        pc_dataset.attrs["ic_centroid"] = ic_peak.centroid
-        pc_dataset.attrs["ic_multiplicity"] = (
-            1  # For legacy compat. Always one for modern data
-        )
-
-        # Apply IC correction to time calibration, if on
-        # and correction is less than the total length of the GET window in TB
-        ic_cor = frib_event.correct_ic_time(ic_peak, detector_params.get_frequency)
-        if frib_params.correct_ic_time and ic_cor < 512.0:
-            pc.calibrate_z_position(
-                detector_params.micromegas_time_bucket,
-                detector_params.window_time_bucket,
-                detector_params.detector_length,
-                ic_cor,
-            )
-        else:
-            pc.calibrate_z_position(
-                detector_params.micromegas_time_bucket,
-                detector_params.window_time_bucket,
-                detector_params.detector_length,
-            )
+        # Set IC if present; take first non-garbage peak
+        if event.ic_trace is not None:
+            # No way to disentangle multiplicity
+            for peak in event.ic_trace.get_peaks():
+                pc_dataset.attrs["ic_amplitude"] = peak.amplitude
+                pc_dataset.attrs["ic_integral"] = peak.integral
+                pc_dataset.attrs["ic_centroid"] = peak.centroid
+                pc_dataset.attrs["ic_multiplicity"] = (
+                    event.ic_trace.get_number_of_peaks()
+                )
+                break
 
         pc_dataset[:] = pc.cloud
 
