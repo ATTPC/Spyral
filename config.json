@@ -46,11 +46,11 @@
     },
     "Cluster": {
         "min_cloud_size": 50,
-        "smoothing_neighbor_distance(mm)": 10.0,
+        "smoothing_neighbor_distance(mm)": 15.0,
         "minimum_points": 3,
         "minimum_size_scale_factor": 0.06,
         "minimum_size_lower_cutoff": 10,
-        "circle_overlap_ratio": 0.75,
+        "circle_overlap_ratio": 0.5,
         "fractional_charge_threshold": 0.75,
         "n_neighbors_outlier_test": 5
     },

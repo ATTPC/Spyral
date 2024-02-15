@@ -18,9 +18,13 @@ See the [User Guide](user_guide/getting_started.md)
 
 See [Configuration](user_guide/config/about.md)
 
+## I have some old data I want to analyze, can I use Spyral?
+
+In general, yes. Spyral has a legacy mode that supports analyzing data taken before AT-TPC's data acquisition was split (pre-FRIBDAQ): see [here](user_guide/phases/point_cloud.md) for more details. However, at this time, it only supports analyzing the ion chamber data out of CoBo 10. Any other auxilary signals will have to be extended or requested.
+
 ## Why can't I install Spyral with pip (i.e. `pip install spyral`)? Why can't I `import spyral`?
 
-Spyral is *not* a library/package. Spyral is an application, intended to be run by users through the provided entry points (notebooks or scripts). This is also reflected in the way Spyral handles dependencies. We pin versions explicitly, to ensure that the code will run identically in whatever environment it is installed to.
+Spyral is not a library/package. Spyral is an application, intended to be run by users through the provided entry points (notebooks or scripts). This is also reflected in the way Spyral handles dependencies. We pin versions explicitly, to ensure that the code will run identically in whatever environment it is installed to.
 
 More importantly, it will be extremely rare that Spyral works perfectly right out of the box for any analysis; the AT-TPC is such a powerful tool, that can be used to take such a wide range of data, that no one single analysis will work perfectly for all of these use cases. A good example of this is the so-called estimation phase of AT-TPC analysis where we attempt to guess the physical properties of a trajectory for use in the final fitting/solving phase. This phase is extremely sensitive to the shape/size of the data being analyzed. As such, even more so than an application, Spyral is a *framework*, a ground floor providing the basic building blocks of AT-TPC analysis. We want users to have access to the source code, and be able to modify the behavior to fit their needs without having to be restricted by our design choices, because we cannot predict every use case.
 

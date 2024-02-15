@@ -117,6 +117,9 @@ class GetTrace:
         ----------
         params: GetParameters
             Configuration paramters controlling the GET signal analysis
+        rel_height: float
+            The relative height at which the left and right ips points are evaluated. Typically this is
+            not needed to be modified, but for some legacy data is necessary
         """
 
         if self.is_valid() == False:

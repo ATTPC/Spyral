@@ -57,6 +57,8 @@ def phase_pointcloud_legacy(
         A map of pad number to geometry/hardware/calibrations
     get_params: GetParameters
         Configuration parameters for GET data signal analysis (AT-TPC pads)
+    ic_params: GetParameters
+        Configuration parameters for legacy IC data signal analysis
     detector_params: DetectorParameters
         Configuration parameters for physical detector properties
     queue: SimpleQueue

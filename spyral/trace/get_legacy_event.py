@@ -15,7 +15,8 @@ class GetLegacyEvent:
     """Class representing a legacy event in the GET DAQ
 
     Contains traces (GetTraces) from the AT-TPC pad plane as well
-    as external signals in CoBo 10
+    as external signals in CoBo 10. At this time, we only support extraction
+    of the IC from CoBo 10.
 
     Attributes
     ----------
@@ -53,9 +54,10 @@ class GetLegacyEvent:
             The hdf5 Dataset that contains trace data
         event_number: int
             The event number
-        params: GetParameters
+        get_params: GetParameters
             Configuration parameters controlling the GET signal analysis
-
+        ic_params: FribParameters
+            Configuration parameters controlling the ion chamber signal analysis
         Returns
         -------
         GetEvent
@@ -82,8 +84,10 @@ class GetLegacyEvent:
             The hdf5 Dataset that contains trace data
         event_number: int
             The event number
-        params: GetParameters
+        get_params: GetParameters
             Configuration parameters controlling the GET signal analysis
+        ic_params: FribParameters
+            Configuration parameters controlling the ion chamber signal analysis
         """
         self.name = str(raw_data.name)
         self.number = event_number
