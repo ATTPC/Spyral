@@ -11,7 +11,7 @@ from scipy.integrate import solve_ivp
 from pathlib import Path
 import json
 
-from numba import float64, int32, njit
+from numba import float64, int32
 from numba.types import string, ListType
 from numba.typed import List
 from numba.experimental import jitclass
@@ -21,81 +21,8 @@ KE_LIMIT = 0.1
 DEG2RAD: float = np.pi / 180.0
 
 
-@njit
-def is_float_equal(lhs: float, rhs: float) -> bool:
-    """JIT-ed is equal with absolute precision 1.0e-6
-
-    Parameters
-    ----------
-    lhs: float
-        The left-hand side of the comparsion
-    rhs: float
-        The right-hand side of the comparsion
-
-    Returns
-    -------
-    bool:
-        Returns True if the lhs and rhs are equal within 1.0e-6 precision
-
-    """
-    PRECISION: float = 1.0e-6
-    return abs(lhs - rhs) < PRECISION
-
-
 @dataclass
-class InitialState:
-    """Wrapper for the initial state used to generate a trajectory
-
-    Attributes
-    ---------
-    vertex_x: float
-        Vertex x-position in meters
-    vertex_y: float
-        Vertex y-position in meters
-    vertex_z: float
-        Vertex z-position in meters
-    polar: float
-        Polar angle in radians
-    azimuthal: float
-        Azimuthal angle in radians
-    kinetic_energy: float
-        Kinetic energy in MeV
-
-    Methods
-    -------
-    to_array() -> ndarray
-        Convert the class to an array (element order preserved)
-    """
-
-    vertex_x: float = 0.0  # m
-    vertex_y: float = 0.0
-    vertex_z: float = 0.0
-    polar: float = 0.0  # rad
-    azimuthal: float = 0.0
-    kinetic_energy: float = 0.0  # MeV
-
-    def to_array(self) -> np.ndarray:
-        """Convert the class to an array (element order preserved)
-
-        Returns
-        -------
-        ndarray
-            Length 6 array of [x,y,z,polar,azim,ke]
-        """
-        return np.array(
-            [
-                self.vertex_x,
-                self.vertex_y,
-                self.vertex_z,
-                self.polar,
-                self.azimuthal,
-                self.kinetic_energy,
-            ]
-        )
-
-
-@dataclass
-class GeneratorParams:
+class InterpolatorParameters:
     """Wrapper for the general parameters required to generate an interpolation scheme
 
     Attributes
@@ -236,6 +163,34 @@ def stop_condition(
     target: GasTarget,
     ejectile: NucleusData,
 ) -> float:
+    """Detect if a solution has reached the low-energy stopping condition
+
+    Terminate the integration of the ivp if the condition specified has been reached.
+    Scipy finds the roots of this function with the ivp. The parameters must match
+    those given to the equation to be solved
+
+    Parameters
+    ----------
+    t: float
+        time step, unused
+    state: ndarray
+        the state of the particle (x,y,z,vx,vy,vz)
+    Bfield: float
+        the magnitude of the magnetic field, unused
+    Efield: float
+        the magnitude of the electric field, unused
+    target: Target
+        the material through which the particle travels, unused
+    ejectile: NucleusData
+        ejectile (from the reaction) nucleus data
+
+    Returns
+    -------
+    float
+        The difference between the kinetic energy and the lower limit. When
+        this function returns zero the termination condition has been reached.
+
+    """
     speed = math.sqrt(state[3] ** 2.0 + state[4] ** 2.0 + state[5] ** 2.0)
     kinetic_energy = ejectile.mass * (
         1.0 / math.sqrt(1.0 - (speed / C) ** 2.0) - 1.0
@@ -250,7 +205,35 @@ def z_bound_condition(
     Efield: float,
     target: GasTarget,
     ejectile: NucleusData,
-):
+) -> float:
+    """Detect if a solution has reached the end-of-detector-in-z condition
+
+    Terminate the integration of the ivp if the condition specified has been reached.
+    Scipy finds the roots of this function with the ivp. The parameters must match
+    those given to the equation to be solved
+
+    Parameters
+    ----------
+    t: float
+        time step, unused
+    state: ndarray
+        the state of the particle (x,y,z,vx,vy,vz)
+    Bfield: float
+        the magnitude of the magnetic field, unused
+    Efield: float
+        the magnitude of the electric field, unused
+    target: Target
+        the material through which the particle travels, unused
+    ejectile: NucleusData
+        ejectile (from the reaction) nucleus data, unused
+
+    Returns
+    -------
+    float
+        The difference between the current z position and the length of the detector (1m). When
+        this function returns zero the termination condition has been reached.
+
+    """
     return state[2] - 1.0
 
 
@@ -261,18 +244,50 @@ def rho_bound_condition(
     Efield: float,
     target: GasTarget,
     ejectile: NucleusData,
-):
-    return np.linalg.norm(state[:2]) - 0.292
+) -> float:
+    """Detect if a solution has reached the end-of-detector-in-rho condition
+
+    Terminate the integration of the ivp if the condition specified has been reached.
+    Scipy finds the roots of this function with the ivp. The parameters must match
+    those given to the equation to be solved
+
+    Note here that the edge in rho (292 mm) is padded by 30 mm to account for conditions where the vertex is off axis
+
+    Parameters
+    ----------
+    t: float
+        time step, unused
+    state: ndarray
+        the state of the particle (x,y,z,vx,vy,vz)
+    Bfield: float
+        the magnitude of the magnetic field, unused
+    Efield: float
+        the magnitude of the electric field, unused
+    target: Target
+        the material through which the particle travels, unused
+    ejectile: NucleusData
+        ejectile (from the reaction) nucleus data, unused
+
+    Returns
+    -------
+    float
+        The difference between the current z position and the maximum rho of the detector (332 mm). When
+        this function returns zero the termination condition has been reached.
+
+    """
+    return np.linalg.norm(state[:2]) - 0.332
 
 
-def check_tracks_need_generation(track_path: Path, params: GeneratorParams) -> bool:
+def check_tracks_need_generation(
+    track_path: Path, params: InterpolatorParameters
+) -> bool:
     """Check if track meta data matches or if tracks don't exist
 
     Parameters
     ----------
     track_path: Path
         Path to the track interpolation scheme
-    params: GeneratorParams
+    params: InterpolatorParameters
         The parameters for this interpolation scheme
 
     Returns
@@ -291,12 +306,12 @@ def check_tracks_need_generation(track_path: Path, params: GeneratorParams) -> b
         return True
 
 
-def generate_tracks(params: GeneratorParams, track_path: Path):
+def generate_tracks(params: InterpolatorParameters, track_path: Path):
     """Generate a set of tracks given some parameters and write them to an npy file at a path.
 
     Parameters
     ----------
-    params: GeneratorParams
+    params: InterpolatorParameters
         parameters which control the tracks
     track_path: Path
         where to write the tracks to
@@ -408,22 +423,23 @@ def generate_tracks(params: GeneratorParams, track_path: Path):
 
 # To use numba with a class we need to declare the types of all members of the class
 # and use the @jitclass decorator
-@jitclass(
-    [
-        ("filepath", string),
-        ("particle_name", string),
-        ("gas_name", string),
-        ("bfield", float64),
-        ("efield", float64),
-        ("ke_min", float64),
-        ("ke_max", float64),
-        ("ke_bins", int32),
-        ("polar_min", float64),
-        ("polar_max", float64),
-        ("polar_bins", int32),
-        ("interpolators", ListType(BilinearInterpolator.class_type.instance_type)),
-    ]
-)
+tinterp_spec = [
+    ("filepath", string),
+    ("particle_name", string),
+    ("gas_name", string),
+    ("bfield", float64),
+    ("efield", float64),
+    ("ke_min", float64),
+    ("ke_max", float64),
+    ("ke_bins", int32),
+    ("polar_min", float64),
+    ("polar_max", float64),
+    ("polar_bins", int32),
+    ("interpolators", ListType(BilinearInterpolator.class_type.instance_type)),
+]
+
+
+@jitclass(spec=tinterp_spec)
 class TrackInterpolator:
     """Represents an interpolation scheme used to generate trajectories.
 
@@ -605,7 +621,6 @@ class TrackInterpolator:
         trajectory[:, 0] += vx
         trajectory[:, 1] += vy
         trajectory[:, 2] += vz
-        # Rotate
         # Trim stopped region
         removal = np.full(len(trajectory), True)
         previous_element = np.full(3, -1.0)

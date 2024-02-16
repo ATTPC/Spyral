@@ -2,7 +2,7 @@ from .core.config import Config
 from .core.workspace import Workspace
 from .core.track_generator import (
     generate_tracks,
-    GeneratorParams,
+    InterpolatorParameters,
     check_tracks_need_generation,
 )
 from .core.particle_id import load_particle_id
@@ -73,7 +73,7 @@ def generate_shared_resources(config: Config):
             )
             print("Gas Target is required for running the solver stage (phase 4).")
             raise Exception
-        gen_params = GeneratorParams(
+        gen_params = InterpolatorParameters(
             target,
             pid.nucleus,
             config.detector.magnetic_field,
@@ -113,7 +113,6 @@ def run_spyral_parallel(config: Config, no_progress: bool = False):
 
     # Some data must be made and shared across processes through files.
     generate_shared_resources(config)
-
     n_processes = config.run.n_processes
 
     queues: list[SimpleQueue] = []

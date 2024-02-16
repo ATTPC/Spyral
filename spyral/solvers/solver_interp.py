@@ -1,6 +1,6 @@
 from .guess import Guess
 from ..core.cluster import Cluster
-from ..core.track_generator import TrackInterpolator, InitialState
+from ..core.track_generator import TrackInterpolator
 from ..core.constants import QBRHO_2_P
 from ..interpolate import LinearInterpolator
 
@@ -31,22 +31,21 @@ def interpolate_trajectory(
     LinearInterpolator | None
         Returns a LinearInterpolator interpolating the x,y coordinates on z upon success. Upon failure (typically an out of bounds for the interpolation scheme) returns None.
     """
-    state = InitialState()
-    state.vertex_x = fit_params["vertex_x"].value
-    state.vertex_y = fit_params["vertex_y"].value
-    state.vertex_z = fit_params["vertex_z"].value
+    vertex_x = fit_params["vertex_x"].value
+    vertex_y = fit_params["vertex_y"].value
+    vertex_z = fit_params["vertex_z"].value
     momentum = QBRHO_2_P * (fit_params["brho"].value * float(ejectile.Z))
-    state.kinetic_energy = math.sqrt(momentum**2.0 + ejectile.mass**2.0) - ejectile.mass
-    state.polar = fit_params["polar"].value
-    state.azimuthal = fit_params["azimuthal"].value
+    kinetic_energy = math.sqrt(momentum**2.0 + ejectile.mass**2.0) - ejectile.mass
+    polar = fit_params["polar"].value
+    azimuthal = fit_params["azimuthal"].value
 
     return interpolator.get_interpolated_trajectory(
-        state.vertex_x,
-        state.vertex_y,
-        state.vertex_z,
-        state.polar,
-        state.azimuthal,
-        state.kinetic_energy,
+        vertex_x,
+        vertex_y,
+        vertex_z,
+        polar,
+        azimuthal,
+        kinetic_energy,
     )
 
 
@@ -182,10 +181,10 @@ def fit_model_interp(
     # Since sorted in z, need to trim 10% from one end depending on direction
     traj_data: np.ndarray
     if guess.polar > np.pi * 0.5:
-        traj_len = int(len(cluster.data) * 0.1)
+        traj_len = int(len(cluster.data) * 0.25)
         traj_data = cluster.data[traj_len:, :3] * 0.001
     else:
-        traj_len = int(len(cluster.data) * 0.9)
+        traj_len = int(len(cluster.data) * 0.75)
         traj_data = cluster.data[:traj_len, :3] * 0.001
     momentum = QBRHO_2_P * (guess.brho * float(ejectile.Z))
     kinetic_energy = math.sqrt(momentum**2.0 + ejectile.mass**2.0) - ejectile.mass
@@ -193,27 +192,24 @@ def fit_model_interp(
         return None
 
     fit_params = create_params(guess, ejectile, interpolator)
-    is_too_short = True
-    depth = 0
-    while is_too_short:
-        depth += 1
-        try:
-            trajectory = interpolate_trajectory(fit_params, interpolator, ejectile)
-        except Exception:
-            return
+    # is_too_short = True
+    # depth = 0
+    # while is_too_short and depth < 50:
+    #     depth += 1
+    #     try:
+    #         trajectory = interpolate_trajectory(fit_params, interpolator, ejectile)
+    #     except Exception:
+    #         return
 
-        if depth > 50:
-            return
+    #     if trajectory is None:
+    #         fit_params["brho"].value += fit_params["brho"].value * 0.1
+    #         continue
 
-        if trajectory is None:
-            fit_params["brho"].value += fit_params["brho"].value * 0.1
-            continue
-
-        traj_xy = trajectory.interpolate(traj_data[:, 2])
-        if np.any(np.isnan(traj_xy[:, 0])):
-            fit_params["brho"].value += fit_params["brho"].value * 0.1
-        else:
-            is_too_short = False
+    #     traj_xy = trajectory.interpolate(traj_data[:, 2])
+    #     if np.any(np.isnan(traj_xy[:, 0])):
+    #         fit_params["brho"].value += fit_params["brho"].value * 0.1
+    #     else:
+    #         is_too_short = False
 
     result: MinimizerResult = minimize(
         objective_function, fit_params, args=(traj_data, interpolator, ejectile)
@@ -253,12 +249,11 @@ def solve_physics_interp(
     # We only use 90% of the trajectory data (closest to vertex).
     # Since sorted in z, need to trim 10% from one end depending on direction
     traj_data: np.ndarray
-    depth = 0
     if guess.polar > np.pi * 0.5:
-        traj_len = int(len(cluster.data) * 0.1)
+        traj_len = int(len(cluster.data) * 0.25)
         traj_data = cluster.data[traj_len:, :3] * 0.001
     else:
-        traj_len = int(len(cluster.data) * 0.9)
+        traj_len = int(len(cluster.data) * 0.75)
         traj_data = cluster.data[:traj_len, :3] * 0.001
     momentum = QBRHO_2_P * (guess.brho * float(ejectile.Z))
     kinetic_energy = math.sqrt(momentum**2.0 + ejectile.mass**2.0) - ejectile.mass
@@ -267,29 +262,27 @@ def solve_physics_interp(
 
     fit_params = create_params(guess, ejectile, interpolator)
     # Sometimes brho is far enough away that the estimated trajectory stops before the end of the data. To avoid this, pre-adjust brho to better fit
-    is_too_short = True
-    while is_too_short:
-        trajectory = None
-        try:
-            trajectory = interpolate_trajectory(fit_params, interpolator, ejectile)
-        except Exception:
-            # This is a case where the data/guess is so messed up that there is no valid trajectory with that length/energy
-            return
+    # depth = 0
+    # is_too_short = True
+    # while is_too_short and depth < 50:
+    #     depth += 1
+    #     trajectory = None
+    #     try:
+    #         trajectory = interpolate_trajectory(fit_params, interpolator, ejectile)
+    #     except Exception:
+    #         # This is a case where the data/guess is so messed up that there is no valid trajectory with that length/energy
+    #         return
 
-        if trajectory is None:
-            fit_params["brho"].value += fit_params["brho"].value * 0.1
-            continue
+    #     if trajectory is None:
+    #         fit_params["brho"].value += fit_params["brho"].value * 0.1
+    #         continue
 
-        if depth > 50:
-            return
+    #     traj_xy = trajectory.interpolate(traj_data[:, 2])
 
-        traj_xy = trajectory.interpolate(traj_data[:, 2])
-
-        if np.any(np.isnan(traj_xy[:, 0])):
-            fit_params["brho"].value += fit_params["brho"].value * 0.01
-        else:
-            is_too_short = False
-        depth += 1
+    #     if np.any(np.isnan(traj_xy[:, 0])):
+    #         fit_params["brho"].value += fit_params["brho"].value * 0.01
+    #     else:
+    #         is_too_short = False
 
     best_fit: MinimizerResult = minimize(
         objective_function, fit_params, args=(traj_data, interpolator, ejectile)
