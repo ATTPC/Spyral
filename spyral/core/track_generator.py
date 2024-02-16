@@ -204,12 +204,12 @@ def equation_of_motion(
     """
 
     speed = math.sqrt(state[3] ** 2.0 + state[4] ** 2.0 + state[5] ** 2.0)
+
     unit_vector = state[3:] / speed  # direction
     kinetic_energy = ejectile.mass * (
         1.0 / math.sqrt(1.0 - (speed / C) ** 2.0) - 1.0
     )  # MeV
-    if kinetic_energy < KE_LIMIT:
-        return np.array([state[0], state[1], state[2], 0.0, 0.0, 0.0])
+
     mass_kg = ejectile.mass * MEV_2_KG
     charge_c = ejectile.Z * E_CHARGE
     qm = charge_c / mass_kg
@@ -226,6 +226,43 @@ def equation_of_motion(
     results[5] = qm * Efield - deceleration * unit_vector[2]
 
     return results
+
+
+def stop_condition(
+    t: float,
+    state: np.ndarray,
+    Bfield: float,
+    Efield: float,
+    target: GasTarget,
+    ejectile: NucleusData,
+) -> float:
+    speed = math.sqrt(state[3] ** 2.0 + state[4] ** 2.0 + state[5] ** 2.0)
+    kinetic_energy = ejectile.mass * (
+        1.0 / math.sqrt(1.0 - (speed / C) ** 2.0) - 1.0
+    )  # MeV
+    return kinetic_energy - KE_LIMIT
+
+
+def z_bound_condition(
+    t: float,
+    state: np.ndarray,
+    Bfield: float,
+    Efield: float,
+    target: GasTarget,
+    ejectile: NucleusData,
+):
+    return state[2] - 1.0
+
+
+def rho_bound_condition(
+    t: float,
+    state: np.ndarray,
+    Bfield: float,
+    Efield: float,
+    target: GasTarget,
+    ejectile: NucleusData,
+):
+    return np.linalg.norm(state[:2]) - 0.292
 
 
 def check_tracks_need_generation(track_path: Path, params: GeneratorParams) -> bool:
@@ -255,7 +292,7 @@ def check_tracks_need_generation(track_path: Path, params: GeneratorParams) -> b
 
 
 def generate_tracks(params: GeneratorParams, track_path: Path):
-    """Generate a set of tracks given some parameters and write them to an hdf5 file at a path.
+    """Generate a set of tracks given some parameters and write them to an npy file at a path.
 
     Parameters
     ----------
@@ -268,7 +305,6 @@ def generate_tracks(params: GeneratorParams, track_path: Path):
     polars = np.linspace(
         params.polar_min * DEG2RAD, params.polar_max * DEG2RAD, params.polar_bins
     )
-    time_steps = np.linspace(0.0, TIME_WINDOW, num=params.n_time_steps)
 
     track_meta_path = track_path.parents[0] / f"{track_path.stem}.json"
     with open(track_meta_path, "w") as metafile:
@@ -290,6 +326,18 @@ def generate_tracks(params: GeneratorParams, track_path: Path):
     flush_val = flush_percent * total_iters
     flush_count = 0
 
+    longest_time = 0.0
+
+    stop_condition.terminal = True
+    stop_condition.direction = -1.0
+    z_bound_condition.terminal = True
+    z_bound_condition.direction = 1.0
+    rho_bound_condition.terminal = True
+    rho_bound_condition.direction = 1.0
+
+    print("Optimizing time range...")
+
+    # First narrow the time range to the relevant size for the problem
     for eidx, e in enumerate(kes):
         for pidx, p in enumerate(polars):
             count += 1
@@ -311,13 +359,50 @@ def generate_tracks(params: GeneratorParams, track_path: Path):
                 (0.0, TIME_WINDOW),
                 initial_state,
                 method="RK45",
+                events=[stop_condition, z_bound_condition, rho_bound_condition],
+                args=(bfield, efield, params.target, params.particle),
+            )
+            longest_time = max(longest_time, result.t[-1])
+
+    print("")
+    print(f"Estimated time window: {longest_time}")
+    time_steps = np.linspace(0.0, longest_time, num=params.n_time_steps)
+    flush_count = 0
+
+    print("Generating mesh...")
+    # Now redo solving, using the maximum time estimated from the first pass
+    for eidx, e in enumerate(kes):
+        for pidx, p in enumerate(polars):
+            count += 1
+            if count == flush_val:
+                count = 0
+                flush_count += 1
+                print(
+                    f"\rPercent of data generated: {int(flush_count * flush_percent * 100)}%",
+                    end="",
+                )
+
+            initial_state[:] = 0.0
+            momentum = math.sqrt(e * (e + 2.0 * params.particle.mass))
+            speed = momentum / params.particle.mass * C
+            initial_state[3] = speed * math.sin(p)
+            initial_state[5] = speed * math.cos(p)
+            result = solve_ivp(
+                equation_of_motion,
+                (0.0, longest_time),
+                initial_state,
+                method="RK45",
+                events=[stop_condition, z_bound_condition, rho_bound_condition],
                 args=(bfield, efield, params.target, params.particle),
                 t_eval=time_steps,
             )
-            data[:, :, eidx, pidx] = result.y.T[:, :3]
-
-    print("\n")
-
+            trajectory = result.y.T
+            last_index = len(trajectory)
+            data[:last_index, :, eidx, pidx] = trajectory[:, :3]
+            if last_index < params.n_time_steps:
+                # Stopped, so remaining time is just final position
+                data[last_index:, :, eidx, pidx] = trajectory[-1, :3]
+    print("")
     np.save(track_path, data)
 
 
