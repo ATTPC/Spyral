@@ -1,5 +1,5 @@
 from .core.config import SolverParameters
-from .core.track_generator import create_interpolator
+from .interpolate.track_interpolator import create_interpolator
 from .core.workspace import Workspace
 from .core.particle_id import load_particle_id, ParticleID
 from .core.cluster import Cluster

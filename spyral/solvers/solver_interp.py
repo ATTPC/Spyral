@@ -1,6 +1,6 @@
 from .guess import Guess
 from ..core.cluster import Cluster
-from ..core.track_generator import TrackInterpolator
+from ..interpolate.track_interpolator import TrackInterpolator
 from ..core.constants import QBRHO_2_P
 from ..interpolate import LinearInterpolator
 
