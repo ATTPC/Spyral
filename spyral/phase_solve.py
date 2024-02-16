@@ -90,15 +90,14 @@ def phase_solve(
     # Select only the largest polar angle for a given event to avoid beam-like particles
     estimates_gated = (
         estimate_df.filter(
-            pl.struct(["dEdx", "brho"]).map_batches(pid.cut.is_cols_inside)
+            pl.struct(["eloss", "brho"]).map_batches(pid.cut.is_cols_inside)
             & (pl.col("ic_amplitude") > solver_params.ic_min_val)
             & (pl.col("ic_amplitude") < solver_params.ic_max_val)
             # & (pl.col("ic_multiplicity") < 2.0)  # For legacy data
         )
-        .sort("polar", descending=True)
-        .unique("event", keep="first")
-        .collect()
-        .to_dict()
+        # .sort("polar", descending=True)
+        # .unique("event", keep="first")
+        .collect().to_dict()
     )
 
     # Check that data actually exists for given PID

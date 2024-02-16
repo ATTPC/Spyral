@@ -24,9 +24,9 @@ class Direction(Enum):
         Trajectory traveling in the negative z-direction (1)
     """
 
-    NONE: int = -1
-    FORWARD: int = 0
-    BACKWARD: int = 1
+    NONE = -1
+    FORWARD = 0
+    BACKWARD = 1
 
 
 def estimate_physics(
