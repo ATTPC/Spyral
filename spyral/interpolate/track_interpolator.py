@@ -235,6 +235,63 @@ class TrackInterpolator:
 
         return LinearInterpolator(trajectory[:, 2], trajectory[:, :2].T)
 
+    def get_trajectory(
+        self, vx: float, vy: float, vz: float, polar: float, azim: float, ke: float
+    ) -> np.ndarray | None:
+        """Get a trajectory given some initial state.
+
+        Parameters
+        -------------
+        vx: float
+            Vertex x-coordinate in m
+        vy: float
+            Vertex y-coordinate in m
+        vz: float
+            Vertex z-coordinate in m
+        polar: float
+            Polar angle in radians
+        azim: float
+            azimuthal angle in radians
+        ke: float
+            Kinetic energy in MeV
+
+        Returns
+        -------
+        ndarray | None
+            Returns a Nx3 ndarray of the trajectory data or None when the algorithm fails
+        """
+
+        trajectory = np.zeros((len(self.interpolators), 3))
+        for idx, _ in enumerate(trajectory):
+            trajectory[idx] = self.interpolators[idx].interpolate(polar, ke)
+
+        # Rotate the trajectory in azimuthal (around z) to match data
+        z_rot = np.array(
+            [
+                [np.cos(azim), -np.sin(azim), 0.0],
+                [np.sin(azim), np.cos(azim), 0.0],
+                [0.0, 0.0, 1.0],
+            ]
+        )
+        trajectory = (z_rot @ trajectory.T).T
+        # Translate to vertex
+        trajectory[:, 0] += vx
+        trajectory[:, 1] += vy
+        trajectory[:, 2] += vz
+        # Trim stopped region
+        removal = np.full(len(trajectory), True)
+        previous_element = np.full(3, -1.0)
+        for idx, element in enumerate(trajectory):
+            if np.all(previous_element[:] == element[:]):
+                removal[idx] = False
+            previous_element = element
+
+        trajectory = trajectory[removal]
+        if len(trajectory) < 2:
+            return None
+
+        return trajectory
+
     def check_interpolator(
         self,
         particle: str,

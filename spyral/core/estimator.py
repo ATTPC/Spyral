@@ -210,9 +210,9 @@ def estimate_physics_pass(
     azimuthal = math.atan2(vertex[1] - center[1], vertex[0] - center[0])
     if azimuthal < 0:
         azimuthal += 2.0 * math.pi
-    azimuthal -= math.pi * 1.5
-    if azimuthal < 0:
-        azimuthal += 2.0 * math.pi
+    azimuthal += math.pi * 0.5
+    if azimuthal > math.pi * 2.0:
+        azimuthal -= 2.0 * math.pi
 
     brho = (
         detector_params.magnetic_field * radius * 0.001 / np.abs(math.sin(polar))

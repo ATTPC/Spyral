@@ -13,7 +13,7 @@ import json
 
 
 COARSE_TIME_WINDOW: float = 1.0e-6  # 1us window
-KE_LIMIT = 0.1
+KE_LIMIT = 0.001
 DEG2RAD: float = np.pi / 180.0
 
 
@@ -224,7 +224,7 @@ def stop_condition(
     return kinetic_energy - KE_LIMIT
 
 
-def z_bound_condition(
+def forward_z_bound_condition(
     t: float,
     state: np.ndarray,
     Bfield: float,
@@ -261,6 +261,45 @@ def z_bound_condition(
 
     """
     return state[2] - 1.0
+
+
+def backward_z_bound_condition(
+    t: float,
+    state: np.ndarray,
+    Bfield: float,
+    Efield: float,
+    target: GasTarget,
+    ejectile: NucleusData,
+) -> float:
+    """Detect if a solution has reached the end-of-detector-in-z condition
+
+    Terminate the integration of the ivp if the condition specified has been reached.
+    Scipy finds the roots of this function with the ivp. The parameters must match
+    those given to the equation to be solved
+
+    Parameters
+    ----------
+    t: float
+        time step, unused
+    state: ndarray
+        the state of the particle (x,y,z,vx,vy,vz)
+    Bfield: float
+        the magnitude of the magnetic field, unused
+    Efield: float
+        the magnitude of the electric field, unused
+    target: Target
+        the material through which the particle travels, unused
+    ejectile: NucleusData
+        ejectile (from the reaction) nucleus data, unused
+
+    Returns
+    -------
+    float
+        The difference between the current z position and the beginning of the detector (-1.0 m). When
+        this function returns zero the termination condition has been reached.
+
+    """
+    return state[2] + 1.0
 
 
 def rho_bound_condition(
@@ -355,8 +394,10 @@ def generate_track_mesh(params: MeshParameters, track_path: Path):
     # See scipy docs for details
     stop_condition.terminal = True
     stop_condition.direction = -1.0
-    z_bound_condition.terminal = True
-    z_bound_condition.direction = 1.0
+    forward_z_bound_condition.terminal = True
+    forward_z_bound_condition.direction = 1.0
+    backward_z_bound_condition.terminal = True
+    backward_z_bound_condition.direction = -1.0
     rho_bound_condition.terminal = True
     rho_bound_condition.direction = 1.0
 
@@ -375,8 +416,8 @@ def generate_track_mesh(params: MeshParameters, track_path: Path):
                 )
 
             initial_state[:] = 0.0
-            momentum = math.sqrt(e * (e + 2.0 * params.particle.mass))
-            speed = momentum / params.particle.mass * C
+            gamma = e / params.particle.mass + 1.0
+            speed = math.sqrt(1.0 - 1.0 / (gamma**2.0)) * C
             initial_state[3] = speed * math.sin(p)
             initial_state[5] = speed * math.cos(p)
             result = solve_ivp(
@@ -384,13 +425,19 @@ def generate_track_mesh(params: MeshParameters, track_path: Path):
                 (0.0, COARSE_TIME_WINDOW),
                 initial_state,
                 method="RK45",
-                events=[stop_condition, z_bound_condition, rho_bound_condition],
+                events=[
+                    stop_condition,
+                    forward_z_bound_condition,
+                    backward_z_bound_condition,
+                    rho_bound_condition,
+                ],
                 args=(bfield, efield, params.target, params.particle),
             )
             longest_time = max(longest_time, result.t[-1])
 
     print("")
     print(f"Estimated time window: {longest_time}")
+    # time_steps = np.geomspace(1.0e-11, longest_time, num=params.n_time_steps)
     time_steps = np.linspace(0.0, longest_time, num=params.n_time_steps)
     flush_count = 0
 
@@ -408,8 +455,8 @@ def generate_track_mesh(params: MeshParameters, track_path: Path):
                 )
 
             initial_state[:] = 0.0
-            momentum = math.sqrt(e * (e + 2.0 * params.particle.mass))
-            speed = momentum / params.particle.mass * C
+            gamma = e / params.particle.mass + 1.0
+            speed = math.sqrt(1.0 - 1.0 / (gamma**2.0)) * C
             initial_state[3] = speed * math.sin(p)
             initial_state[5] = speed * math.cos(p)
             result = solve_ivp(
@@ -417,7 +464,12 @@ def generate_track_mesh(params: MeshParameters, track_path: Path):
                 (0.0, longest_time),
                 initial_state,
                 method="RK45",
-                events=[stop_condition, z_bound_condition, rho_bound_condition],
+                events=[
+                    stop_condition,
+                    forward_z_bound_condition,
+                    backward_z_bound_condition,
+                    rho_bound_condition,
+                ],
                 args=(bfield, efield, params.target, params.particle),
                 t_eval=time_steps,
             )
@@ -479,14 +531,16 @@ def generate_interpolated_track(
     # Termination conditions
     stop_condition.terminal = True
     stop_condition.direction = -1.0
-    z_bound_condition.terminal = True
-    z_bound_condition.direction = 1.0
+    forward_z_bound_condition.terminal = True
+    forward_z_bound_condition.direction = 1.0
+    backward_z_bound_condition.terminal = True
+    backward_z_bound_condition.direction = -1.0
     rho_bound_condition.terminal = True
     rho_bound_condition.direction = 1.0
 
     # Setup initial state
-    momentum = math.sqrt(ke * (ke + 2.0 * particle.mass))
-    speed = momentum / particle.mass * C
+    gamma = ke / particle.mass + 1.0
+    speed = math.sqrt(1.0 - 1.0 / (gamma**2.0)) * C
     initial_state = np.array(
         [
             vx,
@@ -504,7 +558,12 @@ def generate_interpolated_track(
         (0.0, COARSE_TIME_WINDOW),
         initial_state,
         method="RK45",
-        events=[stop_condition, z_bound_condition, rho_bound_condition],
+        events=[
+            stop_condition,
+            forward_z_bound_condition,
+            backward_z_bound_condition,
+            rho_bound_condition,
+        ],
         args=(bfield, efield, target, particle),
     )
     longest_time = trajectory.t[-1]
@@ -516,7 +575,12 @@ def generate_interpolated_track(
         (0.0, longest_time),
         initial_state,
         method="RK45",
-        events=[stop_condition, z_bound_condition, rho_bound_condition],
+        events=[
+            stop_condition,
+            forward_z_bound_condition,
+            backward_z_bound_condition,
+            rho_bound_condition,
+        ],
         args=(bfield, efield, target, particle),
         t_eval=time_steps,
     )
