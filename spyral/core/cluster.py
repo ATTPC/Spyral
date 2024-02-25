@@ -19,6 +19,7 @@ class LabeledCloud:
 
     label: int = -1  # default is noise label
     point_cloud: PointCloud = field(default_factory=PointCloud)
+    clustered_data: np.ndarray = field(default_factory=lambda: np.zeros(0))
 
 
 class Cluster:
