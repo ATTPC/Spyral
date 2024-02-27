@@ -30,7 +30,7 @@ def run_spyral(
         A communication channel back to the parent process for monitoring progress
     """
 
-    ws = Workspace(config.workspace)
+    ws = Workspace(config.workspace, config.run.is_legacy)
     pad_map = ws.get_pad_map()
     nuclear_map = NuclearDataMap()
 

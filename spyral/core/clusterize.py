@@ -229,8 +229,6 @@ def form_clusters(pc: PointCloud, params: ClusterParameters) -> list[LabeledClou
     min_size = int(params.min_size_scale_factor * n_points)
     if min_size < params.min_size_lower_cutoff:
         min_size = params.min_size_lower_cutoff
-    if min_size > 100:
-        min_size = 100
 
     # Use spatial dimensions and integrated charge
     cluster_data = np.empty(shape=(len(pc.cloud), 4))

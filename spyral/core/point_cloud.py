@@ -93,11 +93,13 @@ class PointCloud:
                     f"When checking pad number of hardware: {trace.hw_id}, recieved None!",
                 )
                 continue
-            if check != pid:
+            if (
+                check != pid
+            ):  # This is dangerous! We trust the pad map over the merged data!
                 pid = check
 
             pad = pmap.get_pad_data(check)
-            if pad is None:
+            if pad is None or pmap.is_beam_pad(check):
                 continue
             for peak in trace.get_peaks():
                 self.cloud[idx, 0] = pad.x  # X-coordinate, geometry
@@ -116,6 +118,7 @@ class PointCloud:
                 if corrector is not None:
                     self.cloud[idx] = corrector.correct_point(self.cloud[idx])
                 idx += 1
+        self.cloud = self.cloud[self.cloud[:, 3] != 0.0]
 
     def load_cloud_from_hdf5_data(self, data: np.ndarray, event_number: int):
         """Load a point cloud from an hdf5 file dataset
@@ -173,6 +176,7 @@ class PointCloud:
         ic_correction: float
             The ion chamber time correction in GET Time Buckets (default=0.0)
         """
+        # Maybe use mm as the reference because it is more stable?
         for idx, point in enumerate(self.cloud):
             self.cloud[idx][2] = (window_tb - point[6]) / (
                 window_tb - micromegas_tb

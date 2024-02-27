@@ -3,7 +3,7 @@ from .interpolate.track_interpolator import create_interpolator
 from .core.workspace import Workspace
 from .core.particle_id import load_particle_id, ParticleID
 from .core.cluster import Cluster
-from .solvers.solver_interp import solve_physics_interp, Guess
+from .solvers.solver_interp_ip import solve_physics_interp, Guess
 from .parallel.status_message import StatusMessage, Phase
 from .core.spy_log import spyral_error, spyral_warn, spyral_info
 
@@ -110,6 +110,10 @@ def phase_solve(
     flush_percent = 0.01
     flush_val = int(flush_percent * (len(estimates_gated["event"])))
     count = 0
+    if len(estimates_gated["event"]) < 100:
+        flush_percent = 100.0 / float(len(estimates_gated["event"]))
+        flush_val = 1
+        count = 0
 
     # Result storage
     results: dict[str, list] = {
@@ -139,7 +143,7 @@ def phase_solve(
     for row, event in enumerate(estimates_gated["event"]):
         if count > flush_val:
             count = 0
-            queue.put(StatusMessage(run, Phase.SOLVE, 1))
+            queue.put(StatusMessage(run, Phase.SOLVE, int(flush_percent * 100.0)))
         count += 1
 
         event_group = cluster_group[f"event_{event}"]
@@ -158,7 +162,16 @@ def phase_solve(
             estimates_gated["vertex_y"][row],
             estimates_gated["vertex_z"][row],
         )
-        solve_physics_interp(cidx, cluster, guess, interpolator, pid.nucleus, results)
+        solve_physics_interp(
+            cidx,
+            cluster,
+            guess,
+            interpolator,
+            pid.nucleus,
+            estimates_gated["center_x"][row],
+            estimates_gated["center_y"][row],
+            results,
+        )
 
     # Write out the results
     physics_df = pl.DataFrame(results)

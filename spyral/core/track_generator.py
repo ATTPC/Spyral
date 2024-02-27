@@ -437,8 +437,8 @@ def generate_track_mesh(params: MeshParameters, track_path: Path):
 
     print("")
     print(f"Estimated time window: {longest_time}")
-    # time_steps = np.geomspace(1.0e-11, longest_time, num=params.n_time_steps)
-    time_steps = np.linspace(0.0, longest_time, num=params.n_time_steps)
+    time_steps = np.geomspace(1.0e-11, longest_time, num=params.n_time_steps)
+    # time_steps = np.linspace(0.0, longest_time, num=params.n_time_steps)
     flush_count = 0
 
     print("Generating mesh...")
