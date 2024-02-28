@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.6">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.11">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.50c56a3b.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.7e359304.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
@@ -263,10 +263,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
@@ -321,10 +319,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
@@ -555,10 +551,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
@@ -798,10 +792,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
@@ -984,10 +976,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_8" checked>
@@ -1351,6 +1341,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../legacy_beam_pads/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    legacy_beam_pads
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1369,10 +1380,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_9" >
@@ -1477,10 +1486,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_10" >
@@ -1564,10 +1571,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_11" >
@@ -1672,10 +1677,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_12" >
@@ -1780,10 +1783,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_13" >
@@ -1888,10 +1889,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_14" >
@@ -1948,6 +1947,27 @@
   
   <span class="md-ellipsis">
     get_event
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../trace/get_legacy_event/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    get_legacy_event
   </span>
   
 
@@ -2257,7 +2277,8 @@
 
             <details class="quote">
               <summary>Source code in <code>spyral/core/estimator.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">12</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">11</span>
+<span class="normal">12</span>
 <span class="normal">13</span>
 <span class="normal">14</span>
 <span class="normal">15</span>
@@ -2271,8 +2292,7 @@
 <span class="normal">23</span>
 <span class="normal">24</span>
 <span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Direction</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="normal">26</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Direction</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Enum for the direction of a trajectory</span>
 
 <span class="sd">    Attributes</span>
@@ -2319,7 +2339,7 @@
 
 
 <h2 id="spyral.core.estimator.estimate_physics_pass" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">estimate_physics_pass</span><span class="p">(</span><span class="n">cluster_index</span><span class="p">,</span> <span class="n">cluster</span><span class="p">,</span> <span class="n">ic_amplitude</span><span class="p">,</span> <span class="n">ic_centroid</span><span class="p">,</span> <span class="n">ic_integral</span><span class="p">,</span> <span class="n">estimate_params</span><span class="p">,</span> <span class="n">detector_params</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">chosen_direction</span><span class="o">=</span><span class="n">Direction</span><span class="o">.</span><span class="n">NONE</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">estimate_physics_pass</span><span class="p">(</span><span class="n">cluster_index</span><span class="p">,</span> <span class="n">cluster</span><span class="p">,</span> <span class="n">ic_amplitude</span><span class="p">,</span> <span class="n">ic_centroid</span><span class="p">,</span> <span class="n">ic_integral</span><span class="p">,</span> <span class="n">ic_multiplicity</span><span class="p">,</span> <span class="n">estimate_params</span><span class="p">,</span> <span class="n">detector_params</span><span class="p">,</span> <span class="n">results</span><span class="p">,</span> <span class="n">chosen_direction</span><span class="o">=</span><span class="n">Direction</span><span class="o">.</span><span class="n">NONE</span><span class="p">)</span></code>
 
 </h2>
 
@@ -2460,7 +2480,20 @@ manipulation of the data.</p>
 
           <details class="quote">
             <summary>Source code in <code>spyral/core/estimator.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">111</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
 <span class="normal">112</span>
 <span class="normal">113</span>
 <span class="normal">114</span>
@@ -2619,17 +2652,13 @@ manipulation of the data.</p>
 <span class="normal">267</span>
 <span class="normal">268</span>
 <span class="normal">269</span>
-<span class="normal">270</span>
-<span class="normal">271</span>
-<span class="normal">272</span>
-<span class="normal">273</span>
-<span class="normal">274</span>
-<span class="normal">275</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">estimate_physics_pass</span><span class="p">(</span>
+<span class="normal">270</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">estimate_physics_pass</span><span class="p">(</span>
     <span class="n">cluster_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">cluster</span><span class="p">:</span> <span class="n">Cluster</span><span class="p">,</span>
     <span class="n">ic_amplitude</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">ic_centroid</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">ic_integral</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">ic_multiplicity</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">estimate_params</span><span class="p">:</span> <span class="n">EstimateParameters</span><span class="p">,</span>
     <span class="n">detector_params</span><span class="p">:</span> <span class="n">DetectorParameters</span><span class="p">,</span>
     <span class="n">results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span>
@@ -2697,13 +2726,15 @@ manipulation of the data.</p>
     <span class="n">center</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">center</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">radius</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">least_squares_circle</span><span class="p">(</span>
         <span class="n">first_arc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">first_arc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
     <span class="p">)</span>
-    <span class="n">better_radius</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">cluster</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">center</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
-    <span class="n">circle</span> <span class="o">=</span> <span class="n">generate_circle_points</span><span class="p">(</span><span class="n">center</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">center</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">better_radius</span><span class="p">)</span>
+    <span class="c1"># better_radius = np.linalg.norm(cluster.data[0, :2] - center[:2])</span>
+    <span class="n">circle</span> <span class="o">=</span> <span class="n">generate_circle_points</span><span class="p">(</span><span class="n">center</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">center</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">radius</span><span class="p">)</span>
     <span class="c1"># Re-estimate vertex using the fitted circle. Extrapolate back to point closest to beam axis</span>
     <span class="n">vertex_estimate_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">circle</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">vertex</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">circle</span><span class="p">[</span><span class="n">vertex_estimate_index</span><span class="p">]</span>
-    <span class="c1"># Re-calculate distance to vertex</span>
+    <span class="c1"># Re-calculate distance to vertex, maximum, first arc</span>
     <span class="n">rho_to_vertex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">((</span><span class="n">cluster</span><span class="o">.</span><span class="n">data</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">vertex</span><span class="p">[:</span><span class="mi">2</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">maximum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">rho_to_vertex</span><span class="p">)</span>
+    <span class="n">first_arc</span> <span class="o">=</span> <span class="n">cluster</span><span class="o">.</span><span class="n">data</span><span class="p">[:</span> <span class="p">(</span><span class="n">maximum</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
 
     <span class="c1"># Do a linear fit to small segment of trajectory to extract rho vs. z and extrapolate vertex z</span>
     <span class="n">test_index</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">maximum</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">))</span>
@@ -2714,7 +2745,7 @@ manipulation of the data.</p>
     <span class="n">center</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">vertex</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
 
     <span class="c1"># Toss tracks whose verticies are not close to the origin in x,y</span>
-    <span class="k">if</span> <span class="n">vertex_rho</span> <span class="o">&gt;</span> <span class="n">estimate_params</span><span class="o">.</span><span class="n">max_distance_from_beam_axis</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">vertex_rho</span> <span class="o">&gt;</span> <span class="n">detector_params</span><span class="o">.</span><span class="n">beam_region_radius</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">Direction</span><span class="o">.</span><span class="n">NONE</span><span class="p">)</span>
 
     <span class="n">polar</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan</span><span class="p">(</span><span class="n">fit</span><span class="o">.</span><span class="n">slope</span><span class="p">)</span>
@@ -2733,22 +2764,26 @@ manipulation of the data.</p>
     <span class="n">azimuthal</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">vertex</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">center</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">vertex</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">center</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="k">if</span> <span class="n">azimuthal</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">azimuthal</span> <span class="o">+=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span>
-    <span class="n">azimuthal</span> <span class="o">-=</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mf">1.5</span>
-    <span class="k">if</span> <span class="n">azimuthal</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">azimuthal</span> <span class="o">+=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span>
+    <span class="n">azimuthal</span> <span class="o">+=</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mf">0.5</span>
+    <span class="k">if</span> <span class="n">azimuthal</span> <span class="o">&gt;</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mf">2.0</span><span class="p">:</span>
+        <span class="n">azimuthal</span> <span class="o">-=</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span>
 
     <span class="n">brho</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">detector_params</span><span class="o">.</span><span class="n">magnetic_field</span> <span class="o">*</span> <span class="n">better_radius</span> <span class="o">*</span> <span class="mf">0.001</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">polar</span><span class="p">))</span>
+        <span class="n">detector_params</span><span class="o">.</span><span class="n">magnetic_field</span> <span class="o">*</span> <span class="n">radius</span> <span class="o">*</span> <span class="mf">0.001</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">polar</span><span class="p">))</span>
     <span class="p">)</span>  <span class="c1"># Sometimes our angle is in the wrong quadrant</span>
     <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">brho</span><span class="p">):</span>
         <span class="n">brho</span> <span class="o">=</span> <span class="mf">0.0</span>
 
     <span class="n">arclength</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">charge_deposited</span> <span class="o">=</span> <span class="n">first_arc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">first_arc</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="c1"># Stop integrating if we leave the small pad region</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">first_arc</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mf">152.0</span><span class="p">:</span>
+            <span class="k">break</span>
         <span class="n">arclength</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">first_arc</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">first_arc</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+        <span class="n">charge_deposited</span> <span class="o">+=</span> <span class="n">first_arc</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">arclength</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">Direction</span><span class="o">.</span><span class="n">NONE</span><span class="p">)</span>
-    <span class="n">charge_deposited</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">first_arc</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">])</span>
     <span class="n">dEdx</span> <span class="o">=</span> <span class="n">charge_deposited</span> <span class="o">/</span> <span class="n">arclength</span>
 
     <span class="n">integral_len</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">cluster</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">vertex</span><span class="p">)</span>
@@ -2773,6 +2808,7 @@ manipulation of the data.</p>
     <span class="n">results</span><span class="p">[</span><span class="s2">&quot;ic_amplitude&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ic_amplitude</span><span class="p">)</span>
     <span class="n">results</span><span class="p">[</span><span class="s2">&quot;ic_centroid&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ic_centroid</span><span class="p">)</span>
     <span class="n">results</span><span class="p">[</span><span class="s2">&quot;ic_integral&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ic_integral</span><span class="p">)</span>
+    <span class="n">results</span><span class="p">[</span><span class="s2">&quot;ic_multiplicity&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ic_multiplicity</span><span class="p">)</span>
     <span class="n">results</span><span class="p">[</span><span class="s2">&quot;vertex_x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vertex</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">results</span><span class="p">[</span><span class="s2">&quot;vertex_y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vertex</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
     <span class="n">results</span><span class="p">[</span><span class="s2">&quot;vertex_z&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vertex</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
@@ -2851,7 +2887,7 @@ manipulation of the data.</p>
     <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.e1c3ead8.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.8fd75fb4.min.js"></script>
       
         <script src="../../../javascript/mathjax.js"></script>
       

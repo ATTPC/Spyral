@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.6">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.11">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.50c56a3b.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.7e359304.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
@@ -265,10 +265,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
@@ -323,10 +321,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
@@ -559,10 +555,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" checked>
@@ -690,6 +684,15 @@
   <a href="#auxilary-detectors-and-corrections" class="md-nav__link">
     <span class="md-ellipsis">
       Auxilary Detectors and Corrections
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#legacy-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Legacy Data
     </span>
   </a>
   
@@ -885,10 +888,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
@@ -1069,10 +1070,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_8" >
@@ -1369,6 +1368,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/core/legacy_beam_pads/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    legacy_beam_pads
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1387,10 +1407,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_9" >
@@ -1495,10 +1513,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_10" >
@@ -1582,10 +1598,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_11" >
@@ -1690,10 +1704,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_12" >
@@ -1798,10 +1810,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_13" >
@@ -1906,10 +1916,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_14" >
@@ -1966,6 +1974,27 @@
   
   <span class="md-ellipsis">
     get_event
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/trace/get_legacy_event/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    get_legacy_event
   </span>
   
 
@@ -2177,6 +2206,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#legacy-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Legacy Data
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#final-thoughts" class="md-nav__link">
     <span class="md-ellipsis">
       Final Thoughts
@@ -2247,6 +2285,8 @@
 <p>The AT-TPC has at minimum one auxilary detector, the upstream ion chamber. The ion chamber (IC) is used to generate the AT-TPC trigger (in conjunction with the mesh) and identify beam species, and is recorded using the FRIBDAQ framework. Its data is analyzed very similarly to the GET data; baselines are removed and signals are extracted. Users can specify the maximum allowed ion chamber multiplicty to reject data with has an inconsistent trigger. Usually the AT-TPC also has a silicon detector downstream within the hole of the pad plane. This is useful for correcting the time of an event which triggered from the wrong IC signal by examining coincidences between the silicon and IC; only IC events which do not have a silicon coincidence are valid triggers. See the code in <code>spyral/traces/frib_traces.py</code> and <code>spyral/traces/frib_event.py</code> for details.</p>
 <p>Additionally, it has been found that in some cases the AT-TPC needs a correction for distortions to the electric field. The correction is calculated using <a href="https://gitlab.cern.ch/garfield/garfieldpp">Garfield++</a> externally from Spyral. Spyral takes in a correction file containing initial electron positions and final drift positions and times. Spyral generates an interpolation mesh to calculate corrections for each point. The mesh is calculated and stored in a Numpy format file (<code>.npy</code>). It is not clear how impactful this correction is anymore; it was seemingly most important early on in the AT-TPC development. The associated code can be found in <code>spyral/correction</code>. This correction is optional, and can be turned off and on using the configuration.</p>
 <p>Point clouds are also sorted in z for ease of use later.</p>
+<h2 id="legacy-data">Legacy Data</h2>
+<p>In the past, the AT-TPC was not run with a split DAQ. That is, all signals were recorded using the GET data aquisition, including auxilary detectors like the ion chamber. In the configuration, one can indicate to Spyral that legacy data is being analyzed (see <a href="../../config/run/">here</a>). If this is turned on Spyral assumes that any data in CoBo 10 is exclusively from auxilary detectors. Legacy mappings and corrections are included in the <code>etc</code> directory. Legacy IC data is analyzed for peaks using the <code>FRIB</code> parameters even though the data is acquired using the GET DAQ (see <a href="../../config/traces/">here</a>). Legacy analysis is an advanced feature, and requires some experience with using Spyral. This phase is the only phase significantly impacted by legacy analysis.</p>
 <h2 id="final-thoughts">Final Thoughts</h2>
 <p>The first phase is very intense and represents a major data transformation. Typically, the trace data is somewhere between 10-50 GB per run, and the output of the point cloud phase is something like 250 MB to 1 GB. This is an enormous reduction of data, and as such is usually the slowest phase, taking anywhere from 10 minutes to an hour depending on the hardware being used. The bottleneck is typically I/O speed; reading in so much data is a serious issue depending on the type of storage used to hold the traces. In general, if the traces are stored on a network drive which doesn't have hardline 10 Gb connection, this phase will be slow. HDD drives can also be a slow down, or older USB connected external drives. The general recommendation is to move data to a fast local SSD for analysis when possible.</p>
 
@@ -2298,7 +2338,7 @@
     <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.e1c3ead8.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.8fd75fb4.min.js"></script>
       
         <script src="../../../javascript/mathjax.js"></script>
       

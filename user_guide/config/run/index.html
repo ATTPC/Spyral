@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.6">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.11">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.50c56a3b.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.7e359304.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
@@ -265,10 +265,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
@@ -325,10 +323,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" checked>
@@ -509,6 +505,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#is_legacy" class="md-nav__link">
+    <span class="md-ellipsis">
+      is_legacy
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -662,10 +667,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
@@ -903,10 +906,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
@@ -1087,10 +1088,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_8" >
@@ -1387,6 +1386,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/core/legacy_beam_pads/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    legacy_beam_pads
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1405,10 +1425,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_9" >
@@ -1513,10 +1531,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_10" >
@@ -1600,10 +1616,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_11" >
@@ -1708,10 +1722,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_12" >
@@ -1816,10 +1828,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_13" >
@@ -1924,10 +1934,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_14" >
@@ -1984,6 +1992,27 @@
   
   <span class="md-ellipsis">
     get_event
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/trace/get_legacy_event/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    get_legacy_event
   </span>
   
 
@@ -2221,6 +2250,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#is_legacy" class="md-nav__link">
+    <span class="md-ellipsis">
+      is_legacy
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2249,7 +2287,8 @@
     &quot;phase_pointcloud&quot;: false,
     &quot;phase_cluster&quot;: false,
     &quot;phase_estimate&quot;: false,
-    &quot;phase_solve&quot;: false
+    &quot;phase_solve&quot;: false,
+    &quot;is_legacy&quot;: false
 },
 </code></pre>
 <p>Note that by default run 17 is given and no phases are run, so nothing will actually happen.</p>
@@ -2268,6 +2307,8 @@
 <p>Select whether or not to run the estimation phase, the third phase of the analysis. Set to <code>true</code> to run or <code>false</code> to skip.</p>
 <h2 id="phase_solve">phase_solve</h2>
 <p>Select whether or not to run the solving phase, the fourth and final phase of the analysis. Set to <code>true</code> to run or <code>false</code> to skip.</p>
+<h2 id="is_legacy">is_legacy</h2>
+<p>Controls whether or not data is analyzed in legacy mode. Legacy data is defined as data which was taken before the separation of auxilary detectors like the IC from the GET data acquisition into the FRIB acquisition. In this mode it is assumed that any data in CoBo 10 is auxilary data.</p>
 
 
 
@@ -2317,7 +2358,7 @@
     <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.e1c3ead8.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.8fd75fb4.min.js"></script>
       
         <script src="../../../javascript/mathjax.js"></script>
       

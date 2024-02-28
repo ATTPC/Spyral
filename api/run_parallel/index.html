@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.6">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.11">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.50c56a3b.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e359304.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -263,10 +263,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
@@ -321,10 +319,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
@@ -555,10 +551,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
@@ -798,10 +792,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
@@ -1049,10 +1041,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_8" >
@@ -1349,6 +1339,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/legacy_beam_pads/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    legacy_beam_pads
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1367,10 +1378,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_9" >
@@ -1475,10 +1484,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_10" >
@@ -1562,10 +1569,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_11" >
@@ -1670,10 +1675,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_12" >
@@ -1778,10 +1781,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_13" >
@@ -1886,10 +1887,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_14" >
@@ -1946,6 +1945,27 @@
   
   <span class="md-ellipsis">
     get_event
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../trace/get_legacy_event/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    get_legacy_event
   </span>
   
 
@@ -2348,17 +2368,17 @@ processors are started. Otherwise, there may be race conditions.</p>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">pid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span>
-                <span class="s2">&quot;Could not create interpolation scheme, particle ID does not have the correct format!&quot;</span>
+                <span class="s2">&quot;Could not create trajectory mesh, particle ID does not have the correct format!&quot;</span>
             <span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Particle ID is required for running the solver stage (phase 4).&quot;</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">Exception</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">GasTarget</span><span class="p">):</span>
             <span class="nb">print</span><span class="p">(</span>
-                <span class="s2">&quot;Could not create interpolation scheme, target data does not have the correct format for a GasTarget!&quot;</span>
+                <span class="s2">&quot;Could not create trajectory mesh, target data does not have the correct format for a GasTarget!&quot;</span>
             <span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Gas Target is required for running the solver stage (phase 4).&quot;</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">Exception</span>
-        <span class="n">gen_params</span> <span class="o">=</span> <span class="n">GeneratorParams</span><span class="p">(</span>
+        <span class="n">mesh_params</span> <span class="o">=</span> <span class="n">MeshParameters</span><span class="p">(</span>
             <span class="n">target</span><span class="p">,</span>
             <span class="n">pid</span><span class="o">.</span><span class="n">nucleus</span><span class="p">,</span>
             <span class="n">config</span><span class="o">.</span><span class="n">detector</span><span class="o">.</span><span class="n">magnetic_field</span><span class="p">,</span>
@@ -2372,10 +2392,10 @@ processors are started. Otherwise, there may be race conditions.</p>
             <span class="n">config</span><span class="o">.</span><span class="n">solver</span><span class="o">.</span><span class="n">interp_polar_bins</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">track_path</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">get_track_file_path</span><span class="p">(</span><span class="n">pid</span><span class="o">.</span><span class="n">nucleus</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
-        <span class="n">do_gen</span> <span class="o">=</span> <span class="n">check_tracks_need_generation</span><span class="p">(</span><span class="n">track_path</span><span class="p">,</span> <span class="n">gen_params</span><span class="p">)</span>
+        <span class="n">do_gen</span> <span class="o">=</span> <span class="n">check_mesh_needs_generation</span><span class="p">(</span><span class="n">track_path</span><span class="p">,</span> <span class="n">mesh_params</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">do_gen</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Creating the interpolation scheme... This may take some time...&quot;</span><span class="p">)</span>
-            <span class="n">generate_tracks</span><span class="p">(</span><span class="n">gen_params</span><span class="p">,</span> <span class="n">track_path</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Creating the trajectory mesh... This may take some time...&quot;</span><span class="p">)</span>
+            <span class="n">generate_track_mesh</span><span class="p">(</span><span class="n">mesh_params</span><span class="p">,</span> <span class="n">track_path</span><span class="p">)</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done.&quot;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Shared resources are ready.&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -2540,8 +2560,7 @@ used to generate a set of child processes to analyze the data range.</p>
 <span class="normal">188</span>
 <span class="normal">189</span>
 <span class="normal">190</span>
-<span class="normal">191</span>
-<span class="normal">192</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">run_spyral_parallel</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">no_progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="normal">191</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">run_spyral_parallel</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">no_progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Spyral&#39;s parent process function</span>
 
 <span class="sd">    This is the main function to be called to run Spyral. The configuration will be</span>
@@ -2559,7 +2578,6 @@ used to generate a set of child processes to analyze the data range.</p>
 
     <span class="c1"># Some data must be made and shared across processes through files.</span>
     <span class="n">generate_shared_resources</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
-
     <span class="n">n_processes</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">n_processes</span>
 
     <span class="n">queues</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">SimpleQueue</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -2698,7 +2716,7 @@ used to generate a set of child processes to analyze the data range.</p>
     <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e1c3ead8.min.js"></script>
+      <script src="../../assets/javascripts/bundle.8fd75fb4.min.js"></script>
       
         <script src="../../javascript/mathjax.js"></script>
       

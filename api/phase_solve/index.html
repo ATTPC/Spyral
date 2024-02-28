@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.6">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.11">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.50c56a3b.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e359304.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -263,10 +263,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
@@ -321,10 +319,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
@@ -555,10 +551,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
@@ -798,10 +792,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
@@ -1040,10 +1032,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_8" >
@@ -1340,6 +1330,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/legacy_beam_pads/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    legacy_beam_pads
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1358,10 +1369,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_9" >
@@ -1466,10 +1475,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_10" >
@@ -1553,10 +1560,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_11" >
@@ -1661,10 +1666,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_12" >
@@ -1769,10 +1772,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_13" >
@@ -1877,10 +1878,8 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_14" >
@@ -1937,6 +1936,27 @@
   
   <span class="md-ellipsis">
     get_event
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../trace/get_legacy_event/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    get_legacy_event
   </span>
   
 
@@ -2176,7 +2196,7 @@
 
 
 <h2 id="spyral.phase_solve.phase_solve" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">phase_solve</span><span class="p">(</span><span class="n">run</span><span class="p">,</span> <span class="n">ws</span><span class="p">,</span> <span class="n">solver_params</span><span class="p">,</span> <span class="n">nuclear_map</span><span class="p">,</span> <span class="n">queue</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">phase_solve</span><span class="p">(</span><span class="n">run</span><span class="p">,</span> <span class="n">ws</span><span class="p">,</span> <span class="n">solver_params</span><span class="p">,</span> <span class="n">det_params</span><span class="p">,</span> <span class="n">nuclear_map</span><span class="p">,</span> <span class="n">queue</span><span class="p">)</span></code>
 
 </h2>
 
@@ -2236,6 +2256,20 @@ All three previous phases (point cloud, cluster, estimate) must have been run be
           <td>
             <div class="doc-md-description">
               <p>Configuration parameters for this phase</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>det_params</code></td>
+          <td>
+                <code><a class="autorefs autorefs-internal" title="spyral.core.config.DetectorParameters" href="../core/config/#spyral.core.config.DetectorParameters">DetectorParameters</a></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Configuration parameters for detector characteristics</p>
             </div>
           </td>
           <td>
@@ -2421,10 +2455,29 @@ All three previous phases (point cloud, cluster, estimate) must have been run be
 <span class="normal">162</span>
 <span class="normal">163</span>
 <span class="normal">164</span>
-<span class="normal">165</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">phase_solve</span><span class="p">(</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">phase_solve</span><span class="p">(</span>
     <span class="n">run</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">ws</span><span class="p">:</span> <span class="n">Workspace</span><span class="p">,</span>
     <span class="n">solver_params</span><span class="p">:</span> <span class="n">SolverParameters</span><span class="p">,</span>
+    <span class="n">det_params</span><span class="p">:</span> <span class="n">DetectorParameters</span><span class="p">,</span>
     <span class="n">nuclear_map</span><span class="p">:</span> <span class="n">NuclearDataMap</span><span class="p">,</span>
     <span class="n">queue</span><span class="p">:</span> <span class="n">SimpleQueue</span><span class="p">,</span>
 <span class="p">):</span>
@@ -2441,6 +2494,8 @@ All three previous phases (point cloud, cluster, estimate) must have been run be
 <span class="sd">        The project Workspace</span>
 <span class="sd">    solver_params: SolverParameters</span>
 <span class="sd">        Configuration parameters for this phase</span>
+<span class="sd">    det_params: DetectorParameters</span>
+<span class="sd">        Configuration parameters for detector characteristics</span>
 <span class="sd">    nuclear_map: NuclearDataMap</span>
 <span class="sd">        Map containing AMDE data</span>
 <span class="sd">    queue: SimpleQueue</span>
@@ -2498,6 +2553,7 @@ All three previous phases (point cloud, cluster, estimate) must have been run be
             <span class="n">pl</span><span class="o">.</span><span class="n">struct</span><span class="p">([</span><span class="s2">&quot;dEdx&quot;</span><span class="p">,</span> <span class="s2">&quot;brho&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">map_batches</span><span class="p">(</span><span class="n">pid</span><span class="o">.</span><span class="n">cut</span><span class="o">.</span><span class="n">is_cols_inside</span><span class="p">)</span>
             <span class="o">&amp;</span> <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;ic_amplitude&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">solver_params</span><span class="o">.</span><span class="n">ic_min_val</span><span class="p">)</span>
             <span class="o">&amp;</span> <span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="s2">&quot;ic_amplitude&quot;</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">solver_params</span><span class="o">.</span><span class="n">ic_max_val</span><span class="p">)</span>
+            <span class="c1"># &amp; (pl.col(&quot;ic_multiplicity&quot;) &lt; 2.0)  # For legacy data</span>
         <span class="p">)</span>
         <span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="s2">&quot;polar&quot;</span><span class="p">,</span> <span class="n">descending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="s2">&quot;event&quot;</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="s2">&quot;first&quot;</span><span class="p">)</span>
@@ -2514,6 +2570,10 @@ All three previous phases (point cloud, cluster, estimate) must have been run be
     <span class="n">flush_percent</span> <span class="o">=</span> <span class="mf">0.01</span>
     <span class="n">flush_val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">flush_percent</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">estimates_gated</span><span class="p">[</span><span class="s2">&quot;event&quot;</span><span class="p">])))</span>
     <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">estimates_gated</span><span class="p">[</span><span class="s2">&quot;event&quot;</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">:</span>
+        <span class="n">flush_percent</span> <span class="o">=</span> <span class="mf">100.0</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">estimates_gated</span><span class="p">[</span><span class="s2">&quot;event&quot;</span><span class="p">]))</span>
+        <span class="n">flush_val</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="c1"># Result storage</span>
     <span class="n">results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
@@ -2543,7 +2603,7 @@ All three previous phases (point cloud, cluster, estimate) must have been run be
     <span class="k">for</span> <span class="n">row</span><span class="p">,</span> <span class="n">event</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">estimates_gated</span><span class="p">[</span><span class="s2">&quot;event&quot;</span><span class="p">]):</span>
         <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="n">flush_val</span><span class="p">:</span>
             <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="n">queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">StatusMessage</span><span class="p">(</span><span class="n">run</span><span class="p">,</span> <span class="n">Phase</span><span class="o">.</span><span class="n">SOLVE</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">StatusMessage</span><span class="p">(</span><span class="n">run</span><span class="p">,</span> <span class="n">Phase</span><span class="o">.</span><span class="n">SOLVE</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">flush_percent</span> <span class="o">*</span> <span class="mf">100.0</span><span class="p">)))</span>
         <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="n">event_group</span> <span class="o">=</span> <span class="n">cluster_group</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;event_</span><span class="si">{</span><span class="n">event</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>
@@ -2562,7 +2622,17 @@ All three previous phases (point cloud, cluster, estimate) must have been run be
             <span class="n">estimates_gated</span><span class="p">[</span><span class="s2">&quot;vertex_y&quot;</span><span class="p">][</span><span class="n">row</span><span class="p">],</span>
             <span class="n">estimates_gated</span><span class="p">[</span><span class="s2">&quot;vertex_z&quot;</span><span class="p">][</span><span class="n">row</span><span class="p">],</span>
         <span class="p">)</span>
-        <span class="n">solve_physics_interp</span><span class="p">(</span><span class="n">cidx</span><span class="p">,</span> <span class="n">cluster</span><span class="p">,</span> <span class="n">guess</span><span class="p">,</span> <span class="n">interpolator</span><span class="p">,</span> <span class="n">pid</span><span class="o">.</span><span class="n">nucleus</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+        <span class="n">solve_physics_interp</span><span class="p">(</span>
+            <span class="n">cidx</span><span class="p">,</span>
+            <span class="n">cluster</span><span class="p">,</span>
+            <span class="n">guess</span><span class="p">,</span>
+            <span class="n">pid</span><span class="o">.</span><span class="n">nucleus</span><span class="p">,</span>
+            <span class="n">interpolator</span><span class="p">,</span>
+            <span class="n">estimates_gated</span><span class="p">[</span><span class="s2">&quot;center_x&quot;</span><span class="p">][</span><span class="n">row</span><span class="p">],</span>
+            <span class="n">estimates_gated</span><span class="p">[</span><span class="s2">&quot;center_y&quot;</span><span class="p">][</span><span class="n">row</span><span class="p">],</span>
+            <span class="n">det_params</span><span class="p">,</span>
+            <span class="n">results</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="c1"># Write out the results</span>
     <span class="n">physics_df</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
@@ -2630,7 +2700,7 @@ All three previous phases (point cloud, cluster, estimate) must have been run be
     <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e1c3ead8.min.js"></script>
+      <script src="../../assets/javascripts/bundle.8fd75fb4.min.js"></script>
       
         <script src="../../javascript/mathjax.js"></script>
       
