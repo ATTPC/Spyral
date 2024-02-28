@@ -85,7 +85,7 @@ class Cluster:
         self.event = cloud.point_cloud.event_number
         self.label = cloud.label
         self.copy_cloud(cloud.point_cloud)
-        self.drop_outliers(params.n_neighbors_outlier_test)
+        self.drop_outliers(params.outlier_scale_factor)
 
     def copy_cloud(self, cloud: PointCloud):
         """Copy PointCloud data to the cluster
@@ -104,17 +104,18 @@ class Cluster:
         self.data[:, 3] = cloud.cloud[:, 4]  # peak integral
         self.data[:, 4] = cloud.cloud[:, 7]  # scale (big or small)
 
-    def drop_outliers(self, neighbors=2):
+    def drop_outliers(self, scale: float = 0.05):
         """Use scikit-learn LocalOutlierFactor to test the cluster for spatial outliers.
 
         This helps reduce noise when fitting the data.
 
         Parameters
         ----------
-        neighbors: int
-            The number of neighbors to compare to for the outlier test (default=2)
+        scale: float
+            Scale factor to be multiplied by the length of the trajectory to get
+            the number of neighbors over which to test
         """
-        neighbors = int(0.05 * len(self.data))
+        neighbors = int(scale * len(self.data))  # 0.05 default
         if neighbors < 2:
             neighbors = 2
         test_data = self.data[:, :3].copy()

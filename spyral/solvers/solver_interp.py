@@ -2,18 +2,35 @@ from .guess import Guess
 from ..core.cluster import Cluster
 from ..interpolate.track_interpolator import TrackInterpolator
 from ..core.constants import QBRHO_2_P
+from ..core.config import DetectorParameters
 
 from spyral_utils.nuclear import NucleusData
 
 from lmfit import Parameters, minimize, fit_report
 from lmfit.minimizer import MinimizerResult
 import numpy as np
-import math
 from numba import njit, prange
 
 
 @njit(fastmath=True, error_model="numpy", inline="always")
 def distances(track: np.ndarray, data: np.ndarray) -> float:
+    """Calculate the average distance (error) of a track solution to the data
+
+    Loop over the data and approximate the error as the closest distance of a point in the
+    track solution to the data. JIT-ed for speed
+
+    Parameters
+    ----------
+    track: ndarray
+        The track solution
+    data: ndarray
+        The data to compare to
+
+    Returns
+    -------
+    float
+        The average distance (error)
+    """
     assert track.shape[1] == 3
     assert data.shape[1] == 3
 
@@ -34,6 +51,26 @@ def distances(track: np.ndarray, data: np.ndarray) -> float:
 def calc_azimuthal(
     vertex_x: float, vertex_y: float, center_x: float, center_y: float
 ) -> float:
+    """Calculate the azimuthal angle of the trajectory from the vertex
+
+    Uses the center of the circle from the estimation phase and the updated vertex position
+
+    Parameters
+    ----------
+    vertex_x: float
+        vertex x coordinate
+    vertex_y: float
+        vertex y coordinate
+    center_x: float
+        center x coordinate
+    center_y: float
+        center y coordinate
+
+    Returns
+    -------
+    float
+        The azimuthal angle of a trajectory from the vertex
+    """
     azimuthal = np.arctan2(vertex_y - center_y, vertex_x - center_x)
     if azimuthal < 0.0:
         azimuthal += 2.0 * np.pi
@@ -59,14 +96,14 @@ def interpolate_trajectory(
 
     Returns
     -------
-    LinearInterpolator | None
-        Returns a LinearInterpolator interpolating the x,y coordinates on z upon success. Upon failure (typically an out of bounds for the interpolation scheme) returns None.
+    ndarray | None
+        Returns a array of interpolated ODE trajectory solutions. Upon failure (typically an out of bounds for the interpolation scheme) returns None.
     """
     vertex_x = fit_params["vertex_x"].value
     vertex_y = fit_params["vertex_y"].value
     vertex_z = fit_params["vertex_z"].value
     momentum = QBRHO_2_P * (fit_params["brho"].value * float(ejectile.Z))
-    kinetic_energy = math.sqrt(momentum**2.0 + ejectile.mass**2.0) - ejectile.mass
+    kinetic_energy = np.sqrt(momentum**2.0 + ejectile.mass**2.0) - ejectile.mass
     polar = fit_params["polar"].value
     azimuthal = calc_azimuthal(
         vertex_x, vertex_y, fit_params["center_x"].value, fit_params["center_y"].value
@@ -103,7 +140,7 @@ def objective_function(
 
     Returns
     -------
-    ndarray
+    float
         the error between the estimate and the data
     """
     trajectory = interpolate_trajectory(fit_params, interpolator, ejectile)
@@ -118,8 +155,11 @@ def create_params(
     interpolator: TrackInterpolator,
     center_x: float,
     center_y: float,
+    det_params: DetectorParameters,
 ) -> Parameters:
     """Create the lmfit parameters with appropriate bounds
+
+    Convert all values to correct units (meters, radians, etc.) as well
 
     Parameters
     ----------
@@ -129,16 +169,24 @@ def create_params(
         the data for the particle being tracked
     interpolator: TrackInterpolator
         the interpolation scheme to be used
+    center_x: float
+        The x-coordinate of the center of the circle fit from the estimation phase
+        Units of mm
+    center_y: float
+        The y-coordinate of the center of the circle fit from the estimation phase
+        Units of mm
+    det_params: DetectorParameters
+        Configuration parameters for detector characteristics
 
     Returns
     -------
     Parameters
         the lmfit parameters with bounds
     """
-    interp_min_momentum = math.sqrt(
+    interp_min_momentum = np.sqrt(
         interpolator.ke_min * (interpolator.ke_min + 2.0 * ejectile.mass)
     )
-    interp_max_momentum = math.sqrt(
+    interp_max_momentum = np.sqrt(
         interpolator.ke_max * (interpolator.ke_max + 2.0 * ejectile.mass)
     )
     interp_min_brho = (interp_min_momentum / QBRHO_2_P) / ejectile.Z
@@ -165,6 +213,10 @@ def create_params(
 
     min_z = guess.vertex_z * 0.001 - uncertainty_position_z * 2.0
     max_z = guess.vertex_z * 0.001 + uncertainty_position_z * 2.0
+    if min_z < 0.0:
+        min_z = 0.0
+    if max_z > det_params.detector_length * 0.001:
+        max_z = det_params.detector_length * 0.001
 
     vert_phi = np.arctan2(guess.vertex_y, guess.vertex_x)
     if vert_phi < 0.0:
@@ -172,11 +224,17 @@ def create_params(
     vert_rho = np.sqrt(guess.vertex_x**2.0 + guess.vertex_y**2.0) * 0.001
 
     fit_params = Parameters()
-    fit_params.add("center_x", value=center_x, vary=False)
-    fit_params.add("center_y", value=center_y, vary=False)
+    fit_params.add("center_x", value=center_x * 0.001, vary=False)
+    fit_params.add("center_y", value=center_y * 0.001, vary=False)
     fit_params.add("brho", guess.brho, min=min_brho, max=max_brho)
     fit_params.add("polar", guess.polar, min=min_polar, max=max_polar)
-    fit_params.add("vertex_rho", value=vert_rho, min=0.0, max=0.03, vary=True)
+    fit_params.add(
+        "vertex_rho",
+        value=vert_rho,
+        min=0.0,
+        max=det_params.beam_region_radius * 0.001,
+        vary=True,
+    )
     fit_params.add("vertex_phi", value=vert_phi, min=0.0, max=np.pi * 2.0, vary=True)
     fit_params.add("vertex_x", expr="vertex_rho * cos(vertex_phi)")
     fit_params.add("vertex_y", expr="vertex_rho * sin(vertex_phi)")
@@ -188,10 +246,11 @@ def create_params(
 def fit_model_interp(
     cluster: Cluster,
     guess: Guess,
-    interpolator: TrackInterpolator,
     ejectile: NucleusData,
+    interpolator: TrackInterpolator,
     center_x: float,
     center_y: float,
+    det_params: DetectorParameters,
 ) -> Parameters | None:
     """Used for jupyter notebooks examining the good-ness of the model
 
@@ -205,6 +264,14 @@ def fit_model_interp(
         the data for the particle being tracked
     interpolator: TrackInterpolator
         the interpolation scheme to be used
+    center_x: float
+        The x-coordinate of the center of the circle fit from the estimation phase
+        Units of mm
+    center_y: float
+        The y-coordinate of the center of the circle fit from the estimation phase
+        Units of mm
+    det_params: DetectorParameters
+        Configuration parameters for detector characteristics
 
     Returns
     -------
@@ -212,21 +279,14 @@ def fit_model_interp(
         Returns the best fit Parameters upon success, or None upon failure
     """
     traj_data = cluster.data[:, :3] * 0.001
-    # We only use 90% of the trajectory data (closest to vertex).
-    # Since sorted in z, need to trim 10% from one end depending on direction
-    # traj_data: np.ndarray
-    # if guess.polar > np.pi * 0.5:
-    #     traj_len = int(len(cluster.data) * 0.0)
-    #     traj_data = cluster.data[traj_len:, :3] * 0.001
-    # else:
-    #     traj_len = int(len(cluster.data) * 1.0)
-    #     traj_data = cluster.data[:traj_len, :3] * 0.001
     momentum = QBRHO_2_P * (guess.brho * float(ejectile.Z))
-    kinetic_energy = math.sqrt(momentum**2.0 + ejectile.mass**2.0) - ejectile.mass
+    kinetic_energy = np.sqrt(momentum**2.0 + ejectile.mass**2.0) - ejectile.mass
     if not interpolator.check_values_in_range(kinetic_energy, guess.polar):
         return None
 
-    fit_params = create_params(guess, ejectile, interpolator, center_x, center_y)
+    fit_params = create_params(
+        guess, ejectile, interpolator, center_x, center_y, det_params
+    )
 
     result: MinimizerResult = minimize(
         objective_function,
@@ -243,10 +303,11 @@ def solve_physics_interp(
     cluster_index: int,
     cluster: Cluster,
     guess: Guess,
-    interpolator: TrackInterpolator,
     ejectile: NucleusData,
+    interpolator: TrackInterpolator,
     center_x: float,
     center_y: float,
+    det_params: DetectorParameters,
     results: dict[str, list],
 ):
     """High level function to be called from the application.
@@ -265,25 +326,26 @@ def solve_physics_interp(
         the data for the particle being tracked
     interpolator: TrackInterpolator
         the interpolation scheme to be used
+    center_x: float
+        The x-coordinate of the center of the circle fit from the estimation phase
+        Units of mm
+    center_y: float
+        The y-coordinate of the center of the circle fit from the estimation phase
+        Units of mm
+    det_params: DetectorParameters
+        Configuration parameters for detector characteristics
     results: dict[str, list]
         storage for results from the fitting, which will later be written as a dataframe.
     """
     traj_data = cluster.data[:, :3] * 0.001
-    # We only use 90% of the trajectory data (closest to vertex).
-    # Since sorted in z, need to trim 10% from one end depending on direction
-    # traj_data: np.ndarray
-    # if guess.polar > np.pi * 0.5:
-    #     traj_len = int(len(cluster.data) * 0.25)
-    #     traj_data = cluster.data[traj_len:, :3] * 0.001
-    # else:
-    #     traj_len = int(len(cluster.data) * 0.75)
-    #     traj_data = cluster.data[:traj_len, :3] * 0.001
     momentum = QBRHO_2_P * (guess.brho * float(ejectile.Z))
-    kinetic_energy = math.sqrt(momentum**2.0 + ejectile.mass**2.0) - ejectile.mass
+    kinetic_energy = np.sqrt(momentum**2.0 + ejectile.mass**2.0) - ejectile.mass
     if not interpolator.check_values_in_range(kinetic_energy, guess.polar):
         return
 
-    fit_params = create_params(guess, ejectile, interpolator, center_x, center_y)
+    fit_params = create_params(
+        guess, ejectile, interpolator, center_x, center_y, det_params
+    )
 
     best_fit: MinimizerResult = minimize(
         objective_function,
@@ -307,21 +369,7 @@ def solve_physics_interp(
     results["azimuthal"].append(azim)
     results["redchisq"].append(best_fit.redchi)
 
-    # Sometimes fit is so bad uncertainties cannot be estimated
-    # if hasattr(best_fit, "uvars"):
-    #     results["sigma_vx"].append(best_fit.uvars["vertex_x"].s)
-    #     results["sigma_vy"].append(best_fit.uvars["vertex_y"].s)
-    #     results["sigma_vz"].append(best_fit.uvars["vertex_z"].s)
-    #     results["sigma_brho"].append(best_fit.uvars["brho"].s)
-    #     results["sigma_polar"].append(best_fit.uvars["polar"].s)
-    #     results["sigma_azimuthal"].append(best_fit.uvars["azimuthal"].s)
-    # else:
-    #     results["sigma_vx"].append(1.0e6)
-    #     results["sigma_vy"].append(1.0e6)
-    #     results["sigma_vz"].append(1.0e6)
-    #     results["sigma_brho"].append(1.0e6)
-    #     results["sigma_polar"].append(1.0e6)
-    #     results["sigma_azimuthal"].append(1.0e6)
+    # Right now we can't quantify uncertainties
     results["sigma_vx"].append(1.0e6)
     results["sigma_vy"].append(1.0e6)
     results["sigma_vz"].append(1.0e6)

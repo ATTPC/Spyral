@@ -1,9 +1,9 @@
-from .core.config import SolverParameters
+from .core.config import SolverParameters, DetectorParameters
 from .interpolate.track_interpolator import create_interpolator
 from .core.workspace import Workspace
 from .core.particle_id import load_particle_id, ParticleID
 from .core.cluster import Cluster
-from .solvers.solver_interp_ip import solve_physics_interp, Guess
+from .solvers.solver_interp import solve_physics_interp, Guess
 from .parallel.status_message import StatusMessage, Phase
 from .core.spy_log import spyral_error, spyral_warn, spyral_info
 
@@ -20,6 +20,7 @@ def phase_solve(
     run: int,
     ws: Workspace,
     solver_params: SolverParameters,
+    det_params: DetectorParameters,
     nuclear_map: NuclearDataMap,
     queue: SimpleQueue,
 ):
@@ -36,6 +37,8 @@ def phase_solve(
         The project Workspace
     solver_params: SolverParameters
         Configuration parameters for this phase
+    det_params: DetectorParameters
+        Configuration parameters for detector characteristics
     nuclear_map: NuclearDataMap
         Map containing AMDE data
     queue: SimpleQueue
@@ -166,10 +169,11 @@ def phase_solve(
             cidx,
             cluster,
             guess,
-            interpolator,
             pid.nucleus,
+            interpolator,
             estimates_gated["center_x"][row],
             estimates_gated["center_y"][row],
+            det_params,
             results,
         )
 

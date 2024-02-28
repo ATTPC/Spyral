@@ -1,3 +1,11 @@
+"""Beam pads for legacy AT-TPC data
+
+Attributes
+----------
+LEGACY_BEAM_PADS: list[int]
+    list of pad numbers for pads in the beam region for legacy data
+"""
+
 LEGACY_BEAM_PADS: list[int] = [
     134,
     135,

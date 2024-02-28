@@ -4,13 +4,7 @@ from .config import ClusterParameters
 from ..geometry.circle import least_squares_circle
 
 import sklearn.cluster as skcluster
-from sklearn.preprocessing import (
-    StandardScaler,
-    MinMaxScaler,
-    MaxAbsScaler,
-    RobustScaler,
-)
-from sklearn.decomposition import PCA
+from sklearn.preprocessing import RobustScaler
 import numpy as np
 
 
@@ -190,11 +184,11 @@ def cleanup_clusters(
     list[Cluster]
         The cleaned clusters
     """
+    # Cluster must have more than two points to have outlier test applied
     return [
         convert_labeled_to_cluster(cluster, params)
         for cluster in clusters
-        if cluster.label != -1
-        and len(cluster.point_cloud.cloud) > params.n_neighbors_outlier_test
+        if cluster.label != -1 and len(cluster.point_cloud.cloud) > 2
     ]
 
 
@@ -241,7 +235,7 @@ def form_clusters(pc: PointCloud, params: ClusterParameters) -> list[LabeledClou
         min_cluster_size=min_size,
         min_samples=params.min_points,
         allow_single_cluster=True,
-        cluster_selection_epsilon=0.3,
+        cluster_selection_epsilon=params.cluster_selection_epsilon,
     )
 
     fitted_clusters = clusterizer.fit(cluster_data)
