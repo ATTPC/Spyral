@@ -50,6 +50,7 @@ nav:
       - spy_log: api/core/spy_log.md
       - track_generator: api/core/track_generator.md
       - workspace: api/core/workspace.md
+      - legacy_beam_pads: api/core/legacy_beam_pads.md
     - correction:
       - About correction: api/correction/index.md
       - generate: api/correction/generate.md
@@ -72,6 +73,7 @@ nav:
     - trace:
       - About trace: api/trace/index.md
       - get_event: api/trace/get_event.md
+      - get_legacy_event: api/trace/get_legacy_event.md
       - get_trace: api/trace/get_trace.md
       - frib_event: api/trace/frib_event.md
       - frib_trace: api/trace/frib_trace.md
