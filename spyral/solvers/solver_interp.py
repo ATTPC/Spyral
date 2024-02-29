@@ -47,39 +47,6 @@ def distances(track: np.ndarray, data: np.ndarray) -> float:
     return np.average(errors)
 
 
-@njit
-def calc_azimuthal(
-    vertex_x: float, vertex_y: float, center_x: float, center_y: float
-) -> float:
-    """Calculate the azimuthal angle of the trajectory from the vertex
-
-    Uses the center of the circle from the estimation phase and the updated vertex position
-
-    Parameters
-    ----------
-    vertex_x: float
-        vertex x coordinate
-    vertex_y: float
-        vertex y coordinate
-    center_x: float
-        center x coordinate
-    center_y: float
-        center y coordinate
-
-    Returns
-    -------
-    float
-        The azimuthal angle of a trajectory from the vertex
-    """
-    azimuthal = np.arctan2(vertex_y - center_y, vertex_x - center_x)
-    if azimuthal < 0.0:
-        azimuthal += 2.0 * np.pi
-    azimuthal += np.pi * 0.5
-    if azimuthal > 2.0 * np.pi:
-        azimuthal -= 2.0 * np.pi
-    return azimuthal
-
-
 def interpolate_trajectory(
     fit_params: Parameters, interpolator: TrackInterpolator, ejectile: NucleusData
 ) -> np.ndarray | None:
@@ -105,9 +72,7 @@ def interpolate_trajectory(
     momentum = QBRHO_2_P * (fit_params["brho"].value * float(ejectile.Z))
     kinetic_energy = np.sqrt(momentum**2.0 + ejectile.mass**2.0) - ejectile.mass
     polar = fit_params["polar"].value
-    azimuthal = calc_azimuthal(
-        vertex_x, vertex_y, fit_params["center_x"].value, fit_params["center_y"].value
-    )
+    azimuthal = fit_params["azimuthal"].value
 
     return interpolator.get_trajectory(
         vertex_x,
@@ -153,8 +118,6 @@ def create_params(
     guess: Guess,
     ejectile: NucleusData,
     interpolator: TrackInterpolator,
-    center_x: float,
-    center_y: float,
     det_params: DetectorParameters,
 ) -> Parameters:
     """Create the lmfit parameters with appropriate bounds
@@ -169,12 +132,6 @@ def create_params(
         the data for the particle being tracked
     interpolator: TrackInterpolator
         the interpolation scheme to be used
-    center_x: float
-        The x-coordinate of the center of the circle fit from the estimation phase
-        Units of mm
-    center_y: float
-        The y-coordinate of the center of the circle fit from the estimation phase
-        Units of mm
     det_params: DetectorParameters
         Configuration parameters for detector characteristics
 
@@ -224,8 +181,6 @@ def create_params(
     vert_rho = np.sqrt(guess.vertex_x**2.0 + guess.vertex_y**2.0) * 0.001
 
     fit_params = Parameters()
-    fit_params.add("center_x", value=center_x * 0.001, vary=False)
-    fit_params.add("center_y", value=center_y * 0.001, vary=False)
     fit_params.add("brho", guess.brho, min=min_brho, max=max_brho)
     fit_params.add("polar", guess.polar, min=min_polar, max=max_polar)
     fit_params.add(
@@ -239,6 +194,7 @@ def create_params(
     fit_params.add("vertex_x", expr="vertex_rho * cos(vertex_phi)")
     fit_params.add("vertex_y", expr="vertex_rho * sin(vertex_phi)")
     fit_params.add("vertex_z", guess.vertex_z * 0.001, min=min_z, max=max_z, vary=True)
+    fit_params.add("azimuthal", value=guess.azimuthal, min=0.0, max=2.0 * np.pi)
     return fit_params
 
 
@@ -248,8 +204,6 @@ def fit_model_interp(
     guess: Guess,
     ejectile: NucleusData,
     interpolator: TrackInterpolator,
-    center_x: float,
-    center_y: float,
     det_params: DetectorParameters,
 ) -> Parameters | None:
     """Used for jupyter notebooks examining the good-ness of the model
@@ -264,12 +218,6 @@ def fit_model_interp(
         the data for the particle being tracked
     interpolator: TrackInterpolator
         the interpolation scheme to be used
-    center_x: float
-        The x-coordinate of the center of the circle fit from the estimation phase
-        Units of mm
-    center_y: float
-        The y-coordinate of the center of the circle fit from the estimation phase
-        Units of mm
     det_params: DetectorParameters
         Configuration parameters for detector characteristics
 
@@ -284,9 +232,7 @@ def fit_model_interp(
     if not interpolator.check_values_in_range(kinetic_energy, guess.polar):
         return None
 
-    fit_params = create_params(
-        guess, ejectile, interpolator, center_x, center_y, det_params
-    )
+    fit_params = create_params(guess, ejectile, interpolator, det_params)
 
     result: MinimizerResult = minimize(
         objective_function,
@@ -305,8 +251,6 @@ def solve_physics_interp(
     guess: Guess,
     ejectile: NucleusData,
     interpolator: TrackInterpolator,
-    center_x: float,
-    center_y: float,
     det_params: DetectorParameters,
     results: dict[str, list],
 ):
@@ -326,12 +270,6 @@ def solve_physics_interp(
         the data for the particle being tracked
     interpolator: TrackInterpolator
         the interpolation scheme to be used
-    center_x: float
-        The x-coordinate of the center of the circle fit from the estimation phase
-        Units of mm
-    center_y: float
-        The y-coordinate of the center of the circle fit from the estimation phase
-        Units of mm
     det_params: DetectorParameters
         Configuration parameters for detector characteristics
     results: dict[str, list]
@@ -343,9 +281,7 @@ def solve_physics_interp(
     if not interpolator.check_values_in_range(kinetic_energy, guess.polar):
         return
 
-    fit_params = create_params(
-        guess, ejectile, interpolator, center_x, center_y, det_params
-    )
+    fit_params = create_params(guess, ejectile, interpolator, det_params)
 
     best_fit: MinimizerResult = minimize(
         objective_function,
@@ -363,10 +299,7 @@ def solve_physics_interp(
     results["vertex_z"].append(best_fit.params["vertex_z"].value)
     results["brho"].append(best_fit.params["brho"].value)
     results["polar"].append(best_fit.params["polar"].value)
-    azim = calc_azimuthal(
-        results["vertex_x"][-1], results["vertex_y"][-1], center_x, center_y
-    )
-    results["azimuthal"].append(azim)
+    results["azimuthal"].append(best_fit.params["azimuthal"].value)
     results["redchisq"].append(best_fit.redchi)
 
     # Right now we can't quantify uncertainties
