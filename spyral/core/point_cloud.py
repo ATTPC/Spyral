@@ -58,13 +58,11 @@ class PointCloud:
         self,
         event: GetEvent | GetLegacyEvent,
         pmap: PadMap,
-        corrector: ElectronCorrector | None = None,
     ):
         """Load a point cloud from a GetEvent
 
         Loads the points from the signals in the traces and applies
-        the Garfield electron drift correction, pad relative gain correction,
-        and the pad time correction
+        the pad relative gain correction and the pad time correction
 
         Parameters
         ----------
@@ -72,8 +70,6 @@ class PointCloud:
             The GetEvent whose data should be loaded
         pmap: PadMap
             The PadMap used to get pad correction values
-        corrector: ElectronCorrector | None
-            The optional Garfield electron drift correction
         """
         self.event_number = event.number
         count = 0
@@ -114,9 +110,6 @@ class PointCloud:
                     peak.centroid + pad.time_offset
                 )  # Time bucket with correction
                 self.cloud[idx, 7] = pad.scale
-                # Apply correction if requested
-                if corrector is not None:
-                    self.cloud[idx] = corrector.correct_point(self.cloud[idx])
                 idx += 1
         self.cloud = self.cloud[self.cloud[:, 3] != 0.0]
 
@@ -159,11 +152,12 @@ class PointCloud:
         micromegas_tb: float,
         window_tb: float,
         detector_length: float,
+        efield_correction: ElectronCorrector | None = None,
         ic_correction: float = 0.0,
     ):
         """Calibrate the cloud z-position from the micromegas and window time references
 
-        Also applies the ion chamber time correction if given
+        Also applies the ion chamber time correction and electric field correction if given
 
         Parameters
         ----------
@@ -173,14 +167,18 @@ class PointCloud:
             The window time reference in GET Time Buckets
         detector_length: float
             The detector length in mm
+        efield_correction: ElectronCorrector | None
+            The optional Garfield electric field correction to the electron drift
         ic_correction: float
-            The ion chamber time correction in GET Time Buckets (default=0.0)
+            The ion chamber time correction in GET Time Buckets
         """
         # Maybe use mm as the reference because it is more stable?
         for idx, point in enumerate(self.cloud):
             self.cloud[idx][2] = (window_tb - point[6]) / (
                 window_tb - micromegas_tb
             ) * detector_length - ic_correction
+            if efield_correction is not None:
+                self.cloud[idx] = efield_correction.correct_point(self.cloud[idx])
 
     def smooth_cloud(self, max_distance: float = 10.0):
         """Smooth the point cloud by averaging over nearest neighbors by distance, weighted by the integrated charge.
