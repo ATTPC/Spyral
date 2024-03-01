@@ -171,8 +171,6 @@ def phase_solve(
             guess,
             pid.nucleus,
             interpolator,
-            estimates_gated["center_x"][row],
-            estimates_gated["center_y"][row],
             det_params,
             results,
         )
