@@ -11,6 +11,7 @@ import h5py as h5
 import numpy as np
 from pathlib import Path
 from multiprocessing import SimpleQueue
+import polars as pl
 
 
 def get_event_range(trace_file: h5.File) -> tuple[int, int]:
@@ -103,6 +104,11 @@ def phase_pointcloud_legacy(
     flush_val = int(flush_percent * (max_event - min_event))
     count = 0
 
+    # Load drift velocity information
+    df = pl.read_csv(detector_params.drift_velocity_path)
+    mm_tb = df.row(by_predicate=(pl.col('run')) == run, named = True)['micro_mean']
+    w_tb = df.row(by_predicate=(pl.col('run')) == run, named = True)['wind_mean']
+
     # Process the data
     for idx in range(min_event, max_event + 1):
         if count > flush_val:
@@ -121,8 +127,8 @@ def phase_pointcloud_legacy(
         pc = PointCloud()
         pc.load_cloud_from_get_event(event, pad_map)
         pc.calibrate_z_position(
-            detector_params.micromegas_time_bucket,
-            detector_params.window_time_bucket,
+            mm_tb,
+            w_tb,
             detector_params.detector_length,
             corrector,
         )

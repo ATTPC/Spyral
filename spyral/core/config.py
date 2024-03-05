@@ -81,10 +81,8 @@ class DetectorParameters:
         The detector length in mm
     beam_region_radius: float
         The beam region radius in mm
-    micromegas_time_bucket: float
-        The micromegas time reference in GET time buckets
-    window_time_bucket: float
-        The window time reference in GET time buckets
+    drift_velocity_path: str
+        Path to file containing information related to a run's drift velocity
     get_frequency: float
         The GET DAQ sampling frequency in MHz. Typically 3.125 or 6.25
     garfield_file_path: str
@@ -96,8 +94,7 @@ class DetectorParameters:
     electric_field: float = 0.0  # V/m
     detector_length: float = 0.0  # mm
     beam_region_radius: float = 0.0  # mm
-    micromegas_time_bucket: float = 0.0
-    window_time_bucket: float = 0.0
+    drift_velocity_path: str = ""
     get_frequency: float = 0.0  # MHz
     garfield_file_path: str = ""
     do_garfield_correction: bool = False
@@ -340,8 +337,7 @@ def deserialize_config(json_data: dict[Any, Any]) -> Config:
     config.detector.electric_field = det_params["electric_field(V/m)"]
     config.detector.detector_length = det_params["detector_length(mm)"]
     config.detector.beam_region_radius = det_params["beam_region_radius(mm)"]
-    config.detector.micromegas_time_bucket = det_params["micromegas_time_bucket"]
-    config.detector.window_time_bucket = det_params["window_time_bucket"]
+    config.detector.drift_velocity_path = det_params["drift_velocity_path"]
     config.detector.get_frequency = det_params["get_frequency(MHz)"]
     config.detector.garfield_file_path = det_params["electric_field_garfield_path"]
     config.detector.do_garfield_correction = det_params["do_garfield_correction"]
