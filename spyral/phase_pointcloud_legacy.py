@@ -105,9 +105,9 @@ def phase_pointcloud_legacy(
     count = 0
 
     # Load drift velocity information
-    df = pl.read_csv(detector_params.drift_velocity_path)
-    mm_tb = df.row(by_predicate=(pl.col('run')) == run, named = True)['micro_mean']
-    w_tb = df.row(by_predicate=(pl.col('run')) == run, named = True)['wind_mean']
+    df: pl.DataFrame = pl.read_csv(detector_params.drift_velocity_path)
+    mm_tb: float = df.row(by_predicate=(pl.col('run')) == run, named = True)['micro_mean']
+    w_tb: float = df.row(by_predicate=(pl.col('run')) == run, named = True)['wind_mean']
 
     # Process the data
     for idx in range(min_event, max_event + 1):
