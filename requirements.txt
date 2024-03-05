@@ -14,3 +14,4 @@ plotly==5.19.0
 scikit-learn==1.4.1.post1
 tqdm==4.66.2
 rocket-fft==0.2.4
+vector==1.2.0
