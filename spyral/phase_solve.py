@@ -9,6 +9,7 @@ from .core.spy_log import spyral_error, spyral_warn, spyral_info
 
 from spyral_utils.nuclear import NuclearDataMap
 from spyral_utils.nuclear.target import load_target, GasTarget
+from spyral_utils.plot import Cut2D
 
 import h5py as h5
 import polars as pl
@@ -65,6 +66,15 @@ def phase_solve(
             f"Target {solver_params.gas_data_path} is not of the correct format, Solver will not run!",
         )
         return
+
+    # Apply gain-matching factor to pid based on run
+    gm_df: pl.DataFrame = pl.read_csv(solver_params.gain_match_path)
+    gain_factor: float = gm_df.row(by_predicate = (pl.col('run') == run), named = True)['gain_factor']
+    
+    pid_vertices: list[tuple[float, float]] = list(pid.cut.get_vertices())
+    pid_vertices_matched: list[list[float, float]] = []
+    for point, coords in enumerate(pid_vertices): pid_vertices_matched.append(list(coords)); pid_vertices_matched[point][0] /= gain_factor
+    pid.cut = Cut2D(pid.cut.name, pid_vertices_matched)
 
     # Check the cluster phase and estimate phase data
     cluster_path = ws.get_cluster_file_path(run)

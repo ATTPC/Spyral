@@ -246,6 +246,7 @@ class SolverParameters:
 
     gas_data_path: str = ""
     particle_id_filename: str = ""
+    gain_match_path: str = ""
     ic_min_val: float = 0.0
     ic_max_val: float = 0.0
     n_time_steps: int = 0
@@ -383,6 +384,7 @@ def deserialize_config(json_data: dict[Any, Any]) -> Config:
     solver_params = json_data["Solver"]
     config.solver.gas_data_path = solver_params["gas_data_path"]
     config.solver.particle_id_filename = solver_params["particle_id_file"]
+    config.solver.gain_match_path = solver_params["gain_match_path"]
     config.solver.ic_min_val = solver_params["ic_min"]
     config.solver.ic_max_val = solver_params["ic_max"]
     config.solver.n_time_steps = solver_params["ode_n_time_steps"]
