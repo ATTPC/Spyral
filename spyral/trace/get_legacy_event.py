@@ -58,6 +58,10 @@ class GetLegacyEvent:
             Configuration parameters controlling the GET signal analysis
         ic_params: FribParameters
             Configuration parameters controlling the ion chamber signal analysis
+        ic_trace: GetTrace
+            GetTrace of raw IC trace
+        ic_sca_trace: GetTrace
+            GetTrace of raw IC SCA trace
         Returns
         -------
         GetEvent
@@ -65,6 +69,7 @@ class GetLegacyEvent:
         """
         self.traces: list[GetTrace] = []
         self.ic_trace: GetTrace | None = None
+        self.ic_sca_trace: GetTrace | None = None
         self.name: str = INVALID_EVENT_NAME
         self.number: int = INVALID_EVENT_NUMBER
         self.load_traces(raw_data, event_number, get_params, ic_params)
@@ -100,6 +105,7 @@ class GetLegacyEvent:
             for idx, row in enumerate(raw_data)
         ]
         # Legacy data where external data was stored in CoBo 10 (IC, mesh)
+        counter: int = 0
         for trace in self.traces:
             # Extract IC
             if (
@@ -108,15 +114,45 @@ class GetLegacyEvent:
                 and trace.hw_id.aget_channel == 0
             ):
                 self.ic_trace = trace
-                self.ic_trace.find_peaks(ic_params, rel_height=0.8)
+                self.ic_trace.find_peaks(ic_params, rel_height=0.5, min_width=4.0)
+                counter += 1
+            
+            # Extract IC SCA
+            elif (
+                trace.hw_id.cobo_id == 10
+                and trace.hw_id.aget_id == 2
+                and trace.hw_id.aget_channel == 34
+            ):
+                self.ic_sca_trace = trace
+                self.ic_sca_trace.find_peaks(ic_params, rel_height=0.5)
+                counter +=1
+                
+            elif (counter == 2):
                 break
         # Remove CoBo 10 from our normal traces
         self.traces = [trace for trace in self.traces if trace.hw_id.cobo_id != 10]
 
     def is_valid(self) -> bool:
         return self.name != INVALID_EVENT_NAME and self.number != INVALID_EVENT_NUMBER
+    
+    def is_ic_valid(self) -> bool:
+        # Check if both IC and IC SCA traces exist and have at least one peak
+        if (self.ic_trace is None or
+            self.ic_trace.get_number_of_peaks() < 1 or
+            self.ic_sca_trace is None or
+            self.ic_sca_trace.get_number_of_peaks() < 1
+            ):
+            return False
+        
+        ic_first_peak = (self.ic_trace.get_peaks())[0]
+        ic_sca_first_peak = (self.ic_sca_trace.get_peaks())[0]
 
-
+        # Check distance between first peaks of IC and IC SCA traces
+        if (abs(ic_first_peak.centroid - ic_sca_first_peak.centroid) <= 10):
+            return True
+        else:
+            return False
+            
 @njit
 def preprocess_traces(traces: np.ndarray, baseline_window_scale: float) -> np.ndarray:
     """JIT-ed Method for pre-cleaning the trace data in bulk before doing trace analysis

@@ -107,7 +107,7 @@ class GetTrace:
         """
         return self.hw_id.pad_id
 
-    def find_peaks(self, params: GetParameters, rel_height: float = 0.95):
+    def find_peaks(self, params: GetParameters, rel_height: float = 0.95, min_width: float = 1.0):
         """Find the peaks in the trace data
 
         The goal is to determine the centroid location of a signal peak within a given pad trace. Use the find_peaks
@@ -131,7 +131,7 @@ class GetTrace:
             self.trace,
             distance=params.peak_separation,
             prominence=params.peak_prominence,
-            width=(1.0, params.peak_max_width),
+            width=(0, params.peak_max_width),
             rel_height=rel_height,
         )
         for idx, p in enumerate(pks):
@@ -143,7 +143,9 @@ class GetTrace:
             peak.integral = np.sum(
                 np.abs(self.trace[peak.positive_inflection : peak.negative_inflection])
             )
-            if peak.amplitude > params.peak_threshold:
+            if (peak.amplitude > params.peak_threshold and 
+                abs(peak.positive_inflection - peak.negative_inflection) > min_width
+                ):
                 self.peaks.append(peak)
 
     def get_number_of_peaks(self) -> int:
