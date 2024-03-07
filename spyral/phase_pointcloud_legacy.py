@@ -143,6 +143,10 @@ def phase_pointcloud_legacy(
         pc_dataset.attrs["ic_centroid"] = -1.0
         pc_dataset.attrs["ic_multiplicity"] = -1.0
 
+        # default IC SCA settings
+        pc_dataset.attrs["ic_sca_centroid"] = -1.0
+        pc_dataset.attrs["ic_sca_multiplicity"] = -1.0
+
         # Set IC if present; take first non-garbage peak
         if event.ic_trace is not None:
             # No way to disentangle multiplicity
@@ -152,6 +156,15 @@ def phase_pointcloud_legacy(
                 pc_dataset.attrs["ic_centroid"] = peak.centroid
                 pc_dataset.attrs["ic_multiplicity"] = (
                     event.ic_trace.get_number_of_peaks()
+                )
+                break
+        # Set IC SCA if present; take first non-garbage peak
+        if event.ic_sca_trace is not None:
+            # No way to disentangle multiplicity
+            for peak in event.ic_sca_trace.get_peaks():
+                pc_dataset.attrs["ic_sca_centroid"] = peak.centroid
+                pc_dataset.attrs["ic_sca_multiplicity"] = (
+                    event.ic_sca_trace.get_number_of_peaks()
                 )
                 break
 

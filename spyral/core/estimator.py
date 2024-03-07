@@ -33,6 +33,8 @@ def estimate_physics(
     ic_centroid: float,
     ic_integral: float,
     ic_multiplicity: float,
+    ic_sca_centroid: float,
+    ic_sca_multiplicity: float,
     estimate_params: EstimateParameters,
     detector_params: DetectorParameters,
     results: dict[str, list],
@@ -45,6 +47,8 @@ def estimate_physics(
         ic_centroid,
         ic_integral,
         ic_multiplicity,
+        ic_sca_centroid,
+        ic_sca_multiplicity,
         estimate_params,
         detector_params,
         results,
@@ -62,6 +66,8 @@ def estimate_physics(
             ic_centroid,
             ic_integral,
             ic_multiplicity,
+            ic_sca_centroid,
+            ic_sca_multiplicity,
             estimate_params,
             detector_params,
             results,
@@ -75,6 +81,8 @@ def estimate_physics(
             ic_centroid,
             ic_integral,
             ic_multiplicity,
+            ic_sca_centroid,
+            ic_sca_multiplicity,
             estimate_params,
             detector_params,
             results,
@@ -102,6 +110,8 @@ def estimate_physics_pass(
     ic_centroid: float,
     ic_integral: float,
     ic_multiplicity: float,
+    ic_sca_centroid: float,
+    ic_sca_multiplicity: float,
     estimate_params: EstimateParameters,
     detector_params: DetectorParameters,
     results: dict[str, list],
@@ -252,6 +262,8 @@ def estimate_physics_pass(
     results["ic_centroid"].append(ic_centroid)
     results["ic_integral"].append(ic_integral)
     results["ic_multiplicity"].append(ic_multiplicity)
+    results["ic_sca_centroid"].append(ic_sca_centroid)
+    results["ic_sca_multiplicity"].append(ic_sca_multiplicity)
     results["vertex_x"].append(vertex[0])
     results["vertex_y"].append(vertex[1])
     results["vertex_z"].append(vertex[2])

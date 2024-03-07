@@ -106,7 +106,9 @@ def phase_solve(
             pl.struct(["dEdx", "brho"]).map_batches(pid.cut.is_cols_inside)
             & (pl.col("ic_amplitude") > solver_params.ic_min_val)
             & (pl.col("ic_amplitude") < solver_params.ic_max_val)
-            # & (pl.col("ic_multiplicity") < 2.0)  # For legacy data
+            & (pl.col("ic_multiplicity") < 2.0)
+            & (pl.col("ic_sca_multiplicity") < 2.0)
+            & (abs(pl.col("ic_sca_multiplicity") - pl.col("ic_multiplicity")) <= 10)  # For legacy data
         )
         .sort("polar", descending=True)
         .unique("event", keep="first")

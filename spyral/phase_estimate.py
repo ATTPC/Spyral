@@ -68,6 +68,8 @@ def phase_estimate(
         "ic_centroid": [],
         "ic_integral": [],
         "ic_multiplicity": [],
+        "ic_sca_centroid": [],
+        "ic_sca_multiplicity": [],
         "vertex_x": [],
         "vertex_y": [],
         "vertex_z": [],
@@ -103,6 +105,8 @@ def phase_estimate(
         ic_cent: float = event.attrs["ic_centroid"]
         ic_int: float = event.attrs["ic_integral"]
         ic_mult: float = event.attrs["ic_multiplicity"]
+        ic_sca_cent: float = event.attrs["ic_sca_centroid"]
+        ic_sca_mult: float = event.attrs["ic_sca_multiplicity"]
         # Go through every cluster in each event
         for cidx in range(0, nclusters):
             local_cluster: h5.Group | None = None
@@ -123,6 +127,8 @@ def phase_estimate(
                 ic_cent,
                 ic_int,
                 ic_mult,
+                ic_sca_cent,
+                ic_sca_mult,
                 estimate_params,
                 detector_params,
                 data,

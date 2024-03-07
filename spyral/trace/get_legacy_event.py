@@ -134,24 +134,6 @@ class GetLegacyEvent:
 
     def is_valid(self) -> bool:
         return self.name != INVALID_EVENT_NAME and self.number != INVALID_EVENT_NUMBER
-    
-    def is_ic_valid(self) -> bool:
-        # Check if both IC and IC SCA traces exist and have at least one peak
-        if (self.ic_trace is None or
-            self.ic_trace.get_number_of_peaks() < 1 or
-            self.ic_sca_trace is None or
-            self.ic_sca_trace.get_number_of_peaks() < 1
-            ):
-            return False
-        
-        ic_first_peak = (self.ic_trace.get_peaks())[0]
-        ic_sca_first_peak = (self.ic_sca_trace.get_peaks())[0]
-
-        # Check distance between first peaks of IC and IC SCA traces
-        if (abs(ic_first_peak.centroid - ic_sca_first_peak.centroid) <= 10):
-            return True
-        else:
-            return False
             
 @njit
 def preprocess_traces(traces: np.ndarray, baseline_window_scale: float) -> np.ndarray:
