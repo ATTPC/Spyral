@@ -1,4 +1,4 @@
-spyral-utils==0.2.2
+spyral-utils==0.3.0
 black==24.2.0
 click==8.1.7
 contourpy==1.2.0
