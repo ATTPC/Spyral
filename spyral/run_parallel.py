@@ -5,7 +5,6 @@ from .core.track_generator import (
     MeshParameters,
     check_mesh_needs_generation,
 )
-from .core.particle_id import load_particle_id
 from .correction import generate_electron_correction
 from .parallel.status_message import StatusMessage, Phase
 from .parallel.run_stack import create_run_stacks
@@ -14,6 +13,7 @@ from .core.spy_log import init_spyral_logger_parent, spyral_info
 
 from spyral_utils.nuclear import NuclearDataMap
 from spyral_utils.nuclear.target import GasTarget, load_target
+from spyral_utils.nuclear.particle_id import deserialize_particle_id
 
 from multiprocessing import Process, SimpleQueue
 from copy import deepcopy
@@ -58,7 +58,7 @@ def generate_shared_resources(config: Config):
 
     if config.run.do_solve:
         target = load_target(Path(config.solver.gas_data_path), nuc_map)
-        pid = load_particle_id(
+        pid = deserialize_particle_id(
             ws.get_gate_file_path(config.solver.particle_id_filename), nuc_map
         )
         if pid is None:
