@@ -161,42 +161,64 @@ def phase_pointcloud(
             continue
 
         frib_event = FribEvent(frib_data, idx, frib_params)
+        # Handle IC analysis cases
+        # First check if IC correction is not on
+        if frib_params.correct_ic_time:
+            # IC correction is on, extract good IC peak with Si coincidence imposed
+            good_ic = frib_event.get_good_ic_peak(frib_params)
+            if good_ic is None:
+                # There is no good IC peak, skip
+                pc.calibrate_z_position(
+                    detector_params.micromegas_time_bucket,
+                    detector_params.window_time_bucket,
+                    detector_params.detector_length,
+                    corrector,
+                )
+                pc_dataset[:] = pc.cloud
+                continue
+            # Good IC found, get the peak and multiplicity
+            peak = good_ic[1]
+            mult = good_ic[0]
+            pc_dataset.attrs["ic_amplitude"] = peak.amplitude
+            pc_dataset.attrs["ic_integral"] = peak.integral
+            pc_dataset.attrs["ic_centroid"] = peak.centroid
+            pc_dataset.attrs["ic_multiplicity"] = mult
 
-        ic_peak = frib_event.get_good_ic_peak(frib_params)
-        if ic_peak is None:
-            pc.calibrate_z_position(
-                detector_params.micromegas_time_bucket,
-                detector_params.window_time_bucket,
-                detector_params.detector_length,
-                corrector,
-            )
-            pc_dataset[:] = pc.cloud
-            continue
-        pc_dataset.attrs["ic_amplitude"] = ic_peak.amplitude
-        pc_dataset.attrs["ic_integral"] = ic_peak.integral
-        pc_dataset.attrs["ic_centroid"] = ic_peak.centroid
-        pc_dataset.attrs["ic_multiplicity"] = (
-            1  # For legacy compat. Always one for modern data
-        )
-
-        # Apply IC correction to time calibration, if on
-        # and correction is less than the total length of the GET window in TB
-        ic_cor = frib_event.correct_ic_time(ic_peak, detector_params.get_frequency)
-        if frib_params.correct_ic_time and ic_cor < 512.0:
-            pc.calibrate_z_position(
-                detector_params.micromegas_time_bucket,
-                detector_params.window_time_bucket,
-                detector_params.detector_length,
-                corrector,
-                ic_cor,
-            )
+            ic_cor = frib_event.correct_ic_time(peak, detector_params.get_frequency)
+            # Apply IC correction to time calibration, if correction is less than the
+            # total length of the GET window in TB
+            if ic_cor < 512.0:
+                pc.calibrate_z_position(
+                    detector_params.micromegas_time_bucket,
+                    detector_params.window_time_bucket,
+                    detector_params.detector_length,
+                    corrector,
+                    ic_cor,
+                )
+            else:
+                pc.calibrate_z_position(
+                    detector_params.micromegas_time_bucket,
+                    detector_params.window_time_bucket,
+                    detector_params.detector_length,
+                    corrector,
+                )
         else:
+            # No IC correction, so we calibrate z without it
             pc.calibrate_z_position(
                 detector_params.micromegas_time_bucket,
                 detector_params.window_time_bucket,
                 detector_params.detector_length,
                 corrector,
             )
+            # Extract Raw IC, no Si conicidence imposed
+            ic_raw_mult = frib_event.get_ic_trace().get_number_of_peaks()
+            ic_peak = frib_event.get_ic_trace().get_peaks()[0]
+            # Check multiplicity condition
+            if ic_raw_mult < frib_params.ic_multiplicity:
+                pc_dataset.attrs["ic_amplitude"] = ic_peak.amplitude
+                pc_dataset.attrs["ic_integral"] = ic_peak.integral
+                pc_dataset.attrs["ic_centroid"] = ic_peak.centroid
+                pc_dataset.attrs["ic_multiplicity"] = ic_raw_mult
 
         pc_dataset[:] = pc.cloud
 

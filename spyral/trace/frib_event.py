@@ -98,7 +98,7 @@ class FribEvent:
         """
         return self.traces[MESH_COLUMN]
 
-    def get_good_ic_peak(self, params: FribParameters) -> Peak | None:
+    def get_good_ic_peak(self, params: FribParameters) -> tuple[int, Peak] | None:
         """Attempts to retrieve the "good" ion chamber signal.
 
         In many cases the ion chamber has multiple peaks due to bunches of beam being delivered to the AT-TPC.
@@ -114,8 +114,8 @@ class FribEvent:
 
         Returns
         -------
-        Peak | None
-            Returns None on failure to find any good ion chamber signal; otherwise returns the Peak associated with a good signal
+        tuple[int, Peak] | None
+            Returns None on failure to find any good ion chamber signal; otherwise returns the good ion chamber multiplicity and the first Peak associated with a good signal
         """
         ic_peaks = self.get_ic_trace().get_peaks()
         si_peaks = self.get_si_trace().get_peaks()
@@ -124,7 +124,7 @@ class FribEvent:
             return None
         elif len(si_peaks) == 0:
             if len(ic_peaks) == 1:
-                return ic_peaks[0]
+                return (1, ic_peaks[0])
             else:
                 return None
 
@@ -144,7 +144,7 @@ class FribEvent:
         if good_ic_count > params.ic_multiplicity or good_ic_count == 0:
             return None
         else:
-            return ic_peaks[good_ic_index]
+            return (good_ic_count, ic_peaks[good_ic_index])
 
     def correct_ic_time(self, good_peak: Peak, get_frequency: float) -> float:
         """Calculate the correction to the GET time buckets using the ion chamber signal

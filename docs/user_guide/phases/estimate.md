@@ -99,7 +99,7 @@ Gates are drawn using matplotlib. Settings can be altered within the notebook to
 
 Here the gate is specified to be for protons. A particle ID gate is *required* to move on to the final phase. You do not need to use the notebook to make a particle ID gate. You simply need to have a JSON file of the correct format.
 
-The notebook will typically need tweaking from experiment to experiment. The histogram ranges often need extending/shrinking, and the number of bins will vary depending on total statistics. It also gives users a chance to see some of the [spyral-utils](https://github.com/gwm17/spyral-utils/) package, which can be used outside of Spyral to do further analysis.
+The notebook will typically need tweaking from experiment to experiment. The histogram ranges often need extending/shrinking, and the number of bins will vary depending on total statistics. It also gives users a chance to see some of the [spyral-utils](https://github.com/gwm17/spyral-utils/) package (which contains the relevant code for a `ParticleID`), which can be used outside of Spyral to do further analysis.
 
 ## Final Thoughts
 

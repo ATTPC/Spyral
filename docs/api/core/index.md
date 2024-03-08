@@ -9,7 +9,6 @@ The `core` module contains a lot of code that is used throughout Spyral (as well
 - [estimator](estimator.md)
 - [hardware_id](hardware_id.md)
 - [pad_map](pad_map.md)
-- [particle_id](particle_id.md)
 - [point_cloud](point_cloud.md)
 - [spy_log](spy_log.md)
 - [track_generator](track_generator.md)
