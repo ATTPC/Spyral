@@ -1174,7 +1174,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../core/particle_id/" class="md-nav__link">
+      <a href="../../core/particle_id.md" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2710,7 +2710,7 @@ silicon detector, and mesh signals.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="p">[</span><span class="n">MESH_COLUMN</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">get_good_ic_peak</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">FribParameters</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Peak</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">get_good_ic_peak</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">FribParameters</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Peak</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Attempts to retrieve the &quot;good&quot; ion chamber signal.</span>
 
 <span class="sd">        In many cases the ion chamber has multiple peaks due to bunches of beam being delivered to the AT-TPC.</span>
@@ -2726,8 +2726,8 @@ silicon detector, and mesh signals.</p>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        Peak | None</span>
-<span class="sd">            Returns None on failure to find any good ion chamber signal; otherwise returns the Peak associated with a good signal</span>
+<span class="sd">        tuple[int, Peak] | None</span>
+<span class="sd">            Returns None on failure to find any good ion chamber signal; otherwise returns the good ion chamber multiplicity and the first Peak associated with a good signal</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">ic_peaks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_ic_trace</span><span class="p">()</span><span class="o">.</span><span class="n">get_peaks</span><span class="p">()</span>
         <span class="n">si_peaks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_si_trace</span><span class="p">()</span><span class="o">.</span><span class="n">get_peaks</span><span class="p">()</span>
@@ -2736,7 +2736,7 @@ silicon detector, and mesh signals.</p>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">si_peaks</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ic_peaks</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">ic_peaks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">return</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ic_peaks</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">None</span>
 
@@ -2756,7 +2756,7 @@ silicon detector, and mesh signals.</p>
         <span class="k">if</span> <span class="n">good_ic_count</span> <span class="o">&gt;</span> <span class="n">params</span><span class="o">.</span><span class="n">ic_multiplicity</span> <span class="ow">or</span> <span class="n">good_ic_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">ic_peaks</span><span class="p">[</span><span class="n">good_ic_index</span><span class="p">]</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">good_ic_count</span><span class="p">,</span> <span class="n">ic_peaks</span><span class="p">[</span><span class="n">good_ic_index</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="nf">correct_ic_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">good_peak</span><span class="p">:</span> <span class="n">Peak</span><span class="p">,</span> <span class="n">get_frequency</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the correction to the GET time buckets using the ion chamber signal</span>
@@ -3186,11 +3186,11 @@ allowed for a good event. In general, AT-TPC would only accept multiplicty one t
     <tbody>
         <tr>
           <td>
-                <code><a class="autorefs autorefs-internal" title="spyral.trace.get_trace.Peak" href="../peak/#spyral.trace.peak.Peak">Peak</a> | None</code>
+                <code>tuple[int, <a class="autorefs autorefs-internal" title="spyral.trace.get_trace.Peak" href="../peak/#spyral.trace.peak.Peak">Peak</a>] | None</code>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Returns None on failure to find any good ion chamber signal; otherwise returns the Peak associated with a good signal</p>
+              <p>Returns None on failure to find any good ion chamber signal; otherwise returns the good ion chamber multiplicity and the first Peak associated with a good signal</p>
             </div>
           </td>
         </tr>
@@ -3245,7 +3245,7 @@ allowed for a good event. In general, AT-TPC would only accept multiplicty one t
 <span class="normal">144</span>
 <span class="normal">145</span>
 <span class="normal">146</span>
-<span class="normal">147</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_good_ic_peak</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">FribParameters</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Peak</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">147</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_good_ic_peak</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">FribParameters</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Peak</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Attempts to retrieve the &quot;good&quot; ion chamber signal.</span>
 
 <span class="sd">    In many cases the ion chamber has multiple peaks due to bunches of beam being delivered to the AT-TPC.</span>
@@ -3261,8 +3261,8 @@ allowed for a good event. In general, AT-TPC would only accept multiplicty one t
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
-<span class="sd">    Peak | None</span>
-<span class="sd">        Returns None on failure to find any good ion chamber signal; otherwise returns the Peak associated with a good signal</span>
+<span class="sd">    tuple[int, Peak] | None</span>
+<span class="sd">        Returns None on failure to find any good ion chamber signal; otherwise returns the good ion chamber multiplicity and the first Peak associated with a good signal</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">ic_peaks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_ic_trace</span><span class="p">()</span><span class="o">.</span><span class="n">get_peaks</span><span class="p">()</span>
     <span class="n">si_peaks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_si_trace</span><span class="p">()</span><span class="o">.</span><span class="n">get_peaks</span><span class="p">()</span>
@@ -3271,7 +3271,7 @@ allowed for a good event. In general, AT-TPC would only accept multiplicty one t
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">si_peaks</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ic_peaks</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">ic_peaks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">return</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ic_peaks</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
@@ -3291,7 +3291,7 @@ allowed for a good event. In general, AT-TPC would only accept multiplicty one t
     <span class="k">if</span> <span class="n">good_ic_count</span> <span class="o">&gt;</span> <span class="n">params</span><span class="o">.</span><span class="n">ic_multiplicity</span> <span class="ow">or</span> <span class="n">good_ic_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">ic_peaks</span><span class="p">[</span><span class="n">good_ic_index</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">good_ic_count</span><span class="p">,</span> <span class="n">ic_peaks</span><span class="p">[</span><span class="n">good_ic_index</span><span class="p">])</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>

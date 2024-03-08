@@ -1288,7 +1288,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api/core/particle_id/" class="md-nav__link">
+      <a href="../../../api/core/particle_id.md" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2313,7 +2313,7 @@
 <h2 id="event_ic_multiplicity">event_ic_multiplicity</h2>
 <p>The maximum allowed ion chamber multiplicity for an event. In general, AT-TPC experiments would only allow for one ion chamber hit per event. This is only available to FRIB data.</p>
 <h2 id="event_correct_ic_time">event_correct_ic_time</h2>
-<p>Turn on/off the ion chamber time correction. Sometimes, the wrong beam triggers the event start in the AT-TPC. This can be corrected using the correlation between downstream silicon and the ion chamber. <code>true</code> turns the correction on, <code>false</code> turns the correction off. This is only available to FRIB data.</p>
+<p>Turn on/off the ion chamber time correction. Sometimes, the wrong beam triggers the event start in the AT-TPC. This can be corrected using the correlation between downstream silicon and the ion chamber. <code>true</code> turns the correction on, <code>false</code> turns the correction off. Note that the ion chamber-silicon coincidence is <em>only</em> applied when this parameter is set to true. Otherwise, the raw ion chamber signal is analyzed and <em>all</em> peaks found in that signal count towards the ion chamber multiplicity. This is only available to FRIB data.</p>
 <h2 id="important-note">Important Note</h2>
 <p>If the <code>is_legacy</code> switch is turned on in the Run parameters, the FRIB parameters are used to process the ion chamber, even though the ion chamber data is recorded through the GET acquisition. This allows for the setting of independent parameters for analyzing the IC. However some of the FRIB parameters are unused in this case. In particular, the <code>event_correct_ic_time</code> and <code>event_ic_multiplicity</code> are not used. Additionally, the baseline of the IC signal is analyzed using the GET <code>baseline_window_scale</code>.</p>
 

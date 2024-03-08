@@ -1241,7 +1241,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../core/particle_id/" class="md-nav__link">
+      <a href="../core/particle_id.md" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2615,7 +2615,33 @@ the first phase of Spyral analysis.</p>
 <span class="normal">196</span>
 <span class="normal">197</span>
 <span class="normal">198</span>
-<span class="normal">199</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">phase_pointcloud</span><span class="p">(</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">phase_pointcloud</span><span class="p">(</span>
     <span class="n">run</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">ws</span><span class="p">:</span> <span class="n">Workspace</span><span class="p">,</span>
     <span class="n">pad_map</span><span class="p">:</span> <span class="n">PadMap</span><span class="p">,</span>
@@ -2716,7 +2742,7 @@ the first phase of Spyral analysis.</p>
         <span class="n">event</span> <span class="o">=</span> <span class="n">GetEvent</span><span class="p">(</span><span class="n">event_data</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">get_params</span><span class="p">)</span>
 
         <span class="n">pc</span> <span class="o">=</span> <span class="n">PointCloud</span><span class="p">()</span>
-        <span class="n">pc</span><span class="o">.</span><span class="n">load_cloud_from_get_event</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">pad_map</span><span class="p">,</span> <span class="n">corrector</span><span class="p">)</span>
+        <span class="n">pc</span><span class="o">.</span><span class="n">load_cloud_from_get_event</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">pad_map</span><span class="p">)</span>
 
         <span class="n">pc_dataset</span> <span class="o">=</span> <span class="n">cloud_group</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;cloud_</span><span class="si">{</span><span class="n">pc</span><span class="o">.</span><span class="n">event_number</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">pc</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span>
@@ -2737,44 +2763,70 @@ the first phase of Spyral analysis.</p>
                 <span class="n">detector_params</span><span class="o">.</span><span class="n">micromegas_time_bucket</span><span class="p">,</span>
                 <span class="n">detector_params</span><span class="o">.</span><span class="n">window_time_bucket</span><span class="p">,</span>
                 <span class="n">detector_params</span><span class="o">.</span><span class="n">detector_length</span><span class="p">,</span>
+                <span class="n">corrector</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">pc_dataset</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">cloud</span>
             <span class="k">continue</span>
 
         <span class="n">frib_event</span> <span class="o">=</span> <span class="n">FribEvent</span><span class="p">(</span><span class="n">frib_data</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">frib_params</span><span class="p">)</span>
+        <span class="c1"># Handle IC analysis cases</span>
+        <span class="c1"># First check if IC correction is not on</span>
+        <span class="k">if</span> <span class="n">frib_params</span><span class="o">.</span><span class="n">correct_ic_time</span><span class="p">:</span>
+            <span class="c1"># IC correction is on, extract good IC peak with Si coincidence imposed</span>
+            <span class="n">good_ic</span> <span class="o">=</span> <span class="n">frib_event</span><span class="o">.</span><span class="n">get_good_ic_peak</span><span class="p">(</span><span class="n">frib_params</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">good_ic</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># There is no good IC peak, skip</span>
+                <span class="n">pc</span><span class="o">.</span><span class="n">calibrate_z_position</span><span class="p">(</span>
+                    <span class="n">detector_params</span><span class="o">.</span><span class="n">micromegas_time_bucket</span><span class="p">,</span>
+                    <span class="n">detector_params</span><span class="o">.</span><span class="n">window_time_bucket</span><span class="p">,</span>
+                    <span class="n">detector_params</span><span class="o">.</span><span class="n">detector_length</span><span class="p">,</span>
+                    <span class="n">corrector</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">pc_dataset</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">cloud</span>
+                <span class="k">continue</span>
+            <span class="c1"># Good IC found, get the peak and multiplicity</span>
+            <span class="n">peak</span> <span class="o">=</span> <span class="n">good_ic</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">mult</span> <span class="o">=</span> <span class="n">good_ic</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">pc_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;ic_amplitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">amplitude</span>
+            <span class="n">pc_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;ic_integral&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">integral</span>
+            <span class="n">pc_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;ic_centroid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">centroid</span>
+            <span class="n">pc_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;ic_multiplicity&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mult</span>
 
-        <span class="n">ic_peak</span> <span class="o">=</span> <span class="n">frib_event</span><span class="o">.</span><span class="n">get_good_ic_peak</span><span class="p">(</span><span class="n">frib_params</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">ic_peak</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">pc</span><span class="o">.</span><span class="n">calibrate_z_position</span><span class="p">(</span>
-                <span class="n">detector_params</span><span class="o">.</span><span class="n">micromegas_time_bucket</span><span class="p">,</span>
-                <span class="n">detector_params</span><span class="o">.</span><span class="n">window_time_bucket</span><span class="p">,</span>
-                <span class="n">detector_params</span><span class="o">.</span><span class="n">detector_length</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="n">pc_dataset</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">cloud</span>
-            <span class="k">continue</span>
-        <span class="n">pc_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;ic_amplitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ic_peak</span><span class="o">.</span><span class="n">amplitude</span>
-        <span class="n">pc_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;ic_integral&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ic_peak</span><span class="o">.</span><span class="n">integral</span>
-        <span class="n">pc_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;ic_centroid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ic_peak</span><span class="o">.</span><span class="n">centroid</span>
-        <span class="n">pc_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;ic_multiplicity&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="mi">1</span>  <span class="c1"># For legacy compat. Always one for modern data</span>
-        <span class="p">)</span>
-
-        <span class="c1"># Apply IC correction to time calibration, if on</span>
-        <span class="c1"># and correction is less than the total length of the GET window in TB</span>
-        <span class="n">ic_cor</span> <span class="o">=</span> <span class="n">frib_event</span><span class="o">.</span><span class="n">correct_ic_time</span><span class="p">(</span><span class="n">ic_peak</span><span class="p">,</span> <span class="n">detector_params</span><span class="o">.</span><span class="n">get_frequency</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">frib_params</span><span class="o">.</span><span class="n">correct_ic_time</span> <span class="ow">and</span> <span class="n">ic_cor</span> <span class="o">&lt;</span> <span class="mf">512.0</span><span class="p">:</span>
-            <span class="n">pc</span><span class="o">.</span><span class="n">calibrate_z_position</span><span class="p">(</span>
-                <span class="n">detector_params</span><span class="o">.</span><span class="n">micromegas_time_bucket</span><span class="p">,</span>
-                <span class="n">detector_params</span><span class="o">.</span><span class="n">window_time_bucket</span><span class="p">,</span>
-                <span class="n">detector_params</span><span class="o">.</span><span class="n">detector_length</span><span class="p">,</span>
-                <span class="n">ic_cor</span><span class="p">,</span>
-            <span class="p">)</span>
+            <span class="n">ic_cor</span> <span class="o">=</span> <span class="n">frib_event</span><span class="o">.</span><span class="n">correct_ic_time</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="n">detector_params</span><span class="o">.</span><span class="n">get_frequency</span><span class="p">)</span>
+            <span class="c1"># Apply IC correction to time calibration, if correction is less than the</span>
+            <span class="c1"># total length of the GET window in TB</span>
+            <span class="k">if</span> <span class="n">ic_cor</span> <span class="o">&lt;</span> <span class="mf">512.0</span><span class="p">:</span>
+                <span class="n">pc</span><span class="o">.</span><span class="n">calibrate_z_position</span><span class="p">(</span>
+                    <span class="n">detector_params</span><span class="o">.</span><span class="n">micromegas_time_bucket</span><span class="p">,</span>
+                    <span class="n">detector_params</span><span class="o">.</span><span class="n">window_time_bucket</span><span class="p">,</span>
+                    <span class="n">detector_params</span><span class="o">.</span><span class="n">detector_length</span><span class="p">,</span>
+                    <span class="n">corrector</span><span class="p">,</span>
+                    <span class="n">ic_cor</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pc</span><span class="o">.</span><span class="n">calibrate_z_position</span><span class="p">(</span>
+                    <span class="n">detector_params</span><span class="o">.</span><span class="n">micromegas_time_bucket</span><span class="p">,</span>
+                    <span class="n">detector_params</span><span class="o">.</span><span class="n">window_time_bucket</span><span class="p">,</span>
+                    <span class="n">detector_params</span><span class="o">.</span><span class="n">detector_length</span><span class="p">,</span>
+                    <span class="n">corrector</span><span class="p">,</span>
+                <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># No IC correction, so we calibrate z without it</span>
             <span class="n">pc</span><span class="o">.</span><span class="n">calibrate_z_position</span><span class="p">(</span>
                 <span class="n">detector_params</span><span class="o">.</span><span class="n">micromegas_time_bucket</span><span class="p">,</span>
                 <span class="n">detector_params</span><span class="o">.</span><span class="n">window_time_bucket</span><span class="p">,</span>
                 <span class="n">detector_params</span><span class="o">.</span><span class="n">detector_length</span><span class="p">,</span>
+                <span class="n">corrector</span><span class="p">,</span>
             <span class="p">)</span>
+            <span class="c1"># Extract Raw IC, no Si conicidence imposed</span>
+            <span class="n">ic_raw_mult</span> <span class="o">=</span> <span class="n">frib_event</span><span class="o">.</span><span class="n">get_ic_trace</span><span class="p">()</span><span class="o">.</span><span class="n">get_number_of_peaks</span><span class="p">()</span>
+            <span class="n">ic_peak</span> <span class="o">=</span> <span class="n">frib_event</span><span class="o">.</span><span class="n">get_ic_trace</span><span class="p">()</span><span class="o">.</span><span class="n">get_peaks</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># Check multiplicity condition</span>
+            <span class="k">if</span> <span class="n">ic_raw_mult</span> <span class="o">&lt;</span> <span class="n">frib_params</span><span class="o">.</span><span class="n">ic_multiplicity</span><span class="p">:</span>
+                <span class="n">pc_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;ic_amplitude&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ic_peak</span><span class="o">.</span><span class="n">amplitude</span>
+                <span class="n">pc_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;ic_integral&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ic_peak</span><span class="o">.</span><span class="n">integral</span>
+                <span class="n">pc_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;ic_centroid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ic_peak</span><span class="o">.</span><span class="n">centroid</span>
+                <span class="n">pc_dataset</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;ic_multiplicity&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ic_raw_mult</span>
 
         <span class="n">pc_dataset</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">cloud</span>
 

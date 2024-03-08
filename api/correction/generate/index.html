@@ -1174,7 +1174,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../core/particle_id/" class="md-nav__link">
+      <a href="../../core/particle_id.md" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2386,7 +2386,8 @@ x=z, y=rho, x=transverse</p>
 <span class="normal">102</span>
 <span class="normal">103</span>
 <span class="normal">104</span>
-<span class="normal">105</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">generate_electron_correction</span><span class="p">(</span>
+<span class="normal">105</span>
+<span class="normal">106</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">generate_electron_correction</span><span class="p">(</span>
     <span class="n">garf_file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">output_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">params</span><span class="p">:</span> <span class="n">DetectorParameters</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate the grid for the correction to electrons drifting the AT-TPC field</span>
@@ -2427,7 +2428,6 @@ x=z, y=rho, x=transverse</p>
 
     <span class="n">rho_final</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_chunks</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">))</span>
     <span class="n">misc_final</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_chunks</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
-    <span class="n">t_final</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_chunks</span><span class="p">,</span> <span class="n">chunk_size</span><span class="p">))</span>
     <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_chunks</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">chunk_size</span><span class="p">):</span>
             <span class="c1"># Convert distances to mm</span>
@@ -2445,14 +2445,16 @@ x=z, y=rho, x=transverse</p>
                 <span class="n">chunk</span> <span class="o">*</span> <span class="n">chunk_size</span> <span class="o">+</span> <span class="n">row</span><span class="p">,</span> <span class="mi">5</span>
             <span class="p">]</span>  <span class="c1"># time/z initial</span>
 
+    <span class="c1"># Correct the time for the midpoint and convert to mm</span>
     <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">misc_final</span><span class="p">:</span>
         <span class="n">mid_val</span> <span class="o">=</span> <span class="n">chunk</span><span class="p">[</span><span class="n">chunk_midpoint_index</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
         <span class="n">chunk</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-=</span> <span class="n">mid_val</span>
-
-    <span class="n">t_final</span> <span class="o">*=</span> <span class="n">params</span><span class="o">.</span><span class="n">detector_length</span> <span class="o">/</span> <span class="p">(</span>
-        <span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">window_time_bucket</span> <span class="o">-</span> <span class="n">params</span><span class="o">.</span><span class="n">micromegas_time_bucket</span><span class="p">)</span>
-        <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="n">params</span><span class="o">.</span><span class="n">get_frequency</span> <span class="o">*</span> <span class="mf">1000.0</span><span class="p">)</span>
-    <span class="p">)</span>
+        <span class="n">chunk</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*=</span> <span class="p">(</span>
+            <span class="n">params</span><span class="o">.</span><span class="n">detector_length</span>
+            <span class="o">/</span> <span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">window_time_bucket</span> <span class="o">-</span> <span class="n">params</span><span class="o">.</span><span class="n">micromegas_time_bucket</span><span class="p">)</span>
+            <span class="o">*</span> <span class="n">params</span><span class="o">.</span><span class="n">get_frequency</span>
+            <span class="o">*</span> <span class="mf">0.001</span>
+        <span class="p">)</span>
 
     <span class="n">interp</span> <span class="o">=</span> <span class="n">BilinearInterpolator</span><span class="p">(</span>
         <span class="n">gz_min</span><span class="p">,</span> <span class="n">gz_max</span><span class="p">,</span> <span class="n">gz_bins</span><span class="p">,</span> <span class="n">grho_min</span><span class="p">,</span> <span class="n">grho_max</span><span class="p">,</span> <span class="n">grho_bins</span><span class="p">,</span> <span class="n">misc_final</span>
@@ -2588,8 +2590,7 @@ x=z, y=rho, x=transverse</p>
 
           <details class="quote">
             <summary>Source code in <code>spyral/correction/generate.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">108</span>
-<span class="normal">109</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">109</span>
 <span class="normal">110</span>
 <span class="normal">111</span>
 <span class="normal">112</span>
@@ -2611,7 +2612,8 @@ x=z, y=rho, x=transverse</p>
 <span class="normal">128</span>
 <span class="normal">129</span>
 <span class="normal">130</span>
-<span class="normal">131</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">interpolate_initial_rho</span><span class="p">(</span><span class="n">contour</span><span class="p">:</span> <span class="n">ContourGenerator</span><span class="p">,</span> <span class="n">z</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">rho</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="normal">131</span>
+<span class="normal">132</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">interpolate_initial_rho</span><span class="p">(</span><span class="n">contour</span><span class="p">:</span> <span class="n">ContourGenerator</span><span class="p">,</span> <span class="n">z</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">rho</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Using a contour interpolate the initial rho</span>
 
 <span class="sd">    Parameters</span>

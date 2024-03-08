@@ -1232,7 +1232,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../core/particle_id/" class="md-nav__link">
+      <a href="../core/particle_id.md" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2309,8 +2309,7 @@ All three previous phases (point cloud, cluster, estimate) must have been run be
 
           <details class="quote">
             <summary>Source code in <code>spyral/phase_solve.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 19</span>
-<span class="normal"> 20</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 20</span>
 <span class="normal"> 21</span>
 <span class="normal"> 22</span>
 <span class="normal"> 23</span>
@@ -2504,7 +2503,7 @@ All three previous phases (point cloud, cluster, estimate) must have been run be
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Need particle ID and target to select the correct data subset/interpolation scheme</span>
-    <span class="n">pid</span><span class="p">:</span> <span class="n">ParticleID</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">load_particle_id</span><span class="p">(</span>
+    <span class="n">pid</span><span class="p">:</span> <span class="n">ParticleID</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">deserialize_particle_id</span><span class="p">(</span>
         <span class="n">ws</span><span class="o">.</span><span class="n">get_gate_file_path</span><span class="p">(</span><span class="n">solver_params</span><span class="o">.</span><span class="n">particle_id_filename</span><span class="p">),</span> <span class="n">nuclear_map</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">pid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -2621,6 +2620,7 @@ All three previous phases (point cloud, cluster, estimate) must have been run be
             <span class="n">estimates_gated</span><span class="p">[</span><span class="s2">&quot;vertex_x&quot;</span><span class="p">][</span><span class="n">row</span><span class="p">],</span>
             <span class="n">estimates_gated</span><span class="p">[</span><span class="s2">&quot;vertex_y&quot;</span><span class="p">][</span><span class="n">row</span><span class="p">],</span>
             <span class="n">estimates_gated</span><span class="p">[</span><span class="s2">&quot;vertex_z&quot;</span><span class="p">][</span><span class="n">row</span><span class="p">],</span>
+            <span class="n">Direction</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">solve_physics_interp</span><span class="p">(</span>
             <span class="n">cidx</span><span class="p">,</span>
@@ -2628,8 +2628,6 @@ All three previous phases (point cloud, cluster, estimate) must have been run be
             <span class="n">guess</span><span class="p">,</span>
             <span class="n">pid</span><span class="o">.</span><span class="n">nucleus</span><span class="p">,</span>
             <span class="n">interpolator</span><span class="p">,</span>
-            <span class="n">estimates_gated</span><span class="p">[</span><span class="s2">&quot;center_x&quot;</span><span class="p">][</span><span class="n">row</span><span class="p">],</span>
-            <span class="n">estimates_gated</span><span class="p">[</span><span class="s2">&quot;center_y&quot;</span><span class="p">][</span><span class="n">row</span><span class="p">],</span>
             <span class="n">det_params</span><span class="p">,</span>
             <span class="n">results</span><span class="p">,</span>
         <span class="p">)</span>

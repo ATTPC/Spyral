@@ -1174,7 +1174,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../core/particle_id/" class="md-nav__link">
+      <a href="../../core/particle_id.md" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2431,18 +2431,29 @@ and the second column is the y-coordinate of a point on the circle</p>
               <em>required</em>
           </td>
         </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
         <tr>
-          <td><code>tuple</code></td>
           <td>
+                <code>tuple[float, float, float, float]</code>
           </td>
           <td>
             <div class="doc-md-description">
               <p>A four member tuple containing the center x-coordinate, the center y-coordinate, the radius, and the RMSE (in that order)
 These are NaN if the matrix is singular</p>
             </div>
-          </td>
-          <td>
-              <em>required</em>
           </td>
         </tr>
     </tbody>
@@ -2502,7 +2513,8 @@ These are NaN if the matrix is singular</p>
 <span class="normal">85</span>
 <span class="normal">86</span>
 <span class="normal">87</span>
-<span class="normal">88</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@njit</span>
+<span class="normal">88</span>
+<span class="normal">89</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">least_squares_circle</span><span class="p">(</span>
     <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
@@ -2517,7 +2529,8 @@ These are NaN if the matrix is singular</p>
 <span class="sd">    y: ndarray</span>
 <span class="sd">        list of all y position coordinates to be fit</span>
 
-<span class="sd">    ## Returns</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    tuple[float, float, float, float]</span>
 <span class="sd">        A four member tuple containing the center x-coordinate, the center y-coordinate, the radius, and the RMSE (in that order)</span>
 <span class="sd">        These are NaN if the matrix is singular</span>

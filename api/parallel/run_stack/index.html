@@ -1174,7 +1174,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../core/particle_id/" class="md-nav__link">
+      <a href="../../core/particle_id.md" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2302,18 +2302,29 @@ from the list.</p>
               <em>required</em>
           </td>
         </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
         <tr>
-          <td><code>dict</code></td>
           <td>
+                <code>dict[int, int]</code>
           </td>
           <td>
             <div class="doc-md-description">
               <p>a dictionary where the keys are run numbers and the values are the size of the associated raw trace files. The
 dict is sorted descending on the size of the raw trace files.</p>
             </div>
-          </td>
-          <td>
-              <em>required</em>
           </td>
         </tr>
     </tbody>
@@ -2349,7 +2360,8 @@ dict is sorted descending on the size of the raw trace files.</p>
 <span class="normal">51</span>
 <span class="normal">52</span>
 <span class="normal">53</span>
-<span class="normal">54</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">collect_runs</span><span class="p">(</span><span class="n">ws</span><span class="p">:</span> <span class="n">Workspace</span><span class="p">,</span> <span class="n">run_min</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">run_max</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+<span class="normal">54</span>
+<span class="normal">55</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">collect_runs</span><span class="p">(</span><span class="n">ws</span><span class="p">:</span> <span class="n">Workspace</span><span class="p">,</span> <span class="n">run_min</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">run_max</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Make dict of runs with the size of the raw data file</span>
 
 <span class="sd">    Using the Workspace and the Config run_min and run_max, get a dict of run numbers to be processed</span>
@@ -2366,7 +2378,8 @@ dict is sorted descending on the size of the raw trace files.</p>
 <span class="sd">    run_max: int</span>
 <span class="sd">        the last run, inclusive</span>
 
-<span class="sd">    ## Returns</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    dict[int, int]</span>
 <span class="sd">        a dictionary where the keys are run numbers and the values are the size of the associated raw trace files. The</span>
 <span class="sd">        dict is sorted descending on the size of the raw trace files.</span>
@@ -2445,30 +2458,38 @@ This seems to provide a fairly balanced load without too much effort.</p>
               <em>required</em>
           </td>
         </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
         <tr>
-          <td><code>list</code></td>
           <td>
+                <code>list[list[int]]</code>
           </td>
           <td>
             <div class="doc-md-description">
               
             </div>
-          </td>
-          <td>
-              <em>required</em>
           </td>
         </tr>
         <tr>
-          <td><code>The</code></td>
           <td>
+                <code>The stacks. Each stack is a list of ints, where each value is a run number for that stack to process.</code>
           </td>
           <td>
             <div class="doc-md-description">
               
             </div>
-          </td>
-          <td>
-              <em>required</em>
           </td>
         </tr>
     </tbody>
@@ -2476,8 +2497,7 @@ This seems to provide a fairly balanced load without too much effort.</p>
 
           <details class="quote">
             <summary>Source code in <code>spyral/parallel/run_stack.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 57</span>
-<span class="normal"> 58</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 58</span>
 <span class="normal"> 59</span>
 <span class="normal"> 60</span>
 <span class="normal"> 61</span>
@@ -2538,7 +2558,9 @@ This seems to provide a fairly balanced load without too much effort.</p>
 <span class="normal">116</span>
 <span class="normal">117</span>
 <span class="normal">118</span>
-<span class="normal">119</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_run_stacks</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">n_stacks</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_run_stacks</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">n_stacks</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a set of runs to be processed for each stack in n_stacks.</span>
 
 <span class="sd">    Each stack is intended to be handed off to a single processor. As such,</span>
@@ -2554,7 +2576,8 @@ This seems to provide a fairly balanced load without too much effort.</p>
 <span class="sd">    n_stacks: int</span>
 <span class="sd">        the number of stacks, should be equal to number of processors</span>
 
-<span class="sd">    ## Returns</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    list[list[int]]</span>
 <span class="sd">    The stacks. Each stack is a list of ints, where each value is a run number for that stack to process.</span>
 <span class="sd">    &quot;&quot;&quot;</span>

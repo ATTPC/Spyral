@@ -1252,7 +1252,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api/core/particle_id/" class="md-nav__link">
+      <a href="../../../api/core/particle_id.md" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2280,7 +2280,7 @@
 }
 </code></pre>
 <p>Here the gate is specified to be for protons. A particle ID gate is <em>required</em> to move on to the final phase. You do not need to use the notebook to make a particle ID gate. You simply need to have a JSON file of the correct format.</p>
-<p>The notebook will typically need tweaking from experiment to experiment. The histogram ranges often need extending/shrinking, and the number of bins will vary depending on total statistics. It also gives users a chance to see some of the <a href="https://github.com/gwm17/spyral-utils/">spyral-utils</a> package, which can be used outside of Spyral to do further analysis.</p>
+<p>The notebook will typically need tweaking from experiment to experiment. The histogram ranges often need extending/shrinking, and the number of bins will vary depending on total statistics. It also gives users a chance to see some of the <a href="https://github.com/gwm17/spyral-utils/">spyral-utils</a> package (which contains the relevant code for a <code>ParticleID</code>), which can be used outside of Spyral to do further analysis.</p>
 <h2 id="final-thoughts">Final Thoughts</h2>
 <p>Estimating, as the name implies, is the least precise of all of the phases. It doesn't have as many parameters as the others because it's not clear at the time of writing which parts change significantly from experiment to experiment. Feedback on this section is welcome; it remains one of the areas where improvement is most desired.</p>
 <p>Estimating is fast, and should not represent a signficant bottleneck to analysis.</p>
