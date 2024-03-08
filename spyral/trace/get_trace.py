@@ -120,6 +120,9 @@ class GetTrace:
         rel_height: float
             The relative height at which the left and right ips points are evaluated. Typically this is
             not needed to be modified, but for some legacy data is necessary
+        min_width: float
+            The minimum width of the peak. It is not inherently evaluated at the base of the peak, but is 
+            found according to a formula related to the prominence and relative height. See SciPy docs for more
         """
 
         if self.is_valid() == False:
@@ -131,8 +134,8 @@ class GetTrace:
             self.trace,
             distance=params.peak_separation,
             prominence=params.peak_prominence,
-            width=(0, params.peak_max_width),
-            rel_height=rel_height,
+            width=(min_width, params.peak_max_width),
+            rel_height=rel_height
         )
         for idx, p in enumerate(pks):
             peak = Peak()
@@ -143,9 +146,7 @@ class GetTrace:
             peak.integral = np.sum(
                 np.abs(self.trace[peak.positive_inflection : peak.negative_inflection])
             )
-            if (peak.amplitude > params.peak_threshold and 
-                abs(peak.positive_inflection - peak.negative_inflection) > min_width
-                ):
+            if (peak.amplitude > params.peak_threshold):
                 self.peaks.append(peak)
 
     def get_number_of_peaks(self) -> int:
