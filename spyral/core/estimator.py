@@ -37,6 +37,12 @@ def estimate_physics(
     detector_params: DetectorParameters,
     results: dict[str, list],
 ):
+    # Check if we have enough points to estimate
+    if len(cluster.data) < estimate_params.min_total_trajectory_points:
+        return
+    # Generate smoothing splines, these will give us better distance measures
+    cluster.apply_smoothing_splines(1.0)
+
     # Run estimation where we attempt to guess the right direction
     is_good, direction = estimate_physics_pass(
         cluster_index,
@@ -45,7 +51,6 @@ def estimate_physics(
         ic_centroid,
         ic_integral,
         ic_multiplicity,
-        estimate_params,
         detector_params,
         results,
     )
@@ -62,7 +67,6 @@ def estimate_physics(
             ic_centroid,
             ic_integral,
             ic_multiplicity,
-            estimate_params,
             detector_params,
             results,
             Direction.BACKWARD,
@@ -75,15 +79,22 @@ def estimate_physics(
             ic_centroid,
             ic_integral,
             ic_multiplicity,
-            estimate_params,
             detector_params,
             results,
             Direction.FORWARD,
         )
 
 
-def choose_direction(cluster: Cluster) -> Direction:
-    rhos = np.linalg.norm(cluster.data[:, :2], axis=1)  # cylindrical coordinates rho
+def choose_direction(cluster_data: np.ndarray) -> Direction:
+    """Choose a direction for the trajectory based on which end of the data is in-spiraling
+
+    Parameters
+    ----------
+    cluster_data: np.ndarray
+        T
+
+    """
+    rhos = np.linalg.norm(cluster_data[:, :2], axis=1)  # cylindrical coordinates rho
     direction = Direction.NONE
 
     # See if in-spiraling to the window or microgmegas, sets the direction and guess of z-vertex
@@ -102,7 +113,6 @@ def estimate_physics_pass(
     ic_centroid: float,
     ic_integral: float,
     ic_multiplicity: float,
-    estimate_params: EstimateParameters,
     detector_params: DetectorParameters,
     results: dict[str, list],
     chosen_direction: Direction = Direction.NONE,
@@ -124,17 +134,13 @@ def estimate_physics_pass(
         The ion chamber centroid for this cluster
     ic_integral:
         The ion chamber integral for this cluster
-    estimate_params:
-        Configuration parameters controlling the estimation algorithm
     detector_params:
         Configuration parameters for the physical detector properties
     results: dict[str, int]
         Dictionary to store estimation results in
 
     """
-    # Do some cleanup, reject clusters which have too few points
-    if len(cluster.data) < estimate_params.min_total_trajectory_points:
-        return (False, Direction.NONE)
+    # Do some cleanup, reject clusters which have too many beam region points
     beam_region_fraction = float(
         len(
             cluster.data[
@@ -149,40 +155,43 @@ def estimate_physics_pass(
     direction = chosen_direction
     vertex = np.array([0.0, 0.0, 0.0])  # reaction vertex
     center = np.array([0.0, 0.0, 0.0])  # spiral center
+    # copy the data so we can modify it without worrying about side-effects
+    cluster_data = cluster.data.copy()
+
     # If chosen direction is set to NONE, we want to have the algorithm
     # try to decide which direction the trajectory is going
     if direction == Direction.NONE:
-        direction = choose_direction(cluster)
+        direction = choose_direction(cluster_data)
 
     if direction == Direction.BACKWARD:
-        cluster.data = np.flip(cluster.data, axis=0)
+        cluster_data = np.flip(cluster_data, axis=0)
 
     # Guess that the vertex is the first point; make sure to copy! not reference
-    vertex[:] = cluster.data[0, :3]
+    vertex[:] = cluster_data[0, :3]
 
     # Find the first point that is furthest from the vertex in rho (maximum) to get the first arc of the trajectory
-    rho_to_vertex = np.linalg.norm(cluster.data[1:, :2] - vertex[:2], axis=1)
+    rho_to_vertex = np.linalg.norm(cluster_data[1:, :2] - vertex[:2], axis=1)
     maximum = np.argmax(rho_to_vertex)
-    first_arc = cluster.data[: (maximum + 1)]
+    first_arc = cluster_data[: (maximum + 1)]
 
     # Fit a circle to the first arc and extract some physics
     center[0], center[1], radius, _ = least_squares_circle(
         first_arc[:, 0], first_arc[:, 1]
     )
-    # better_radius = np.linalg.norm(cluster.data[0, :2] - center[:2])
+    # radius = np.linalg.norm(cluster_data[0, :2] - center[:2])
     circle = generate_circle_points(center[0], center[1], radius)
     # Re-estimate vertex using the fitted circle. Extrapolate back to point closest to beam axis
     vertex_estimate_index = np.argsort(np.linalg.norm(circle, axis=1))[0]
     vertex[:2] = circle[vertex_estimate_index]
     # Re-calculate distance to vertex, maximum, first arc
-    rho_to_vertex = np.linalg.norm((cluster.data[:, :2] - vertex[:2]), axis=1)
+    rho_to_vertex = np.linalg.norm((cluster_data[:, :2] - vertex[:2]), axis=1)
     maximum = np.argmax(rho_to_vertex)
-    first_arc = cluster.data[: (maximum + 1)]
+    first_arc = cluster_data[: (maximum + 1)]
 
     # Do a linear fit to small segment of trajectory to extract rho vs. z and extrapolate vertex z
     test_index = max(10, int(maximum * 0.5))
     # test_index = 10
-    fit = linregress(cluster.data[:test_index, 2], rho_to_vertex[:test_index])
+    fit = linregress(cluster_data[:test_index, 2], rho_to_vertex[:test_index])
     vertex_rho = np.linalg.norm(vertex[:2])
     vertex[2] = (vertex_rho - fit.intercept) / fit.slope
     center[2] = vertex[2]
@@ -217,33 +226,45 @@ def estimate_physics_pass(
     if np.isnan(brho):
         brho = 0.0
 
-    arclength = 0.0
+    # arclength = 0.0
     charge_deposited = first_arc[0, 3]
+    small_pad_cutoff = -1  # Where do we cross from big pads to small pads
     for idx in range(len(first_arc) - 1):
         # Stop integrating if we leave the small pad region
         if np.linalg.norm(first_arc[idx + 1, :2]) > 152.0:
+            small_pad_cutoff = idx + 1
             break
-        arclength += np.linalg.norm(first_arc[idx + 1, :3] - first_arc[idx, :3])
+        # arclength += np.linalg.norm(first_arc[idx + 1, :3] - first_arc[idx, :3])
         charge_deposited += first_arc[idx + 1, 3]
-    if arclength == 0.0:
+    if charge_deposited == first_arc[0, 3]:
         return (False, Direction.NONE)
+
+    # Use the splines to do a fine-grained line integral to calculate the distance
+    points = np.empty((1000, 3))
+    points[:, 2] = np.linspace(first_arc[0, 2], first_arc[small_pad_cutoff, 2], 1000)
+    points[:, 0] = cluster.x_spline(points[:, 2])
+    points[:, 1] = cluster.y_spline(points[:, 2])
+    arclength = np.sqrt((np.diff(points, axis=0) ** 2.0).sum(axis=1)).sum()  # integrate
+
     dEdx = charge_deposited / arclength
 
-    integral_len = np.linalg.norm(cluster.data[0, :3] - vertex)
-    eloss = cluster.data[0, 3]
-    cutoff = 700.0  # mm
-    index = 1
-    while True:
-        if index == len(cluster.data):
-            break
-        elif integral_len > cutoff:
-            break
-        eloss += cluster.data[index, 3]
-        integral_len += np.linalg.norm(
-            cluster.data[index, :3] - cluster.data[index - 1, :3]
-        )
-        index += 1
-    cutoff_index = index
+    # GWM: Needs removing but do it carefully
+    # integral_len = np.linalg.norm(cluster_data[0, :3] - vertex)
+    # eloss = cluster_data[0, 3]
+    # cutoff = 700.0  # mm
+    # index = 1
+    # while True:
+    #     if index == len(cluster_data):
+    #         break
+    #     elif integral_len > cutoff:
+    #         break
+    #     eloss += cluster_data[index, 3]
+    #     integral_len += np.linalg.norm(
+    #         cluster_data[index, :3] - cluster_data[index - 1, :3]
+    #     )
+    #     index += 1
+    # cutoff_index = index
+
     # fill in our map
     results["event"].append(cluster.event)
     results["cluster_index"].append(cluster_index)
@@ -265,6 +286,6 @@ def estimate_physics_pass(
     results["dE"].append(charge_deposited)
     results["arclength"].append(arclength)
     results["direction"].append(direction.value)
-    results["eloss"].append(eloss)
-    results["cutoff_index"].append(cutoff_index)
+    results["eloss"].append(-1.0)
+    results["cutoff_index"].append(-1)
     return (True, direction)
