@@ -286,6 +286,4 @@ def estimate_physics_pass(
     results["dE"].append(charge_deposited)
     results["arclength"].append(arclength)
     results["direction"].append(direction.value)
-    results["eloss"].append(-1.0)
-    results["cutoff_index"].append(-1)
     return (True, direction)
