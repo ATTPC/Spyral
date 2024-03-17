@@ -212,9 +212,13 @@ class EstimateParameters:
     ----------
     min_total_trajectory_points: int
         minimum number of points in a cluster for the cluster to be considered a particle trajectory
+    smoothing_factor: float
+        smoothing factor for creation of smoothing splines. See scipy's documentaion for make_smoothing_splines
+        and in particular the lam parameter for more details.
     """
 
     min_total_trajectory_points: int = 0
+    smoothing_factor: float = 0.0
 
 
 @dataclass
@@ -383,6 +387,7 @@ def deserialize_config(json_data: dict[Any, Any]) -> Config:
     config.estimate.min_total_trajectory_points = est_params[
         "mininum_total_trajectory_points"
     ]
+    config.estimate.smoothing_factor = est_params["smoothing_factor"]
 
     solver_params = json_data["Solver"]
     config.solver.gas_data_path = solver_params["gas_data_path"]

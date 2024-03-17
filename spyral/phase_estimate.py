@@ -81,8 +81,6 @@ def phase_estimate(
         "dE": [],
         "arclength": [],
         "direction": [],
-        "eloss": [],
-        "cutoff_index": [],
     }
 
     # Process data
@@ -99,10 +97,10 @@ def phase_estimate(
             continue
 
         nclusters = event.attrs["nclusters"]
-        ic_amp: float = event.attrs["ic_amplitude"]
-        ic_cent: float = event.attrs["ic_centroid"]
-        ic_int: float = event.attrs["ic_integral"]
-        ic_mult: float = event.attrs["ic_multiplicity"]
+        ic_amp = float(event.attrs["ic_amplitude"])
+        ic_cent = float(event.attrs["ic_centroid"])
+        ic_int = float(event.attrs["ic_integral"])
+        ic_mult = float(event.attrs["ic_multiplicity"])
         # Go through every cluster in each event
         for cidx in range(0, nclusters):
             local_cluster: h5.Group | None = None

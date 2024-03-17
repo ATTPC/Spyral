@@ -16,7 +16,9 @@ The estimation phase is probably the most hard-to-read part of the Spyral framew
 
 First, we do some bad trajectory rejection. Trajectories are rejected based on the number of points and their near-ness to the beam axis. If trajectories have too few points or too many points in the beam region, we reject them. These parameters are exposed in the [configuration](../config/estimate.md).
 
-Once we're confident we've idenfied a valid trajectory, its time to start estimating. First we try to see if the trajectory is going forward (towards the micromegas) or backward (toward the window) by calculating the average &rho; (distance to beam axis) at either end of the trajectory. Due to energy loss, the trajectories in-spiral, so the end with the smaller &rho; is the direction of travel, and the larger is the closest to the reaction vertex.
+Once we're confident we've idenfied a valid trajectory, we need to smooth the trajectory as a function of z. This is done using smoothing splines in the `Cluster` class. The degree of smoothing is controlled by the [configuration](../config/estimate.md). This operation collapses the cluster data to a set of piecewise polynomaials as a function of z. The reason we need this is to give better estimates of distance along the trajectory. The raw data is too noisy in position and charge to perform accurate line integrals.
+
+Now, its time to start estimating. First we try to see if the trajectory is going forward (towards the micromegas) or backward (toward the window) by calculating the average &rho; (distance to beam axis) at either end of the trajectory. Due to energy loss, the trajectories in-spiral, so the end with the smaller &rho; is the direction of travel, and the larger is the closest to the reaction vertex.
 
 We then fit a circle to the first arc of the trajectory. This is done by fitting the region from the start of the trajectory to the point of furthest distance in &rho;. That circle fit is used to estimate the radius of curvature. The circle fit is also used to extract the reaction vertex X and Y coordinates by extrapolating the fit circle to the closest approach to the beam axis. Finally, we also fit a small segment of the beginning of the trajectory to with a line in &rho; vs. z. Using the extrapolated vertex X and Y, we can then use the linear fit to estimate a vertex Z. The polar angle is extracted from the slope of the line in &rho;-z; the azimuthal from the orientation of the vertex with respect to the center of the circle fit.
 
@@ -49,7 +51,7 @@ The output of the estimation phase is a set of dataframes saved to parquet files
 - ic_amplitude: the ion chamber charge amplitude for this event
 - ic_centroid: the ion chamber centroid (time) for this event
 - ic_integral: the ion chamber integrated charge for this event
-- ic_multiplicity: the ion chamber peak multiplicity for this event (only relevant for legacy data)
+- ic_multiplicity: the ion chamber peak multiplicity for this event
 - vertex_x: the estimated vertex x-coordinate (mm)
 - vertex_y: the estimated vertex y-coordinate (mm)
 - vertex_z: the estimated vertex z-coordinate (mm)
@@ -63,10 +65,8 @@ The output of the estimation phase is a set of dataframes saved to parquet files
 - dE: the total integrated charge sum over the length of the first arc (arb.)
 - arclength: the length of the first arc (mm)
 - direction: indicates the detected direction of the trajectory (forward or backward)
-- eloss: Summed integrated charge up to some cutoff (arb.) (Experimental, not used)
-- cutoff_index: Index in the cluster up to which the eloss was summed. (Experimental, not used)
 
-Units are given where relevant. Some values are experimental and not meant for use in final analysis.
+Units are given where relevant.
 
 ## Plotting and Particle ID
 

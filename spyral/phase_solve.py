@@ -115,7 +115,7 @@ def phase_solve(
     flush_val = int(flush_percent * (len(estimates_gated["event"])))
     count = 0
     if len(estimates_gated["event"]) < 100:
-        flush_percent = 100.0 / float(len(estimates_gated["event"]))
+        flush_percent = 1.0 / float(len(estimates_gated["event"]))
         flush_val = 1
         count = 0
 

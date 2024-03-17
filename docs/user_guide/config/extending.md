@@ -34,10 +34,10 @@ should look very similar to the Workspace section of our JSON
 },
 ```
 
-If you're not familiar with dataclasses, you can read up on them [here](https://docs.python.org/3/library/dataclasses.html). Essentially, this wrapper allows you to make simple data holding structures. We then store all of these parameter sets in a parent Config class. So the only trick is translating the JSON to Python, and thankfully the python standard library already does most of this for us. In the function `json_load_config_hook` we take the dictionary of parsed JSON data and place it into our structures. Check out the following snippet:
+If you're not familiar with dataclasses, you can read up on them [here](https://docs.python.org/3/library/dataclasses.html). Essentially, this wrapper allows you to make simple data holding structures. We then store all of these parameter sets in a parent Config class. So the only trick is translating the JSON to Python, and thankfully the python standard library already does most of this for us. In the function `deserialize_config` we take the dictionary of parsed JSON data and place it into our structures. Check out the following snippet:
 
 ```python
-def json_load_config_hook(json_data: dict[Any, Any]) -> Config:
+def deserialize_config(json_data: dict[Any, Any]) -> Config:
     config = Config()
     ws_params = json_data['Workspace']
     config.workspace.trace_data_path = ws_params['trace_data_path']
@@ -52,5 +52,5 @@ So extending the configuration is as simple as:
 
 1. Make a new set of configuration parameters in the JSON
 2. Add a new dataclass to config.py
-3. Add the new dataclass to the Config parent class
-4. Update the json_load_config_hook function
+3. Add the new dataclass to the `Config` parent class
+4. Update the `deserialize_config` function
