@@ -37,6 +37,30 @@ def estimate_physics(
     detector_params: DetectorParameters,
     results: dict[str, list],
 ):
+    """Entry point for estimation
+
+    This is the parent function for estimation. It handles checking that the data
+    meets the conditions to be estimated, applying splines to data, and
+    esuring that the estimation results pass a sanity check.
+
+    Parameters
+    ----------
+    cluster_index: int
+        The cluster index in the HDF5 file.
+    cluster: Cluster
+        The cluster to estimate
+    ic_amplitude:
+        The ion chamber amplitude for this cluster
+    ic_centroid:
+        The ion chamber centroid for this cluster
+    ic_integral:
+        The ion chamber integral for this cluster
+    detector_params:
+        Configuration parameters for the physical detector properties
+    results: dict[str, int]
+        Dictionary to store estimation results in
+
+    """
     # Check if we have enough points to estimate
     if len(cluster.data) < estimate_params.min_total_trajectory_points:
         return
@@ -55,7 +79,7 @@ def estimate_physics(
         results,
     )
 
-    # If estimation was consistent or didn't meet valid criteria were done
+    # If estimation was consistent or didn't meet valid criteria we're done
     if is_good or (not is_good and direction == Direction.NONE):
         return
     # If we made a bad guess, try the other direction
