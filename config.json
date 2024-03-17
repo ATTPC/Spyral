@@ -56,7 +56,8 @@
         "outlier_scale_factor": 0.05
     },
     "Estimate": {
-        "mininum_total_trajectory_points": 30
+        "mininum_total_trajectory_points": 30,
+        "smoothing_factor": 1.0
     },
     "Solver": {
         "gas_data_path": "/path/to/some/gas.json",

@@ -41,7 +41,7 @@ def estimate_physics(
     if len(cluster.data) < estimate_params.min_total_trajectory_points:
         return
     # Generate smoothing splines, these will give us better distance measures
-    cluster.apply_smoothing_splines(1.0)
+    cluster.apply_smoothing_splines(estimate_params.smoothing_factor)
 
     # Run estimation where we attempt to guess the right direction
     is_good, direction = estimate_physics_pass(
@@ -247,23 +247,6 @@ def estimate_physics_pass(
     arclength = np.sqrt((np.diff(points, axis=0) ** 2.0).sum(axis=1)).sum()  # integrate
 
     dEdx = charge_deposited / arclength
-
-    # GWM: Needs removing but do it carefully
-    # integral_len = np.linalg.norm(cluster_data[0, :3] - vertex)
-    # eloss = cluster_data[0, 3]
-    # cutoff = 700.0  # mm
-    # index = 1
-    # while True:
-    #     if index == len(cluster_data):
-    #         break
-    #     elif integral_len > cutoff:
-    #         break
-    #     eloss += cluster_data[index, 3]
-    #     integral_len += np.linalg.norm(
-    #         cluster_data[index, :3] - cluster_data[index - 1, :3]
-    #     )
-    #     index += 1
-    # cutoff_index = index
 
     # fill in our map
     results["event"].append(cluster.event)
