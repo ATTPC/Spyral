@@ -33,6 +33,8 @@ are not guaranteed to work; if there is a problem please make an issue on the Gi
 
 ## Usage
 
+For a full user guide and documentation see [our docs](https://attpc.github.io/Spyral/). Below is a very brief sketch of using Spyral.
+
 ### Configuration
 
 User configuration parameters are passed through JSON files. Configuration files are passed at runtime to the script.
