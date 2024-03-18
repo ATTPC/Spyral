@@ -108,7 +108,7 @@ class GetLegacyEvent:
                 and trace.hw_id.aget_channel == 0
             ):
                 self.ic_trace = trace
-                self.ic_trace.find_peaks(ic_params, rel_height=0.8)
+                self.ic_trace.find_peaks(ic_params, rel_height=0.8)  # type: ignore
                 break
         # Remove CoBo 10 from our normal traces
         self.traces = [trace for trace in self.traces if trace.hw_id.cobo_id != 10]

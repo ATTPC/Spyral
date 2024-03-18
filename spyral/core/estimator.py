@@ -21,9 +21,9 @@ class Direction(Enum):
         Trajectory traveling in the negative z-direction (1)
     """
 
-    NONE: int = -1
-    FORWARD: int = 0
-    BACKWARD: int = 1
+    NONE: int = -1  # type: ignore
+    FORWARD: int = 0  # type: ignore
+    BACKWARD: int = 1  # type: ignore
 
 
 def estimate_physics(
@@ -217,14 +217,14 @@ def estimate_physics_pass(
     # test_index = 10
     fit = linregress(cluster_data[:test_index, 2], rho_to_vertex[:test_index])
     vertex_rho = np.linalg.norm(vertex[:2])
-    vertex[2] = (vertex_rho - fit.intercept) / fit.slope
+    vertex[2] = (vertex_rho - fit.intercept) / fit.slope  # type: ignore
     center[2] = vertex[2]
 
     # Toss tracks whose verticies are not close to the origin in x,y
     if vertex_rho > detector_params.beam_region_radius:
         return (False, Direction.NONE)
 
-    polar = math.atan(fit.slope)
+    polar = math.atan(fit.slope)  # type: ignore
     # We have a self consistency case here. Polar should match chosen Direction
     if (polar > 0.0 and direction == Direction.BACKWARD) or (
         polar < 0.0 and direction == Direction.FORWARD
@@ -266,8 +266,8 @@ def estimate_physics_pass(
     # Use the splines to do a fine-grained line integral to calculate the distance
     points = np.empty((1000, 3))
     points[:, 2] = np.linspace(first_arc[0, 2], first_arc[small_pad_cutoff, 2], 1000)
-    points[:, 0] = cluster.x_spline(points[:, 2])
-    points[:, 1] = cluster.y_spline(points[:, 2])
+    points[:, 0] = cluster.x_spline(points[:, 2])  # type: ignore
+    points[:, 1] = cluster.y_spline(points[:, 2])  # type: ignore
     arclength = np.sqrt((np.diff(points, axis=0) ** 2.0).sum(axis=1)).sum()  # integrate
 
     dEdx = charge_deposited / arclength

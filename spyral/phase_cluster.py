@@ -45,13 +45,13 @@ def phase_cluster(
     point_file = h5.File(point_path, "r")
     cluster_file = h5.File(cluster_path, "w")
 
-    cloud_group: h5.Group = point_file["cloud"]
+    cloud_group: h5.Group = point_file["cloud"]  # type: ignore
     if not isinstance(cloud_group, h5.Group):
         spyral_error(__name__, f"Point cloud group not present in run {run}!")
         return
 
-    min_event: int = cloud_group.attrs["min_event"]
-    max_event: int = cloud_group.attrs["max_event"]
+    min_event: int = cloud_group.attrs["min_event"]  # type: ignore
+    max_event: int = cloud_group.attrs["max_event"]  # type: ignore
     cluster_group: h5.Group = cluster_file.create_group("cluster")
     cluster_group.attrs["min_event"] = min_event
     cluster_group.attrs["max_event"] = max_event
@@ -69,7 +69,7 @@ def phase_cluster(
 
         cloud_data: h5.Dataset | None = None
         try:
-            cloud_data = cloud_group[f"cloud_{idx}"]
+            cloud_data = cloud_group[f"cloud_{idx}"]  # type: ignore
         except Exception:
             continue
 

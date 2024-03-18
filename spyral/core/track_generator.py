@@ -181,6 +181,7 @@ def equation_of_motion(
     return results
 
 
+# These function sigs must match the ODE function
 def stop_condition(
     t: float,
     state: np.ndarray,
@@ -224,6 +225,7 @@ def stop_condition(
     return kinetic_energy - KE_LIMIT
 
 
+# These function sigs must match the ODE function
 def forward_z_bound_condition(
     t: float,
     state: np.ndarray,
@@ -263,6 +265,7 @@ def forward_z_bound_condition(
     return state[2] - 1.0
 
 
+# These function sigs must match the ODE function
 def backward_z_bound_condition(
     t: float,
     state: np.ndarray,
@@ -302,6 +305,7 @@ def backward_z_bound_condition(
     return state[2] + 1.0
 
 
+# These function sigs must match the ODE function
 def rho_bound_condition(
     t: float,
     state: np.ndarray,

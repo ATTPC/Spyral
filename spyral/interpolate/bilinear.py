@@ -41,7 +41,7 @@ bilinear_spec = [
 ]
 
 
-@jitclass(spec=bilinear_spec)
+@jitclass(spec=bilinear_spec)  # type: ignore
 class BilinearInterpolator:
     """A JIT-ed bilinear interpolation class
 

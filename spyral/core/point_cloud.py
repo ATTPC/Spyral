@@ -6,7 +6,6 @@ from ..trace.get_legacy_event import GetLegacyEvent
 from .spy_log import spyral_warn
 
 import numpy as np
-from sklearn.neighbors import NearestNeighbors
 
 
 class PointCloud:

@@ -28,8 +28,8 @@ def get_event_range(trace_file: h5.File) -> tuple[int, int]:
         A pair of integers (first event number, last event number)
     """
     meta_group = trace_file.get("meta")
-    meta_data = meta_group.get("meta")
-    return (int(meta_data[0]), int(meta_data[2]))
+    meta_data = meta_group.get("meta")  # type: ignore
+    return (int(meta_data[0]), int(meta_data[2]))  # type: ignore
 
 
 def phase_pointcloud_legacy(
@@ -112,7 +112,7 @@ def phase_pointcloud_legacy(
 
         event_data: h5.Dataset
         try:
-            event_data = event_group[f"evt{idx}_data"]
+            event_data = event_group[f"evt{idx}_data"]  # type: ignore
         except Exception:
             continue
 
