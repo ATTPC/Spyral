@@ -7,7 +7,7 @@ from pathlib import Path
 import json
 
 from numba import float64, int32
-from numba.types import string, ListType
+from numba.types import string, ListType  # type: ignore
 from numba.typed import List
 from numba.experimental import jitclass
 
@@ -26,11 +26,11 @@ tinterp_spec = [
     ("polar_min", float64),
     ("polar_max", float64),
     ("polar_bins", int32),
-    ("interpolators", ListType(BilinearInterpolator.class_type.instance_type)),
+    ("interpolators", ListType(BilinearInterpolator.class_type.instance_type)),  # type: ignore
 ]
 
 
-@jitclass(spec=tinterp_spec)
+@jitclass(spec=tinterp_spec)  # type: ignore
 class TrackInterpolator:
     """Represents an interpolation scheme used to generate trajectories.
 
@@ -109,7 +109,7 @@ class TrackInterpolator:
     def __init__(
         self,
         track_path: str,
-        interpolators: ListType(BilinearInterpolator.class_type.instance_type),
+        interpolators: ListType(BilinearInterpolator.class_type.instance_type),  # type: ignore
         particle_name: str,
         gas_name: str,
         bfield: float,
@@ -405,7 +405,7 @@ def create_interpolator(track_path: Path) -> TrackInterpolator:
     pmin_rad = meta_dict["polar_min"] * DEG2RAD
     pmax_rad = meta_dict["polar_max"] * DEG2RAD
 
-    typed_interpolators = List()
+    typed_interpolators = List()  # type: ignore
 
     [
         typed_interpolators.append(

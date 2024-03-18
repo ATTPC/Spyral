@@ -47,13 +47,13 @@ def phase_estimate(
     estimate_path = ws.get_estimate_file_path_parquet(run)
 
     cluster_file = h5.File(cluster_path, "r")
-    cluster_group: h5.Group = cluster_file["cluster"]
+    cluster_group: h5.Group = cluster_file["cluster"]  # type: ignore
     if not isinstance(cluster_group, h5.Group):
         spyral_error(__name__, f"Cluster group not present for run {run}!")
         return
 
-    min_event: int = cluster_group.attrs["min_event"]
-    max_event: int = cluster_group.attrs["max_event"]
+    min_event: int = cluster_group.attrs["min_event"]  # type: ignore
+    max_event: int = cluster_group.attrs["max_event"]  # type: ignore
 
     flush_percent = 0.01
     flush_val = int(flush_percent * (max_event - min_event))
@@ -92,25 +92,25 @@ def phase_estimate(
 
         event: h5.Group | None = None
         try:
-            event = cluster_group[f"event_{idx}"]
+            event = cluster_group[f"event_{idx}"]  # type: ignore
         except Exception:
             continue
 
-        nclusters = event.attrs["nclusters"]
-        ic_amp = float(event.attrs["ic_amplitude"])
-        ic_cent = float(event.attrs["ic_centroid"])
-        ic_int = float(event.attrs["ic_integral"])
-        ic_mult = float(event.attrs["ic_multiplicity"])
+        nclusters: int = event.attrs["nclusters"]  # type: ignore
+        ic_amp = float(event.attrs["ic_amplitude"])  # type: ignore
+        ic_cent = float(event.attrs["ic_centroid"])  # type: ignore
+        ic_int = float(event.attrs["ic_integral"])  # type: ignore
+        ic_mult = float(event.attrs["ic_multiplicity"])  # type: ignore
         # Go through every cluster in each event
         for cidx in range(0, nclusters):
             local_cluster: h5.Group | None = None
             try:
-                local_cluster = event[f"cluster_{cidx}"]
+                local_cluster = event[f"cluster_{cidx}"]  # type: ignore
             except Exception:
                 continue
 
             cluster = Cluster(
-                idx, local_cluster.attrs["label"], local_cluster["cloud"][:].copy()
+                idx, local_cluster.attrs["label"], local_cluster["cloud"][:].copy()  # type: ignore
             )
 
             # Cluster is loaded do some analysis

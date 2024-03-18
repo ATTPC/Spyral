@@ -32,6 +32,18 @@ This will also install the appropriate pip.
 
 Windows is mostly a mess for this. You can download from the official [Python](https://www.python.org/downloads/windows/) if you want and manual install. However, I recommend using Visual Studio Installer (see [here](https://learn.microsoft.com/en-us/visualstudio/install/install-visual-studio?view=vs-2022)) to install everything. It will make sure your paths are set and not a huge mess. However, Visual Studio is quite heavy, so your mileage may vary.
 
+### Python @ FRIB
+
+When working on the FRIB systems (both Windows and Linux), in many cases you will not have control over which versions of python are available to you. Instead, the recommended solution is often to use the pre-installed Anaconda distributions on the systems. Below is the Spyral approved method for setting up an environment:
+
+- First setup a new conda environment for Spyral. To do this run: `conda create --name spyral-env python=3.11`. The Python flag `python=3.11` tells conda to use Python version 3.11 for this environment. You can set the version number to any of the supported versions for Spyral.
+- Once that environment is setup, it can be activated at anytime using `conda activate spyral-env`. To deactivate (return to `base`) use `conda activate`. To completely deactivate any conda virtual environment use `conda deactivate`
+- Once the environment is activated (you should see `(spyral-env)` on your terminal tag) you can install the dependencies using `pip install -r requirements.txt` from the Spyral repository.
+
+Note that you can't use `conda install` for the requirements. Several of our dependencies are only available via PyPI and not conda or conda-forge. This also can refer to the bundled versions of some libraries like scipy and numpy for Anaconda. We only support using the versions pinned in the requirements.txt file.
+
+This method is tested during development and should work in general even on systems not at FRIB where Anaconda is installed and you have limited control over what Python is avaliable to you. However, our general recommendation remains, where possible, to install and manage your Python distributions yourself to avoid overlarge installs and possible dependency clashing (or at the very least use miniconda instead of a full Anaconda).
+
 ### Using the right Python
 
 In general when a newer version of Python is installed it is aliased as `python3`. Sometimes if multiple new versions are installed you may have to get more specific and use something like `python3.11`. You can always check by running the interpreter to see which version you are actively using.
@@ -61,6 +73,8 @@ The above example is for Linux/MacOS. Windows users will need to use the slightl
 ```bash
 pip install -r requirements.txt
 ```
+
+**Note**: if you installed Python through Anaconda (i.e. the methods described by the [Python @ FRIB](#python--frib) section) you *do not* need to create a virtual environment as descirbed in this section. You already created a conda virtual environment instead. Simply skip right to using `pip install -r requirements.txt` after downloading Spyral and setting up the conda environment.
 
 To make sure everything went ok you can then run
 

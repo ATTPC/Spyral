@@ -54,7 +54,7 @@ class ElectronCorrector:
         corrected_point = np.zeros(len(point))
         corrected_point[3:] = point[3:]
 
-        radius: float = np.linalg.norm(point[:2])
+        radius: float = np.linalg.norm(point[:2])  # type: ignore
         azimuthal: float = np.arctan2(point[1], point[0])
 
         correction = self.correction.interpolate(radius, point[2])

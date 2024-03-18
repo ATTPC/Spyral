@@ -25,11 +25,11 @@ class Phase(Enum):
         Convert the Enum to a string message
     """
 
-    CLOUD: int = 0
-    CLUSTER: int = 1
-    ESTIMATE: int = 2
-    SOLVE: int = 3
-    WAIT: int = 4
+    CLOUD: int = 0  # type: ignore
+    CLUSTER: int = 1  # type: ignore
+    ESTIMATE: int = 2  # type: ignore
+    SOLVE: int = 3  # type: ignore
+    WAIT: int = 4  # type: ignore
 
     def __str__(self) -> str:
         """Convert the Enum to a string message

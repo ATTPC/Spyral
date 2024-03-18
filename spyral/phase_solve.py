@@ -83,7 +83,7 @@ def phase_solve(
     cluster_file = h5.File(cluster_path, "r")
     estimate_df = pl.scan_parquet(estimate_path)
 
-    cluster_group: h5.Group = cluster_file["cluster"]
+    cluster_group: h5.Group = cluster_file["cluster"]  # type: ignore
     if not isinstance(cluster_group, h5.Group):
         spyral_error(
             __name__, f"Cluster group does not eixst for run {run} at phase 4!"
@@ -152,9 +152,9 @@ def phase_solve(
 
         event_group = cluster_group[f"event_{event}"]
         cidx = estimates_gated["cluster_index"][row]
-        local_cluster: h5.Dataset = event_group[f"cluster_{cidx}"]
+        local_cluster: h5.Dataset = event_group[f"cluster_{cidx}"]  # type: ignore
         cluster = Cluster(
-            event, local_cluster.attrs["label"], local_cluster["cloud"][:].copy()
+            event, local_cluster.attrs["label"], local_cluster["cloud"][:].copy()  # type: ignore
         )
 
         # Do the solver

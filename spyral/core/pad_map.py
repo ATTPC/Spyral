@@ -64,7 +64,6 @@ class PadMap:
         time_correction_path: Path,
         electronics_path: Path,
         scale_path: Path,
-        is_legacy: bool = False,
     ):
         """Construct the PadMap
 

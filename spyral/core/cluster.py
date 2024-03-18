@@ -175,9 +175,9 @@ class Cluster:
         if self.x_spline is None or self.y_spline is None or self.c_spline is None:
             self.create_splines(smoothing)
 
-        self.data[:, 0] = self.x_spline(self.data[:, 2])
-        self.data[:, 1] = self.y_spline(self.data[:, 2])
-        self.data[:, 3] = self.c_spline(self.data[:, 2])
+        self.data[:, 0] = self.x_spline(self.data[:, 2])  # type: ignore
+        self.data[:, 1] = self.y_spline(self.data[:, 2])  # type: ignore
+        self.data[:, 3] = self.c_spline(self.data[:, 2])  # type: ignore
 
 
 def convert_labeled_to_cluster(

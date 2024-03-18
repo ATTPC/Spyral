@@ -126,7 +126,7 @@ def interpolate_initial_rho(contour: ContourGenerator, z: float, rho: float) -> 
     lines = contour.lines(rho)
     if len(lines) == 0:
         return 0.0
-    line: np.ndarray = lines[0]
+    line: np.ndarray = lines[0]  # type: ignore
     line = line[line[:, 0].argsort()]
 
     return np.interp(np.array([z]), line[:, 0], line[:, 1])[0]
