@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.11">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.14">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.7e359304.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.10ba22f1.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
@@ -374,6 +374,15 @@
   <a href="#windows" class="md-nav__link">
     <span class="md-ellipsis">
       Windows
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-frib" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python @ FRIB
     </span>
   </a>
   
@@ -2244,6 +2253,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#python-frib" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python @ FRIB
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#using-the-right-python" class="md-nav__link">
     <span class="md-ellipsis">
       Using the right Python
@@ -2334,6 +2352,15 @@
 <p>This will also install the appropriate pip.</p>
 <h3 id="windows">Windows</h3>
 <p>Windows is mostly a mess for this. You can download from the official <a href="https://www.python.org/downloads/windows/">Python</a> if you want and manual install. However, I recommend using Visual Studio Installer (see <a href="https://learn.microsoft.com/en-us/visualstudio/install/install-visual-studio?view=vs-2022">here</a>) to install everything. It will make sure your paths are set and not a huge mess. However, Visual Studio is quite heavy, so your mileage may vary.</p>
+<h3 id="python-frib">Python @ FRIB</h3>
+<p>When working on the FRIB systems (both Windows and Linux), in many cases you will not have control over which versions of python are available to you. Instead, the recommended solution is often to use the pre-installed Anaconda distributions on the systems. Below is the Spyral approved method for setting up an environment:</p>
+<ul>
+<li>First setup a new conda environment for Spyral. To do this run: <code>conda create --name spyral-env python=3.11</code>. The Python flag <code>python=3.11</code> tells conda to use Python version 3.11 for this environment. You can set the version number to any of the supported versions for Spyral.</li>
+<li>Once that environment is setup, it can be activated at anytime using <code>conda activate spyral-env</code>. To deactivate (return to <code>base</code>) use <code>conda activate</code>. To completely deactivate any conda virtual environment use <code>conda deactivate</code></li>
+<li>Once the environment is activated (you should see <code>(spyral-env)</code> on your terminal tag) you can install the dependencies using <code>pip install -r requirements.txt</code> from the Spyral repository.</li>
+</ul>
+<p>Note that you can't use <code>conda install</code> for the requirements. Several of our dependencies are only available via PyPI and not conda or conda-forge. This also can refer to the bundled versions of some libraries like scipy and numpy for Anaconda. We only support using the versions pinned in the requirements.txt file.</p>
+<p>This method is tested during development and should work in general even on systems not at FRIB where Anaconda is installed and you have limited control over what Python is avaliable to you. However, our general recommendation remains, where possible, to install and manage your Python distributions yourself to avoid overlarge installs and possible dependency clashing (or at the very least use miniconda instead of a full Anaconda).</p>
 <h3 id="using-the-right-python">Using the right Python</h3>
 <p>In general when a newer version of Python is installed it is aliased as <code>python3</code>. Sometimes if multiple new versions are installed you may have to get more specific and use something like <code>python3.11</code>. You can always check by running the interpreter to see which version you are actively using.</p>
 <h2 id="installation">Installation</h2>
@@ -2349,6 +2376,7 @@
 <p>The above example is for Linux/MacOS. Windows users will need to use the slightly different commands. More details on virtualenvs can be found <a href="https://docs.python.org/3/library/venv.html">here</a>. Once the virtualenv is active, use pip to install the dependencies.</p>
 <pre><code class="language-bash">pip install -r requirements.txt
 </code></pre>
+<p><strong>Note</strong>: if you installed Python through Anaconda (i.e. the methods described by the <a href="#python--frib">Python @ FRIB</a> section) you <em>do not</em> need to create a virtual environment as descirbed in this section. You already created a conda virtual environment instead. Simply skip right to using <code>pip install -r requirements.txt</code> after downloading Spyral and setting up the conda environment.</p>
 <p>To make sure everything went ok you can then run</p>
 <pre><code class="language-bash">python main.py --help
 </code></pre>
@@ -2431,7 +2459,7 @@
     <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.8fd75fb4.min.js"></script>
+      <script src="../../assets/javascripts/bundle.bd41221c.min.js"></script>
       
         <script src="../../javascript/mathjax.js"></script>
       

@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.11">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.14">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.7e359304.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.10ba22f1.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
@@ -2103,6 +2103,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#i-just-ran-spyral-and-it-seems-like-everything-went-well-but-there-is-no-output-datathe-results-didnt-change" class="md-nav__link">
+    <span class="md-ellipsis">
+      I just ran Spyral and it seems like everything went well, but there is no output data/the results didn't change!
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#why-cant-i-install-spyral-with-pip-ie-pip-install-spyral-why-cant-i-import-spyral" class="md-nav__link">
     <span class="md-ellipsis">
       Why can't I install Spyral with pip (i.e. pip install spyral)? Why can't I import spyral?
@@ -2211,6 +2220,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#i-just-ran-spyral-and-it-seems-like-everything-went-well-but-there-is-no-output-datathe-results-didnt-change" class="md-nav__link">
+    <span class="md-ellipsis">
+      I just ran Spyral and it seems like everything went well, but there is no output data/the results didn't change!
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#why-cant-i-install-spyral-with-pip-ie-pip-install-spyral-why-cant-i-import-spyral" class="md-nav__link">
     <span class="md-ellipsis">
       Why can't I install Spyral with pip (i.e. pip install spyral)? Why can't I import spyral?
@@ -2249,9 +2267,11 @@
 <p>See <a href="../user_guide/config/about/">Configuration</a></p>
 <h2 id="i-have-some-old-data-i-want-to-analyze-can-i-use-spyral">I have some old data I want to analyze, can I use Spyral?</h2>
 <p>In general, yes. Spyral has a legacy mode that supports analyzing data taken before AT-TPC's data acquisition was split (pre-FRIBDAQ): see <a href="../user_guide/phases/point_cloud/">here</a> for more details. However, at this time, it only supports analyzing the ion chamber data out of CoBo 10. Any other auxilary signals will have to be extended or requested.</p>
+<h2 id="i-just-ran-spyral-and-it-seems-like-everything-went-well-but-there-is-no-output-datathe-results-didnt-change">I just ran Spyral and it seems like everything went well, but there is no output data/the results didn't change!</h2>
+<p>Check the log files in your workspace (in the <code>&lt;your_workspace&gt;/log</code> directory). Spyral will try to catch-and-continue most errors that aren't directly related to reading the configuration and spawning the processes. This helps us not crash out if one single file out 100 files to be analyzed is not formated correctly, but can sometimes make it look like Spyral ran but didn't do anything. The logs should contain lines indicating if a crash happened and what was detected as a possible error.</p>
 <h2 id="why-cant-i-install-spyral-with-pip-ie-pip-install-spyral-why-cant-i-import-spyral">Why can't I install Spyral with pip (i.e. <code>pip install spyral</code>)? Why can't I <code>import spyral</code>?</h2>
 <p>Spyral is not a library/package. Spyral is an application, intended to be run by users through the provided entry points (notebooks or scripts). This is also reflected in the way Spyral handles dependencies. We pin versions explicitly, to ensure that the code will run identically in whatever environment it is installed to.</p>
-<p>More importantly, it will be extremely rare that Spyral works perfectly right out of the box for any analysis; the AT-TPC is such a powerful tool, that can be used to take such a wide range of data, that no one single analysis will work perfectly for all of these use cases. A good example of this is the so-called estimation phase of AT-TPC analysis where we attempt to guess the physical properties of a trajectory for use in the final fitting/solving phase. This phase is extremely sensitive to the shape/size of the data being analyzed. As such, even more so than an application, Spyral is a <em>framework</em>, a ground floor providing the basic building blocks of AT-TPC analysis. We want users to have access to the source code, and be able to modify the behavior to fit their needs without having to be restricted by our design choices, because we cannot predict every use case.</p>
+<p>More importantly, it may not be the case that Spyral works perfectly right out of the box for any analysis; the AT-TPC is such a powerful tool, that can be used to take such a wide range of data, that no one single analysis will work perfectly for all of these use cases. A good example of this is the so-called estimation phase of AT-TPC analysis where we attempt to guess the physical properties of a trajectory for use in the final fitting/solving phase. This phase is sensitive to the shape/size of the data being analyzed. As such, even more so than an application, Spyral is a <em>framework</em>, a ground floor providing the basic building blocks of AT-TPC analysis. We want users to have access to the source code, and be able to modify the behavior to fit their needs without having to be restricted by our design choices, because we cannot predict every use case.</p>
 <p>This may change in the future, in particular as Spyral matures and becomes more tested, it may become clear that a more rigid analysis environment will provide users with a better access point to AT-TPC analysis. In such as case, Spyral may migrate to an installable package.</p>
 <p>Please let us know what you think on this topic! User feedback will be critical for determining the path forward for Spyral.</p>
 
@@ -2303,7 +2323,7 @@
     <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.8fd75fb4.min.js"></script>
+      <script src="../assets/javascripts/bundle.bd41221c.min.js"></script>
       
         <script src="../javascript/mathjax.js"></script>
       

@@ -18,7 +18,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.11">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.14">
     
     
       
@@ -26,7 +26,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.7e359304.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.10ba22f1.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
@@ -2332,8 +2332,9 @@
 <p>Please provide docstrings for each function and class. Dataclasses do not necessarily need docstrings. This helps other developers understand what the purpose and usage code. Check out some of the docstrings in Spyral to get a feel for the expected format.</p>
 <h3 id="type-hints">Type Hints</h3>
 <p>Please use <a href="https://docs.python.org/3/library/typing.html">type hints</a> to annotate your code where applicable. This includes function arguments, return values, and any variables where the type might be ambiguous. In general, a good rule to follow is: can your IDE determine the type of the variable? If it can it doesn't need a type hint. If it can't, the variable needs a type hint. The Any type hint is allowed in some specific cases. Functions which return None do not need a return type hint.</p>
+<p>In some places in the code you may notice the comment <code># type: ignore</code>. The Spyral development team uses type checking to help detect and eliminate issues in the codebase before they get deployed. However, many libraries don't provide a level of typing which allows for type checking. This comment will disable type checking and static type analysis for that line. It should only be used when it has been confirmed through testing that that line behaves as expected.</p>
 <h3 id="formatting">Formatting</h3>
-<p>TBD</p>
+<p>Spyral uses the black formatter. The appropriate version of black is included in the requirements.txt file, so simply install and everything should be good to go.</p>
 <h3 id="files">Files</h3>
 <p>Please try to keep files from being monster 1000 lines of code documents. This is not a hard and fast rule, but in general files should contain a unqiue individual unit of code which interfaces with the rest of the framework. There can be execptions.</p>
 <h3 id="notebooks">Notebooks</h3>
@@ -2399,7 +2400,7 @@ pyyaml
     <script id="__config" type="application/json">{"base": "..", "features": [], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../assets/javascripts/bundle.8fd75fb4.min.js"></script>
+      <script src="../assets/javascripts/bundle.bd41221c.min.js"></script>
       
         <script src="../javascript/mathjax.js"></script>
       

@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.11">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.14">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.7e359304.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.10ba22f1.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
@@ -530,6 +530,15 @@
   <a href="#minimum_total_trajectory_points" class="md-nav__link">
     <span class="md-ellipsis">
       minimum_total_trajectory_points
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#smoothing_factor" class="md-nav__link">
+    <span class="md-ellipsis">
+      smoothing_factor
     </span>
   </a>
   
@@ -2133,6 +2142,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#smoothing_factor" class="md-nav__link">
+    <span class="md-ellipsis">
+      smoothing_factor
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2153,14 +2171,17 @@
 
 <h1 id="estimation-configuration">Estimation Configuration</h1>
 <p>The Estimate parameters control the estimation phase. The default estimate parameters given in <code>config.json</code> are:</p>
-<pre><code class="language-json">&quot;Estimate&quot;:
+<pre><code class="language-json">&quot;Estimate&quot;: 
 {
     &quot;mininum_total_trajectory_points&quot;: 30,
+    &quot;smoothing_factor&quot;: 1.0
 },
 </code></pre>
 <p>A break down of each parameter:</p>
 <h2 id="minimum_total_trajectory_points">minimum_total_trajectory_points</h2>
 <p>Minimum number of points in a cluster to be considered a valid trajectory. Any clusters smaller will be ignored.</p>
+<h2 id="smoothing_factor">smoothing_factor</h2>
+<p>This is the parameter which controls the "degree" of smoothing which is applied to the cluster in x, y, and charge as a function of z. Each of these coordinates is smoothed using smoothing splines from the scipy toolkit. Our <code>smoothing_factor</code> parameter is a re-exposure of scipy's <code>lam</code> parameter in the function <code>make_smoothing_splines</code> (see <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.make_smoothing_spline.html#scipy.interpolate.make_smoothing_spline">the docs</a> for more details). Note that we cannot use scipy's default estimation feature for the smoothing factor; th estimation of <code>lam</code> is extremely slow, as it is an optimization problem. <code>smoothing_factor</code> cannot be negative, and in general seems to be around 1.0 for most of the data. This parameter needs more testing across more datasets, so please let us know if you find anyting interesting!</p>
 
 
 
@@ -2210,7 +2231,7 @@
     <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.8fd75fb4.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.bd41221c.min.js"></script>
       
         <script src="../../../javascript/mathjax.js"></script>
       

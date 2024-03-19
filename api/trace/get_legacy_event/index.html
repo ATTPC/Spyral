@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.11">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.14">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.7e359304.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.10ba22f1.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
@@ -2575,7 +2575,7 @@ of the IC from CoBo 10.</p>
                 <span class="ow">and</span> <span class="n">trace</span><span class="o">.</span><span class="n">hw_id</span><span class="o">.</span><span class="n">aget_channel</span> <span class="o">==</span> <span class="mi">0</span>
             <span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">ic_trace</span> <span class="o">=</span> <span class="n">trace</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">ic_trace</span><span class="o">.</span><span class="n">find_peaks</span><span class="p">(</span><span class="n">ic_params</span><span class="p">,</span> <span class="n">rel_height</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ic_trace</span><span class="o">.</span><span class="n">find_peaks</span><span class="p">(</span><span class="n">ic_params</span><span class="p">,</span> <span class="n">rel_height</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
                 <span class="k">break</span>
         <span class="c1"># Remove CoBo 10 from our normal traces</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">traces</span> <span class="o">=</span> <span class="p">[</span><span class="n">trace</span> <span class="k">for</span> <span class="n">trace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traces</span> <span class="k">if</span> <span class="n">trace</span><span class="o">.</span><span class="n">hw_id</span><span class="o">.</span><span class="n">cobo_id</span> <span class="o">!=</span> <span class="mi">10</span><span class="p">]</span>
@@ -2943,7 +2943,7 @@ of the IC from CoBo 10.</p>
             <span class="ow">and</span> <span class="n">trace</span><span class="o">.</span><span class="n">hw_id</span><span class="o">.</span><span class="n">aget_channel</span> <span class="o">==</span> <span class="mi">0</span>
         <span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ic_trace</span> <span class="o">=</span> <span class="n">trace</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ic_trace</span><span class="o">.</span><span class="n">find_peaks</span><span class="p">(</span><span class="n">ic_params</span><span class="p">,</span> <span class="n">rel_height</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ic_trace</span><span class="o">.</span><span class="n">find_peaks</span><span class="p">(</span><span class="n">ic_params</span><span class="p">,</span> <span class="n">rel_height</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
             <span class="k">break</span>
     <span class="c1"># Remove CoBo 10 from our normal traces</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">traces</span> <span class="o">=</span> <span class="p">[</span><span class="n">trace</span> <span class="k">for</span> <span class="n">trace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traces</span> <span class="k">if</span> <span class="n">trace</span><span class="o">.</span><span class="n">hw_id</span><span class="o">.</span><span class="n">cobo_id</span> <span class="o">!=</span> <span class="mi">10</span><span class="p">]</span>
@@ -3204,7 +3204,7 @@ array, not a reference to an array in an hdf file</p>
     <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.8fd75fb4.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.bd41221c.min.js"></script>
       
         <script src="../../../javascript/mathjax.js"></script>
       

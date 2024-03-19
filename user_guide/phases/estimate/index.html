@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.11">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.14">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.7e359304.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.10ba22f1.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
@@ -2217,7 +2217,8 @@
 <h2 id="how-it-works">How it Works</h2>
 <p>The estimation phase is probably the most hard-to-read part of the Spyral framework. It is very short; the entirety of the code is in <code>spyral/core/estimator.py</code> and the function <code>estimate_physics</code>, and only just eclipses 100 lines of code in total. But it does a <em>lot</em> of things, and makes a lot of, shall we say, educated guesses about the behavior of the trajectory. In all honesty, it is best to read the code for this section to understand how it works.</p>
 <p>First, we do some bad trajectory rejection. Trajectories are rejected based on the number of points and their near-ness to the beam axis. If trajectories have too few points or too many points in the beam region, we reject them. These parameters are exposed in the <a href="../../config/estimate/">configuration</a>.</p>
-<p>Once we're confident we've idenfied a valid trajectory, its time to start estimating. First we try to see if the trajectory is going forward (towards the micromegas) or backward (toward the window) by calculating the average &rho; (distance to beam axis) at either end of the trajectory. Due to energy loss, the trajectories in-spiral, so the end with the smaller &rho; is the direction of travel, and the larger is the closest to the reaction vertex.</p>
+<p>Once we're confident we've idenfied a valid trajectory, we need to smooth the trajectory as a function of z. This is done using smoothing splines in the <code>Cluster</code> class. The degree of smoothing is controlled by the <a href="../../config/estimate/">configuration</a>. This operation collapses the cluster data to a set of piecewise polynomaials as a function of z. The reason we need this is to give better estimates of distance along the trajectory. The raw data is too noisy in position and charge to perform accurate line integrals.</p>
+<p>Now, its time to start estimating. First we try to see if the trajectory is going forward (towards the micromegas) or backward (toward the window) by calculating the average &rho; (distance to beam axis) at either end of the trajectory. Due to energy loss, the trajectories in-spiral, so the end with the smaller &rho; is the direction of travel, and the larger is the closest to the reaction vertex.</p>
 <p>We then fit a circle to the first arc of the trajectory. This is done by fitting the region from the start of the trajectory to the point of furthest distance in &rho;. That circle fit is used to estimate the radius of curvature. The circle fit is also used to extract the reaction vertex X and Y coordinates by extrapolating the fit circle to the closest approach to the beam axis. Finally, we also fit a small segment of the beginning of the trajectory to with a line in &rho; vs. z. Using the extrapolated vertex X and Y, we can then use the linear fit to estimate a vertex Z. The polar angle is extracted from the slope of the line in &rho;-z; the azimuthal from the orientation of the vertex with respect to the center of the circle fit.</p>
 <p>The radius of curvature (also &rho;) is proportional to the momentum from the equation for cyclotron motion</p>
 <div class="arithmatex">\[
@@ -2241,7 +2242,7 @@
 <li>ic_amplitude: the ion chamber charge amplitude for this event</li>
 <li>ic_centroid: the ion chamber centroid (time) for this event</li>
 <li>ic_integral: the ion chamber integrated charge for this event</li>
-<li>ic_multiplicity: the ion chamber peak multiplicity for this event (only relevant for legacy data)</li>
+<li>ic_multiplicity: the ion chamber peak multiplicity for this event</li>
 <li>vertex_x: the estimated vertex x-coordinate (mm)</li>
 <li>vertex_y: the estimated vertex y-coordinate (mm)</li>
 <li>vertex_z: the estimated vertex z-coordinate (mm)</li>
@@ -2255,10 +2256,8 @@
 <li>dE: the total integrated charge sum over the length of the first arc (arb.)</li>
 <li>arclength: the length of the first arc (mm)</li>
 <li>direction: indicates the detected direction of the trajectory (forward or backward)</li>
-<li>eloss: Summed integrated charge up to some cutoff (arb.) (Experimental, not used)</li>
-<li>cutoff_index: Index in the cluster up to which the eloss was summed. (Experimental, not used)</li>
 </ul>
-<p>Units are given where relevant. Some values are experimental and not meant for use in final analysis.</p>
+<p>Units are given where relevant.</p>
 <h2 id="plotting-and-particle-id">Plotting and Particle ID</h2>
 <p>Once estimation is done, you can check the progress of the work and see how well Spyral is doing from a physics perspective. This involves plotting the B&rho; vs. dE/dx relationship to examine particle groups as well as kinematics in the relationship B&rho; vs. &theta;. To help with this Spyral ships with a notebook <code>particle_id.ipynb</code> which will allow you to plot and gate on particle groups. To launch the notebook use the following command from the Spyral repo:</p>
 <pre><code class="language-bash">jupyter-lab --notebook-dir=./notebooks
@@ -2333,7 +2332,7 @@
     <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.8fd75fb4.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.bd41221c.min.js"></script>
       
         <script src="../../../javascript/mathjax.js"></script>
       
