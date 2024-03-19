@@ -24,9 +24,11 @@ Please provide docstrings for each function and class. Dataclasses do not necess
 
 Please use [type hints](https://docs.python.org/3/library/typing.html) to annotate your code where applicable. This includes function arguments, return values, and any variables where the type might be ambiguous. In general, a good rule to follow is: can your IDE determine the type of the variable? If it can it doesn't need a type hint. If it can't, the variable needs a type hint. The Any type hint is allowed in some specific cases. Functions which return None do not need a return type hint.
 
+In some places in the code you may notice the comment `# type: ignore`. The Spyral development team uses type checking to help detect and eliminate issues in the codebase before they get deployed. However, many libraries don't provide a level of typing which allows for type checking. This comment will disable type checking and static type analysis for that line. It should only be used when it has been confirmed through testing that that line behaves as expected.
+
 ### Formatting
 
-TBD
+Spyral uses the black formatter. The appropriate version of black is included in the requirements.txt file, so simply install and everything should be good to go.
 
 ### Files
 

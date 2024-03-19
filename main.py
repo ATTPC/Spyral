@@ -31,11 +31,11 @@ def show_splash():
     show_default=True,
 )
 @click.argument("config", type=click.Path(exists=True))
-def main(term: bool, config: Path):
+def main(term: bool, config: str):
     """
     Spyral is an analysis framework for AT-TPC data. Provide a JSON configuration file CONFIG to control analysis settings.
     """
-    configuration = load_config(config)
+    configuration = load_config(Path(config))
     if not term:
         with contextlib.redirect_stdout(open(os.devnull, "w")):
             run_spyral_parallel(configuration, no_progress=True)

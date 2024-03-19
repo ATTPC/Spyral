@@ -13,7 +13,7 @@ linear_spec = [
 ]
 
 
-@jitclass(spec=linear_spec)
+@jitclass(spec=linear_spec)  # type: ignore
 class LinearInterpolator:
     """Simple JIT-ed wrapper around numpy.interp for use with vector valued functions (i.e. f(x) -> [y,z])
 

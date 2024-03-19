@@ -194,7 +194,6 @@ class Workspace:
             self.pad_time_path,
             self.pad_electronics_path,
             self.pad_scale_path,
-            is_legacy,
         )
 
     def get_trace_file_path(self, run_number: int) -> Path:

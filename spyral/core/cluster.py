@@ -3,6 +3,7 @@ from .config import ClusterParameters
 import numpy as np
 from dataclasses import dataclass, field
 from sklearn.neighbors import LocalOutlierFactor
+from scipy.interpolate import BSpline, make_smoothing_spline
 
 
 @dataclass
@@ -62,6 +63,12 @@ class Cluster:
             The label from the clustering algorithm (default = -1)
         data: ndarray
             The PointCloud data for the Cluster (default = empty array)
+        x_spline: BSpline | None
+            An optional spline on z-x to smooth the cluster.
+        y_spline: BSpline | None
+            An optional spline on z-y to smooth the cluster.
+        c_spline: BSpline | None
+            An optional spline on z-charge to smooth the cluster.
 
         Returns
         -------
@@ -71,6 +78,9 @@ class Cluster:
         self.event = event
         self.label = label
         self.data = data
+        self.x_spline: BSpline | None = None
+        self.y_spline: BSpline | None = None
+        self.c_spline: BSpline | None = None
 
     def from_labeled_cloud(self, cloud: LabeledCloud, params: ClusterParameters):
         """Convert a LabeledCloud to a Cluster, dropping any outliers
@@ -122,6 +132,52 @@ class Cluster:
         neigh = LocalOutlierFactor(n_neighbors=neighbors)
         result = neigh.fit_predict(test_data)
         self.data = self.data[result > 0]  # label=-1 is an outlier
+
+    def create_splines(self, smoothing: float = 1.0) -> None:
+        """Create smoothing splines for the x,y,charge dimensions
+
+        Create smoothing splines along the z-coordinate for x, y, and charge.
+        The degree of smoothing is controlled by the smoothing parameter. smoothing = 0.0 is
+        no smoothing (pure interpolation) and higher values gives a higher degree of smoothing.
+
+        Parameters
+        ----------
+        smoothing: float
+            The smoothing factor (lambda in the scipy notation). Must be a positive float or zero.
+        """
+
+        self.x_spline = make_smoothing_spline(
+            self.data[:, 2], self.data[:, 0], lam=smoothing
+        )
+        self.y_spline = make_smoothing_spline(
+            self.data[:, 2], self.data[:, 1], lam=smoothing
+        )
+        self.c_spline = make_smoothing_spline(
+            self.data[:, 2], self.data[:, 3], lam=smoothing
+        )
+
+    def apply_smoothing_splines(self, smoothing: float = 1.0) -> None:
+        """Apply smoothing to the underlying cluster data with smoothing splines
+
+        Apply smoothing splines to the x, y, and charge dimensions as a function of
+        z. The degree of smoothing is controlled by the smoothing parameter. If the splines
+        are not already created using the create_splines function, they will be created here.
+
+        Note: This function modifies the underlying data in the cluster. This is not a reversible operation.
+
+        Parameters
+        ----------
+        smoothing: float
+            The smoothing factor (lambda in the scipy notation). Must be a positive float or zero.
+
+        """
+
+        if self.x_spline is None or self.y_spline is None or self.c_spline is None:
+            self.create_splines(smoothing)
+
+        self.data[:, 0] = self.x_spline(self.data[:, 2])  # type: ignore
+        self.data[:, 1] = self.y_spline(self.data[:, 2])  # type: ignore
+        self.data[:, 3] = self.c_spline(self.data[:, 2])  # type: ignore
 
 
 def convert_labeled_to_cluster(

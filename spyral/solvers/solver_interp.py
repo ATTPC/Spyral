@@ -44,7 +44,7 @@ def distances(track: np.ndarray, data: np.ndarray) -> float:
                 + (track[j, 2] - data[i, 2]) ** 2.0
             )
         errors[i] = np.min(dists[i])
-    return np.average(errors)
+    return np.average(errors)  # type: ignore
 
 
 def interpolate_trajectory(
@@ -242,7 +242,7 @@ def fit_model_interp(
     )
     print(fit_report(result))
 
-    return result.params
+    return result.params  # type: ignore
 
 
 def solve_physics_interp(
@@ -294,12 +294,12 @@ def solve_physics_interp(
     results["cluster_index"].append(cluster_index)
     results["cluster_label"].append(cluster.label)
     # Best fit values and uncertainties
-    results["vertex_x"].append(best_fit.params["vertex_x"].value)
-    results["vertex_y"].append(best_fit.params["vertex_y"].value)
-    results["vertex_z"].append(best_fit.params["vertex_z"].value)
-    results["brho"].append(best_fit.params["brho"].value)
-    results["polar"].append(best_fit.params["polar"].value)
-    results["azimuthal"].append(best_fit.params["azimuthal"].value)
+    results["vertex_x"].append(best_fit.params["vertex_x"].value)  # type: ignore
+    results["vertex_y"].append(best_fit.params["vertex_y"].value)  # type: ignore
+    results["vertex_z"].append(best_fit.params["vertex_z"].value)  # type: ignore
+    results["brho"].append(best_fit.params["brho"].value)  # type: ignore
+    results["polar"].append(best_fit.params["polar"].value)  # type: ignore
+    results["azimuthal"].append(best_fit.params["azimuthal"].value)  # type: ignore
     results["redchisq"].append(best_fit.redchi)
 
     # Right now we can't quantify uncertainties

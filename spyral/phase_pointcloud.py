@@ -29,8 +29,8 @@ def get_event_range(trace_file: h5.File) -> tuple[int, int]:
         A pair of integers (first event number, last event number)
     """
     meta_group = trace_file.get("meta")
-    meta_data = meta_group.get("meta")
-    return (int(meta_data[0]), int(meta_data[2]))
+    meta_data = meta_group.get("meta")  # type: ignore
+    return (int(meta_data[0]), int(meta_data[2]))  # type: ignore
 
 
 def phase_pointcloud(
@@ -88,7 +88,7 @@ def phase_pointcloud(
         corrector = create_electron_corrector(corr_path)
 
     # Some checks for existance
-    event_group: h5.Group = trace_file["get"]
+    event_group: h5.Group = trace_file["get"]  # type: ignore
     if not isinstance(event_group, h5.Group):
         spyral_error(
             __name__,
@@ -96,13 +96,13 @@ def phase_pointcloud(
         )
         return
 
-    frib_group: h5.Group = trace_file["frib"]
+    frib_group: h5.Group = trace_file["frib"]  # type: ignore
     if not isinstance(frib_group, h5.Group):
         spyral_error(
             __name__, f"FRIB group does not exist in run {run}, phase 1 cannot be run!"
         )
         return
-    frib_evt_group: h5.Group = frib_group["evt"]
+    frib_evt_group: h5.Group = frib_group["evt"]  # type: ignore
     if not isinstance(frib_evt_group, h5.Group):
         spyral_error(
             __name__,
@@ -127,7 +127,7 @@ def phase_pointcloud(
 
         event_data: h5.Dataset
         try:
-            event_data = event_group[f"evt{idx}_data"]
+            event_data = event_group[f"evt{idx}_data"]  # type: ignore
         except Exception:
             continue
 
@@ -149,7 +149,7 @@ def phase_pointcloud(
         # Now analyze FRIBDAQ data
         frib_data: h5.Dataset
         try:
-            frib_data = frib_evt_group[f"evt{idx}_1903"]
+            frib_data = frib_evt_group[f"evt{idx}_1903"]  # type: ignore
         except Exception:
             pc.calibrate_z_position(
                 detector_params.micromegas_time_bucket,

@@ -231,7 +231,7 @@ def form_clusters(pc: PointCloud, params: ClusterParameters) -> list[LabeledClou
     # Unfiy feature ranges to their means and have standard variance (1)
     cluster_data = RobustScaler().fit_transform(cluster_data)
 
-    clusterizer = skcluster.HDBSCAN(
+    clusterizer = skcluster.HDBSCAN(  # type: ignore
         min_cluster_size=min_size,
         min_samples=params.min_points,
         allow_single_cluster=True,
