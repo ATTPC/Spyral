@@ -100,6 +100,8 @@ class LinearInterpolator:
         for idx in range(len(self.y)):
             results[:, idx] = np.interp(xs, self.x, self.y[idx])
         for idx, x in enumerate(xs):
-            if x < self.x_min or x > self.x_max:
-                results[idx] = np.array([np.nan, np.nan])
+            if x < self.x_min:
+                results[idx, :] = self.y[:, 0]
+            elif x > self.x_max:
+                results[idx, :] = self.y[:, -1]
         return results

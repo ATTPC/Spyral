@@ -1,6 +1,7 @@
 from .guess import Guess
 from ..core.cluster import Cluster
 from ..interpolate.track_interpolator import TrackInterpolator
+from ..interpolate.linear import LinearInterpolator
 from ..core.constants import QBRHO_2_P
 from ..core.config import DetectorParameters
 
@@ -49,6 +50,43 @@ def distances(track: np.ndarray, data: np.ndarray) -> float:
 
 def interpolate_trajectory(
     fit_params: Parameters, interpolator: TrackInterpolator, ejectile: NucleusData
+) -> LinearInterpolator | None:
+    """Use the interpolation scheme to generate a trajectory from the given fit parameters.
+
+    Parameters
+    ----------
+    fit_params: Parameters
+        the set of lmfit Parameters
+    interpolator: TrackInterpolator
+        the interpolation scheme
+    ejectile: NucleusData
+        data for the particle being tracked
+
+    Returns
+    -------
+    ndarray | None
+        Returns a array of interpolated ODE trajectory solutions. Upon failure (typically an out of bounds for the interpolation scheme) returns None.
+    """
+    vertex_x = fit_params["vertex_x"].value
+    vertex_y = fit_params["vertex_y"].value
+    vertex_z = fit_params["vertex_z"].value
+    momentum = QBRHO_2_P * (fit_params["brho"].value * float(ejectile.Z))
+    kinetic_energy = np.sqrt(momentum**2.0 + ejectile.mass**2.0) - ejectile.mass
+    polar = fit_params["polar"].value
+    azimuthal = fit_params["azimuthal"].value
+
+    return interpolator.get_interpolated_trajectory(
+        vertex_x,
+        vertex_y,
+        vertex_z,
+        polar,
+        azimuthal,
+        kinetic_energy,
+    )
+
+
+def interpolate_trajectory_old(
+    fit_params: Parameters, interpolator: TrackInterpolator, ejectile: NucleusData
 ) -> np.ndarray | None:
     """Use the interpolation scheme to generate a trajectory from the given fit parameters.
 
@@ -84,7 +122,37 @@ def interpolate_trajectory(
     )
 
 
-def objective_function(
+def objective_function_single_old(
+    fit_params: Parameters,
+    x: np.ndarray,
+    interpolator: TrackInterpolator,
+    ejectile: NucleusData,
+) -> float:
+    """Function to be minimized. Returns errors for data compared to estimated track.
+
+    Parameters
+    ----------
+    fit_params: Parameters
+        the set of lmfit Parameters
+    x: ndarray
+        the data to be fit (x,y,z) coordinates in meters
+    interpolator: TrackInterpolator
+        the interpolation scheme to be used
+    ejectile: NucleusData
+        the data for the particle being tracked
+
+    Returns
+    -------
+    float
+        the error between the estimate and the data
+    """
+    trajectory = interpolate_trajectory_old(fit_params, interpolator, ejectile)
+    if trajectory is None:
+        return 1.0e6
+    return distances(trajectory, x)
+
+
+def objective_function_single(
     fit_params: Parameters,
     x: np.ndarray,
     interpolator: TrackInterpolator,
@@ -111,7 +179,44 @@ def objective_function(
     trajectory = interpolate_trajectory(fit_params, interpolator, ejectile)
     if trajectory is None:
         return 1.0e6
-    return distances(trajectory, x)
+    # return distances(trajectory, x)
+    xy = trajectory.interpolate(x[:, 2])
+    if len(np.unique(np.round(xy[:, 0], decimals=4))) == 1:
+        return 1.0e6
+    return np.average(np.linalg.norm(x[:, :2] - xy, axis=1))
+
+
+def objective_function(
+    fit_params: Parameters,
+    x: np.ndarray,
+    interpolator: TrackInterpolator,
+    ejectile: NucleusData,
+) -> np.ndarray:
+    """Function to be minimized. Returns errors for data compared to estimated track.
+
+    Parameters
+    ----------
+    fit_params: Parameters
+        the set of lmfit Parameters
+    x: ndarray
+        the data to be fit (x,y,z) coordinates in meters
+    interpolator: TrackInterpolator
+        the interpolation scheme to be used
+    ejectile: NucleusData
+        the data for the particle being tracked
+
+    Returns
+    -------
+    float
+        the error between the estimate and the data
+    """
+    trajectory = interpolate_trajectory(fit_params, interpolator, ejectile)
+    if trajectory is None:
+        return np.full(len(x), 1.0e6)
+    xy = trajectory.interpolate(x[:, 2])
+    if len(np.unique(np.round(xy[:, 0], decimals=4))) == 1:
+        return np.full(len(x), 1.0e6)
+    return np.linalg.norm(x[:, :2] - xy, axis=1)
 
 
 def create_params(
@@ -181,8 +286,14 @@ def create_params(
     vert_rho = np.sqrt(guess.vertex_x**2.0 + guess.vertex_y**2.0) * 0.001
 
     fit_params = Parameters()
-    fit_params.add("brho", guess.brho, min=min_brho, max=max_brho)
-    fit_params.add("polar", guess.polar, min=min_polar, max=max_polar)
+    fit_params.add(
+        "brho",
+        guess.brho,
+        min=min_brho,
+        max=max_brho,
+        vary=True,
+    )
+    fit_params.add("polar", guess.polar, min=min_polar, max=max_polar, vary=True)
     fit_params.add(
         "vertex_rho",
         value=vert_rho,
@@ -226,6 +337,8 @@ def fit_model_interp(
     Parameters | None
         Returns the best fit Parameters upon success, or None upon failure
     """
+    # track_len = int(len(cluster.data) * 0.5)
+    # cluster.apply_smoothing_splines(1.0)
     traj_data = cluster.data[:, :3] * 0.001
     momentum = QBRHO_2_P * (guess.brho * float(ejectile.Z))
     kinetic_energy = np.sqrt(momentum**2.0 + ejectile.mass**2.0) - ejectile.mass
@@ -235,9 +348,12 @@ def fit_model_interp(
     fit_params = create_params(guess, ejectile, interpolator, det_params)
 
     result: MinimizerResult = minimize(
-        objective_function,
+        # objective_function,
+        # objective_function_single,
+        objective_function_single_old,
         fit_params,
         args=(traj_data, interpolator, ejectile),
+        # method="leastsq",
         method="lbfgsb",
     )
     print(fit_report(result))
@@ -284,7 +400,7 @@ def solve_physics_interp(
     fit_params = create_params(guess, ejectile, interpolator, det_params)
 
     best_fit: MinimizerResult = minimize(
-        objective_function,
+        objective_function_single,
         fit_params,
         args=(traj_data, interpolator, ejectile),
         method="lbfgsb",
