@@ -36,7 +36,7 @@ def distances(track: np.ndarray, data: np.ndarray) -> float:
     assert data.shape[1] == 3
 
     dists = np.zeros((len(data), len(track)))
-    errors = np.zeros(len(data))
+    error = 0.0
     for i in prange(len(data)):
         for j in prange(len(track)):
             dists[i, j] = np.sqrt(
@@ -44,48 +44,11 @@ def distances(track: np.ndarray, data: np.ndarray) -> float:
                 + (track[j, 1] - data[i, 1]) ** 2.0
                 + (track[j, 2] - data[i, 2]) ** 2.0
             )
-        errors[i] = np.min(dists[i])
-    return np.average(errors)  # type: ignore
+        error += np.min(dists[i])
+    return error / len(data)
 
 
 def interpolate_trajectory(
-    fit_params: Parameters, interpolator: TrackInterpolator, ejectile: NucleusData
-) -> LinearInterpolator | None:
-    """Use the interpolation scheme to generate a trajectory from the given fit parameters.
-
-    Parameters
-    ----------
-    fit_params: Parameters
-        the set of lmfit Parameters
-    interpolator: TrackInterpolator
-        the interpolation scheme
-    ejectile: NucleusData
-        data for the particle being tracked
-
-    Returns
-    -------
-    ndarray | None
-        Returns a array of interpolated ODE trajectory solutions. Upon failure (typically an out of bounds for the interpolation scheme) returns None.
-    """
-    vertex_x = fit_params["vertex_x"].value
-    vertex_y = fit_params["vertex_y"].value
-    vertex_z = fit_params["vertex_z"].value
-    momentum = QBRHO_2_P * (fit_params["brho"].value * float(ejectile.Z))
-    kinetic_energy = np.sqrt(momentum**2.0 + ejectile.mass**2.0) - ejectile.mass
-    polar = fit_params["polar"].value
-    azimuthal = fit_params["azimuthal"].value
-
-    return interpolator.get_interpolated_trajectory(
-        vertex_x,
-        vertex_y,
-        vertex_z,
-        polar,
-        azimuthal,
-        kinetic_energy,
-    )
-
-
-def interpolate_trajectory_old(
     fit_params: Parameters, interpolator: TrackInterpolator, ejectile: NucleusData
 ) -> np.ndarray | None:
     """Use the interpolation scheme to generate a trajectory from the given fit parameters.
@@ -102,7 +65,7 @@ def interpolate_trajectory_old(
     Returns
     -------
     ndarray | None
-        Returns a array of interpolated ODE trajectory solutions. Upon failure (typically an out of bounds for the interpolation scheme) returns None.
+        Returns a array of interpolated ODE trajectory data. Upon failure (typically an out of bounds for the interpolation scheme) returns None.
     """
     vertex_x = fit_params["vertex_x"].value
     vertex_y = fit_params["vertex_y"].value
@@ -122,76 +85,12 @@ def interpolate_trajectory_old(
     )
 
 
-def objective_function_single_old(
-    fit_params: Parameters,
-    x: np.ndarray,
-    interpolator: TrackInterpolator,
-    ejectile: NucleusData,
-) -> float:
-    """Function to be minimized. Returns errors for data compared to estimated track.
-
-    Parameters
-    ----------
-    fit_params: Parameters
-        the set of lmfit Parameters
-    x: ndarray
-        the data to be fit (x,y,z) coordinates in meters
-    interpolator: TrackInterpolator
-        the interpolation scheme to be used
-    ejectile: NucleusData
-        the data for the particle being tracked
-
-    Returns
-    -------
-    float
-        the error between the estimate and the data
-    """
-    trajectory = interpolate_trajectory_old(fit_params, interpolator, ejectile)
-    if trajectory is None:
-        return 1.0e6
-    return distances(trajectory, x)
-
-
-def objective_function_single(
-    fit_params: Parameters,
-    x: np.ndarray,
-    interpolator: TrackInterpolator,
-    ejectile: NucleusData,
-) -> float:
-    """Function to be minimized. Returns errors for data compared to estimated track.
-
-    Parameters
-    ----------
-    fit_params: Parameters
-        the set of lmfit Parameters
-    x: ndarray
-        the data to be fit (x,y,z) coordinates in meters
-    interpolator: TrackInterpolator
-        the interpolation scheme to be used
-    ejectile: NucleusData
-        the data for the particle being tracked
-
-    Returns
-    -------
-    float
-        the error between the estimate and the data
-    """
-    trajectory = interpolate_trajectory(fit_params, interpolator, ejectile)
-    if trajectory is None:
-        return 1.0e6
-    # return distances(trajectory, x)
-    xy = trajectory.interpolate(x[:, 2])
-    if len(np.unique(np.round(xy[:, 0], decimals=4))) == 1:
-        return 1.0e6
-    return np.average(np.linalg.norm(x[:, :2] - xy, axis=1))
-
-
 def objective_function(
     fit_params: Parameters,
     x: np.ndarray,
     interpolator: TrackInterpolator,
     ejectile: NucleusData,
-) -> np.ndarray:
+) -> float:
     """Function to be minimized. Returns errors for data compared to estimated track.
 
     Parameters
@@ -212,11 +111,8 @@ def objective_function(
     """
     trajectory = interpolate_trajectory(fit_params, interpolator, ejectile)
     if trajectory is None:
-        return np.full(len(x), 1.0e6)
-    xy = trajectory.interpolate(x[:, 2])
-    if len(np.unique(np.round(xy[:, 0], decimals=4))) == 1:
-        return np.full(len(x), 1.0e6)
-    return np.linalg.norm(x[:, :2] - xy, axis=1)
+        return 1.0e6
+    return distances(trajectory, x)
 
 
 def create_params(
@@ -337,8 +233,6 @@ def fit_model_interp(
     Parameters | None
         Returns the best fit Parameters upon success, or None upon failure
     """
-    # track_len = int(len(cluster.data) * 0.5)
-    # cluster.apply_smoothing_splines(1.0)
     traj_data = cluster.data[:, :3] * 0.001
     momentum = QBRHO_2_P * (guess.brho * float(ejectile.Z))
     kinetic_energy = np.sqrt(momentum**2.0 + ejectile.mass**2.0) - ejectile.mass
@@ -348,12 +242,9 @@ def fit_model_interp(
     fit_params = create_params(guess, ejectile, interpolator, det_params)
 
     result: MinimizerResult = minimize(
-        # objective_function,
-        # objective_function_single,
-        objective_function_single_old,
+        objective_function,
         fit_params,
         args=(traj_data, interpolator, ejectile),
-        # method="leastsq",
         method="lbfgsb",
     )
     print(fit_report(result))
@@ -400,7 +291,7 @@ def solve_physics_interp(
     fit_params = create_params(guess, ejectile, interpolator, det_params)
 
     best_fit: MinimizerResult = minimize(
-        objective_function_single,
+        objective_function,
         fit_params,
         args=(traj_data, interpolator, ejectile),
         method="lbfgsb",
