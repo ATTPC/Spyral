@@ -34,6 +34,12 @@ class Cluster:
         The cluster label from the algorithm
     data: ndarray
         The point cloud data (trimmed down). Contains position, integrated charge
+    x_spline: BSpline | None
+        An optional spline on z-x to smooth the cluster.
+    y_spline: BSpline | None
+        An optional spline on z-y to smooth the cluster.
+    c_spline: BSpline | None
+        An optional spline on z-charge to smooth the cluster.
 
     Methods
     -------
@@ -63,12 +69,6 @@ class Cluster:
             The label from the clustering algorithm (default = -1)
         data: ndarray
             The PointCloud data for the Cluster (default = empty array)
-        x_spline: BSpline | None
-            An optional spline on z-x to smooth the cluster.
-        y_spline: BSpline | None
-            An optional spline on z-y to smooth the cluster.
-        c_spline: BSpline | None
-            An optional spline on z-charge to smooth the cluster.
 
         Returns
         -------
