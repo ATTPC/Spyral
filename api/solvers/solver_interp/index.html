@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.14">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.11">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.10ba22f1.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.7e359304.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
@@ -1158,27 +1158,6 @@
   
   <span class="md-ellipsis">
     pad_map
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../core/particle_id.md" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    particle_id
   </span>
   
 
@@ -2396,8 +2375,7 @@
 
           <details class="quote">
             <summary>Source code in <code>spyral/solvers/solver_interp.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">117</span>
-<span class="normal">118</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">118</span>
 <span class="normal">119</span>
 <span class="normal">120</span>
 <span class="normal">121</span>
@@ -2477,7 +2455,14 @@
 <span class="normal">195</span>
 <span class="normal">196</span>
 <span class="normal">197</span>
-<span class="normal">198</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_params</span><span class="p">(</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_params</span><span class="p">(</span>
     <span class="n">guess</span><span class="p">:</span> <span class="n">Guess</span><span class="p">,</span>
     <span class="n">ejectile</span><span class="p">:</span> <span class="n">NucleusData</span><span class="p">,</span>
     <span class="n">interpolator</span><span class="p">:</span> <span class="n">TrackInterpolator</span><span class="p">,</span>
@@ -2544,8 +2529,14 @@
     <span class="n">vert_rho</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">guess</span><span class="o">.</span><span class="n">vertex_x</span><span class="o">**</span><span class="mf">2.0</span> <span class="o">+</span> <span class="n">guess</span><span class="o">.</span><span class="n">vertex_y</span><span class="o">**</span><span class="mf">2.0</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.001</span>
 
     <span class="n">fit_params</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">()</span>
-    <span class="n">fit_params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;brho&quot;</span><span class="p">,</span> <span class="n">guess</span><span class="o">.</span><span class="n">brho</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="n">min_brho</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">max_brho</span><span class="p">)</span>
-    <span class="n">fit_params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;polar&quot;</span><span class="p">,</span> <span class="n">guess</span><span class="o">.</span><span class="n">polar</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="n">min_polar</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">max_polar</span><span class="p">)</span>
+    <span class="n">fit_params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+        <span class="s2">&quot;brho&quot;</span><span class="p">,</span>
+        <span class="n">guess</span><span class="o">.</span><span class="n">brho</span><span class="p">,</span>
+        <span class="nb">min</span><span class="o">=</span><span class="n">min_brho</span><span class="p">,</span>
+        <span class="nb">max</span><span class="o">=</span><span class="n">max_brho</span><span class="p">,</span>
+        <span class="n">vary</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">fit_params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;polar&quot;</span><span class="p">,</span> <span class="n">guess</span><span class="o">.</span><span class="n">polar</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="n">min_polar</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">max_polar</span><span class="p">,</span> <span class="n">vary</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">fit_params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
         <span class="s2">&quot;vertex_rho&quot;</span><span class="p">,</span>
         <span class="n">value</span><span class="o">=</span><span class="n">vert_rho</span><span class="p">,</span>
@@ -2652,8 +2643,7 @@ track solution to the data. JIT-ed for speed</p>
 
           <details class="quote">
             <summary>Source code in <code>spyral/solvers/solver_interp.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">15</span>
-<span class="normal">16</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">16</span>
 <span class="normal">17</span>
 <span class="normal">18</span>
 <span class="normal">19</span>
@@ -2684,7 +2674,8 @@ track solution to the data. JIT-ed for speed</p>
 <span class="normal">44</span>
 <span class="normal">45</span>
 <span class="normal">46</span>
-<span class="normal">47</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@njit</span><span class="p">(</span><span class="n">fastmath</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">error_model</span><span class="o">=</span><span class="s2">&quot;numpy&quot;</span><span class="p">,</span> <span class="n">inline</span><span class="o">=</span><span class="s2">&quot;always&quot;</span><span class="p">)</span>
+<span class="normal">47</span>
+<span class="normal">48</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@njit</span><span class="p">(</span><span class="n">fastmath</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">error_model</span><span class="o">=</span><span class="s2">&quot;numpy&quot;</span><span class="p">,</span> <span class="n">inline</span><span class="o">=</span><span class="s2">&quot;always&quot;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">distances</span><span class="p">(</span><span class="n">track</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the average distance (error) of a track solution to the data</span>
 
@@ -2707,7 +2698,7 @@ track solution to the data. JIT-ed for speed</p>
     <span class="k">assert</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span>
 
     <span class="n">dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">track</span><span class="p">)))</span>
-    <span class="n">errors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+    <span class="n">error</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">prange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)):</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">prange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">track</span><span class="p">)):</span>
             <span class="n">dists</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
@@ -2715,8 +2706,8 @@ track solution to the data. JIT-ed for speed</p>
                 <span class="o">+</span> <span class="p">(</span><span class="n">track</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">**</span> <span class="mf">2.0</span>
                 <span class="o">+</span> <span class="p">(</span><span class="n">track</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span> <span class="o">**</span> <span class="mf">2.0</span>
             <span class="p">)</span>
-        <span class="n">errors</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dists</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="n">error</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">dists</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">error</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -2850,14 +2841,7 @@ track solution to the data. JIT-ed for speed</p>
 
           <details class="quote">
             <summary>Source code in <code>spyral/solvers/solver_interp.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">202</span>
-<span class="normal">203</span>
-<span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">209</span>
 <span class="normal">210</span>
 <span class="normal">211</span>
 <span class="normal">212</span>
@@ -2893,7 +2877,14 @@ track solution to the data. JIT-ed for speed</p>
 <span class="normal">242</span>
 <span class="normal">243</span>
 <span class="normal">244</span>
-<span class="normal">245</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">fit_model_interp</span><span class="p">(</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">fit_model_interp</span><span class="p">(</span>
     <span class="n">cluster</span><span class="p">:</span> <span class="n">Cluster</span><span class="p">,</span>
     <span class="n">guess</span><span class="p">:</span> <span class="n">Guess</span><span class="p">,</span>
     <span class="n">ejectile</span><span class="p">:</span> <span class="n">NucleusData</span><span class="p">,</span>
@@ -3033,7 +3024,7 @@ track solution to the data. JIT-ed for speed</p>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Returns a array of interpolated ODE trajectory solutions. Upon failure (typically an out of bounds for the interpolation scheme) returns None.</p>
+              <p>Returns a array of interpolated ODE trajectory data. Upon failure (typically an out of bounds for the interpolation scheme) returns None.</p>
             </div>
           </td>
         </tr>
@@ -3042,8 +3033,7 @@ track solution to the data. JIT-ed for speed</p>
 
           <details class="quote">
             <summary>Source code in <code>spyral/solvers/solver_interp.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">50</span>
-<span class="normal">51</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">51</span>
 <span class="normal">52</span>
 <span class="normal">53</span>
 <span class="normal">54</span>
@@ -3076,7 +3066,8 @@ track solution to the data. JIT-ed for speed</p>
 <span class="normal">81</span>
 <span class="normal">82</span>
 <span class="normal">83</span>
-<span class="normal">84</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">interpolate_trajectory</span><span class="p">(</span>
+<span class="normal">84</span>
+<span class="normal">85</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">interpolate_trajectory</span><span class="p">(</span>
     <span class="n">fit_params</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">interpolator</span><span class="p">:</span> <span class="n">TrackInterpolator</span><span class="p">,</span> <span class="n">ejectile</span><span class="p">:</span> <span class="n">NucleusData</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Use the interpolation scheme to generate a trajectory from the given fit parameters.</span>
@@ -3093,7 +3084,7 @@ track solution to the data. JIT-ed for speed</p>
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    ndarray | None</span>
-<span class="sd">        Returns a array of interpolated ODE trajectory solutions. Upon failure (typically an out of bounds for the interpolation scheme) returns None.</span>
+<span class="sd">        Returns a array of interpolated ODE trajectory data. Upon failure (typically an out of bounds for the interpolation scheme) returns None.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">vertex_x</span> <span class="o">=</span> <span class="n">fit_params</span><span class="p">[</span><span class="s2">&quot;vertex_x&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
     <span class="n">vertex_y</span> <span class="o">=</span> <span class="n">fit_params</span><span class="p">[</span><span class="s2">&quot;vertex_y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
@@ -3230,8 +3221,7 @@ track solution to the data. JIT-ed for speed</p>
 
           <details class="quote">
             <summary>Source code in <code>spyral/solvers/solver_interp.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 87</span>
-<span class="normal"> 88</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 88</span>
 <span class="normal"> 89</span>
 <span class="normal"> 90</span>
 <span class="normal"> 91</span>
@@ -3257,7 +3247,8 @@ track solution to the data. JIT-ed for speed</p>
 <span class="normal">111</span>
 <span class="normal">112</span>
 <span class="normal">113</span>
-<span class="normal">114</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">objective_function</span><span class="p">(</span>
+<span class="normal">114</span>
+<span class="normal">115</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">objective_function</span><span class="p">(</span>
     <span class="n">fit_params</span><span class="p">:</span> <span class="n">Parameters</span><span class="p">,</span>
     <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">interpolator</span><span class="p">:</span> <span class="n">TrackInterpolator</span><span class="p">,</span>
@@ -3423,14 +3414,7 @@ track solution to the data. JIT-ed for speed</p>
 
           <details class="quote">
             <summary>Source code in <code>spyral/solvers/solver_interp.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span>
-<span class="normal">254</span>
-<span class="normal">255</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">255</span>
 <span class="normal">256</span>
 <span class="normal">257</span>
 <span class="normal">258</span>
@@ -3486,7 +3470,14 @@ track solution to the data. JIT-ed for speed</p>
 <span class="normal">308</span>
 <span class="normal">309</span>
 <span class="normal">310</span>
-<span class="normal">311</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">solve_physics_interp</span><span class="p">(</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">solve_physics_interp</span><span class="p">(</span>
     <span class="n">cluster_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">cluster</span><span class="p">:</span> <span class="n">Cluster</span><span class="p">,</span>
     <span class="n">guess</span><span class="p">:</span> <span class="n">Guess</span><span class="p">,</span>
@@ -3612,7 +3603,7 @@ track solution to the data. JIT-ed for speed</p>
     <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.bd41221c.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.8fd75fb4.min.js"></script>
       
         <script src="../../../javascript/mathjax.js"></script>
       
