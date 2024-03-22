@@ -1,6 +1,7 @@
 from .guess import Guess
 from ..core.cluster import Cluster
 from ..interpolate.track_interpolator import TrackInterpolator
+from ..interpolate.linear import LinearInterpolator
 from ..core.constants import QBRHO_2_P
 from ..core.config import DetectorParameters
 
@@ -35,7 +36,7 @@ def distances(track: np.ndarray, data: np.ndarray) -> float:
     assert data.shape[1] == 3
 
     dists = np.zeros((len(data), len(track)))
-    errors = np.zeros(len(data))
+    error = 0.0
     for i in prange(len(data)):
         for j in prange(len(track)):
             dists[i, j] = np.sqrt(
@@ -43,8 +44,8 @@ def distances(track: np.ndarray, data: np.ndarray) -> float:
                 + (track[j, 1] - data[i, 1]) ** 2.0
                 + (track[j, 2] - data[i, 2]) ** 2.0
             )
-        errors[i] = np.min(dists[i])
-    return np.average(errors)  # type: ignore
+        error += np.min(dists[i])
+    return error / len(data)
 
 
 def interpolate_trajectory(
@@ -64,7 +65,7 @@ def interpolate_trajectory(
     Returns
     -------
     ndarray | None
-        Returns a array of interpolated ODE trajectory solutions. Upon failure (typically an out of bounds for the interpolation scheme) returns None.
+        Returns a array of interpolated ODE trajectory data. Upon failure (typically an out of bounds for the interpolation scheme) returns None.
     """
     vertex_x = fit_params["vertex_x"].value
     vertex_y = fit_params["vertex_y"].value
@@ -181,8 +182,14 @@ def create_params(
     vert_rho = np.sqrt(guess.vertex_x**2.0 + guess.vertex_y**2.0) * 0.001
 
     fit_params = Parameters()
-    fit_params.add("brho", guess.brho, min=min_brho, max=max_brho)
-    fit_params.add("polar", guess.polar, min=min_polar, max=max_polar)
+    fit_params.add(
+        "brho",
+        guess.brho,
+        min=min_brho,
+        max=max_brho,
+        vary=True,
+    )
+    fit_params.add("polar", guess.polar, min=min_polar, max=max_polar, vary=True)
     fit_params.add(
         "vertex_rho",
         value=vert_rho,

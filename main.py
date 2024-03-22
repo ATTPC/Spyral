@@ -5,6 +5,7 @@ from pathlib import Path
 import click
 import contextlib
 import os
+import multiprocessing
 
 # Generated using https://www.asciiart.eu
 SPLASH: str = r"""
@@ -36,6 +37,8 @@ def main(term: bool, config: str):
     Spyral is an analysis framework for AT-TPC data. Provide a JSON configuration file CONFIG to control analysis settings.
     """
     configuration = load_config(Path(config))
+    # Manually set the start method, to avoid fork
+    multiprocessing.set_start_method("spawn")
     if not term:
         with contextlib.redirect_stdout(open(os.devnull, "w")):
             run_spyral_parallel(configuration, no_progress=True)

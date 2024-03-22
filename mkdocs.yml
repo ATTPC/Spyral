@@ -45,7 +45,6 @@ nav:
       - estimator: api/core/estimator.md
       - hardware_id: api/core/hardware_id.md
       - pad_map: api/core/pad_map.md
-      - particle_id: api/core/particle_id.md
       - point_cloud: api/core/point_cloud.md
       - spy_log: api/core/spy_log.md
       - track_generator: api/core/track_generator.md

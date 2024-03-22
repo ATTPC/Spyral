@@ -1,6 +1,7 @@
 from .cluster import Cluster
 from .config import DetectorParameters, EstimateParameters
 from ..geometry.circle import generate_circle_points, least_squares_circle
+from .spy_log import spyral_warn
 
 import numpy as np
 import math
@@ -65,7 +66,18 @@ def estimate_physics(
     if len(cluster.data) < estimate_params.min_total_trajectory_points:
         return
     # Generate smoothing splines, these will give us better distance measures
-    cluster.apply_smoothing_splines(estimate_params.smoothing_factor)
+    try:
+        cluster.apply_smoothing_splines(estimate_params.smoothing_factor)
+    except Exception as e:
+        # Spline creation can fail for two main reasons:
+        # - Not enough points in the data (need at least 5)
+        # - The data is inherentily multivalued in z (a spark event where the pad plane lights up at one instance in time)
+        # We do not analyze un-splineable events. But we do report a warning in the log file that these events failed
+        spyral_warn(
+            __name__,
+            f"Spline creation failed for event {cluster.event} with error: {e}",
+        )
+        return
 
     # Run estimation where we attempt to guess the right direction
     is_good, direction = estimate_physics_pass(
