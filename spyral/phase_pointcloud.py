@@ -4,6 +4,7 @@ from .core.point_cloud import PointCloud
 from .core.workspace import Workspace
 from .trace.frib_event import FribEvent
 from .trace.get_event import GetEvent
+from .trace.frib_scalers import process_scalers
 from .correction import create_electron_corrector, ElectronCorrector
 from .parallel.status_message import StatusMessage, Phase
 from .core.spy_log import spyral_info, spyral_error, spyral_warn
@@ -110,6 +111,13 @@ def phase_pointcloud(
         )
         return
 
+    frib_scaler_group: h5.Group | None = frib_group["scaler"]  # type: ignore
+    if not isinstance(frib_group, h5.Group):
+        spyral_warn(
+            __name__,
+            f"FRIB scaler data group does not exist in run {run}. Spyral will continue, but scalers will not exist.",
+        )
+        frib_scaler_group = None
     cloud_group = point_file.create_group("cloud")
     cloud_group.attrs["min_event"] = min_event
     cloud_group.attrs["max_event"] = max_event
@@ -221,5 +229,10 @@ def phase_pointcloud(
                 pc_dataset.attrs["ic_multiplicity"] = ic_raw_mult
 
         pc_dataset[:] = pc.cloud
+    # End of event data
+
+    # Process scaler data if it exists
+    if frib_scaler_group is not None:
+        process_scalers(frib_scaler_group, ws.get_scaler_file_path(run))
 
     spyral_info(__name__, "Phase 1 complete")
