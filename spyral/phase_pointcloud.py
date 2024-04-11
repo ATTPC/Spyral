@@ -192,7 +192,9 @@ def phase_pointcloud(
             pc_dataset.attrs["ic_centroid"] = peak.centroid
             pc_dataset.attrs["ic_multiplicity"] = mult
 
-            ic_cor = frib_event.correct_ic_time(peak, detector_params.get_frequency)
+            ic_cor = frib_event.correct_ic_time(
+                peak, frib_params, detector_params.get_frequency
+            )
             # Apply IC correction to time calibration, if correction is less than the
             # total length of the GET window in TB
             if ic_cor < 512.0:
@@ -218,15 +220,15 @@ def phase_pointcloud(
                 detector_params.detector_length,
                 corrector,
             )
-            # Extract Raw IC, no Si conicidence imposed
-            ic_raw_mult = frib_event.get_ic_trace().get_number_of_peaks()
-            ic_peak = frib_event.get_ic_trace().get_peaks()[0]
-            # Check multiplicity condition
-            if ic_raw_mult <= frib_params.ic_multiplicity:
+            # Get triggering IC, no Si conicidence imposed
+            ic_mult = frib_event.get_ic_multiplicity(frib_params)
+            ic_peak = frib_event.get_triggering_ic_peak(frib_params)
+            # Check multiplicity condition and existence of trigger
+            if ic_mult <= frib_params.ic_multiplicity and ic_peak is not None:
                 pc_dataset.attrs["ic_amplitude"] = ic_peak.amplitude
                 pc_dataset.attrs["ic_integral"] = ic_peak.integral
                 pc_dataset.attrs["ic_centroid"] = ic_peak.centroid
-                pc_dataset.attrs["ic_multiplicity"] = ic_raw_mult
+                pc_dataset.attrs["ic_multiplicity"] = ic_mult
 
         pc_dataset[:] = pc.cloud
     # End of event data
