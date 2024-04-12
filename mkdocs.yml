@@ -61,6 +61,7 @@ nav:
       - About interpolate: api/interpolate/index.md
       - bilinear: api/interpolate/bilinear.md
       - linear: api/interpolate/linear.md
+      - track_interpolator: api/interpolate/track_interpolator.md
     - parallel:
       - About parallel: api/parallel/index.md
       - run_stack: api/parallel/run_stack.md

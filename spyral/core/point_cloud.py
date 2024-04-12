@@ -173,9 +173,11 @@ class PointCloud:
         """
         # Maybe use mm as the reference because it is more stable?
         for idx, point in enumerate(self.cloud):
-            self.cloud[idx][2] = (window_tb - point[6]) / (
-                window_tb - micromegas_tb
-            ) * detector_length - ic_correction
+            self.cloud[idx][2] = (
+                (window_tb - (point[6] - ic_correction))
+                / (window_tb - micromegas_tb)
+                * detector_length
+            )
             if efield_correction is not None:
                 self.cloud[idx] = efield_correction.correct_point(self.cloud[idx])
 

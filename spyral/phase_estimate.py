@@ -55,8 +55,17 @@ def phase_estimate(
     min_event: int = cluster_group.attrs["min_event"]  # type: ignore
     max_event: int = cluster_group.attrs["max_event"]  # type: ignore
 
-    flush_percent = 0.01
-    flush_val = int(flush_percent * (max_event - min_event))
+    nevents = max_event - min_event
+    total: int
+    flush_val: int
+    if nevents < 100:
+        total = nevents
+        flush_val = 0
+    else:
+        flush_percent = 0.01
+        flush_val = int(flush_percent * (max_event - min_event))
+        total = 100
+
     count = 0
 
     # estimation results
@@ -83,12 +92,13 @@ def phase_estimate(
         "direction": [],
     }
 
+    msg = StatusMessage(run, Phase.ESTIMATE, total, 1)  # We always increment by 1
     # Process data
     for idx in range(min_event, max_event + 1):
+        count += 1
         if count > flush_val:
             count = 0
-            queue.put(StatusMessage(run, Phase.ESTIMATE, 1))
-        count += 1
+            queue.put(msg)
 
         event: h5.Group | None = None
         try:

@@ -144,6 +144,9 @@ class FribParameters:
         The maximum peak width parameter used in scipy.signal.find_peaks
     peak_threshold: float
         The minimum amplitude of a valid peak
+    ic_delay_time_bucket: int
+        The delay to the IC signal in FRIB TimeBuckets. All IC peaks
+        before this TB are ignored when considering IC multiplicity/validity
     ic_multiplicity: int
         The maximum allowed ion chamber multiplicity
     correct_ic_time: bool
@@ -155,6 +158,7 @@ class FribParameters:
     peak_prominence: float = 20.0
     peak_max_width: float = 100.0
     peak_threshold: float = 25.0
+    ic_delay_time_bucket: int = 1100
     ic_multiplicity: int = 1
     correct_ic_time: bool = True
 
@@ -363,6 +367,7 @@ def deserialize_config(json_data: dict[Any, Any]) -> Config:
     config.frib.peak_prominence = frib_params["peak_prominence"]
     config.frib.peak_max_width = frib_params["peak_max_width"]
     config.frib.peak_threshold = frib_params["peak_threshold"]
+    config.frib.ic_delay_time_bucket = frib_params["ic_delay_time_bucket"]
     config.frib.ic_multiplicity = frib_params["event_ic_multiplicity"]
     config.frib.correct_ic_time = frib_params["event_correct_ic_time"]
 
