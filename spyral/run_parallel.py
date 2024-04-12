@@ -137,7 +137,7 @@ def run_spyral_parallel(config: Config, no_progress: bool = False):
                 daemon=False,
             )
         )
-        pbars.append(tqdm(total=100, disable=no_progress))
+        pbars.append(tqdm(total=0, disable=no_progress, miniters=1, mininterval=0.001))
         stats.append(Phase.WAIT)
         runs.append(-1)
         pbars[-1].set_description(f"| Process {s} | { str(stats[-1]) } |")
@@ -149,9 +149,9 @@ def run_spyral_parallel(config: Config, no_progress: bool = False):
     # main loop
     while True:
         anyone_alive = False
-        # check processes still going
-        for process in processes:
-            if process.is_alive():
+        # check processes still going, or if queues have data to be read out
+        for idx, process in enumerate(processes):
+            if process.is_alive() or (not queues[idx].empty()):
                 anyone_alive = True
                 break
 
@@ -165,7 +165,7 @@ def run_spyral_parallel(config: Config, no_progress: bool = False):
 
             msg: StatusMessage = q.get()
             if msg.phase != stats[idx] or msg.run != runs[idx]:
-                pbars[idx].reset()
+                pbars[idx].reset(total=msg.total)
                 pbars[idx].set_description(f"| Process {idx} | {msg}")
                 stats[idx] = msg.phase
                 runs[idx] = msg.run

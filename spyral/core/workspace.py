@@ -52,6 +52,8 @@ class Workspace:
         Path to the correction folder in the workspace
     log_path: Path
         Path to the log folder in the workspace
+    scaler_path: Path
+        Path to the scaler folder in the workspace
     pad_geometry_path: Path
         Path to pad geometry file
     pad_gain_path: Path
@@ -95,6 +97,8 @@ class Workspace:
         Get the log file path given a process_id
     clear_log_path() -> Path
         Clear the log directory path
+    get_scaler_file_path(run_number: int) -> Path
+        Get the scaler file path for a run
     """
 
     def __init__(self, params: WorkspaceParameters, is_legacy: bool = False):
@@ -159,6 +163,10 @@ class Workspace:
         self.log_path = self.workspace_path / "log"
         if not self.log_path.exists():
             self.log_path.mkdir()
+
+        self.scaler_path = self.workspace_path / "scalers"
+        if not self.scaler_path.exists():
+            self.scaler_path.mkdir()
 
         self.pad_geometry_path = Path(params.pad_geometry_path)
         if not self.pad_geometry_path.exists() or not self.pad_geometry_path.is_file():
@@ -390,3 +398,18 @@ class Workspace:
         for item in self.log_path.iterdir():
             if item.is_file():
                 item.unlink()
+
+    def get_scaler_file_path(self, run_number: int) -> Path:
+        """Get the path to a scaler file
+
+        Parameters
+        ----------
+        run_number: int
+            The run number
+
+        Returns
+        -------
+        Path
+            The path to the scaler file
+        """
+        return self.scaler_path / f"{form_run_string(run_number)}.parquet"

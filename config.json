@@ -41,6 +41,7 @@
         "peak_prominence": 20.0,
         "peak_max_width": 500.0,
         "peak_threshold": 100.0,
+        "ic_delay_time_bucket": 1100,
         "event_ic_multiplicity": 1,
         "event_correct_ic_time": true
     },

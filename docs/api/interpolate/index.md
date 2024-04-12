@@ -4,3 +4,4 @@ This module contains submodules related to interpolation. These submodules are a
 
 - [bilinear](bilinear.md)
 - [linear](linear.md)
+- [track_interpolator](track_interpolator.md)
