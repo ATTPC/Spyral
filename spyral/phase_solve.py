@@ -52,7 +52,7 @@ def phase_solve(
         ws.get_gate_file_path(solver_params.particle_id_filename), nuclear_map
     )
     if pid is None:
-        queue.put(StatusMessage(run, Phase.WAIT, 0))
+        queue.put(StatusMessage(run, Phase.WAIT, 0, 0))
         spyral_warn(
             __name__,
             f"Particle ID {solver_params.particle_id_filename} does not exist, Solver will not run!",
@@ -60,7 +60,7 @@ def phase_solve(
         return
     target = load_target(Path(solver_params.gas_data_path), nuclear_map)
     if not isinstance(target, GasTarget):
-        queue.put(StatusMessage(run, Phase.WAIT, 0))
+        queue.put(StatusMessage(run, Phase.WAIT, 0, 0))
         spyral_warn(
             __name__,
             f"Target {solver_params.gas_data_path} is not of the correct format, Solver will not run!",
@@ -71,7 +71,7 @@ def phase_solve(
     cluster_path = ws.get_cluster_file_path(run)
     estimate_path = ws.get_estimate_file_path_parquet(run)
     if not cluster_path.exists() or not estimate_path.exists():
-        queue.put(StatusMessage(run, Phase.WAIT, 0))
+        queue.put(StatusMessage(run, Phase.WAIT, 0, 0))
         spyral_warn(
             __name__,
             f"Either clusters or esitmates do not exist for run {run} at phase 4. Skipping.",
@@ -106,17 +106,24 @@ def phase_solve(
 
     # Check that data actually exists for given PID
     if len(estimates_gated["event"]) == 0:
-        queue.put(StatusMessage(run, Phase.WAIT, 0))
+        queue.put(StatusMessage(run, Phase.WAIT, 0, 0))
         spyral_warn(__name__, f"No events within PID for run {run}!")
         return
 
-    flush_percent = 0.01
-    flush_val = int(flush_percent * (len(estimates_gated["event"])))
+    nevents = len(estimates_gated["event"])
+    total: int
+    flush_val: int
+    if nevents < 100:
+        total = nevents
+        flush_val = 0
+    else:
+        flush_percent = 0.01
+        flush_val = int(flush_percent * (nevents))
+        total = 100
+
     count = 0
-    if len(estimates_gated["event"]) < 100:
-        flush_percent = 1.0 / float(len(estimates_gated["event"]))
-        flush_val = 1
-        count = 0
+
+    msg = StatusMessage(run, Phase.SOLVE, total, 1)  # We always increment by 1
 
     # Result storage
     results: dict[str, list] = {
@@ -144,10 +151,10 @@ def phase_solve(
 
     # Process the data
     for row, event in enumerate(estimates_gated["event"]):
+        count += 1
         if count > flush_val:
             count = 0
-            queue.put(StatusMessage(run, Phase.SOLVE, int(flush_percent * 100.0)))
-        count += 1
+            queue.put(msg)
 
         event_group = cluster_group[f"event_{event}"]
         cidx = estimates_gated["cluster_index"][row]

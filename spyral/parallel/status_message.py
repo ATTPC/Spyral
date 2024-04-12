@@ -74,9 +74,10 @@ class StatusMessage:
         Construct a string describing the current task being computed on the child process
     """
 
-    def __init__(self, run: int, phase: Phase, progress: float):
+    def __init__(self, run: int, phase: Phase, total: int, progress: int):
         self.run = run
         self.phase = phase
+        self.total = total
         self.progress = progress
 
     def __str__(self) -> str:

@@ -122,16 +122,27 @@ def phase_pointcloud(
     cloud_group.attrs["min_event"] = min_event
     cloud_group.attrs["max_event"] = max_event
 
-    flush_percent = 0.01
-    flush_val = int(flush_percent * (max_event - min_event))
+    nevents = max_event - min_event
+    total: int
+    flush_val: int
+    if nevents < 100:
+        total = nevents
+        flush_val = 0
+    else:
+        flush_percent = 0.01
+        flush_val = int(flush_percent * (max_event - min_event))
+        total = 100
+
     count = 0
+
+    msg = StatusMessage(run, Phase.CLOUD, total, 1)  # We always increment by 1
 
     # Process the data
     for idx in range(min_event, max_event + 1):
+        count += 1
         if count > flush_val:
             count = 0
-            queue.put(StatusMessage(run, Phase.CLOUD, 1))
-        count += 1
+            queue.put(msg)
 
         event_data: h5.Dataset
         try:
