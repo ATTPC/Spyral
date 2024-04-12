@@ -16,11 +16,11 @@
         <link rel="prev" href="../bilinear/">
       
       
-        <link rel="next" href="../../parallel/">
+        <link rel="next" href="../track_interpolator/">
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.11">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.14">
     
     
       
@@ -28,10 +28,10 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.7e359304.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.fad675c6.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.356b1318.min.css">
       
       
 
@@ -71,6 +71,9 @@
     
     <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green">
   
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
@@ -127,9 +130,9 @@
     
     
     
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
     
-      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
       </label>
     
@@ -137,9 +140,9 @@
     
     
     
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="lime"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="lime"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
     
-      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
       </label>
     
@@ -148,16 +151,13 @@
       
     
     
-      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
-    
-    
     
     
       <div class="md-header__source">
         <a href="https://github.com/turinath/Spyral/" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
@@ -203,7 +203,7 @@
       <a href="https://github.com/turinath/Spyral/" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
@@ -263,8 +263,10 @@
     
     
     
+    
     <li class="md-nav__item md-nav__item--nested">
       
+        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
@@ -319,8 +321,10 @@
     
     
     
+    
     <li class="md-nav__item md-nav__item--nested">
       
+        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
@@ -551,8 +555,10 @@
     
     
     
+    
     <li class="md-nav__item md-nav__item--nested">
       
+        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
@@ -792,8 +798,10 @@
     
     
     
+    
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
+        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
@@ -974,8 +982,10 @@
     
     
     
+    
     <li class="md-nav__item md-nav__item--nested">
       
+        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_8" >
@@ -1290,8 +1300,10 @@
     
     
     
+    
     <li class="md-nav__item md-nav__item--nested">
       
+        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_9" >
@@ -1396,8 +1408,10 @@
     
     
     
+    
     <li class="md-nav__item md-nav__item--nested">
       
+        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_10" >
@@ -1483,8 +1497,10 @@
     
     
     
+    
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
+        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_11" checked>
@@ -1624,7 +1640,7 @@
           <li class="md-nav__item">
   <a href="#spyral.interpolate.linear.LinearInterpolator.__init__" class="md-nav__link">
     <span class="md-ellipsis">
-      __init__
+      __init__()
     </span>
   </a>
   
@@ -1633,7 +1649,7 @@
           <li class="md-nav__item">
   <a href="#spyral.interpolate.linear.LinearInterpolator.check_values" class="md-nav__link">
     <span class="md-ellipsis">
-      check_values
+      check_values()
     </span>
   </a>
   
@@ -1642,7 +1658,7 @@
           <li class="md-nav__item">
   <a href="#spyral.interpolate.linear.LinearInterpolator.interpolate" class="md-nav__link">
     <span class="md-ellipsis">
-      interpolate
+      interpolate()
     </span>
   </a>
   
@@ -1657,6 +1673,27 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../track_interpolator/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    track_interpolator
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -1680,8 +1717,10 @@
     
     
     
+    
     <li class="md-nav__item md-nav__item--nested">
       
+        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_12" >
@@ -1786,8 +1825,10 @@
     
     
     
+    
     <li class="md-nav__item md-nav__item--nested">
       
+        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_13" >
@@ -1892,8 +1933,10 @@
     
     
     
+    
     <li class="md-nav__item md-nav__item--nested">
       
+        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_14" >
@@ -2167,7 +2210,7 @@
           <li class="md-nav__item">
   <a href="#spyral.interpolate.linear.LinearInterpolator.__init__" class="md-nav__link">
     <span class="md-ellipsis">
-      __init__
+      __init__()
     </span>
   </a>
   
@@ -2176,7 +2219,7 @@
           <li class="md-nav__item">
   <a href="#spyral.interpolate.linear.LinearInterpolator.check_values" class="md-nav__link">
     <span class="md-ellipsis">
-      check_values
+      check_values()
     </span>
   </a>
   
@@ -2185,7 +2228,7 @@
           <li class="md-nav__item">
   <a href="#spyral.interpolate.linear.LinearInterpolator.interpolate" class="md-nav__link">
     <span class="md-ellipsis">
-      interpolate
+      interpolate()
     </span>
   </a>
   
@@ -2240,6 +2283,7 @@
 
 
 
+
 <h2 id="spyral.interpolate.linear.LinearInterpolator" class="doc doc-heading">
           <code>LinearInterpolator</code>
 
@@ -2268,7 +2312,7 @@ a factor of 50.</p>
     </thead>
     <tbody>
         <tr>
-          <td><code><span title="spyral.interpolate.linear.LinearInterpolator.x">x</span></code></td>
+          <td><code>x</code></td>
           <td>
                 <code>ndarray</code>
           </td>
@@ -2279,7 +2323,7 @@ a factor of 50.</p>
           </td>
         </tr>
         <tr>
-          <td><code><span title="spyral.interpolate.linear.LinearInterpolator.y">y</span></code></td>
+          <td><code>y</code></td>
           <td>
                 <code>ndarray</code>
           </td>
@@ -2291,7 +2335,7 @@ same length as x. The second dimension is the length of the output of the interp
           </td>
         </tr>
         <tr>
-          <td><code><span title="spyral.interpolate.linear.LinearInterpolator.x_min">x_min</span></code></td>
+          <td><code>x_min</code></td>
           <td>
                 <code>float</code>
           </td>
@@ -2302,7 +2346,7 @@ same length as x. The second dimension is the length of the output of the interp
           </td>
         </tr>
         <tr>
-          <td><code><span title="spyral.interpolate.linear.LinearInterpolator.x_max">x_max</span></code></td>
+          <td><code>x_max</code></td>
           <td>
                 <code>float</code>
           </td>
@@ -2327,7 +2371,7 @@ same length as x. The second dimension is the length of the output of the interp
     </thead>
     <tbody>
           <tr>
-            <td><code><span title="spyral.interpolate.linear.LinearInterpolator.LinearInterpolator">LinearInterpolator</span></code></td>
+            <td><code>LinearInterpolator</code></td>
             <td>
               <div class="doc-md-description">
                 <p>Construct the LinearInterpolator</p>
@@ -2335,7 +2379,7 @@ same length as x. The second dimension is the length of the output of the interp
             </td>
           </tr>
           <tr>
-            <td><code><a class="autorefs autorefs-internal" title="spyral.interpolate.linear.LinearInterpolator.check_values" href="#spyral.interpolate.linear.LinearInterpolator.check_values">check_values</a></code></td>
+            <td><code>check_values</code></td>
             <td>
               <div class="doc-md-description">
                 <p>Internal consistency check. Raises an Exception on failure.</p>
@@ -2343,7 +2387,7 @@ same length as x. The second dimension is the length of the output of the interp
             </td>
           </tr>
           <tr>
-            <td><code><a class="autorefs autorefs-internal" title="spyral.interpolate.linear.LinearInterpolator.interpolate" href="#spyral.interpolate.linear.LinearInterpolator.interpolate">interpolate</a></code></td>
+            <td><code>interpolate</code></td>
             <td>
               <div class="doc-md-description">
                 <p>Perform interpolation for a set of x-coordinate values.</p>
@@ -2558,6 +2602,7 @@ same length as x. The second dimension is the length of the output of the interp
 
 
 
+
 <h3 id="spyral.interpolate.linear.LinearInterpolator.__init__" class="doc doc-heading">
           <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">x_vals</span><span class="p">,</span> <span class="n">y_vals</span><span class="p">)</span></code>
 
@@ -2691,6 +2736,7 @@ same length as x. The second dimension is the length of the output of the interp
 
 
 
+
 <h3 id="spyral.interpolate.linear.LinearInterpolator.check_values" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">check_values</span><span class="p">()</span></code>
 
@@ -2740,6 +2786,7 @@ same length as x. The second dimension is the length of the output of the interp
 
 
 <div class="doc doc-object doc-function">
+
 
 
 
@@ -2866,7 +2913,6 @@ same length as x. The second dimension is the length of the output of the interp
 
   </div>
 
-
 </div>
 
 
@@ -2877,13 +2923,6 @@ same length as x. The second dimension is the length of the output of the interp
   </div>
 
 </div>
-
-
-
-
-
-
-
 
 
 
@@ -2894,7 +2933,6 @@ same length as x. The second dimension is the length of the output of the interp
             </div>
           
           
-<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
         
       </main>
@@ -2923,10 +2961,10 @@ same length as x. The second dimension is the length of the output of the interp
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.8fd75fb4.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.cd18aaf1.min.js"></script>
       
         <script src="../../../javascript/mathjax.js"></script>
       
