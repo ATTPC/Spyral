@@ -19,6 +19,7 @@ The GET and FRIB parameters control the trace analysis for each acquisition. The
     "peak_prominence": 20.0,
     "peak_max_width": 500.0,
     "peak_threshold": 100.0,
+    "ic_delay_time_bucket": 1100,
     "event_ic_multiplicity": 1,
     "event_correct_ic_time": true
 },
@@ -46,13 +47,17 @@ The maximum width of a peak (at the base of the peak). This is a re-exposure of 
 
 The minimum amplitude of a peak. This parameter is available to both FRIB and GET data.
 
+## ic_delay_time_bucket
+
+This is the delay to the ion chamber singal in units of FRIBDAQ time buckets. Any peaks in the ion chamber singal before this time bucket are ignored and not included in subsequent ion chamber analysis. The first peak after this time bucket is the triggering ion chamber singal, and all peaks after this time bucket are counted towards the ion chamber multiplicity (except in the case of `event_correct_ic_time` set to true, where the auxilary silicon detector is used to eliminate some of the peaks). In general, this parameter does not need changed from experiment to experiment, as it is a direct result of the electronic delay in the AT-TPC triggering scheme.
+
 ## event_ic_multiplicity
 
 The maximum allowed ion chamber multiplicity for an event. In general, AT-TPC experiments would only allow for one ion chamber hit per event. This is only available to FRIB data.
 
 ## event_correct_ic_time
 
-Turn on/off the ion chamber time correction. Sometimes, the wrong beam triggers the event start in the AT-TPC. This can be corrected using the correlation between downstream silicon and the ion chamber. `true` turns the correction on, `false` turns the correction off. Note that the ion chamber-silicon coincidence is *only* applied when this parameter is set to true. Otherwise, the raw ion chamber signal is analyzed and *all* peaks found in that signal count towards the ion chamber multiplicity. This is only available to FRIB data.
+Turn on/off the ion chamber time correction. Sometimes, the wrong beam triggers the event start in the AT-TPC. This can be corrected using the correlation between downstream silicon and the ion chamber. `true` turns the correction on, `false` turns the correction off. Note that the ion chamber-silicon coincidence is *only* applied when this parameter is set to true. Otherwise, the raw ion chamber signal is analyzed and *all* peaks found in that signal (after the delay of `ic_delay_time_bucket`) count towards the ion chamber multiplicity. This is only available to FRIB data.
 
 ## Important Note
 
