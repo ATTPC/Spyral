@@ -168,10 +168,16 @@ class PhaseLike(Protocol):
         raise NotImplementedError
 
     def get_artifact_path(self, workspace_path: Path) -> Path:
-        return workspace_path / f"{self.name}"
+        path = workspace_path / f"{self.name}"
+        if not path.exists():
+            path.mkdir()
+        return path
 
     def get_asset_storage_path(self, workspace_path: Path) -> Path:
-        return workspace_path / f"{self.name}_assets"
+        path = workspace_path / f"{self.name}_assets"
+        if not path.exists():
+            path.mkdir()
+        return path
 
     def create_assets(self, workspace_path: Path) -> bool:
         raise NotImplementedError
