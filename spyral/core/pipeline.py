@@ -14,6 +14,8 @@ class Pipeline:
     def __init__(self, phases: list[PhaseLike], workspace_path: Path, trace_path: Path):
         self.phases = phases
         self.workspace = workspace_path
+        if not self.workspace.exists():
+            self.workspace.mkdir()
         self.traces = trace_path
 
     def create_assets(self) -> bool:
@@ -46,7 +48,7 @@ def start_pipeline(
     run_min: int,
     run_max: int,
     n_procs: int = 1,
-    display: bool = True,
+    disable_display: bool = False,
 ) -> None:
 
     init_spyral_logger_parent(pipeline.workspace)
@@ -71,7 +73,9 @@ def start_pipeline(
                 daemon=False,
             )
         )
-        pbars.append(tqdm(total=0, disable=display, miniters=1, mininterval=0.001))
+        pbars.append(
+            tqdm(total=0, disable=disable_display, miniters=1, mininterval=0.001)
+        )
         active_phases.append("Waiting")  # put something here
         pbars[-1].set_description(f"| Process {s} | Waiting |")
 

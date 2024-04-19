@@ -57,11 +57,13 @@ class PointcloudPhase(PhaseLike):
         self.get_params = get_params
         self.frib_params = frib_params
         self.det_params = detector_params
-        self.pad_geom_path = pad_geometry_path
-        self.pad_elec_path = pad_electronics_path
-        self.pad_time_path = pad_time_path
-        self.pad_gain_path = pad_gain_path
-        self.pad_scale_path = pad_scale_path
+        self.pad_map = PadMap(
+            pad_geometry_path,
+            pad_gain_path,
+            pad_time_path,
+            pad_electronics_path,
+            pad_scale_path,
+        )
 
     def create_assets(self, workspace_path: Path) -> bool:
         asset_path = self.get_asset_storage_path(workspace_path)
@@ -106,15 +108,6 @@ class PointcloudPhase(PhaseLike):
         corrector: ElectronCorrector | None = None
         if self.det_params.do_garfield_correction:
             corrector = create_electron_corrector(self.electron_correction_path)
-
-        # Load PadMap
-        pad_map = PadMap(
-            self.pad_geom_path,
-            self.pad_gain_path,
-            self.pad_time_path,
-            self.pad_elec_path,
-            self.pad_scale_path,
-        )
 
         # Some checks for existance
         event_group: h5.Group = trace_file["get"]  # type: ignore
@@ -182,7 +175,7 @@ class PointcloudPhase(PhaseLike):
             event = GetEvent(event_data, idx, self.get_params)
 
             pc = PointCloud()
-            pc.load_cloud_from_get_event(event, pad_map)
+            pc.load_cloud_from_get_event(event, self.pad_map)
 
             pc_dataset = cloud_group.create_dataset(
                 f"cloud_{pc.event_number}", shape=pc.cloud.shape, dtype=np.float64

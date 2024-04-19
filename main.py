@@ -1,51 +1,110 @@
-from spyral.core.config import load_config
-from spyral.run_parallel import run_spyral_parallel
+from spyral import Pipeline, start_pipeline, PointcloudPhase, ClusterPhase
+from spyral import (
+    GetParameters,
+    FribParameters,
+    DetectorParameters,
+    ClusterParameters,
+    SolverParameters,
+    EstimateParameters,
+)
 
 from pathlib import Path
-import click
-import contextlib
-import os
 import multiprocessing
 
-# Generated using https://www.asciiart.eu
-SPLASH: str = r"""
--------------------------------
- ____                        _ 
-/ ___| _ __  _   _ _ __ __ _| |
-\___ \|  _ \| | | |  __/ _  | |
- ___| | |_| | |_| | | | |_| | |
-|____/|  __/ \__  |_|  \__ _|_|
-      |_|    |___/             
--------------------------------
-"""
 
+pad_geometry_path = Path("/home/gordon/pipelines/Spyral/etc/padxy.csv")
+pad_gain_path = Path("/home/gordon/pipelines/Spyral/etc/pad_gain_map.csv")
+pad_time_path = Path("/home/gordon/pipelines/Spyral/etc/pad_time_correction.csv")
+pad_electronics_path = Path("/home/gordon/pipelines/Spyral/etc/pad_electronics.csv")
+pad_scale_path = Path("/home/gordon/pipelines/Spyral/etc/pad_scale.csv")
 
-def show_splash():
-    print(SPLASH)
+workspace_path = Path("/media/gordon/ThesisData/NewData/Pipeline/")
+trace_path = Path("/media/gordon/ThesisData/NewData/a1975/h5/")
 
-
-@click.command()
-@click.option(
-    "--term/--no-term",
-    default=True,
-    help="Whether or not Spyral displays progress text to the terminal",
-    show_default=True,
+get_params = GetParameters(
+    baseline_window_scale=20.0,
+    peak_separation=50.0,
+    peak_prominence=20.0,
+    peak_max_width=50.0,
+    peak_threshold=40.0,
 )
-@click.argument("config", type=click.Path(exists=True))
-def main(term: bool, config: str):
-    """
-    Spyral is an analysis framework for AT-TPC data. Provide a JSON configuration file CONFIG to control analysis settings.
-    """
-    configuration = load_config(Path(config))
-    # Manually set the start method, to avoid fork
-    multiprocessing.set_start_method("spawn")
-    if not term:
-        with contextlib.redirect_stdout(open(os.devnull, "w")):
-            run_spyral_parallel(configuration, no_progress=True)
-    else:
-        show_splash()
-        run_spyral_parallel(configuration)
+
+frib_params = FribParameters(
+    baseline_window_scale=100.0,
+    peak_separation=50.0,
+    peak_prominence=20.0,
+    peak_max_width=500.0,
+    peak_threshold=100.0,
+    ic_delay_time_bucket=1100,
+    ic_multiplicity=1,
+    correct_ic_time=True,
+)
+
+det_params = DetectorParameters(
+    magnetic_field=2.85,
+    electric_field=45000.0,
+    detector_length=1000.0,
+    beam_region_radius=25.0,
+    micromegas_time_bucket=10.0,
+    window_time_bucket=560.0,
+    get_frequency=6.25,
+    garfield_file_path="/path/to/some/garfield.txt",
+    do_garfield_correction=False,
+)
+
+cluster_params = ClusterParameters(
+    min_cloud_size=50,
+    smoothing_neighbor_distance=15.0,
+    min_points=3,
+    min_size_scale_factor=0.05,
+    min_size_lower_cutoff=10,
+    cluster_selection_epsilon=0.3,
+    circle_overlap_ratio=0.5,
+    fractional_charge_threshold=0.8,
+    outlier_scale_factor=0.05,
+)
+
+estimate_params = EstimateParameters(
+    min_total_trajectory_points=30, smoothing_factor=1.0
+)
+
+solver_params = SolverParameters(
+    gas_data_path="/home/gordon/pipelines/Spyral/etc/deuterium_gas.json",
+    particle_id_filename="/media/gordon/ThesisData/NewData/Analyzed/a1975/gates/proton_gate.json",
+    ic_min_val=900.0,
+    ic_max_val=1350.0,
+    n_time_steps=10000,
+    interp_ke_min=0.05,
+    interp_ke_max=70.0,
+    interp_ke_bins=400,
+    interp_polar_min=2.0,
+    interp_polar_max=88.0,
+    interp_polar_bins=170,
+)
+
+pipe = Pipeline(
+    [
+        PointcloudPhase(
+            get_params,
+            frib_params,
+            det_params,
+            pad_geometry_path,
+            pad_electronics_path,
+            pad_time_path,
+            pad_gain_path,
+            pad_scale_path,
+        ),
+        ClusterPhase(cluster_params, det_params),
+    ],
+    workspace_path,
+    trace_path,
+)
+
+
+def main():
+    start_pipeline(pipe, 94, 94, 4)
 
 
 if __name__ == "__main__":
+    multiprocessing.set_start_method("spawn")
     main()

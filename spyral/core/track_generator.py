@@ -94,6 +94,12 @@ class MeshParameters:
             indent=4,
         )
 
+    def get_track_file_name(self) -> str:
+        return f"{self.particle.isotopic_symbol}_in_{self.target.ugly_string.replace('(Gas)', '')}_{self.target.data.pressure}Torr.npy"
+
+    def get_track_meta_file_name(self) -> str:
+        return f"{self.particle.isotopic_symbol}_in_{self.target.ugly_string.replace('(Gas)', '')}_{self.target.data.pressure}Torr.json"
+
 
 def check_mesh_needs_generation(track_path: Path, params: MeshParameters) -> bool:
     """Check if track mesh meta data matches or if track mesh doesn't exist
@@ -111,7 +117,7 @@ def check_mesh_needs_generation(track_path: Path, params: MeshParameters) -> boo
         Returns True if the mesh needs to be generated
     """
     if track_path.exists():
-        meta_path = track_path.parents[0] / f"{track_path.stem}.json"
+        meta_path = track_path.parents[0] / params.get_track_meta_file_name()
         if not meta_path.exists():
             return True
         with open(meta_path, "r") as meta_file:
@@ -347,7 +353,7 @@ def rho_bound_condition(
     return float(np.linalg.norm(state[:2])) - 0.332
 
 
-def generate_track_mesh(params: MeshParameters, track_path: Path):
+def generate_track_mesh(params: MeshParameters, track_path: Path, meta_path: Path):
     """Generate a mesh of tracks given some parameters and write them to an npy file at a path.
 
     Creates a 4-dimensional array (mesh) of ODE solutions (also called tracks or trajectories) and
@@ -365,14 +371,15 @@ def generate_track_mesh(params: MeshParameters, track_path: Path):
         parameters which control the tracks
     track_path: Path
         where to write the tracks to
+    meta_path: Path
+        where to write the track metadata to
     """
     kes = np.linspace(params.ke_min, params.ke_max, params.ke_bins)
     polars = np.linspace(
         params.polar_min * DEG2RAD, params.polar_max * DEG2RAD, params.polar_bins
     )
 
-    track_meta_path = track_path.parents[0] / f"{track_path.stem}.json"
-    with open(track_meta_path, "w") as metafile:
+    with open(meta_path, "w") as metafile:
         metafile.write(params.serialize_json())
 
     # time x (x, y, z, vx, vy, vz) x ke x polar

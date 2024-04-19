@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from multiprocessing import SimpleQueue
 
@@ -9,7 +9,7 @@ class PhaseResult:
     artifact_path: Path
     successful: bool
     run_number: int
-    metadata: dict = {}
+    metadata: dict = field(default_factory=dict)
 
 
 class PhaseLike(ABC):
