@@ -21,6 +21,10 @@ pad_scale_path = Path("/home/gordon/pipelines/Spyral/etc/pad_scale.csv")
 workspace_path = Path("/media/gordon/ThesisData/NewData/Pipeline/")
 trace_path = Path("/media/gordon/ThesisData/NewData/a1975/h5/")
 
+run_min = 94
+run_max = 94
+n_processes = 4
+
 get_params = GetParameters(
     baseline_window_scale=20.0,
     peak_separation=50.0,
@@ -102,7 +106,7 @@ pipe = Pipeline(
 
 
 def main():
-    start_pipeline(pipe, 94, 94, 4)
+    start_pipeline(pipe, run_min, run_max, n_processes)
 
 
 if __name__ == "__main__":
