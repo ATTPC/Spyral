@@ -1,6 +1,20 @@
-from ..core.config import Config
-from ..core.workspace import Workspace
 from pathlib import Path
+
+
+def form_run_string(run_number: int) -> str:
+    """Make the run_* string
+
+    Parameters
+    ----------
+    run_number: int
+        The run number
+
+    Returns
+    -------
+    str
+        The run string
+    """
+    return f"run_{run_number:04d}"
 
 
 def get_size_path(path: Path) -> int:
@@ -23,7 +37,7 @@ def get_size_path(path: Path) -> int:
         return path.stat().st_size
 
 
-def collect_runs(ws: Workspace, run_min: int, run_max: int) -> dict[int, int]:
+def collect_runs(trace_path: Path, run_min: int, run_max: int) -> dict[int, int]:
     """Make dict of runs with the size of the raw data file
 
     Using the Workspace and the Config run_min and run_max, get a dict of run numbers to be processed
@@ -47,15 +61,17 @@ def collect_runs(ws: Workspace, run_min: int, run_max: int) -> dict[int, int]:
         dict is sorted descending on the size of the raw trace files.
     """
     run_dict = {
-        run: get_size_path(ws.get_trace_file_path(run))
+        run: get_size_path(trace_path / f"{form_run_string(run)}.h5")
         for run in range(run_min, run_max + 1)
-        if get_size_path(ws.get_trace_file_path(run)) != 0
+        if get_size_path(trace_path / f"{form_run_string(run)}.h5") != 0
     }
     run_dict = dict(sorted(run_dict.items(), key=lambda item: item[1], reverse=True))
     return run_dict
 
 
-def create_run_stacks(config: Config, n_stacks: int) -> list[list[int]]:
+def create_run_stacks(
+    trace_path: Path, run_min: int, run_max: int, n_stacks: int
+) -> list[list[int]]:
     """Create a set of runs to be processed for each stack in n_stacks.
 
     Each stack is intended to be handed off to a single processor. As such,
@@ -81,8 +97,7 @@ def create_run_stacks(config: Config, n_stacks: int) -> list[list[int]]:
     stacks = [[] for _ in range(0, n_stacks)]
     total_load = 0
     load_per_stack = [0 for _ in range(0, n_stacks)]
-    ws = Workspace(config.workspace)
-    sorted_runs = collect_runs(ws, config.run.run_min, config.run.run_max)
+    sorted_runs = collect_runs(trace_path, run_min, run_max)
     if len(sorted_runs) == 0:
         return stacks
 

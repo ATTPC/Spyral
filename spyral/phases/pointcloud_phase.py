@@ -1,4 +1,6 @@
-from ..core.pipeline import PhaseLike, PhaseResult, form_run_string, StatusMessage
+from ..core.phase import PhaseLike, PhaseResult
+from ..core.run_stacks import form_run_string
+from ..core.status_message import StatusMessage
 from ..core.config import FribParameters, GetParameters, DetectorParameters
 from ..correction import (
     generate_electron_correction,
@@ -51,7 +53,7 @@ class PointcloudPhase(PhaseLike):
         pad_gain_path: Path,
         pad_scale_path: Path,
     ):
-        self.name = "Pointcloud"
+        super().__init__("Pointcloud")
         self.get_params = get_params
         self.frib_params = frib_params
         self.det_params = detector_params
@@ -63,9 +65,8 @@ class PointcloudPhase(PhaseLike):
 
     def create_assets(self, workspace_path: Path) -> bool:
         asset_path = self.get_asset_storage_path(workspace_path)
-        self.electron_correction_path = (
-            asset_path / f"{Path(self.det_params.garfield_file_path).stem}.npy"
-        )
+        garf_path = Path(self.det_params.garfield_file_path)
+        self.electron_correction_path = asset_path / f"{garf_path.stem}.npy"
 
         if (
             not self.electron_correction_path.exists()
@@ -73,7 +74,7 @@ class PointcloudPhase(PhaseLike):
         ):
             generate_electron_correction(
                 self.electron_correction_path,
-                self.det_params.garfield_file_path,
+                garf_path,
                 self.det_params,
             )
         return True
@@ -89,7 +90,7 @@ class PointcloudPhase(PhaseLike):
                 __name__,
                 f"Run {payload.run_number} does not exist for phase 1, skipping.",
             )
-            return
+            return PhaseResult(Path("null"), True, payload.run_number)
 
         # Open files
         point_path = (
@@ -122,7 +123,7 @@ class PointcloudPhase(PhaseLike):
                 __name__,
                 f"GET event group does not exist in run {payload.run_number}, phase 1 cannot be run!",
             )
-            return
+            return PhaseResult(Path("null"), True, payload.run_number)
 
         frib_group: h5.Group = trace_file["frib"]  # type: ignore
         if not isinstance(frib_group, h5.Group):
@@ -130,14 +131,14 @@ class PointcloudPhase(PhaseLike):
                 __name__,
                 f"FRIB group does not exist in run {payload.run_number}, phase 1 cannot be run!",
             )
-            return
+            return PhaseResult(Path("null"), True, payload.run_number)
         frib_evt_group: h5.Group = frib_group["evt"]  # type: ignore
         if not isinstance(frib_evt_group, h5.Group):
             spyral_error(
                 __name__,
                 f"FRIB event data group does not exist in run {payload.run_number}, phase 1 cannot be run!",
             )
-            return
+            return PhaseResult(Path("null"), True, payload.run_number)
 
         frib_scaler_group: h5.Group | None = frib_group["scaler"]  # type: ignore
         if not isinstance(frib_group, h5.Group):
@@ -276,7 +277,7 @@ class PointcloudPhase(PhaseLike):
         if frib_scaler_group is not None:
             process_scalers(
                 frib_scaler_group,
-                self.get_artifact_path()
+                self.get_artifact_path(workspace_path)
                 / f"{form_run_string(payload.run_number)}_scaler.parquet",
             )
 
