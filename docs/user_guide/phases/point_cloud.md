@@ -77,6 +77,22 @@ Some additional discussion needs to be had about the behavior of the ion chamber
 
 In the past, the AT-TPC was not run with a split DAQ. That is, all signals were recorded using the GET data aquisition, including auxilary detectors like the ion chamber. In the configuration, one can indicate to Spyral that legacy data is being analyzed (see [here](../config/run.md)). If this is turned on Spyral assumes that any data in CoBo 10 is exclusively from auxilary detectors. Legacy mappings and corrections are included in the `etc` directory. Legacy IC data is analyzed for peaks using the `FRIB` parameters even though the data is acquired using the GET DAQ (see [here](../config/traces.md)). Legacy analysis is an advanced feature, and requires some experience with using Spyral. This phase is the only phase significantly impacted by legacy analysis.
 
+## Scalers
+
+The FRIBDAQ data does not only contain auxilary detectors. It also contains scalers, or counters. These scalers are readout independently from the main acquisition and represent statistics of the experiment. The most common scaler to use is the downscaled ion chamber trigger, which is a measurement of the total beam count over the course of the experiment. Scalers are read out run by run and are written to the `scaler` directory of the workspace as dataframes in parquet files. The available columns in the dataframe are:
+
+- clock_free: The time ellapsed while running the data acqusition
+- clock_live: The amount of time for which the acquisition is "live" (able to accept triggers)
+- trigger_free: The total number of trigger signals recieved by the acquisition
+- trigger_live: The total number of triggers which acutally cause events in the acquisition
+- ic_sca: The total number of ion chamber signals recieved by the acquisition
+- mesh_sca: The total number of mesh signals recieved by the acquisition
+- si1_cfd: The total number of Si detector 1 signals recieved by the acquisition
+- si2_cfd: The total number of Si detector 2 signals recieved by the acquisition
+- sipm: Unclear
+- ic_ds: The downscaled rate into the ion chamber, typically a factor of 1000
+- ic_cfd: Unclear
+
 ## Final Thoughts
 
 The first phase is very intense and represents a major data transformation. Typically, the trace data is somewhere between 10-50 GB per run, and the output of the point cloud phase is something like 250 MB to 1 GB. This is an enormous reduction of data, and as such is usually the slowest phase, taking anywhere from 10 minutes to an hour depending on the hardware being used. The bottleneck is typically I/O speed; reading in so much data is a serious issue depending on the type of storage used to hold the traces. In general, if the traces are stored on a network drive which doesn't have hardline 10 Gb connection, this phase will be slow. HDD drives can also be a slow down, or older USB connected external drives. The general recommendation is to move data to a fast local SSD for analysis when possible.
