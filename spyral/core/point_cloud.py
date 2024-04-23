@@ -77,7 +77,7 @@ class PointCloud:
         self.cloud = np.zeros((count, 8))
         idx = 0
         for trace in event.traces:
-            if trace.get_number_of_peaks() == 0:
+            if trace.get_number_of_peaks() == 0 or trace.get_number_of_peaks() > 5:
                 continue
 
             pid = trace.hw_id.pad_id
@@ -157,6 +157,7 @@ class PointCloud:
         """Calibrate the cloud z-position from the micromegas and window time references
 
         Also applies the ion chamber time correction and electric field correction if given
+        Trims any points beyond the bounds of the detector (0 to detector length)
 
         Parameters
         ----------
@@ -181,36 +182,9 @@ class PointCloud:
             if efield_correction is not None:
                 self.cloud[idx] = efield_correction.correct_point(self.cloud[idx])
 
-    def smooth_cloud(self, max_distance: float = 10.0):
-        """Smooth the point cloud by averaging over nearest neighbors by distance, weighted by the integrated charge.
-
-        The neighborhood is defined to be a sphere of radius max_distance centered on the point being considered
-        This modifies the underlying point cloud array
-
-        Parameters
-        ----------
-        max_distance: float
-            The maximum distance between two neighboring points
-        """
-        smoothed_cloud = np.zeros(self.cloud.shape)
-        for idx, point in enumerate(self.cloud):
-            mask = (
-                np.linalg.norm((self.cloud[:, :3] - point[:3]), axis=1) < max_distance
-            )
-            neighbors = self.cloud[mask]
-            if len(neighbors) < 2:
-                continue
-            # Weight points
-            weighted_average = np.average(neighbors, axis=0, weights=neighbors[:, 3])
-            if np.isclose(weighted_average[4], 0.0):
-                continue
-            smoothed_cloud[idx] = weighted_average
-        # Removes duplicate points
-        smoothed_cloud = smoothed_cloud[smoothed_cloud[:, 3] != 0.0]
-        _, indicies = np.unique(
-            np.round(smoothed_cloud[:, :3], decimals=2), axis=0, return_index=True
-        )
-        self.cloud = smoothed_cloud[indicies]
+    def remove_illegal_points(self, detector_length: float = 1000.0):
+        mask = np.logical_and(self.cloud[:, 2] < detector_length, self.cloud[:, 2] > 0.0)
+        self.cloud = self.cloud[mask]
 
     def sort_in_z(self):
         """Sort the internal point cloud array by the z-coordinate"""
