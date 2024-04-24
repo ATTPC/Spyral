@@ -41,7 +41,7 @@ class TrackInterpolator:
     We use numba to just-in-time compile these methods, which results in a dramatic speed up on the order
     of a factor of 50.
 
-    Attriubtes
+    Attributes
     ----------
     file_path: str
         The track save file

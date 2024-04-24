@@ -113,7 +113,7 @@ def phase_solve(
     nevents = len(estimates_gated["event"])
     total: int
     flush_val: int
-    if nevents < 100:
+    if nevents < 1000:
         total = nevents
         flush_val = 0
     else:

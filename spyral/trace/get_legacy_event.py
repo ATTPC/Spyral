@@ -45,6 +45,7 @@ class GetLegacyEvent:
         event_number: int,
         get_params: GetParameters,
         ic_params: FribParameters,
+        rng: np.random.Generator,
     ):
         """Construct the event and process traces
 
@@ -58,6 +59,9 @@ class GetLegacyEvent:
             Configuration parameters controlling the GET signal analysis
         ic_params: FribParameters
             Configuration parameters controlling the ion chamber signal analysis
+        rng: numpy.random.Generator
+            A random number generator for use in the signal analysis
+
         Returns
         -------
         GetEvent
@@ -67,7 +71,7 @@ class GetLegacyEvent:
         self.ic_trace: GetTrace | None = None
         self.name: str = INVALID_EVENT_NAME
         self.number: int = INVALID_EVENT_NUMBER
-        self.load_traces(raw_data, event_number, get_params, ic_params)
+        self.load_traces(raw_data, event_number, get_params, ic_params, rng)
 
     def load_traces(
         self,
@@ -75,6 +79,7 @@ class GetLegacyEvent:
         event_number: int,
         get_params: GetParameters,
         ic_params: FribParameters,
+        rng: np.random.Generator,
     ):
         """Process the traces
 
@@ -88,6 +93,8 @@ class GetLegacyEvent:
             Configuration parameters controlling the GET signal analysis
         ic_params: FribParameters
             Configuration parameters controlling the ion chamber signal analysis
+        rng: numpy.random.Generator
+            A random number generator for use in the signal analysis
         """
         self.name = str(raw_data.name)
         self.number = event_number
@@ -96,7 +103,9 @@ class GetLegacyEvent:
             get_params.baseline_window_scale,
         )
         self.traces = [
-            GetTrace(trace_matrix[idx], hardware_id_from_array(row[0:5]), get_params)
+            GetTrace(
+                trace_matrix[idx], hardware_id_from_array(row[0:5]), get_params, rng
+            )
             for idx, row in enumerate(raw_data)
         ]
         # Legacy data where external data was stored in CoBo 10 (IC, mesh)

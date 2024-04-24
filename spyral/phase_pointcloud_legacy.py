@@ -39,6 +39,7 @@ def phase_pointcloud_legacy(
     get_params: GetParameters,
     ic_params: FribParameters,
     detector_params: DetectorParameters,
+    rng: np.random.Generator,
     queue: SimpleQueue,
 ):
     """The core loop of the pointcloud phase
@@ -61,6 +62,8 @@ def phase_pointcloud_legacy(
         Configuration parameters for legacy IC data signal analysis
     detector_params: DetectorParameters
         Configuration parameters for physical detector properties
+    rng: numpy.random.Generator
+        A random number generator for use in the signal analysis
     queue: SimpleQueue
         Communication channel back to the parent process
     """
@@ -102,7 +105,7 @@ def phase_pointcloud_legacy(
     nevents = max_event - min_event
     total: int
     flush_val: int
-    if nevents < 100:
+    if nevents < 1000:
         total = nevents
         flush_val = 0
     else:
@@ -127,7 +130,7 @@ def phase_pointcloud_legacy(
         except Exception:
             continue
 
-        event = GetLegacyEvent(event_data, idx, get_params, ic_params)
+        event = GetLegacyEvent(event_data, idx, get_params, ic_params, rng)
 
         pc = PointCloud()
         pc.load_cloud_from_get_event(event, pad_map)
