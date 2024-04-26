@@ -156,27 +156,29 @@ def equation_of_motion(
         the derivatives of the state
     """
 
-    speed = math.sqrt(state[3] ** 2.0 + state[4] ** 2.0 + state[5] ** 2.0)
+    momentum = math.sqrt(state[3] ** 2.0 + state[4] ** 2.0 + state[5] ** 2.0)
+    mass_kg = ejectile.mass * MEV_2_KG
+    p_m = momentum / mass_kg
+    speed = math.sqrt(p_m**2.0 / (1.0 + (p_m * 1.0 / C) ** 2.0))
 
-    unit_vector = state[3:] / speed  # direction
+    unit_vector = state[3:] / momentum  # direction
+    velo = unit_vector * speed
     kinetic_energy = ejectile.mass * (
         1.0 / math.sqrt(1.0 - (speed / C) ** 2.0) - 1.0
     )  # MeV
 
-    mass_kg = ejectile.mass * MEV_2_KG
     charge_c = ejectile.Z * E_CHARGE
-    qm = charge_c / mass_kg
 
     deceleration = (
         target.get_dedx(ejectile, kinetic_energy) * MEV_2_JOULE * target.density * 100.0
-    ) / mass_kg
+    )
     results = np.zeros(6)
-    results[0] = state[3]
-    results[1] = state[4]
-    results[2] = state[5]
-    results[3] = qm * state[4] * Bfield - deceleration * unit_vector[0]
-    results[4] = qm * (-1.0 * state[3] * Bfield) - deceleration * unit_vector[1]
-    results[5] = qm * Efield - deceleration * unit_vector[2]
+    results[0] = velo[0]
+    results[1] = velo[1]
+    results[2] = velo[2]
+    results[3] = charge_c * velo[1] * Bfield - deceleration * unit_vector[0]
+    results[4] = charge_c * (-1.0 * velo[0] * Bfield) - deceleration * unit_vector[1]
+    results[5] = charge_c * Efield - deceleration * unit_vector[2]
 
     return results
 
@@ -218,7 +220,10 @@ def stop_condition(
         this function returns zero the termination condition has been reached.
 
     """
-    speed = math.sqrt(state[3] ** 2.0 + state[4] ** 2.0 + state[5] ** 2.0)
+    momentum = math.sqrt(state[3] ** 2.0 + state[4] ** 2.0 + state[5] ** 2.0)
+    mass_kg = ejectile.mass * MEV_2_KG
+    p_m = momentum / mass_kg
+    speed = math.sqrt(p_m**2.0 / (1.0 + (p_m * 1.0 / C) ** 2.0))
     kinetic_energy = ejectile.mass * (
         1.0 / math.sqrt(1.0 - (speed / C) ** 2.0) - 1.0
     )  # MeV
@@ -407,6 +412,7 @@ def generate_track_mesh(params: MeshParameters, track_path: Path):
 
     print("Optimizing time range...")
 
+    mass_kg = params.particle.mass * MEV_2_KG
     # First narrow the time range to the relevant size for the problem
     for eidx, e in enumerate(kes):
         for pidx, p in enumerate(polars):
@@ -422,8 +428,9 @@ def generate_track_mesh(params: MeshParameters, track_path: Path):
             initial_state[:] = 0.0
             gamma = e / params.particle.mass + 1.0
             speed = math.sqrt(1.0 - 1.0 / (gamma**2.0)) * C
-            initial_state[3] = speed * math.sin(p)
-            initial_state[5] = speed * math.cos(p)
+            momentum = gamma * mass_kg * speed
+            initial_state[3] = momentum * math.sin(p)
+            initial_state[5] = momentum * math.cos(p)
             result = solve_ivp(
                 equation_of_motion,
                 (0.0, COARSE_TIME_WINDOW),
@@ -461,8 +468,9 @@ def generate_track_mesh(params: MeshParameters, track_path: Path):
             initial_state[:] = 0.0
             gamma = e / params.particle.mass + 1.0
             speed = math.sqrt(1.0 - 1.0 / (gamma**2.0)) * C
-            initial_state[3] = speed * math.sin(p)
-            initial_state[5] = speed * math.cos(p)
+            momentum = gamma * mass_kg * speed
+            initial_state[3] = momentum * math.sin(p)
+            initial_state[5] = momentum * math.cos(p)
             result = solve_ivp(
                 equation_of_motion,
                 (0.0, longest_time),
@@ -543,16 +551,18 @@ def generate_interpolated_track(
     rho_bound_condition.direction = 1.0
 
     # Setup initial state
+    mass_kg = particle.mass * MEV_2_KG
     gamma = ke / particle.mass + 1.0
     speed = math.sqrt(1.0 - 1.0 / (gamma**2.0)) * C
+    momentum = gamma * mass_kg * speed
     initial_state = np.array(
         [
             vx,
             vy,
             vz,
-            speed * math.sin(polar) * math.cos(azim),
-            speed * math.sin(polar) * math.sin(azim),
-            speed * math.cos(polar),
+            momentum * math.sin(polar) * math.cos(azim),
+            momentum * math.sin(polar) * math.sin(azim),
+            momentum * math.cos(polar),
         ]
     )
 
