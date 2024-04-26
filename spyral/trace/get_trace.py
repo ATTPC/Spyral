@@ -23,15 +23,15 @@ class GetTrace:
 
     Methods
     -------
-    GetTrace(data: ndarray, id: HardwareID, params: GetParameters)
+    GetTrace(data: ndarray, id: HardwareID, params: GetParameters, rng: numpy.random.Generator)
         Construct the GetTrace and find peaks
-    set_trace_data(data: ndarray, id: HardwareID, params: GetParameters)
+    set_trace_data(data: ndarray, id: HardwareID, params: GetParameters, rng: numpy.random.Generator)
         Set the trace data and find peaks
     is_valid() -> bool:
         Check if the trace is valid
     get_pad_id() -> int
         Get the pad id for this trace
-    find_peaks(params: GetParameters)
+    find_peaks(params: GetParameters, rng: numpy.random.Generator, rel_height: float)
         Find the peaks in the trace
     get_number_of_peaks() -> int
         Get the number of peaks found in the trace

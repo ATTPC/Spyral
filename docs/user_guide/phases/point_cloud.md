@@ -47,7 +47,7 @@ This code is entirely contained in `spyral/trace/get_event.py` in the `preproces
 
 Identifying peaks in spectra (traces) can be a tedious, delicate, and time consuming task. Thankfully, it is a common enough problem that someone already solved it. Scipy has a `signal` library that contains the `find_peaks` function. `find_peaks` takes a lot of different arguments that can greatly impact the quality of the peak finding. Chekcout our [configuration](../config/traces.md) description to see which parameters are exposed and what they do.
 
-Once peaks are identified, centroids, amplitudes, integrals are extracted.
+Once peaks are identified, centroids, amplitudes, integrals are extracted. Centroids are smeared within a single time bucket when converted to floating point values for subsequent calculations. This accounts for the binning behavior of sampling the electronic signal.
 
 This code is contained in `spyral/trace/get_trace.py` and `spyral/trace/get_event.py`.
 

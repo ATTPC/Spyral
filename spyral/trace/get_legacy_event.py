@@ -31,9 +31,9 @@ class GetLegacyEvent:
 
     Methods
     -------
-    GetEvent(raw_data: h5py.Dataset, event_number: int, params: GetParameters)
+    GetEvent(raw_data: h5py.Dataset, event_number: int, params: GetParameters, rng: numpy.random.Generator)
         Construct the event and process traces
-    load_traces(raw_data: h5py.Dataset, event_number: int, params: GetParameters)
+    load_traces(raw_data: h5py.Dataset, event_number: int, params: GetParameters, rng: numpy.random.Generator)
         Process traces
     is_valid() -> bool
         Check if the event is valid

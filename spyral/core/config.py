@@ -173,9 +173,6 @@ class ClusterParameters:
         The minimum size for a point cloud to be clustered
     min_points: int
         min_samples parameter in scikit-learns' HDBSCAN algorithm
-    big_event_cutoff: int
-        the cutoff between big events and small events in units of points in the
-        point cloud
     min_size_scale_factor: int
         Factor which is multiplied by the number of points in a point cloud to set
         the min_cluster_size parameter in scikit-learn's HDBSCAN algorithm

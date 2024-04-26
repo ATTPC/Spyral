@@ -36,8 +36,8 @@ class PointCloud:
         Get the positional data from the point cloud
     calibrate_z_position(micromegas_tb: float, window_tb: float, detector_length: float, ic_correction: float = 0.0)
         Calibrate the cloud z-position from the micromegas and window time references
-    smooth_cloud(max_distance: float = 10.0)
-        Smooth the point cloud data using an neighborhood of radius max_distance
+    remove_illegal_points(detector_length: float)
+        Remove any points which lie outside the legal detector bounds in z
     sort_in_z()
         Sort the internal point cloud array by z-position
     """
@@ -183,6 +183,15 @@ class PointCloud:
                 self.cloud[idx] = efield_correction.correct_point(self.cloud[idx])
 
     def remove_illegal_points(self, detector_length: float = 1000.0):
+        """Remove any points which lie outside the legal detector bounds in z
+
+        Parameters
+        ----------
+        detector_length: float
+            The length of the detector in the same units as the point cloud data
+            (typically mm)
+
+        """
         mask = np.logical_and(
             self.cloud[:, 2] < detector_length, self.cloud[:, 2] > 0.0
         )
