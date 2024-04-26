@@ -183,7 +183,9 @@ class PointCloud:
                 self.cloud[idx] = efield_correction.correct_point(self.cloud[idx])
 
     def remove_illegal_points(self, detector_length: float = 1000.0):
-        mask = np.logical_and(self.cloud[:, 2] < detector_length, self.cloud[:, 2] > 0.0)
+        mask = np.logical_and(
+            self.cloud[:, 2] < detector_length, self.cloud[:, 2] > 0.0
+        )
         self.cloud = self.cloud[mask]
 
     def sort_in_z(self):
