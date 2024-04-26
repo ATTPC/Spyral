@@ -215,7 +215,7 @@ def form_clusters(pc: PointCloud, params: ClusterParameters) -> list[LabeledClou
     """
 
     # Smooth out the point cloud by averaging over neighboring points within a distance, droping any duplicate points
-    pc.smooth_cloud(params.smoothing_neighbor_distance)
+    pc.remove_illegal_points()
     if len(pc.cloud) < params.min_cloud_size:
         return []
 
@@ -225,11 +225,11 @@ def form_clusters(pc: PointCloud, params: ClusterParameters) -> list[LabeledClou
         min_size = params.min_size_lower_cutoff
 
     # Use spatial dimensions and integrated charge
-    cluster_data = np.empty(shape=(len(pc.cloud), 4))
-    cluster_data[:, :] = pc.cloud[:, :4]
+    cluster_data = np.empty(shape=(len(pc.cloud), 3))
+    cluster_data[:, :] = pc.cloud[:, :3]
 
     # Unfiy feature ranges to their means and have standard variance (1)
-    cluster_data = RobustScaler().fit_transform(cluster_data)
+    cluster_data[:, 2] *= 584.0 / 1000.0
 
     clusterizer = skcluster.HDBSCAN(  # type: ignore
         min_cluster_size=min_size,

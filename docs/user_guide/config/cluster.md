@@ -6,7 +6,6 @@ The Cluster parameters which control the clustering, joining, and outlier detect
 "Cluster":
 {
     "min_cloud_size": 50,
-    "smoothing_neighbor_distance(mm)": 15.0,
     "minimum_points": 5,
     "minimum_size_scale_factor": 0.05,
     "minimum_size_lower_cutoff": 10,
@@ -22,10 +21,6 @@ A break down of each parameter:
 ## min_cloud_size
 
 This is the minimum size a point cloud must be (in number of points) to be sent through the clustering algorithm. Any smaller point clouds will be tossed as noise.
-
-## smoothing_neighbor_distance(mm)
-
-The neighborhood search radius in millimeters for the smoothing algorithm. Before data is clustered, it is smoothed by averaging over neighbors. This value should be small to avoid smoothing artifacts. This is a scale-dependent parameter and will need adjusted for each experiment.
 
 ## minimum_points
 

@@ -8,12 +8,17 @@ from .phase_estimate import phase_estimate
 from .phase_solve import phase_solve
 
 from spyral_utils.nuclear import NuclearDataMap
+from numpy.random import default_rng, SeedSequence
 
 from multiprocessing import SimpleQueue
 
 
 def run_spyral(
-    config: Config, run_list: list[int], queue: SimpleQueue, process_id: int
+    config: Config,
+    run_list: list[int],
+    queue: SimpleQueue,
+    process_id: int,
+    seed: SeedSequence,
 ):
     """Spyral main loop
 
@@ -28,11 +33,14 @@ def run_spyral(
         The set of runs for this process
     queue: SimpleQueue
         A communication channel back to the parent process for monitoring progress
+    seed: numpy.random.SeedSequence
+        A seed for use in starting a subprocess unique random number generator
     """
 
     ws = Workspace(config.workspace, config.run.is_legacy)
     pad_map = ws.get_pad_map()
     nuclear_map = NuclearDataMap()
+    rng = default_rng(seed=seed)
 
     init_spyral_logger_child(ws, process_id)
 
@@ -44,12 +52,26 @@ def run_spyral(
             if config.run.do_pointcloud and not config.run.is_legacy:
                 spyral_info(__name__, "Running phase point cloud")
                 phase_pointcloud(
-                    idx, ws, pad_map, config.get, config.frib, config.detector, queue
+                    idx,
+                    ws,
+                    pad_map,
+                    config.get,
+                    config.frib,
+                    config.detector,
+                    rng,
+                    queue,
                 )
             elif config.run.do_pointcloud:
                 spyral_info(__name__, "Running phase point cloud with legacy extension")
                 phase_pointcloud_legacy(
-                    idx, ws, pad_map, config.get, config.frib, config.detector, queue
+                    idx,
+                    ws,
+                    pad_map,
+                    config.get,
+                    config.frib,
+                    config.detector,
+                    rng,
+                    queue,
                 )
 
             if config.run.do_cluster:

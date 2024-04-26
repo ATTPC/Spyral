@@ -62,9 +62,9 @@ class BilinearInterpolator:
     x_bins: int
         Number of bins (cells) in the x-coordinate for the grid
     y_min: float
-    y   Minimum value of the y-coordinate for the grid
+        Minimum value of the y-coordinate for the grid
     y_max: float
-    y   Maximum value fo the y-coordinate for the grid
+        Maximum value fo the y-coordinate for the grid
     y_bins: int
         Number of bins (cells) in the y-coordinate for the grid
     values: ndarray

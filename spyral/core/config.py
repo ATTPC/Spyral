@@ -171,13 +171,8 @@ class ClusterParameters:
     ----------
     min_cloud_size: int
         The minimum size for a point cloud to be clustered
-    smoothing_neighbor_distance: float
-        Size of neighborhood radius in mm for smoothing
     min_points: int
         min_samples parameter in scikit-learns' HDBSCAN algorithm
-    big_event_cutoff: int
-        the cutoff between big events and small events in units of points in the
-        point cloud
     min_size_scale_factor: int
         Factor which is multiplied by the number of points in a point cloud to set
         the min_cluster_size parameter in scikit-learn's HDBSCAN algorithm
@@ -198,7 +193,6 @@ class ClusterParameters:
     """
 
     min_cloud_size: int = 0
-    smoothing_neighbor_distance: float = 0.0  # mm
     min_points: int = 0
     min_size_scale_factor: float = 0.0
     min_size_lower_cutoff: int = 0
@@ -373,9 +367,6 @@ def deserialize_config(json_data: dict[Any, Any]) -> Config:
 
     cluster_params = json_data["Cluster"]
     config.cluster.min_cloud_size = cluster_params["min_cloud_size"]
-    config.cluster.smoothing_neighbor_distance = cluster_params[
-        "smoothing_neighbor_distance(mm)"
-    ]
     config.cluster.min_size_scale_factor = cluster_params["minimum_size_scale_factor"]
     config.cluster.min_size_lower_cutoff = cluster_params["minimum_size_lower_cutoff"]
     config.cluster.min_points = cluster_params["minimum_points"]
