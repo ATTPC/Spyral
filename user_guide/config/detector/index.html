@@ -2332,7 +2332,7 @@
     &quot;do_electric_field_correction&quot;: false
 },
 </code></pre>
-<p>Note that these default values <em>will not work</em>. In particular the <code>electric_field_*_path</code> parameters must be modified.</p>
+<p>Note that these default values <em>will not work</em>. In particular the <code>electric_field_garfield_path</code> parameters must be modified.</p>
 <p>A break down of each parameter:</p>
 <h2 id="magnetic_fieldt">magnetic_field(T)</h2>
 <p>The magnetic field strength in Tesla. The default value of 2.85 T is for the Helios magnet at Argonne.</p>
@@ -2349,7 +2349,7 @@
 <h2 id="get_frequencymhz">get_frequency(MHz)</h2>
 <p>The sampling frequency of the GET acquistion. This is used to correlate data between the FRIBDAQ and GET DAQ setups. The valid values are 6.25 MHz or 3.125 MHz. This is a <em>critical</em> parameter.</p>
 <h2 id="electric_field_garfield_path">electric_field_garfield_path</h2>
-<p>The path to a file containing electron drift calculations from <a href="https://gitlab.cern.ch/garfield/garfieldpp">Garfield++</a>. The default value from <code>config.json</code> <em>is not valid</em> and should be modified if the <code>do_electric_field_correction</code> parameter is set to true. Spyral does ship with an example file in the <code>etc/</code> directory, <code>electrons.txt</code>. The example file is not always safe to use. It was calculated for 300 Torr of H<sub>2</sub> gas, and as such may not be accurate. It is also not well tested what impact this correction has in various detector configurations.</p>
+<p>The path to a file containing electron drift calculations from <a href="https://github.com/attpc/electron_correction">electron_corretion</a>. The default value from <code>config.json</code> <em>is not valid</em> and should be modified if the <code>do_electric_field_correction</code> parameter is set to true. Spyral does ship with an example file in the <code>etc/</code> directory, <code>electrons.txt</code>. The example file is not always safe to use. It was calculated for 300 Torr of H<sub>2</sub> gas, and as such may not be accurate. It is also not well tested what impact this correction has in various detector configurations.</p>
 <h2 id="do_electric_field_correction">do_electric_field_correction</h2>
 <p>This is a flag which indiciates whether or not to apply the electric field correction to the point clouds</p>
 

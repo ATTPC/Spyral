@@ -2280,8 +2280,7 @@ processors are started. Otherwise, there may be race conditions.</p>
 
           <details class="quote">
             <summary>Source code in <code>spyral/run_parallel.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">25</span>
-<span class="normal">26</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">26</span>
 <span class="normal">27</span>
 <span class="normal">28</span>
 <span class="normal">29</span>
@@ -2350,7 +2349,8 @@ processors are started. Otherwise, there may be race conditions.</p>
 <span class="normal">92</span>
 <span class="normal">93</span>
 <span class="normal">94</span>
-<span class="normal">95</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">generate_shared_resources</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">):</span>
+<span class="normal">95</span>
+<span class="normal">96</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">generate_shared_resources</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Build the resources used by Spyral</span>
 
 <span class="sd">    Shared resources such as interpolation tables need to be generated *before* the</span>
@@ -2491,8 +2491,7 @@ used to generate a set of child processes to analyze the data range.</p>
 
           <details class="quote">
             <summary>Source code in <code>spyral/run_parallel.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 98</span>
-<span class="normal"> 99</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 99</span>
 <span class="normal">100</span>
 <span class="normal">101</span>
 <span class="normal">102</span>
@@ -2584,7 +2583,14 @@ used to generate a set of child processes to analyze the data range.</p>
 <span class="normal">188</span>
 <span class="normal">189</span>
 <span class="normal">190</span>
-<span class="normal">191</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">run_spyral_parallel</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">no_progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">run_spyral_parallel</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">no_progress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Spyral&#39;s parent process function</span>
 
 <span class="sd">    This is the main function to be called to run Spyral. The configuration will be</span>
@@ -2615,6 +2621,12 @@ used to generate a set of child processes to analyze the data range.</p>
     <span class="n">spyral_info</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Run stacks: </span><span class="si">{</span><span class="n">stacks</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Done.&quot;</span><span class="p">)</span>
 
+    <span class="c1"># Generate a seed for each process so that the</span>
+    <span class="c1"># random number generator in each process is unique</span>
+    <span class="c1"># See numpy docs for more details</span>
+    <span class="n">sequence</span> <span class="o">=</span> <span class="n">SeedSequence</span><span class="p">()</span>
+    <span class="n">seeds</span> <span class="o">=</span> <span class="n">sequence</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">stacks</span><span class="p">))</span>
+
     <span class="c1"># Create the child processes</span>
     <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">stacks</span><span class="p">)):</span>
         <span class="n">local_config</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
@@ -2622,7 +2634,7 @@ used to generate a set of child processes to analyze the data range.</p>
         <span class="n">processes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">Process</span><span class="p">(</span>
                 <span class="n">target</span><span class="o">=</span><span class="n">run_spyral</span><span class="p">,</span>
-                <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">local_config</span><span class="p">,</span> <span class="n">stacks</span><span class="p">[</span><span class="n">s</span><span class="p">],</span> <span class="n">queues</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="p">),</span>
+                <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">local_config</span><span class="p">,</span> <span class="n">stacks</span><span class="p">[</span><span class="n">s</span><span class="p">],</span> <span class="n">queues</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="p">,</span> <span class="n">seeds</span><span class="p">[</span><span class="n">s</span><span class="p">]),</span>
                 <span class="n">daemon</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span>

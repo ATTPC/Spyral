@@ -1296,18 +1296,18 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#spyral.core.point_cloud.PointCloud.retrieve_spatial_coordinates" class="md-nav__link">
+  <a href="#spyral.core.point_cloud.PointCloud.remove_illegal_points" class="md-nav__link">
     <span class="md-ellipsis">
-      retrieve_spatial_coordinates()
+      remove_illegal_points()
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#spyral.core.point_cloud.PointCloud.smooth_cloud" class="md-nav__link">
+  <a href="#spyral.core.point_cloud.PointCloud.retrieve_spatial_coordinates" class="md-nav__link">
     <span class="md-ellipsis">
-      smooth_cloud()
+      retrieve_spatial_coordinates()
     </span>
   </a>
   
@@ -2298,18 +2298,18 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#spyral.core.point_cloud.PointCloud.retrieve_spatial_coordinates" class="md-nav__link">
+  <a href="#spyral.core.point_cloud.PointCloud.remove_illegal_points" class="md-nav__link">
     <span class="md-ellipsis">
-      retrieve_spatial_coordinates()
+      remove_illegal_points()
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#spyral.core.point_cloud.PointCloud.smooth_cloud" class="md-nav__link">
+  <a href="#spyral.core.point_cloud.PointCloud.retrieve_spatial_coordinates" class="md-nav__link">
     <span class="md-ellipsis">
-      smooth_cloud()
+      retrieve_spatial_coordinates()
     </span>
   </a>
   
@@ -2486,10 +2486,10 @@ Each row is [x,y,z,amplitude,integral,pad id,time,scale]</p>
             </td>
           </tr>
           <tr>
-            <td><code>smooth_cloud</code></td>
+            <td><code>remove_illegal_points</code></td>
             <td>
               <div class="doc-md-description">
-                <p>Smooth the point cloud data using an neighborhood of radius max_distance</p>
+                <p>Remove any points which lie outside the legal detector bounds in z</p>
               </div>
             </td>
           </tr>
@@ -2698,22 +2698,7 @@ Each row is [x,y,z,amplitude,integral,pad id,time,scale]</p>
 <span class="normal">200</span>
 <span class="normal">201</span>
 <span class="normal">202</span>
-<span class="normal">203</span>
-<span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span>
-<span class="normal">213</span>
-<span class="normal">214</span>
-<span class="normal">215</span>
-<span class="normal">216</span>
-<span class="normal">217</span>
-<span class="normal">218</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">PointCloud</span><span class="p">:</span>
+<span class="normal">203</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">PointCloud</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Representation of a AT-TPC event</span>
 
 <span class="sd">    A PointCloud is a geometric representation of an event in the AT-TPC</span>
@@ -2741,8 +2726,8 @@ Each row is [x,y,z,amplitude,integral,pad id,time,scale]</p>
 <span class="sd">        Get the positional data from the point cloud</span>
 <span class="sd">    calibrate_z_position(micromegas_tb: float, window_tb: float, detector_length: float, ic_correction: float = 0.0)</span>
 <span class="sd">        Calibrate the cloud z-position from the micromegas and window time references</span>
-<span class="sd">    smooth_cloud(max_distance: float = 10.0)</span>
-<span class="sd">        Smooth the point cloud data using an neighborhood of radius max_distance</span>
+<span class="sd">    remove_illegal_points(detector_length: float)</span>
+<span class="sd">        Remove any points which lie outside the legal detector bounds in z</span>
 <span class="sd">    sort_in_z()</span>
 <span class="sd">        Sort the internal point cloud array by z-position</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -2782,7 +2767,7 @@ Each row is [x,y,z,amplitude,integral,pad id,time,scale]</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">count</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
         <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">trace</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">traces</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">trace</span><span class="o">.</span><span class="n">get_number_of_peaks</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">trace</span><span class="o">.</span><span class="n">get_number_of_peaks</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">trace</span><span class="o">.</span><span class="n">get_number_of_peaks</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
                 <span class="k">continue</span>
 
             <span class="n">pid</span> <span class="o">=</span> <span class="n">trace</span><span class="o">.</span><span class="n">hw_id</span><span class="o">.</span><span class="n">pad_id</span>
@@ -2862,6 +2847,7 @@ Each row is [x,y,z,amplitude,integral,pad id,time,scale]</p>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calibrate the cloud z-position from the micromegas and window time references</span>
 
 <span class="sd">        Also applies the ion chamber time correction and electric field correction if given</span>
+<span class="sd">        Trims any points beyond the bounds of the detector (0 to detector length)</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -2886,36 +2872,20 @@ Each row is [x,y,z,amplitude,integral,pad id,time,scale]</p>
             <span class="k">if</span> <span class="n">efield_correction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">efield_correction</span><span class="o">.</span><span class="n">correct_point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
 
-    <span class="k">def</span> <span class="nf">smooth_cloud</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_distance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Smooth the point cloud by averaging over nearest neighbors by distance, weighted by the integrated charge.</span>
-
-<span class="sd">        The neighborhood is defined to be a sphere of radius max_distance centered on the point being considered</span>
-<span class="sd">        This modifies the underlying point cloud array</span>
+    <span class="k">def</span> <span class="nf">remove_illegal_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detector_length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1000.0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove any points which lie outside the legal detector bounds in z</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        max_distance: float</span>
-<span class="sd">            The maximum distance between two neighboring points</span>
+<span class="sd">        detector_length: float</span>
+<span class="sd">            The length of the detector in the same units as the point cloud data</span>
+<span class="sd">            (typically mm)</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">smoothed_cloud</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">):</span>
-            <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">point</span><span class="p">[:</span><span class="mi">3</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">max_distance</span>
-            <span class="p">)</span>
-            <span class="n">neighbors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">neighbors</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="k">continue</span>
-            <span class="c1"># Weight points</span>
-            <span class="n">weighted_average</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">neighbors</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">neighbors</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">])</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">weighted_average</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">):</span>
-                <span class="k">continue</span>
-            <span class="n">smoothed_cloud</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">weighted_average</span>
-        <span class="c1"># Removes duplicate points</span>
-        <span class="n">smoothed_cloud</span> <span class="o">=</span> <span class="n">smoothed_cloud</span><span class="p">[</span><span class="n">smoothed_cloud</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">]</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">indicies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">smoothed_cloud</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">detector_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
         <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span> <span class="o">=</span> <span class="n">smoothed_cloud</span><span class="p">[</span><span class="n">indicies</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">sort_in_z</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Sort the internal point cloud array by the z-coordinate&quot;&quot;&quot;</span>
@@ -3018,7 +2988,8 @@ Each row is [x,y,z,amplitude,integral,pad id,time,scale]</p>
   <div class="doc doc-contents ">
   
       <p>Calibrate the cloud z-position from the micromegas and window time references</p>
-<p>Also applies the ion chamber time correction and electric field correction if given</p>
+<p>Also applies the ion chamber time correction and electric field correction if given
+Trims any points beyond the bounds of the detector (0 to detector length)</p>
 
 
 
@@ -3141,7 +3112,8 @@ Each row is [x,y,z,amplitude,integral,pad id,time,scale]</p>
 <span class="normal">179</span>
 <span class="normal">180</span>
 <span class="normal">181</span>
-<span class="normal">182</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">calibrate_z_position</span><span class="p">(</span>
+<span class="normal">182</span>
+<span class="normal">183</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">calibrate_z_position</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">micromegas_tb</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">window_tb</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -3152,6 +3124,7 @@ Each row is [x,y,z,amplitude,integral,pad id,time,scale]</p>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calibrate the cloud z-position from the micromegas and window time references</span>
 
 <span class="sd">    Also applies the ion chamber time correction and electric field correction if given</span>
+<span class="sd">    Trims any points beyond the bounds of the detector (0 to detector length)</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -3391,7 +3364,7 @@ the pad relative gain correction and the pad time correction</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">count</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
     <span class="n">idx</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">trace</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">traces</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">trace</span><span class="o">.</span><span class="n">get_number_of_peaks</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">trace</span><span class="o">.</span><span class="n">get_number_of_peaks</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">trace</span><span class="o">.</span><span class="n">get_number_of_peaks</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
             <span class="k">continue</span>
 
         <span class="n">pid</span> <span class="o">=</span> <span class="n">trace</span><span class="o">.</span><span class="n">hw_id</span><span class="o">.</span><span class="n">pad_id</span>
@@ -3528,6 +3501,88 @@ the pad relative gain correction and the pad time correction</p>
 
 
 
+<h3 id="spyral.core.point_cloud.PointCloud.remove_illegal_points" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">remove_illegal_points</span><span class="p">(</span><span class="n">detector_length</span><span class="o">=</span><span class="mf">1000.0</span><span class="p">)</span></code>
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Remove any points which lie outside the legal detector bounds in z</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>detector_length</code></td>
+          <td>
+                <code>float</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>The length of the detector in the same units as the point cloud data
+(typically mm)</p>
+            </div>
+          </td>
+          <td>
+                <code>1000.0</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+          <details class="quote">
+            <summary>Source code in <code>spyral/core/point_cloud.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">remove_illegal_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detector_length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1000.0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove any points which lie outside the legal detector bounds in z</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    detector_length: float</span>
+<span class="sd">        The length of the detector in the same units as the point cloud data</span>
+<span class="sd">        (typically mm)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">detector_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
+    <span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
 <h3 id="spyral.core.point_cloud.PointCloud.retrieve_spatial_coordinates" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">retrieve_spatial_coordinates</span><span class="p">()</span></code>
 
@@ -3595,121 +3650,6 @@ the pad relative gain correction and the pad time correction</p>
 
 
 
-<h3 id="spyral.core.point_cloud.PointCloud.smooth_cloud" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">smooth_cloud</span><span class="p">(</span><span class="n">max_distance</span><span class="o">=</span><span class="mf">10.0</span><span class="p">)</span></code>
-
-</h3>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Smooth the point cloud by averaging over nearest neighbors by distance, weighted by the integrated charge.</p>
-<p>The neighborhood is defined to be a sphere of radius max_distance centered on the point being considered
-This modifies the underlying point cloud array</p>
-
-
-
-  <p><strong>Parameters:</strong></p>
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Type</th>
-        <th>Description</th>
-        <th>Default</th>
-      </tr>
-    </thead>
-    <tbody>
-        <tr>
-          <td><code>max_distance</code></td>
-          <td>
-                <code>float</code>
-          </td>
-          <td>
-            <div class="doc-md-description">
-              <p>The maximum distance between two neighboring points</p>
-            </div>
-          </td>
-          <td>
-                <code>10.0</code>
-          </td>
-        </tr>
-    </tbody>
-  </table>
-
-          <details class="quote">
-            <summary>Source code in <code>spyral/core/point_cloud.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">184</span>
-<span class="normal">185</span>
-<span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span>
-<span class="normal">189</span>
-<span class="normal">190</span>
-<span class="normal">191</span>
-<span class="normal">192</span>
-<span class="normal">193</span>
-<span class="normal">194</span>
-<span class="normal">195</span>
-<span class="normal">196</span>
-<span class="normal">197</span>
-<span class="normal">198</span>
-<span class="normal">199</span>
-<span class="normal">200</span>
-<span class="normal">201</span>
-<span class="normal">202</span>
-<span class="normal">203</span>
-<span class="normal">204</span>
-<span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span>
-<span class="normal">211</span>
-<span class="normal">212</span>
-<span class="normal">213</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">smooth_cloud</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_distance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">10.0</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Smooth the point cloud by averaging over nearest neighbors by distance, weighted by the integrated charge.</span>
-
-<span class="sd">    The neighborhood is defined to be a sphere of radius max_distance centered on the point being considered</span>
-<span class="sd">    This modifies the underlying point cloud array</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    max_distance: float</span>
-<span class="sd">        The maximum distance between two neighboring points</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">smoothed_cloud</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">):</span>
-        <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">point</span><span class="p">[:</span><span class="mi">3</span><span class="p">]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">max_distance</span>
-        <span class="p">)</span>
-        <span class="n">neighbors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">neighbors</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="k">continue</span>
-        <span class="c1"># Weight points</span>
-        <span class="n">weighted_average</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">neighbors</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">neighbors</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">])</span>
-        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">weighted_average</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">):</span>
-            <span class="k">continue</span>
-        <span class="n">smoothed_cloud</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">weighted_average</span>
-    <span class="c1"># Removes duplicate points</span>
-    <span class="n">smoothed_cloud</span> <span class="o">=</span> <span class="n">smoothed_cloud</span><span class="p">[</span><span class="n">smoothed_cloud</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">!=</span> <span class="mf">0.0</span><span class="p">]</span>
-    <span class="n">_</span><span class="p">,</span> <span class="n">indicies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span>
-        <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">smoothed_cloud</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span>
-    <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span> <span class="o">=</span> <span class="n">smoothed_cloud</span><span class="p">[</span><span class="n">indicies</span><span class="p">]</span>
-</code></pre></div></td></tr></table></div>
-          </details>
-  </div>
-
-</div>
-
-
-<div class="doc doc-object doc-function">
-
-
-
-
 <h3 id="spyral.core.point_cloud.PointCloud.sort_in_z" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">sort_in_z</span><span class="p">()</span></code>
 
@@ -3722,10 +3662,10 @@ This modifies the underlying point cloud array</p>
 
           <details class="quote">
             <summary>Source code in <code>spyral/core/point_cloud.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">215</span>
-<span class="normal">216</span>
-<span class="normal">217</span>
-<span class="normal">218</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">sort_in_z</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">sort_in_z</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sort the internal point cloud array by the z-coordinate&quot;&quot;&quot;</span>
     <span class="n">indicies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">indicies</span><span class="p">]</span>

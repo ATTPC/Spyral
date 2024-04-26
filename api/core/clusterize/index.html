@@ -2576,7 +2576,7 @@ clustered by HDBSCAN and the clusters are returned.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Smooth out the point cloud by averaging over neighboring points within a distance, droping any duplicate points</span>
-    <span class="n">pc</span><span class="o">.</span><span class="n">smooth_cloud</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">smoothing_neighbor_distance</span><span class="p">)</span>
+    <span class="n">pc</span><span class="o">.</span><span class="n">remove_illegal_points</span><span class="p">()</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pc</span><span class="o">.</span><span class="n">cloud</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">params</span><span class="o">.</span><span class="n">min_cloud_size</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">[]</span>
 
@@ -2586,11 +2586,11 @@ clustered by HDBSCAN and the clusters are returned.</p>
         <span class="n">min_size</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">min_size_lower_cutoff</span>
 
     <span class="c1"># Use spatial dimensions and integrated charge</span>
-    <span class="n">cluster_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pc</span><span class="o">.</span><span class="n">cloud</span><span class="p">),</span> <span class="mi">4</span><span class="p">))</span>
-    <span class="n">cluster_data</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">cloud</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+    <span class="n">cluster_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pc</span><span class="o">.</span><span class="n">cloud</span><span class="p">),</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">cluster_data</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">pc</span><span class="o">.</span><span class="n">cloud</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span>
 
     <span class="c1"># Unfiy feature ranges to their means and have standard variance (1)</span>
-    <span class="n">cluster_data</span> <span class="o">=</span> <span class="n">RobustScaler</span><span class="p">()</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">cluster_data</span><span class="p">)</span>
+    <span class="n">cluster_data</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*=</span> <span class="mf">584.0</span> <span class="o">/</span> <span class="mf">1000.0</span>
 
     <span class="n">clusterizer</span> <span class="o">=</span> <span class="n">skcluster</span><span class="o">.</span><span class="n">HDBSCAN</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
         <span class="n">min_cluster_size</span><span class="o">=</span><span class="n">min_size</span><span class="p">,</span>

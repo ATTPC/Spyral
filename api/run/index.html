@@ -2219,7 +2219,7 @@
 
 
 <h2 id="spyral.run.run_spyral" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">run_spyral</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">run_list</span><span class="p">,</span> <span class="n">queue</span><span class="p">,</span> <span class="n">process_id</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">run_spyral</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">run_list</span><span class="p">,</span> <span class="n">queue</span><span class="p">,</span> <span class="n">process_id</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span></code>
 
 </h2>
 
@@ -2285,13 +2285,26 @@ Typically called by run_spyral_parallel and spawned to a child process.</p>
               <em>required</em>
           </td>
         </tr>
+        <tr>
+          <td><code>seed</code></td>
+          <td>
+                <code><span title="numpy.random.SeedSequence">SeedSequence</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A seed for use in starting a subprocess unique random number generator</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
     </tbody>
   </table>
 
           <details class="quote">
             <summary>Source code in <code>spyral/run.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">15</span>
-<span class="normal">16</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">16</span>
 <span class="normal">17</span>
 <span class="normal">18</span>
 <span class="normal">19</span>
@@ -2342,8 +2355,34 @@ Typically called by run_spyral_parallel and spawned to a child process.</p>
 <span class="normal">64</span>
 <span class="normal">65</span>
 <span class="normal">66</span>
-<span class="normal">67</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">run_spyral</span><span class="p">(</span>
-    <span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span> <span class="n">run_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">queue</span><span class="p">:</span> <span class="n">SimpleQueue</span><span class="p">,</span> <span class="n">process_id</span><span class="p">:</span> <span class="nb">int</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">run_spyral</span><span class="p">(</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span>
+    <span class="n">run_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+    <span class="n">queue</span><span class="p">:</span> <span class="n">SimpleQueue</span><span class="p">,</span>
+    <span class="n">process_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">seed</span><span class="p">:</span> <span class="n">SeedSequence</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Spyral main loop</span>
 
@@ -2358,11 +2397,14 @@ Typically called by run_spyral_parallel and spawned to a child process.</p>
 <span class="sd">        The set of runs for this process</span>
 <span class="sd">    queue: SimpleQueue</span>
 <span class="sd">        A communication channel back to the parent process for monitoring progress</span>
+<span class="sd">    seed: numpy.random.SeedSequence</span>
+<span class="sd">        A seed for use in starting a subprocess unique random number generator</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">ws</span> <span class="o">=</span> <span class="n">Workspace</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">workspace</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">is_legacy</span><span class="p">)</span>
     <span class="n">pad_map</span> <span class="o">=</span> <span class="n">ws</span><span class="o">.</span><span class="n">get_pad_map</span><span class="p">()</span>
     <span class="n">nuclear_map</span> <span class="o">=</span> <span class="n">NuclearDataMap</span><span class="p">()</span>
+    <span class="n">rng</span> <span class="o">=</span> <span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
 
     <span class="n">init_spyral_logger_child</span><span class="p">(</span><span class="n">ws</span><span class="p">,</span> <span class="n">process_id</span><span class="p">)</span>
 
@@ -2374,12 +2416,26 @@ Typically called by run_spyral_parallel and spawned to a child process.</p>
             <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">do_pointcloud</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">config</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">is_legacy</span><span class="p">:</span>
                 <span class="n">spyral_info</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="s2">&quot;Running phase point cloud&quot;</span><span class="p">)</span>
                 <span class="n">phase_pointcloud</span><span class="p">(</span>
-                    <span class="n">idx</span><span class="p">,</span> <span class="n">ws</span><span class="p">,</span> <span class="n">pad_map</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">frib</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">detector</span><span class="p">,</span> <span class="n">queue</span>
+                    <span class="n">idx</span><span class="p">,</span>
+                    <span class="n">ws</span><span class="p">,</span>
+                    <span class="n">pad_map</span><span class="p">,</span>
+                    <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">,</span>
+                    <span class="n">config</span><span class="o">.</span><span class="n">frib</span><span class="p">,</span>
+                    <span class="n">config</span><span class="o">.</span><span class="n">detector</span><span class="p">,</span>
+                    <span class="n">rng</span><span class="p">,</span>
+                    <span class="n">queue</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">do_pointcloud</span><span class="p">:</span>
                 <span class="n">spyral_info</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="s2">&quot;Running phase point cloud with legacy extension&quot;</span><span class="p">)</span>
                 <span class="n">phase_pointcloud_legacy</span><span class="p">(</span>
-                    <span class="n">idx</span><span class="p">,</span> <span class="n">ws</span><span class="p">,</span> <span class="n">pad_map</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">frib</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">detector</span><span class="p">,</span> <span class="n">queue</span>
+                    <span class="n">idx</span><span class="p">,</span>
+                    <span class="n">ws</span><span class="p">,</span>
+                    <span class="n">pad_map</span><span class="p">,</span>
+                    <span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">,</span>
+                    <span class="n">config</span><span class="o">.</span><span class="n">frib</span><span class="p">,</span>
+                    <span class="n">config</span><span class="o">.</span><span class="n">detector</span><span class="p">,</span>
+                    <span class="n">rng</span><span class="p">,</span>
+                    <span class="n">queue</span><span class="p">,</span>
                 <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">do_cluster</span><span class="p">:</span>

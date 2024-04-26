@@ -2348,7 +2348,7 @@
 
 
 <h2 id="spyral.phase_pointcloud.phase_pointcloud" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">phase_pointcloud</span><span class="p">(</span><span class="n">run</span><span class="p">,</span> <span class="n">ws</span><span class="p">,</span> <span class="n">pad_map</span><span class="p">,</span> <span class="n">get_params</span><span class="p">,</span> <span class="n">frib_params</span><span class="p">,</span> <span class="n">detector_params</span><span class="p">,</span> <span class="n">queue</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">phase_pointcloud</span><span class="p">(</span><span class="n">run</span><span class="p">,</span> <span class="n">ws</span><span class="p">,</span> <span class="n">pad_map</span><span class="p">,</span> <span class="n">get_params</span><span class="p">,</span> <span class="n">frib_params</span><span class="p">,</span> <span class="n">detector_params</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">queue</span><span class="p">)</span></code>
 
 </h2>
 
@@ -2451,6 +2451,20 @@ the first phase of Spyral analysis.</p>
           <td>
             <div class="doc-md-description">
               <p>Configuration parameters for physical detector properties</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>rng</code></td>
+          <td>
+                <code><span title="numpy.random.Generator">Generator</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A random number generator for use in the signal analysis</p>
             </div>
           </td>
           <td>
@@ -2690,13 +2704,16 @@ the first phase of Spyral analysis.</p>
 <span class="normal">248</span>
 <span class="normal">249</span>
 <span class="normal">250</span>
-<span class="normal">251</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">phase_pointcloud</span><span class="p">(</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">phase_pointcloud</span><span class="p">(</span>
     <span class="n">run</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">ws</span><span class="p">:</span> <span class="n">Workspace</span><span class="p">,</span>
     <span class="n">pad_map</span><span class="p">:</span> <span class="n">PadMap</span><span class="p">,</span>
     <span class="n">get_params</span><span class="p">:</span> <span class="n">GetParameters</span><span class="p">,</span>
     <span class="n">frib_params</span><span class="p">:</span> <span class="n">FribParameters</span><span class="p">,</span>
     <span class="n">detector_params</span><span class="p">:</span> <span class="n">DetectorParameters</span><span class="p">,</span>
+    <span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">,</span>
     <span class="n">queue</span><span class="p">:</span> <span class="n">SimpleQueue</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The core loop of the pointcloud phase</span>
@@ -2719,6 +2736,8 @@ the first phase of Spyral analysis.</p>
 <span class="sd">        Configuration parameters for FRIBDAQ data signal analysis (ion chamber, silicon, etc.)</span>
 <span class="sd">    detector_params: DetectorParameters</span>
 <span class="sd">        Configuration parameters for physical detector properties</span>
+<span class="sd">    rng: numpy.random.Generator</span>
+<span class="sd">        A random number generator for use in the signal analysis</span>
 <span class="sd">    queue: SimpleQueue</span>
 <span class="sd">        Communication channel back to the parent process</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -2781,7 +2800,7 @@ the first phase of Spyral analysis.</p>
     <span class="n">nevents</span> <span class="o">=</span> <span class="n">max_event</span> <span class="o">-</span> <span class="n">min_event</span>
     <span class="n">total</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">flush_val</span><span class="p">:</span> <span class="nb">int</span>
-    <span class="k">if</span> <span class="n">nevents</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">nevents</span> <span class="o">&lt;</span> <span class="mi">1000</span><span class="p">:</span>
         <span class="n">total</span> <span class="o">=</span> <span class="n">nevents</span>
         <span class="n">flush_val</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">else</span><span class="p">:</span>
@@ -2790,7 +2809,6 @@ the first phase of Spyral analysis.</p>
         <span class="n">total</span> <span class="o">=</span> <span class="mi">100</span>
 
     <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
-
     <span class="n">msg</span> <span class="o">=</span> <span class="n">StatusMessage</span><span class="p">(</span><span class="n">run</span><span class="p">,</span> <span class="n">Phase</span><span class="o">.</span><span class="n">CLOUD</span><span class="p">,</span> <span class="n">total</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># We always increment by 1</span>
 
     <span class="c1"># Process the data</span>
@@ -2806,7 +2824,7 @@ the first phase of Spyral analysis.</p>
         <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
             <span class="k">continue</span>
 
-        <span class="n">event</span> <span class="o">=</span> <span class="n">GetEvent</span><span class="p">(</span><span class="n">event_data</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">get_params</span><span class="p">)</span>
+        <span class="n">event</span> <span class="o">=</span> <span class="n">GetEvent</span><span class="p">(</span><span class="n">event_data</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">get_params</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
 
         <span class="n">pc</span> <span class="o">=</span> <span class="n">PointCloud</span><span class="p">()</span>
         <span class="n">pc</span><span class="o">.</span><span class="n">load_cloud_from_get_event</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">pad_map</span><span class="p">)</span>

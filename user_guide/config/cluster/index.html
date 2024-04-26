@@ -519,15 +519,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#smoothing_neighbor_distancemm" class="md-nav__link">
-    <span class="md-ellipsis">
-      smoothing_neighbor_distance(mm)
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#minimum_points" class="md-nav__link">
     <span class="md-ellipsis">
       minimum_points
@@ -2228,15 +2219,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#smoothing_neighbor_distancemm" class="md-nav__link">
-    <span class="md-ellipsis">
-      smoothing_neighbor_distance(mm)
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#minimum_points" class="md-nav__link">
     <span class="md-ellipsis">
       minimum_points
@@ -2322,7 +2304,6 @@
 <pre><code class="language-json">&quot;Cluster&quot;:
 {
     &quot;min_cloud_size&quot;: 50,
-    &quot;smoothing_neighbor_distance(mm)&quot;: 15.0,
     &quot;minimum_points&quot;: 5,
     &quot;minimum_size_scale_factor&quot;: 0.05,
     &quot;minimum_size_lower_cutoff&quot;: 10,
@@ -2335,8 +2316,6 @@
 <p>A break down of each parameter:</p>
 <h2 id="min_cloud_size">min_cloud_size</h2>
 <p>This is the minimum size a point cloud must be (in number of points) to be sent through the clustering algorithm. Any smaller point clouds will be tossed as noise.</p>
-<h2 id="smoothing_neighbor_distancemm">smoothing_neighbor_distance(mm)</h2>
-<p>The neighborhood search radius in millimeters for the smoothing algorithm. Before data is clustered, it is smoothed by averaging over neighbors. This value should be small to avoid smoothing artifacts. This is a scale-dependent parameter and will need adjusted for each experiment.</p>
 <h2 id="minimum_points">minimum_points</h2>
 <p>The minimum number of samples (points) in a neighborhood for a point to be a core point. This is a re-exposure of the <code>min_samples</code> parameter of <a href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html#sklearn.cluster.HDBSCAN">scikit-learn's HDBSCAN</a>. See their documentation for more details. Larger values will make the algorithm more likely to identify points as noise. See the original <a href="https://hdbscan.readthedocs.io/en/latest/parameter_selection.html#">HDBSCAN docs</a> for details on why this parameter is important and how it can impact the data.</p>
 <h2 id="minimum_size_scale_factor">minimum_size_scale_factor</h2>

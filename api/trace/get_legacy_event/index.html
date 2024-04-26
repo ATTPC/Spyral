@@ -2501,7 +2501,16 @@ of the IC from CoBo 10.</p>
 <span class="normal">114</span>
 <span class="normal">115</span>
 <span class="normal">116</span>
-<span class="normal">117</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">GetLegacyEvent</span><span class="p">:</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">GetLegacyEvent</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class representing a legacy event in the GET DAQ</span>
 
 <span class="sd">    Contains traces (GetTraces) from the AT-TPC pad plane as well</span>
@@ -2521,9 +2530,9 @@ of the IC from CoBo 10.</p>
 
 <span class="sd">    Methods</span>
 <span class="sd">    -------</span>
-<span class="sd">    GetEvent(raw_data: h5py.Dataset, event_number: int, params: GetParameters)</span>
+<span class="sd">    GetEvent(raw_data: h5py.Dataset, event_number: int, params: GetParameters, rng: numpy.random.Generator)</span>
 <span class="sd">        Construct the event and process traces</span>
-<span class="sd">    load_traces(raw_data: h5py.Dataset, event_number: int, params: GetParameters)</span>
+<span class="sd">    load_traces(raw_data: h5py.Dataset, event_number: int, params: GetParameters, rng: numpy.random.Generator)</span>
 <span class="sd">        Process traces</span>
 <span class="sd">    is_valid() -&gt; bool</span>
 <span class="sd">        Check if the event is valid</span>
@@ -2535,6 +2544,7 @@ of the IC from CoBo 10.</p>
         <span class="n">event_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">get_params</span><span class="p">:</span> <span class="n">GetParameters</span><span class="p">,</span>
         <span class="n">ic_params</span><span class="p">:</span> <span class="n">FribParameters</span><span class="p">,</span>
+        <span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Construct the event and process traces</span>
 
@@ -2548,6 +2558,9 @@ of the IC from CoBo 10.</p>
 <span class="sd">            Configuration parameters controlling the GET signal analysis</span>
 <span class="sd">        ic_params: FribParameters</span>
 <span class="sd">            Configuration parameters controlling the ion chamber signal analysis</span>
+<span class="sd">        rng: numpy.random.Generator</span>
+<span class="sd">            A random number generator for use in the signal analysis</span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        GetEvent</span>
@@ -2557,7 +2570,7 @@ of the IC from CoBo 10.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">ic_trace</span><span class="p">:</span> <span class="n">GetTrace</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">INVALID_EVENT_NAME</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">number</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">INVALID_EVENT_NUMBER</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">load_traces</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">event_number</span><span class="p">,</span> <span class="n">get_params</span><span class="p">,</span> <span class="n">ic_params</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_traces</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">event_number</span><span class="p">,</span> <span class="n">get_params</span><span class="p">,</span> <span class="n">ic_params</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">load_traces</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -2565,6 +2578,7 @@ of the IC from CoBo 10.</p>
         <span class="n">event_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">get_params</span><span class="p">:</span> <span class="n">GetParameters</span><span class="p">,</span>
         <span class="n">ic_params</span><span class="p">:</span> <span class="n">FribParameters</span><span class="p">,</span>
+        <span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Process the traces</span>
 
@@ -2578,6 +2592,8 @@ of the IC from CoBo 10.</p>
 <span class="sd">            Configuration parameters controlling the GET signal analysis</span>
 <span class="sd">        ic_params: FribParameters</span>
 <span class="sd">            Configuration parameters controlling the ion chamber signal analysis</span>
+<span class="sd">        rng: numpy.random.Generator</span>
+<span class="sd">            A random number generator for use in the signal analysis</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_data</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">number</span> <span class="o">=</span> <span class="n">event_number</span>
@@ -2586,7 +2602,9 @@ of the IC from CoBo 10.</p>
             <span class="n">get_params</span><span class="o">.</span><span class="n">baseline_window_scale</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">traces</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">GetTrace</span><span class="p">(</span><span class="n">trace_matrix</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">hardware_id_from_array</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]),</span> <span class="n">get_params</span><span class="p">)</span>
+            <span class="n">GetTrace</span><span class="p">(</span>
+                <span class="n">trace_matrix</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">hardware_id_from_array</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]),</span> <span class="n">get_params</span><span class="p">,</span> <span class="n">rng</span>
+            <span class="p">)</span>
             <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">raw_data</span><span class="p">)</span>
         <span class="p">]</span>
         <span class="c1"># Legacy data where external data was stored in CoBo 10 (IC, mesh)</span>
@@ -2627,7 +2645,7 @@ of the IC from CoBo 10.</p>
 
 
 <h3 id="spyral.trace.get_legacy_event.GetLegacyEvent.__init__" class="doc doc-heading">
-          <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">event_number</span><span class="p">,</span> <span class="n">get_params</span><span class="p">,</span> <span class="n">ic_params</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">event_number</span><span class="p">,</span> <span class="n">get_params</span><span class="p">,</span> <span class="n">ic_params</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span></code>
 
 </h3>
 
@@ -2705,6 +2723,20 @@ of the IC from CoBo 10.</p>
               <em>required</em>
           </td>
         </tr>
+        <tr>
+          <td><code>rng</code></td>
+          <td>
+                <code><span title="numpy.random.Generator">Generator</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A random number generator for use in the signal analysis</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
     </tbody>
   </table>
 
@@ -2762,12 +2794,17 @@ of the IC from CoBo 10.</p>
 <span class="normal">67</span>
 <span class="normal">68</span>
 <span class="normal">69</span>
-<span class="normal">70</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">raw_data</span><span class="p">:</span> <span class="n">h5</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
     <span class="n">event_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">get_params</span><span class="p">:</span> <span class="n">GetParameters</span><span class="p">,</span>
     <span class="n">ic_params</span><span class="p">:</span> <span class="n">FribParameters</span><span class="p">,</span>
+    <span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Construct the event and process traces</span>
 
@@ -2781,6 +2818,9 @@ of the IC from CoBo 10.</p>
 <span class="sd">        Configuration parameters controlling the GET signal analysis</span>
 <span class="sd">    ic_params: FribParameters</span>
 <span class="sd">        Configuration parameters controlling the ion chamber signal analysis</span>
+<span class="sd">    rng: numpy.random.Generator</span>
+<span class="sd">        A random number generator for use in the signal analysis</span>
+
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    GetEvent</span>
@@ -2790,7 +2830,7 @@ of the IC from CoBo 10.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">ic_trace</span><span class="p">:</span> <span class="n">GetTrace</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">INVALID_EVENT_NAME</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">number</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">INVALID_EVENT_NUMBER</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">load_traces</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">event_number</span><span class="p">,</span> <span class="n">get_params</span><span class="p">,</span> <span class="n">ic_params</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">load_traces</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">event_number</span><span class="p">,</span> <span class="n">get_params</span><span class="p">,</span> <span class="n">ic_params</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -2804,7 +2844,7 @@ of the IC from CoBo 10.</p>
 
 
 <h3 id="spyral.trace.get_legacy_event.GetLegacyEvent.load_traces" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">load_traces</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">event_number</span><span class="p">,</span> <span class="n">get_params</span><span class="p">,</span> <span class="n">ic_params</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">load_traces</span><span class="p">(</span><span class="n">raw_data</span><span class="p">,</span> <span class="n">event_number</span><span class="p">,</span> <span class="n">get_params</span><span class="p">,</span> <span class="n">ic_params</span><span class="p">,</span> <span class="n">rng</span><span class="p">)</span></code>
 
 </h3>
 
@@ -2882,16 +2922,26 @@ of the IC from CoBo 10.</p>
               <em>required</em>
           </td>
         </tr>
+        <tr>
+          <td><code>rng</code></td>
+          <td>
+                <code><span title="numpy.random.Generator">Generator</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>A random number generator for use in the signal analysis</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
     </tbody>
   </table>
 
           <details class="quote">
             <summary>Source code in <code>spyral/trace/get_legacy_event.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 72</span>
-<span class="normal"> 73</span>
-<span class="normal"> 74</span>
-<span class="normal"> 75</span>
-<span class="normal"> 76</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 76</span>
 <span class="normal"> 77</span>
 <span class="normal"> 78</span>
 <span class="normal"> 79</span>
@@ -2929,12 +2979,22 @@ of the IC from CoBo 10.</p>
 <span class="normal">111</span>
 <span class="normal">112</span>
 <span class="normal">113</span>
-<span class="normal">114</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_traces</span><span class="p">(</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">load_traces</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">raw_data</span><span class="p">:</span> <span class="n">h5</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
     <span class="n">event_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">get_params</span><span class="p">:</span> <span class="n">GetParameters</span><span class="p">,</span>
     <span class="n">ic_params</span><span class="p">:</span> <span class="n">FribParameters</span><span class="p">,</span>
+    <span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Process the traces</span>
 
@@ -2948,6 +3008,8 @@ of the IC from CoBo 10.</p>
 <span class="sd">        Configuration parameters controlling the GET signal analysis</span>
 <span class="sd">    ic_params: FribParameters</span>
 <span class="sd">        Configuration parameters controlling the ion chamber signal analysis</span>
+<span class="sd">    rng: numpy.random.Generator</span>
+<span class="sd">        A random number generator for use in the signal analysis</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_data</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">number</span> <span class="o">=</span> <span class="n">event_number</span>
@@ -2956,7 +3018,9 @@ of the IC from CoBo 10.</p>
         <span class="n">get_params</span><span class="o">.</span><span class="n">baseline_window_scale</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">traces</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="n">GetTrace</span><span class="p">(</span><span class="n">trace_matrix</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">hardware_id_from_array</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]),</span> <span class="n">get_params</span><span class="p">)</span>
+        <span class="n">GetTrace</span><span class="p">(</span>
+            <span class="n">trace_matrix</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">hardware_id_from_array</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">]),</span> <span class="n">get_params</span><span class="p">,</span> <span class="n">rng</span>
+        <span class="p">)</span>
         <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">raw_data</span><span class="p">)</span>
     <span class="p">]</span>
     <span class="c1"># Legacy data where external data was stored in CoBo 10 (IC, mesh)</span>
@@ -3080,16 +3144,7 @@ array, not a reference to an array in an hdf file</p>
 
           <details class="quote">
             <summary>Source code in <code>spyral/trace/get_legacy_event.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span>
-<span class="normal">126</span>
-<span class="normal">127</span>
-<span class="normal">128</span>
-<span class="normal">129</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">129</span>
 <span class="normal">130</span>
 <span class="normal">131</span>
 <span class="normal">132</span>
@@ -3123,7 +3178,16 @@ array, not a reference to an array in an hdf file</p>
 <span class="normal">160</span>
 <span class="normal">161</span>
 <span class="normal">162</span>
-<span class="normal">163</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@njit</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">preprocess_traces</span><span class="p">(</span><span class="n">traces</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">baseline_window_scale</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;JIT-ed Method for pre-cleaning the trace data in bulk before doing trace analysis</span>
 
