@@ -27,15 +27,21 @@ class GetEvent:
 
     Methods
     -------
-    GetEvent(raw_data: h5py.Dataset, event_number: int, params: GetParameters)
+    GetEvent(raw_data: h5py.Dataset, event_number: int, params: GetParameters, rng: numpy.random.Generator)
         Construct the event and process traces
-    load_traces(raw_data: h5py.Dataset, event_number: int, params: GetParameters)
+    load_traces(raw_data: h5py.Dataset, event_number: int, params: GetParameters, rng: numpy.random.Generator)
         Process traces
     is_valid() -> bool
         Check if the event is valid
     """
 
-    def __init__(self, raw_data: h5.Dataset, event_number: int, params: GetParameters):
+    def __init__(
+        self,
+        raw_data: h5.Dataset,
+        event_number: int,
+        params: GetParameters,
+        rng: np.random.Generator,
+    ):
         """Construct the event and process traces
 
         Parameters
@@ -46,6 +52,8 @@ class GetEvent:
             The event number
         params: GetParameters
             Configuration parameters controlling the GET signal analysis
+        rng: numpy.random.Generator
+            A random number generator for use with the signal analysis
 
         Returns
         -------
@@ -55,10 +63,14 @@ class GetEvent:
         self.traces: list[GetTrace] = []
         self.name: str = INVALID_EVENT_NAME
         self.number: int = INVALID_EVENT_NUMBER
-        self.load_traces(raw_data, event_number, params)
+        self.load_traces(raw_data, event_number, params, rng)
 
     def load_traces(
-        self, raw_data: h5.Dataset, event_number: int, params: GetParameters
+        self,
+        raw_data: h5.Dataset,
+        event_number: int,
+        params: GetParameters,
+        rng: np.random.Generator,
     ):
         """Process the traces
 
@@ -70,6 +82,9 @@ class GetEvent:
             The event number
         params: GetParameters
             Configuration parameters controlling the GET signal analysis
+        rng: numpy.random.Generator
+            A random number generator for use with the signal analysis
+
         """
         self.name = str(raw_data.name)
         self.number = event_number
@@ -78,7 +93,7 @@ class GetEvent:
             params.baseline_window_scale,
         )
         self.traces = [
-            GetTrace(trace_matrix[idx], hardware_id_from_array(row[0:5]), params)
+            GetTrace(trace_matrix[idx], hardware_id_from_array(row[0:5]), params, rng)
             for idx, row in enumerate(raw_data)
         ]
 

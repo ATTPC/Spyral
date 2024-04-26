@@ -16,9 +16,11 @@ In some ways AT-TPC data doesn't fit very neatly into many of the clustering alg
 
 HDBSCAN is a modified DBSCAN algorithm; DBSCAN stands for Density-Based Spatial Clustering of Applications wth Noise, and is a powerful clustering algorithm for noisy data. It clusters points based on their density (closeness to neighbors), but it assumes a *global* density. This means that DBSCAN assumes all clusters have the same density of points. As we mentioned before, this is not so good for AT-TPC data which can change density quite a bit. HDBSCAN however does not have this limitation. HDBSCAN scans density values forming clusters over different densities; the way it does this is fairly involved and we direct you to the [scikit-learn docs](https://scikit-learn.org/stable/modules/clustering.html#hdbscan) for more details.
 
-We cluster on four features: the spatial coordinates (x, y, z) and the charge amplitude. Charge is included as this allows us to reject cross talk noise more effectively. However, for some datasets, it may be necessary to turn off the charge feature, particularly if the charge is very noisy. HDBSCAN, as implemented in scikit-learn, is also very fast, which is great because we have to do a lot of clustering!
+We cluster on the spatial coordinates (x, y, z). The z-axis is rescaled to make it the same total length as the x and y coordinates (this helps to avoid giving to much weight to separation on the z-axis). HDBSCAN, as implemented in scikit-learn, is also very fast, which is great because we have to do a lot of clustering!
 
 However, this doesn't perfectly cluster our data right off the bat. HDBSCAN will make clusters over all the densities, but each density will get it's own cluster! This is not exactly what we want; we need to connect these pieces together to form the total trajectory.
+
+Note that, before clustering, we prune the point cloud of any points which lie outside the legal bounds of the detector on the z-axis (i.e. remove all points for which z < 0.0 or z > detector length). This helps us avoid including any extra noise in the algorithm.
 
 The code for this is found in `spyral/core/clusterize.py` in the function `form_clusters`. There are several parameters to HDBSCAN that are exposed in the [configuration](../config/cluster.md) of Spyral.
 

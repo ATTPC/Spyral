@@ -20,6 +20,7 @@ from copy import deepcopy
 from tqdm import tqdm
 from pathlib import Path
 from time import time
+from numpy.random import SeedSequence
 
 
 def generate_shared_resources(config: Config):
@@ -126,6 +127,12 @@ def run_spyral_parallel(config: Config, no_progress: bool = False):
     spyral_info(__name__, f"Run stacks: {stacks}")
     print("Done.")
 
+    # Generate a seed for each process so that the
+    # random number generator in each process is unique
+    # See numpy docs for more details
+    sequence = SeedSequence()
+    seeds = sequence.spawn(len(stacks))
+
     # Create the child processes
     for s in range(0, len(stacks)):
         local_config = deepcopy(config)
@@ -133,7 +140,7 @@ def run_spyral_parallel(config: Config, no_progress: bool = False):
         processes.append(
             Process(
                 target=run_spyral,
-                args=(local_config, stacks[s], queues[-1], s),
+                args=(local_config, stacks[s], queues[-1], s, seeds[s]),
                 daemon=False,
             )
         )

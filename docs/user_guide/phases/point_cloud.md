@@ -47,7 +47,7 @@ This code is entirely contained in `spyral/trace/get_event.py` in the `preproces
 
 Identifying peaks in spectra (traces) can be a tedious, delicate, and time consuming task. Thankfully, it is a common enough problem that someone already solved it. Scipy has a `signal` library that contains the `find_peaks` function. `find_peaks` takes a lot of different arguments that can greatly impact the quality of the peak finding. Chekcout our [configuration](../config/traces.md) description to see which parameters are exposed and what they do.
 
-Once peaks are identified, centroids, amplitudes, integrals are extracted.
+Once peaks are identified, centroids, amplitudes, integrals are extracted. Centroids are smeared within a single time bucket when converted to floating point values for subsequent calculations. This accounts for the binning behavior of sampling the electronic signal.
 
 This code is contained in `spyral/trace/get_trace.py` and `spyral/trace/get_event.py`.
 
@@ -76,6 +76,22 @@ Some additional discussion needs to be had about the behavior of the ion chamber
 ## Legacy Data
 
 In the past, the AT-TPC was not run with a split DAQ. That is, all signals were recorded using the GET data aquisition, including auxilary detectors like the ion chamber. In the configuration, one can indicate to Spyral that legacy data is being analyzed (see [here](../config/run.md)). If this is turned on Spyral assumes that any data in CoBo 10 is exclusively from auxilary detectors. Legacy mappings and corrections are included in the `etc` directory. Legacy IC data is analyzed for peaks using the `FRIB` parameters even though the data is acquired using the GET DAQ (see [here](../config/traces.md)). Legacy analysis is an advanced feature, and requires some experience with using Spyral. This phase is the only phase significantly impacted by legacy analysis.
+
+## Scalers
+
+The FRIBDAQ data does not only contain auxilary detectors. It also contains scalers, or counters. These scalers are readout independently from the main acquisition and represent statistics of the experiment. The most common scaler to use is the downscaled ion chamber trigger, which is a measurement of the total beam count over the course of the experiment. Scalers are read out run by run and are written to the `scaler` directory of the workspace as dataframes in parquet files. The available columns in the dataframe are:
+
+- clock_free: The time ellapsed while running the data acqusition
+- clock_live: The amount of time for which the acquisition is "live" (able to accept triggers)
+- trigger_free: The total number of trigger signals recieved by the acquisition
+- trigger_live: The total number of triggers which acutally cause events in the acquisition
+- ic_sca: The total number of ion chamber signals recieved by the acquisition
+- mesh_sca: The total number of mesh signals recieved by the acquisition
+- si1_cfd: The total number of Si detector 1 signals recieved by the acquisition
+- si2_cfd: The total number of Si detector 2 signals recieved by the acquisition
+- sipm: Unclear
+- ic_ds: The downscaled rate into the ion chamber, typically a factor of 1000
+- ic_cfd: Unclear
 
 ## Final Thoughts
 

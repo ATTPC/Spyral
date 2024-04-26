@@ -23,15 +23,15 @@ class GetTrace:
 
     Methods
     -------
-    GetTrace(data: ndarray, id: HardwareID, params: GetParameters)
+    GetTrace(data: ndarray, id: HardwareID, params: GetParameters, rng: numpy.random.Generator)
         Construct the GetTrace and find peaks
-    set_trace_data(data: ndarray, id: HardwareID, params: GetParameters)
+    set_trace_data(data: ndarray, id: HardwareID, params: GetParameters, rng: numpy.random.Generator)
         Set the trace data and find peaks
     is_valid() -> bool:
         Check if the trace is valid
     get_pad_id() -> int
         Get the pad id for this trace
-    find_peaks(params: GetParameters)
+    find_peaks(params: GetParameters, rng: numpy.random.Generator, rel_height: float)
         Find the peaks in the trace
     get_number_of_peaks() -> int
         Get the number of peaks found in the trace
@@ -39,7 +39,13 @@ class GetTrace:
         Get the peaks found in the trace
     """
 
-    def __init__(self, data: np.ndarray, id: HardwareID, params: GetParameters):
+    def __init__(
+        self,
+        data: np.ndarray,
+        id: HardwareID,
+        params: GetParameters,
+        rng: np.random.Generator,
+    ):
         """Construct the GetTrace and find peaks
 
         Parameters
@@ -50,6 +56,8 @@ class GetTrace:
             The HardwareID for the pad this trace came from
         params: GetParameters
             Configuration parameters controlling the GET signal analysis
+        rng: numpy.random.Generator
+            A random number generator for use in the signal analysis
 
         Returns
         -------
@@ -60,9 +68,15 @@ class GetTrace:
         self.peaks: list[Peak] = []
         self.hw_id: HardwareID = HardwareID()
         if isinstance(data, np.ndarray) and id.pad_id != INVALID_PAD_ID:
-            self.set_trace_data(data, id, params)
+            self.set_trace_data(data, id, params, rng)
 
-    def set_trace_data(self, data: np.ndarray, id: HardwareID, params: GetParameters):
+    def set_trace_data(
+        self,
+        data: np.ndarray,
+        id: HardwareID,
+        params: GetParameters,
+        rng: np.random.Generator,
+    ):
         """Set trace data and find peaks
 
         Parameters
@@ -73,6 +87,8 @@ class GetTrace:
             The HardwareID for the pad this trace came from
         params: GetParameters
             Configuration parameters controlling the GET signal analysis
+        rng: numpy.random.Generator
+            A random number generator for use in the signal analysis
         """
         data_shape = np.shape(data)
         if data_shape[0] != NUMBER_OF_TIME_BUCKETS:
@@ -83,7 +99,7 @@ class GetTrace:
 
         self.trace = data.astype(np.int32)  # Widen the type and sign it
         self.hw_id = id
-        self.find_peaks(params)
+        self.find_peaks(params, rng)
 
     def is_valid(self) -> bool:
         """Check if the trace is valid
@@ -107,16 +123,24 @@ class GetTrace:
         """
         return self.hw_id.pad_id
 
-    def find_peaks(self, params: GetParameters, rel_height: float = 0.95):
+    def find_peaks(
+        self, params: GetParameters, rng: np.random.Generator, rel_height: float = 0.95
+    ):
         """Find the peaks in the trace data
 
         The goal is to determine the centroid location of a signal peak within a given pad trace. Use the find_peaks
         function of scipy.signal to determine peaks. We then use this info to extract peak amplitudes, and integrated charge.
 
+        Note: A random number generator is used to smear the centroids by within their identified time bucket. A time bucket
+        is essentially a bin in time over which the signal is sampled. As such, the peak is identified to be on the interval
+        [centroid, centroid+1). We sample over this interval to make the data represent this uncertainty.
+
         Parameters
         ----------
         params: GetParameters
             Configuration paramters controlling the GET signal analysis
+        rng: numpy.random.Generator
+            A random number generator for use in the signal analysis
         rel_height: float
             The relative height at which the left and right ips points are evaluated. Typically this is
             not needed to be modified, but for some legacy data is necessary
@@ -136,7 +160,7 @@ class GetTrace:
         )
         for idx, p in enumerate(pks):
             peak = Peak()
-            peak.centroid = p
+            peak.centroid = float(p) + rng.random()
             peak.amplitude = float(self.trace[p])
             peak.positive_inflection = int(np.floor(props["left_ips"][idx]))
             peak.negative_inflection = int(np.ceil(props["right_ips"][idx]))

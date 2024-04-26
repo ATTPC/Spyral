@@ -59,7 +59,7 @@ def phase_cluster(
     nevents = max_event - min_event
     total: int
     flush_val: int
-    if nevents < 100:
+    if nevents < 1000:
         total = nevents
         flush_val = 0
     else:
