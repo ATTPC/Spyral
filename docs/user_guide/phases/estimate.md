@@ -12,11 +12,11 @@ That is the goal of the estimation phase: try to find some way to estimate a val
 
 ## How it Works
 
-The estimation phase is probably the most hard-to-read part of the Spyral framework. It is very short; the entirety of the code is in `spyral/core/estimator.py` and the function `estimate_physics`, and only just eclipses 100 lines of code in total. But it does a *lot* of things, and makes a lot of, shall we say, educated guesses about the behavior of the trajectory. In all honesty, it is best to read the code for this section to understand how it works.
+The estimation phase is probably the most hard-to-read part of the Spyral framework. It does a *lot* of things, and makes a lot of, shall we say, educated guesses about the behavior of the trajectory. In all honesty, it is best to read the code for this section to understand how it works.
 
 First, we do some bad trajectory rejection. Trajectories are rejected based on the number of points and their near-ness to the beam axis. If trajectories have too few points or too many points in the beam region, we reject them. These parameters are exposed in the [configuration](../config/estimate.md).
 
-Once we're confident we've idenfied a valid trajectory, we need to smooth the trajectory as a function of z. This is done using smoothing splines in the `Cluster` class. The degree of smoothing is controlled by the [configuration](../config/estimate.md). This operation collapses the cluster data to a set of piecewise polynomaials as a function of z. The reason we need this is to give better estimates of distance along the trajectory. The raw data is too noisy in position and charge to perform accurate line integrals.
+Once we're confident we've idenfied a valid trajectory, we need to smooth the trajectory as a function of z. This is done using smoothing splines in the `Cluster` class. The degree of smoothing is controlled by the [configuration](../config/estimate.md). This operation collapses the cluster data to a set of piecewise polynomaials as a function of z. The reason we need this is to give better estimates of distance along the trajectory. The raw data is too noisy in position and charge to perform accurate line integrals. Note that this smoothing requires the data to be monotonic in z. If the cluster is too parallel to the pad plane, this method will reject those events. In practice this has been found to result in very small loses in stats, but further testing is being done to explore alternatives.
 
 Now, its time to start estimating. First we try to see if the trajectory is going forward (towards the micromegas) or backward (toward the window) by calculating the average &rho; (distance to beam axis) at either end of the trajectory. Due to energy loss, the trajectories in-spiral, so the end with the smaller &rho; is the direction of travel, and the larger is the closest to the reaction vertex.
 
@@ -97,7 +97,7 @@ Gates are drawn using matplotlib. Settings can be altered within the notebook to
 }
 ```
 
-Here the gate is specified to be for protons. A particle ID gate is *required* to move on to the final phase. You do not need to use the notebook to make a particle ID gate. You simply need to have a JSON file of the correct format.
+Here the gate is specified to be for protons. A particle ID gate is *required* to move on to the final phase. You do not need to use the notebook to make a particle ID gate. You simply need to have a JSON file of the correct format. By default the notebook stores the particle ID gate in the `gates` directory of the workspace. This is where the solver will look for the particle ID by default.
 
 The notebook will typically need tweaking from experiment to experiment. The histogram ranges often need extending/shrinking, and the number of bins will vary depending on total statistics. It also gives users a chance to see some of the [spyral-utils](https://github.com/gwm17/spyral-utils/) package (which contains the relevant code for a `ParticleID`), which can be used outside of Spyral to do further analysis.
 

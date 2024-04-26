@@ -17,7 +17,7 @@ The Detector parameters control the hardware setup of the AT-TPC used for the an
 },
 ```
 
-Note that these default values *will not work*. In particular the `electric_field_*_path` parameters must be modified.
+Note that these default values *will not work*. In particular the `electric_field_garfield_path` parameters must be modified.
 
 A break down of each parameter:
 
@@ -51,7 +51,7 @@ The sampling frequency of the GET acquistion. This is used to correlate data bet
 
 ## electric_field_garfield_path
 
-The path to a file containing electron drift calculations from [Garfield++](https://gitlab.cern.ch/garfield/garfieldpp). The default value from `config.json` *is not valid* and should be modified if the `do_electric_field_correction` parameter is set to true. Spyral does ship with an example file in the `etc/` directory, `electrons.txt`. The example file is not always safe to use. It was calculated for 300 Torr of H<sub>2</sub> gas, and as such may not be accurate. It is also not well tested what impact this correction has in various detector configurations.
+The path to a file containing electron drift calculations from [electron_corretion](https://github.com/attpc/electron_correction). The default value from `config.json` *is not valid* and should be modified if the `do_electric_field_correction` parameter is set to true. Spyral does ship with an example file in the `etc/` directory, `electrons.txt`. The example file is not always safe to use. It was calculated for 300 Torr of H<sub>2</sub> gas, and as such may not be accurate. It is also not well tested what impact this correction has in various detector configurations.
 
 ## do_electric_field_correction
 
