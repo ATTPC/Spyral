@@ -60,9 +60,9 @@ class TrackInterpolator:
     ke_bins: int
         The number of kinetic energy bins in the mesh
     polar_min: float
-      The minimum polar angle of the mesh in degrees
+        The minimum polar angle of the mesh in degrees
     polar_max: float
-      The maximum polar angle of the mesh in degrees
+        The maximum polar angle of the mesh in degrees
     polar_bins: int
         The number of polar angle bins in the mesh
     interpolators: ListType[BilinearInterpolator]
@@ -70,38 +70,12 @@ class TrackInterpolator:
 
     Methods
     -------
-    TrackInterpolator(
-        track_path: str,
-        interpolators: ListType[BilinearInterpolator],
-        particle_name: str,
-        gas_name: str,
-        bfield: float,
-        efield: float,
-        ke_min: float,
-        ke_max: float,
-        ke_bins: int,
-        polar_min: float,
-        polar_max: float,
-        polar_bins: int)
+    TrackInterpolator(track_path: str, interpolators: ListType[BilinearInterpolator], particle_name: str, gas_name: str, bfield: float, efield: float, ke_min: float, ke_max: float, ke_bins: int, polar_min: float, polar_max: float, polar_bins: int)
         Construct a TrackInterpolator
-
     get_interpolated_trajectory(vx: float, vy: float, vz: float, polar: float, azim: float, ke: float) -> LinearInterpolator | None
         Given some initial state, get an interpolated trajectory
-
-    check_interpolator(
-        particle: str,
-        bfield: float,
-        efield: float,
-        target: str,
-        ke_min: float,
-        ke_max: float,
-        ke_bins: int,
-        polar_min: float,
-        polar_max: float,
-        polar_bins: int,
-    ) -> bool
+    check_interpolator(particle: str, bfield: float, efield: float, target: str, ke_min: float, ke_max: float, ke_bins: int, polar_min: float, polar_max: float, polar_bins: int) -> bool
         Check if this interpolator matches the given values
-
     check_values_in_range(ke: float, polar: float) -> bool
         Check if the given ke, polar point is within the mesh
     """
