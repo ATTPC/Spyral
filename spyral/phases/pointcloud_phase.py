@@ -82,7 +82,11 @@ class PointcloudPhase(PhaseLike):
         return True
 
     def run(
-        self, payload: PhaseResult, workspace_path: Path, msg_queue: SimpleQueue
+        self,
+        payload: PhaseResult,
+        workspace_path: Path,
+        msg_queue: SimpleQueue,
+        rng: np.random.Generator,
     ) -> PhaseResult:
         # Copy phase_pointcloud.py here
         # Check that the traces exist
@@ -172,7 +176,7 @@ class PointcloudPhase(PhaseLike):
             except Exception:
                 continue
 
-            event = GetEvent(event_data, idx, self.get_params)
+            event = GetEvent(event_data, idx, self.get_params, rng)
 
             pc = PointCloud()
             pc.load_cloud_from_get_event(event, self.pad_map)

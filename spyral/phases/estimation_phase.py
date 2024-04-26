@@ -10,6 +10,7 @@ import h5py as h5
 import polars as pl
 from pathlib import Path
 from multiprocessing import SimpleQueue
+from numpy.random import Generator
 
 
 class EstimationPhase(PhaseLike):
@@ -24,7 +25,11 @@ class EstimationPhase(PhaseLike):
         return True
 
     def run(
-        self, payload: PhaseResult, workspace_path: Path, msg_queue: SimpleQueue
+        self,
+        payload: PhaseResult,
+        workspace_path: Path,
+        msg_queue: SimpleQueue,
+        rng: Generator,
     ) -> PhaseResult:
         # Check that clusters exist
         cluster_path = payload.artifact_path

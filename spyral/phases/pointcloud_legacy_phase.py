@@ -80,7 +80,11 @@ class PointcloudLegacyPhase(PhaseLike):
         return True
 
     def run(
-        self, payload: PhaseResult, workspace_path: Path, msg_queue: SimpleQueue
+        self,
+        payload: PhaseResult,
+        workspace_path: Path,
+        msg_queue: SimpleQueue,
+        rng: np.random.Generator,
     ) -> PhaseResult:
         trace_path = payload.artifact_path
         if not trace_path.exists():
@@ -146,7 +150,9 @@ class PointcloudLegacyPhase(PhaseLike):
             except Exception:
                 continue
 
-            event = GetLegacyEvent(event_data, idx, self.get_params, self.frib_params)
+            event = GetLegacyEvent(
+                event_data, idx, self.get_params, self.frib_params, rng
+            )
 
             pc = PointCloud()
             pc.load_cloud_from_get_event(event, self.pad_map)

@@ -21,6 +21,7 @@ import h5py as h5
 import polars as pl
 from pathlib import Path
 from multiprocessing import SimpleQueue
+from numpy.random import Generator
 
 
 def form_physics_file_name(run_number: int, particle: ParticleID) -> str:
@@ -81,7 +82,11 @@ class InterpSolverPhase(PhaseLike):
         return True
 
     def run(
-        self, payload: PhaseResult, workspace_path: Path, msg_queue: SimpleQueue
+        self,
+        payload: PhaseResult,
+        workspace_path: Path,
+        msg_queue: SimpleQueue,
+        rng: Generator,
     ) -> PhaseResult:
         # Need particle ID and target to select the correct data subset/interpolation scheme
         pid: ParticleID | None = deserialize_particle_id(

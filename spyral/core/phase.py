@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from pathlib import Path
 from multiprocessing import SimpleQueue
+from numpy.random import Generator
 
 
 @dataclass
@@ -19,7 +20,11 @@ class PhaseLike(ABC):
 
     @abstractmethod
     def run(
-        self, payload: PhaseResult, workspace_path: Path, msg_queue: SimpleQueue
+        self,
+        payload: PhaseResult,
+        workspace_path: Path,
+        msg_queue: SimpleQueue,
+        rng: Generator,
     ) -> PhaseResult:
         raise NotImplementedError
 

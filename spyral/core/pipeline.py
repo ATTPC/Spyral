@@ -7,6 +7,7 @@ from tqdm import tqdm
 from pathlib import Path
 from multiprocessing import SimpleQueue, Process
 from copy import deepcopy
+from numpy.random import SeedSequence, default_rng
 
 
 class Pipeline:
@@ -24,8 +25,11 @@ class Pipeline:
                 return False
         return True
 
-    def run(self, run_list: list[int], msg_queue: SimpleQueue) -> None:
+    def run(
+        self, run_list: list[int], msg_queue: SimpleQueue, seed: SeedSequence
+    ) -> None:
 
+        rng = default_rng(seed=seed)
         for run in run_list:
             result = PhaseResult(
                 Path(self.traces / f"{form_run_string(run)}.h5"), True, run
@@ -33,14 +37,18 @@ class Pipeline:
             if not result.artifact_path.exists():
                 continue
             for phase in self.phases:
-                result = phase.run(result, self.workspace, msg_queue)
+                result = phase.run(result, self.workspace, msg_queue, rng)
 
 
 def _run_pipeline(
-    pipeline: Pipeline, run_list: list[int], msg_queue: SimpleQueue, process_id: int
+    pipeline: Pipeline,
+    run_list: list[int],
+    msg_queue: SimpleQueue,
+    seed: SeedSequence,
+    process_id: int,
 ) -> None:
     init_spyral_logger_child(pipeline.workspace, process_id)
-    pipeline.run(run_list, msg_queue)
+    pipeline.run(run_list, msg_queue, seed)
 
 
 def start_pipeline(
@@ -57,10 +65,13 @@ def start_pipeline(
 
     stacks = create_run_stacks(pipeline.traces, run_min, run_max, n_procs)
 
+    seq = SeedSequence()
+
     queues: list[SimpleQueue] = []
     processes: list[Process] = []
     pbars: list[tqdm] = []
     active_phases: list[str] = []
+    seeds = seq.spawn(len(stacks))
 
     # Create the child processes
     for s in range(0, len(stacks)):
@@ -69,7 +80,7 @@ def start_pipeline(
         processes.append(
             Process(
                 target=_run_pipeline,
-                args=(local_pipeline, stacks[s], queues[-1], s),
+                args=(local_pipeline, stacks[s], queues[-1], seeds[s], s),
                 daemon=False,
             )
         )
