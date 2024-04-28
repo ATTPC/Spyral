@@ -5,6 +5,7 @@ from ..core.cluster import Cluster
 from ..core.estimator import estimate_physics
 from ..core.spy_log import spyral_warn, spyral_error, spyral_info
 from ..core.run_stacks import form_run_string
+from .schema import CLUSTER_SCHEMA, ESTIMATE_SCHEMA
 
 import h5py as h5
 import polars as pl
@@ -17,7 +18,11 @@ class EstimationPhase(PhaseLike):
     def __init__(
         self, estimate_params: EstimateParameters, det_params: DetectorParameters
     ):
-        super().__init__("Estimation")
+        super().__init__(
+            "Estimation",
+            incoming_schema=CLUSTER_SCHEMA,
+            outgoing_schema=ESTIMATE_SCHEMA,
+        )
         self.estimate_params = estimate_params
         self.det_params = det_params
 

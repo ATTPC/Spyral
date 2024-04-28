@@ -13,6 +13,7 @@ from ..core.estimator import Direction
 from ..interpolate.track_interpolator import create_interpolator
 from ..solvers.guess import Guess
 from ..solvers.solver_interp import solve_physics_interp
+from .schema import ESTIMATE_SCHEMA, INTERP_SOLVER_SCHEMA
 
 from spyral_utils.nuclear.target import load_target, GasTarget
 from spyral_utils.nuclear.particle_id import deserialize_particle_id, ParticleID
@@ -30,7 +31,11 @@ def form_physics_file_name(run_number: int, particle: ParticleID) -> str:
 
 class InterpSolverPhase(PhaseLike):
     def __init__(self, solver_params: SolverParameters, det_params: DetectorParameters):
-        super().__init__("InterpSolver")
+        super().__init__(
+            "InterpSolver",
+            incoming_schema=ESTIMATE_SCHEMA,
+            outgoing_schema=INTERP_SOLVER_SCHEMA,
+        )
         self.solver_params = solver_params
         self.det_params = det_params
         self.nuclear_map = NuclearDataMap()

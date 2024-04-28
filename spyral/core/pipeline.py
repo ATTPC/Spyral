@@ -1,6 +1,6 @@
 from .run_stacks import form_run_string, create_run_stacks
 from .status_message import StatusMessage
-from .phase import PhaseLike, PhaseResult
+from .phase import PhaseLike, PhaseResult, ArtifactSchema
 from .spy_log import init_spyral_logger_parent, init_spyral_logger_child
 
 from tqdm import tqdm
@@ -24,6 +24,15 @@ class Pipeline:
             if not phase.create_assets(self.workspace):
                 return False
         return True
+
+    def validate(self) -> dict[str, bool]:
+        # First phase can't be validated, only user can control initial incoming format
+        schema = self.phases[0].outgoing_schema
+        success: dict[str, bool] = {}
+        for idx, phase in enumerate(self.phases[1:]):
+            test, schema = phase.validate(schema)
+            success[f"{self.phases[idx]}->{phase}"] = test
+        return success
 
     def run(
         self, run_list: list[int], msg_queue: SimpleQueue, seed: SeedSequence
@@ -62,6 +71,12 @@ def start_pipeline(
     init_spyral_logger_parent(pipeline.workspace)
 
     pipeline.create_assets()
+    result = pipeline.validate()
+    if False in result.values():
+        print("Pipeline validation failed!")
+        print(f"Status: {result}")
+        return
+    print("Pipeline successfully validated.")
 
     stacks = create_run_stacks(pipeline.traces, run_min, run_max, n_procs)
 

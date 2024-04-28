@@ -5,6 +5,7 @@ from ..core.point_cloud import PointCloud
 from ..core.clusterize import form_clusters, join_clusters, cleanup_clusters
 from ..core.spy_log import spyral_warn, spyral_error, spyral_info
 from ..core.run_stacks import form_run_string
+from .schema import POINTCLOUD_SCHEMA, CLUSTER_SCHEMA
 
 import h5py as h5
 from pathlib import Path
@@ -17,7 +18,9 @@ class ClusterPhase(PhaseLike):
     def __init__(
         self, cluster_params: ClusterParameters, det_params: DetectorParameters
     ) -> None:
-        super().__init__("Cluster")
+        super().__init__(
+            "Cluster", incoming_schema=POINTCLOUD_SCHEMA, outgoing_schema=CLUSTER_SCHEMA
+        )
         self.cluster_params = cluster_params
         self.det_params = det_params
 

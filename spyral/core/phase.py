@@ -3,6 +3,16 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from multiprocessing import SimpleQueue
 from numpy.random import Generator
+from typing import Any, Self
+
+
+@dataclass
+class ArtifactSchema:
+    extension: str
+    structure: list[str] | dict[str, Any] | None
+
+    def __eq__(self, value: Self) -> bool:
+        return self.extension == value.extension and self.structure == value.structure
 
 
 @dataclass
@@ -15,8 +25,18 @@ class PhaseResult:
 
 class PhaseLike(ABC):
 
-    def __init__(self, name: str):
+    def __init__(
+        self,
+        name: str,
+        incoming_schema: ArtifactSchema | None = None,
+        outgoing_schema: ArtifactSchema | None = None,
+    ):
         self.name = name
+        self.incoming_schema = incoming_schema
+        self.outgoing_schema = outgoing_schema
+
+    def __str__(self) -> str:
+        return f"{self.name}Phase"
 
     @abstractmethod
     def run(
@@ -26,6 +46,10 @@ class PhaseLike(ABC):
         msg_queue: SimpleQueue,
         rng: Generator,
     ) -> PhaseResult:
+        raise NotImplementedError
+
+    @abstractmethod
+    def create_assets(self, workspace_path: Path) -> bool:
         raise NotImplementedError
 
     def get_artifact_path(self, workspace_path: Path) -> Path:
@@ -40,6 +64,12 @@ class PhaseLike(ABC):
             path.mkdir()
         return path
 
-    @abstractmethod
-    def create_assets(self, workspace_path: Path) -> bool:
-        raise NotImplementedError
+    def validate(
+        self, incoming: ArtifactSchema | None
+    ) -> tuple[bool, ArtifactSchema | None]:
+        success = (
+            incoming is None
+            or self.incoming_schema is None
+            or self.incoming_schema == incoming
+        )
+        return (success, self.outgoing_schema)

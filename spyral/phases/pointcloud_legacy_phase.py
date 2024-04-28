@@ -11,6 +11,7 @@ from ..core.spy_log import spyral_warn, spyral_error, spyral_info
 from ..core.pad_map import PadMap
 from ..trace.get_legacy_event import GetLegacyEvent
 from ..core.point_cloud import PointCloud
+from .schema import TRACE_SCHEMA, POINTCLOUD_SCHEMA
 
 import h5py as h5
 import numpy as np
@@ -51,7 +52,11 @@ class PointcloudLegacyPhase(PhaseLike):
         pad_gain_path: Path,
         pad_scale_path: Path,
     ):
-        super().__init__("PointcloudLegacy")
+        super().__init__(
+            "PointcloudLegacy",
+            incoming_schema=TRACE_SCHEMA,
+            outgoing_schema=POINTCLOUD_SCHEMA,
+        )
         self.get_params = get_params
         self.frib_params = frib_params
         self.det_params = detector_params

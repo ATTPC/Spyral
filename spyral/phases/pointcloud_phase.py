@@ -13,6 +13,7 @@ from ..trace.get_event import GetEvent
 from ..trace.frib_event import FribEvent
 from ..trace.frib_scalers import process_scalers
 from ..core.point_cloud import PointCloud
+from .schema import TRACE_SCHEMA, POINTCLOUD_SCHEMA
 
 import h5py as h5
 import numpy as np
@@ -53,7 +54,11 @@ class PointcloudPhase(PhaseLike):
         pad_gain_path: Path,
         pad_scale_path: Path,
     ):
-        super().__init__("Pointcloud")
+        super().__init__(
+            "Pointcloud",
+            incoming_schema=TRACE_SCHEMA,
+            outgoing_schema=POINTCLOUD_SCHEMA,
+        )
         self.get_params = get_params
         self.frib_params = frib_params
         self.det_params = detector_params
