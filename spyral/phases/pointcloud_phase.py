@@ -1,7 +1,12 @@
 from ..core.phase import PhaseLike, PhaseResult
 from ..core.run_stacks import form_run_string
 from ..core.status_message import StatusMessage
-from ..core.config import FribParameters, GetParameters, DetectorParameters
+from ..core.config import (
+    FribParameters,
+    GetParameters,
+    DetectorParameters,
+    PadParameters,
+)
 from ..correction import (
     generate_electron_correction,
     create_electron_corrector,
@@ -48,11 +53,7 @@ class PointcloudPhase(PhaseLike):
         get_params: GetParameters,
         frib_params: FribParameters,
         detector_params: DetectorParameters,
-        pad_geometry_path: Path,
-        pad_electronics_path: Path,
-        pad_time_path: Path,
-        pad_gain_path: Path,
-        pad_scale_path: Path,
+        pad_params: PadParameters,
     ):
         super().__init__(
             "Pointcloud",
@@ -62,13 +63,7 @@ class PointcloudPhase(PhaseLike):
         self.get_params = get_params
         self.frib_params = frib_params
         self.det_params = detector_params
-        self.pad_map = PadMap(
-            pad_geometry_path,
-            pad_gain_path,
-            pad_time_path,
-            pad_electronics_path,
-            pad_scale_path,
-        )
+        self.pad_map = PadMap(pad_params)
 
     def create_assets(self, workspace_path: Path) -> bool:
         asset_path = self.get_asset_storage_path(workspace_path)

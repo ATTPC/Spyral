@@ -6,6 +6,7 @@ from .core.pipeline import (
     ArtifactSchema,
 )
 from .core.config import (
+    PadParameters,
     GetParameters,
     FribParameters,
     DetectorParameters,

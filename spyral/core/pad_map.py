@@ -1,5 +1,6 @@
 from .constants import INVALID_PAD_ID
 from .hardware_id import HardwareID, generate_electronics_id
+from .config import PadParameters
 from pathlib import Path
 from dataclasses import dataclass, field
 
@@ -57,28 +58,13 @@ class PadMap:
 
     """
 
-    def __init__(
-        self,
-        geometry_path: Path,
-        gain_path: Path,
-        time_correction_path: Path,
-        electronics_path: Path,
-        scale_path: Path,
-    ):
+    def __init__(self, params: PadParameters):
         """Construct the PadMap
 
         Parameters
         ----------
-        geometry_path: Path
-            Path to a csv file containing pad geometry
-        gain_path: Path
-            Path to a csv file containing pad relative gains
-        time_correction_path: Path
-            Path to a csv file containing pad time offsets
-        electronics_path: Path
-            Path to a csv file containing pad hardware identifiers
-        scale_path: Path
-            Path to a csv file containing pad relative scales
+        params: PadParameters
+            Paths to map files
 
         Returns
         -------
@@ -87,53 +73,36 @@ class PadMap:
         """
         self.map: dict[int, PadData] = {}
         self.elec_map: dict[int, int] = {}
-        self.load(
-            geometry_path, gain_path, time_correction_path, electronics_path, scale_path
-        )
+        self.load(params)
 
-    def load(
-        self,
-        geometry_path: Path,
-        gain_path: Path,
-        time_correction_path: Path,
-        electronics_path: Path,
-        scale_path: Path,
-    ):
+    def load(self, params: PadParameters):
         """Load the map data
 
         Parameters
         ----------
-        geometry_path: Path
-            Path to a csv file containing pad geometry
-        gain_path: Path
-            Path to a csv file containing pad relative gains
-        time_correction_path: Path
-            Path to a csv file containing pad time offsets
-        electronics_path: Path
-            Path to a csv file containing pad hardware identifiers
-        scale_path: Path
-            Path to a csv file containing pad relative scales
+        params: PadParameters
+            Paths to map files
         """
-        with open(geometry_path, "r") as geofile:
+        with open(params.pad_geometry_path, "r") as geofile:
             geofile.readline()  # Remove header
             lines = geofile.readlines()
             for pad_number, line in enumerate(lines):
                 entries = line.split(",")
                 self.map[pad_number] = PadData(x=float(entries[0]), y=float(entries[1]))
-        with open(gain_path, "r") as gainfile:
+        with open(params.pad_gain_path, "r") as gainfile:
             gainfile.readline()
             lines = gainfile.readlines()
             for pad_number, line in enumerate(lines):
                 entries = line.split(",")
                 self.map[pad_number].gain = float(entries[0])
-        with open(time_correction_path, "r") as timefile:
+        with open(params.pad_time_path, "r") as timefile:
             timefile.readline()
             lines = timefile.readlines()
             for pad_number, line in enumerate(lines):
                 entries = line.split(",")
                 self.map[pad_number].time_offset = float(entries[0])
 
-        with open(electronics_path, "r") as elecfile:
+        with open(params.pad_electronics_path, "r") as elecfile:
             elecfile.readline()
             lines = elecfile.readlines()
             for line in lines:
@@ -148,7 +117,7 @@ class PadMap:
                 self.map[hardware.pad_id].hardware = hardware
                 self.elec_map[generate_electronics_id(hardware)] = hardware.pad_id
 
-        with open(scale_path, "r") as scalefile:
+        with open(params.pad_scale_path, "r") as scalefile:
             scalefile.readline()
             lines = scalefile.readlines()
             for pad_number, line in enumerate(lines):
