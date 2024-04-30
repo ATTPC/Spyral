@@ -1,4 +1,4 @@
-from .constants import MEV_2_JOULE, MEV_2_KG, C, E_CHARGE
+from .constants import MEV_2_JOULE, MEV_2_KG, C, E_CHARGE, AMU_2_MEV
 from ..interpolate import LinearInterpolator
 
 from spyral_utils.nuclear import NucleusData
@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from scipy.integrate import solve_ivp
 from pathlib import Path
 import json
+import pycatima as catima
 
 
 COARSE_TIME_WINDOW: float = 1.0e-6  # 1us window
@@ -156,29 +157,30 @@ def equation_of_motion(
         the derivatives of the state
     """
 
-    momentum = math.sqrt(state[3] ** 2.0 + state[4] ** 2.0 + state[5] ** 2.0)
-    mass_kg = ejectile.mass * MEV_2_KG
-    p_m = momentum / mass_kg
-    speed = math.sqrt(p_m**2.0 / (1.0 + (p_m * 1.0 / C) ** 2.0))
+    gv = math.sqrt(state[3] ** 2.0 + state[4] ** 2.0 + state[5] ** 2.0)
+    beta = math.sqrt(gv**2.0 / (1.0 + gv**2.0))
+    gamma = gv / beta
 
-    unit_vector = state[3:] / momentum  # direction
-    velo = unit_vector * speed
-    kinetic_energy = ejectile.mass * (
-        1.0 / math.sqrt(1.0 - (speed / C) ** 2.0) - 1.0
-    )  # MeV
+    unit_vector = state[3:] / gv  # direction
+    velo = unit_vector * beta * C  # convert to m/s
+    kinetic_energy = ejectile.mass * (gamma - 1.0)  # MeV
 
     charge_c = ejectile.Z * E_CHARGE
+    mass_kg = ejectile.mass * MEV_2_KG
+    q_m = charge_c / mass_kg
 
     deceleration = (
         target.get_dedx(ejectile, kinetic_energy) * MEV_2_JOULE * target.density * 100.0
-    )
+    ) / mass_kg
     results = np.zeros(6)
     results[0] = velo[0]
     results[1] = velo[1]
     results[2] = velo[2]
-    results[3] = charge_c * velo[1] * Bfield - deceleration * unit_vector[0]
-    results[4] = charge_c * (-1.0 * velo[0] * Bfield) - deceleration * unit_vector[1]
-    results[5] = charge_c * Efield - deceleration * unit_vector[2]
+    results[3] = (q_m * gamma * velo[1] * Bfield - deceleration * unit_vector[0]) / C
+    results[4] = (
+        q_m * gamma * (-1.0 * velo[0] * Bfield) - deceleration * unit_vector[1]
+    ) / C
+    results[5] = (q_m * gamma * Efield - deceleration * unit_vector[2]) / C
 
     return results
 
@@ -220,14 +222,15 @@ def stop_condition(
         this function returns zero the termination condition has been reached.
 
     """
-    momentum = math.sqrt(state[3] ** 2.0 + state[4] ** 2.0 + state[5] ** 2.0)
-    mass_kg = ejectile.mass * MEV_2_KG
-    p_m = momentum / mass_kg
-    speed = math.sqrt(p_m**2.0 / (1.0 + (p_m * 1.0 / C) ** 2.0))
-    kinetic_energy = ejectile.mass * (
-        1.0 / math.sqrt(1.0 - (speed / C) ** 2.0) - 1.0
-    )  # MeV
-    return kinetic_energy - KE_LIMIT
+    gv = math.sqrt(state[3] ** 2.0 + state[4] ** 2.0 + state[5] ** 2.0)
+    beta = math.sqrt(gv**2.0 / (1.0 + gv**2.0))
+    gamma = gv / beta
+    kinetic_energy = ejectile.mass * (gamma - 1.0)  # MeV
+    # return kinetic_energy - KE_LIMIT
+    mass_u = ejectile.mass / AMU_2_MEV
+    proj = catima.Projectile(mass_u, ejectile.Z)  # type: ignore
+    proj.T(kinetic_energy / mass_u)
+    return catima.calculate(proj, target.material).range / target.density * 0.01 - KE_LIMIT  # type: ignore
 
 
 # These function sigs must match the ODE function
@@ -267,7 +270,7 @@ def forward_z_bound_condition(
         this function returns zero the termination condition has been reached.
 
     """
-    return state[2] - 1.0
+    return np.round(state[2] - 1.0, decimals=3)
 
 
 # These function sigs must match the ODE function
@@ -307,7 +310,7 @@ def backward_z_bound_condition(
         this function returns zero the termination condition has been reached.
 
     """
-    return state[2] + 1.0
+    return np.round(state[2] + 1.0, decimals=3)
 
 
 # These function sigs must match the ODE function
@@ -349,7 +352,7 @@ def rho_bound_condition(
         this function returns zero the termination condition has been reached.
 
     """
-    return float(np.linalg.norm(state[:2])) - 0.332
+    return np.round(float(np.linalg.norm(state[:2])) - 0.332, decimals=3)
 
 
 def generate_track_mesh(params: MeshParameters, track_path: Path):
@@ -398,6 +401,8 @@ def generate_track_mesh(params: MeshParameters, track_path: Path):
     flush_count = 0
 
     longest_time = 0.0
+    assoc_e = 0.0
+    assoc_p = 0.0
 
     # Set the conditions to be terminal for a given direction (approaching from positive or negative slope)
     # See scipy docs for details
@@ -412,7 +417,6 @@ def generate_track_mesh(params: MeshParameters, track_path: Path):
 
     print("Optimizing time range...")
 
-    mass_kg = params.particle.mass * MEV_2_KG
     # First narrow the time range to the relevant size for the problem
     for eidx, e in enumerate(kes):
         for pidx, p in enumerate(polars):
@@ -425,17 +429,22 @@ def generate_track_mesh(params: MeshParameters, track_path: Path):
                     end="",
                 )
 
+            # e = 5.908309455587393
+            # p = 1.3339604361757873
+            # print(f"e: {e}")
+            # print(f"p: {p}")
             initial_state[:] = 0.0
+
             gamma = e / params.particle.mass + 1.0
-            speed = math.sqrt(1.0 - 1.0 / (gamma**2.0)) * C
-            momentum = gamma * mass_kg * speed
-            initial_state[3] = momentum * math.sin(p)
-            initial_state[5] = momentum * math.cos(p)
+            speed = math.sqrt(1.0 - 1.0 / (gamma**2.0))
+            gv = gamma * speed
+            initial_state[3] = gv * math.sin(p)
+            initial_state[5] = gv * math.cos(p)
             result = solve_ivp(
                 equation_of_motion,
                 (0.0, COARSE_TIME_WINDOW),
                 initial_state,
-                method="RK45",
+                method="Radau",
                 events=[
                     stop_condition,
                     forward_z_bound_condition,
@@ -443,11 +452,27 @@ def generate_track_mesh(params: MeshParameters, track_path: Path):
                     rho_bound_condition,
                 ],
                 args=(bfield, efield, params.target, params.particle),
+                # max_step=1.0e-7,
             )
+            vals = result.y.T
+            gv = np.linalg.norm(vals[:, 3:], axis=1)
+            beta = np.sqrt(gv**2.0 / (1.0 + gv**2.0))
+            rhos = np.linalg.norm(vals[:, :2], axis=1)
+            # print(f"Betas: {beta}")
+            # print(f"rhos: {rhos}")
+            # print(f"zs: {vals[:, 2]}")
+            # print(f"times: {result.t}")
+            # print(f"Status: {result.t_events}")
+            # print(f"Time: {result.t[-1]}")
+            # return
+            prev_t = longest_time
             longest_time = max(longest_time, result.t[-1])
+            if longest_time != prev_t:
+                assoc_e = e
+                assoc_p = p
 
     print("")
-    print(f"Estimated time window: {longest_time}")
+    print(f"Estimated time window: {longest_time} for e: {assoc_e} p: {assoc_p}")
     time_steps = np.geomspace(1.0e-11, longest_time, num=params.n_time_steps)
     # time_steps = np.linspace(0.0, longest_time, num=params.n_time_steps)
     flush_count = 0
@@ -467,15 +492,15 @@ def generate_track_mesh(params: MeshParameters, track_path: Path):
 
             initial_state[:] = 0.0
             gamma = e / params.particle.mass + 1.0
-            speed = math.sqrt(1.0 - 1.0 / (gamma**2.0)) * C
-            momentum = gamma * mass_kg * speed
-            initial_state[3] = momentum * math.sin(p)
-            initial_state[5] = momentum * math.cos(p)
+            speed = math.sqrt(1.0 - 1.0 / (gamma**2.0))
+            gv = gamma * speed
+            initial_state[3] = gv * math.sin(p)
+            initial_state[5] = gv * math.cos(p)
             result = solve_ivp(
                 equation_of_motion,
                 (0.0, longest_time),
                 initial_state,
-                method="RK45",
+                method="Radau",
                 events=[
                     stop_condition,
                     forward_z_bound_condition,
