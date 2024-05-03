@@ -1,4 +1,4 @@
-from .constants import MEV_2_JOULE, MEV_2_KG, C, E_CHARGE
+from .constants import MEV_2_JOULE, MEV_2_KG, C, E_CHARGE, AMU_2_MEV
 from ..interpolate import LinearInterpolator
 
 from spyral_utils.nuclear import NucleusData
@@ -10,10 +10,11 @@ from dataclasses import dataclass
 from scipy.integrate import solve_ivp
 from pathlib import Path
 import json
+import pycatima as catima
 
 
 COARSE_TIME_WINDOW: float = 1.0e-6  # 1us window
-KE_LIMIT = 0.001
+RANGE_LIMIT = 0.001  # meters
 DEG2RAD: float = np.pi / 180.0
 
 
@@ -140,7 +141,7 @@ def equation_of_motion(
     t: float
         time step
     state: ndarray
-        the state of the particle (x,y,z,vx,vy,vz)
+        the state of the particle (x,y,z,gvx,gvy,gvz)
     Bfield: float
         the magnitude of the magnetic field
     Efield: float
@@ -156,27 +157,28 @@ def equation_of_motion(
         the derivatives of the state
     """
 
-    speed = math.sqrt(state[3] ** 2.0 + state[4] ** 2.0 + state[5] ** 2.0)
+    gv = math.sqrt(state[3] ** 2.0 + state[4] ** 2.0 + state[5] ** 2.0)
+    beta = math.sqrt(gv**2.0 / (1.0 + gv**2.0))
+    gamma = gv / beta
 
-    unit_vector = state[3:] / speed  # direction
-    kinetic_energy = ejectile.mass * (
-        1.0 / math.sqrt(1.0 - (speed / C) ** 2.0) - 1.0
-    )  # MeV
+    unit_vector = state[3:] / gv  # direction
+    velo = unit_vector * beta * C  # convert to m/s
+    kinetic_energy = ejectile.mass * (gamma - 1.0)  # MeV
 
-    mass_kg = ejectile.mass * MEV_2_KG
     charge_c = ejectile.Z * E_CHARGE
-    qm = charge_c / mass_kg
+    mass_kg = ejectile.mass * MEV_2_KG
+    q_m = charge_c / mass_kg
 
     deceleration = (
         target.get_dedx(ejectile, kinetic_energy) * MEV_2_JOULE * target.density * 100.0
     ) / mass_kg
     results = np.zeros(6)
-    results[0] = state[3]
-    results[1] = state[4]
-    results[2] = state[5]
-    results[3] = qm * state[4] * Bfield - deceleration * unit_vector[0]
-    results[4] = qm * (-1.0 * state[3] * Bfield) - deceleration * unit_vector[1]
-    results[5] = qm * Efield - deceleration * unit_vector[2]
+    results[0] = velo[0]
+    results[1] = velo[1]
+    results[2] = velo[2]
+    results[3] = (q_m * velo[1] * Bfield - deceleration * unit_vector[0]) / C
+    results[4] = (q_m * (-1.0 * velo[0] * Bfield) - deceleration * unit_vector[1]) / C
+    results[5] = (q_m * Efield - deceleration * unit_vector[2]) / C
 
     return results
 
@@ -218,11 +220,14 @@ def stop_condition(
         this function returns zero the termination condition has been reached.
 
     """
-    speed = math.sqrt(state[3] ** 2.0 + state[4] ** 2.0 + state[5] ** 2.0)
-    kinetic_energy = ejectile.mass * (
-        1.0 / math.sqrt(1.0 - (speed / C) ** 2.0) - 1.0
-    )  # MeV
-    return kinetic_energy - KE_LIMIT
+    gv = math.sqrt(state[3] ** 2.0 + state[4] ** 2.0 + state[5] ** 2.0)
+    beta = math.sqrt(gv**2.0 / (1.0 + gv**2.0))
+    gamma = gv / beta
+    kinetic_energy = ejectile.mass * (gamma - 1.0)  # MeV
+    mass_u = ejectile.mass / AMU_2_MEV
+    proj = catima.Projectile(mass_u, ejectile.Z)  # type: ignore
+    proj.T(kinetic_energy / mass_u)
+    return catima.calculate(proj, target.material).range / target.density * 0.01 - RANGE_LIMIT  # type: ignore
 
 
 # These function sigs must match the ODE function
@@ -262,7 +267,7 @@ def forward_z_bound_condition(
         this function returns zero the termination condition has been reached.
 
     """
-    return state[2] - 1.0
+    return np.round(state[2] - 1.0, decimals=3)
 
 
 # These function sigs must match the ODE function
@@ -302,7 +307,7 @@ def backward_z_bound_condition(
         this function returns zero the termination condition has been reached.
 
     """
-    return state[2] + 1.0
+    return np.round(state[2] + 1.0, decimals=3)
 
 
 # These function sigs must match the ODE function
@@ -344,7 +349,7 @@ def rho_bound_condition(
         this function returns zero the termination condition has been reached.
 
     """
-    return float(np.linalg.norm(state[:2])) - 0.332
+    return np.round(float(np.linalg.norm(state[:2])) - 0.332, decimals=3)
 
 
 def generate_track_mesh(params: MeshParameters, track_path: Path):
@@ -420,15 +425,17 @@ def generate_track_mesh(params: MeshParameters, track_path: Path):
                 )
 
             initial_state[:] = 0.0
+
             gamma = e / params.particle.mass + 1.0
-            speed = math.sqrt(1.0 - 1.0 / (gamma**2.0)) * C
-            initial_state[3] = speed * math.sin(p)
-            initial_state[5] = speed * math.cos(p)
+            speed = math.sqrt(1.0 - 1.0 / (gamma**2.0))
+            gv = gamma * speed
+            initial_state[3] = gv * math.sin(p)
+            initial_state[5] = gv * math.cos(p)
             result = solve_ivp(
                 equation_of_motion,
                 (0.0, COARSE_TIME_WINDOW),
                 initial_state,
-                method="RK45",
+                method="Radau",
                 events=[
                     stop_condition,
                     forward_z_bound_condition,
@@ -460,14 +467,15 @@ def generate_track_mesh(params: MeshParameters, track_path: Path):
 
             initial_state[:] = 0.0
             gamma = e / params.particle.mass + 1.0
-            speed = math.sqrt(1.0 - 1.0 / (gamma**2.0)) * C
-            initial_state[3] = speed * math.sin(p)
-            initial_state[5] = speed * math.cos(p)
+            speed = math.sqrt(1.0 - 1.0 / (gamma**2.0))
+            gv = gamma * speed
+            initial_state[3] = gv * math.sin(p)
+            initial_state[5] = gv * math.cos(p)
             result = solve_ivp(
                 equation_of_motion,
                 (0.0, longest_time),
                 initial_state,
-                method="RK45",
+                method="Radau",
                 events=[
                     stop_condition,
                     forward_z_bound_condition,
@@ -544,15 +552,16 @@ def generate_interpolated_track(
 
     # Setup initial state
     gamma = ke / particle.mass + 1.0
-    speed = math.sqrt(1.0 - 1.0 / (gamma**2.0)) * C
+    speed = math.sqrt(1.0 - 1.0 / (gamma**2.0))
+    gv = gamma * speed
     initial_state = np.array(
         [
             vx,
             vy,
             vz,
-            speed * math.sin(polar) * math.cos(azim),
-            speed * math.sin(polar) * math.sin(azim),
-            speed * math.cos(polar),
+            gv * math.sin(polar) * math.cos(azim),
+            gv * math.sin(polar) * math.sin(azim),
+            gv * math.cos(polar),
         ]
     )
 
@@ -561,7 +570,7 @@ def generate_interpolated_track(
         equation_of_motion,
         (0.0, COARSE_TIME_WINDOW),
         initial_state,
-        method="RK45",
+        method="Radau",
         events=[
             stop_condition,
             forward_z_bound_condition,
@@ -578,7 +587,7 @@ def generate_interpolated_track(
         equation_of_motion,
         (0.0, longest_time),
         initial_state,
-        method="RK45",
+        method="Radau",
         events=[
             stop_condition,
             forward_z_bound_condition,
