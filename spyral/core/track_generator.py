@@ -14,7 +14,7 @@ import pycatima as catima
 
 
 COARSE_TIME_WINDOW: float = 1.0e-6  # 1us window
-KE_LIMIT = 0.001
+RANGE_LIMIT = 0.001  # meters
 DEG2RAD: float = np.pi / 180.0
 
 
@@ -141,7 +141,7 @@ def equation_of_motion(
     t: float
         time step
     state: ndarray
-        the state of the particle (x,y,z,vx,vy,vz)
+        the state of the particle (x,y,z,gvx,gvy,gvz)
     Bfield: float
         the magnitude of the magnetic field
     Efield: float
@@ -176,11 +176,9 @@ def equation_of_motion(
     results[0] = velo[0]
     results[1] = velo[1]
     results[2] = velo[2]
-    results[3] = (q_m * gamma * velo[1] * Bfield - deceleration * unit_vector[0]) / C
-    results[4] = (
-        q_m * gamma * (-1.0 * velo[0] * Bfield) - deceleration * unit_vector[1]
-    ) / C
-    results[5] = (q_m * gamma * Efield - deceleration * unit_vector[2]) / C
+    results[3] = (q_m * velo[1] * Bfield - deceleration * unit_vector[0]) / C
+    results[4] = (q_m * (-1.0 * velo[0] * Bfield) - deceleration * unit_vector[1]) / C
+    results[5] = (q_m * Efield - deceleration * unit_vector[2]) / C
 
     return results
 
@@ -226,11 +224,10 @@ def stop_condition(
     beta = math.sqrt(gv**2.0 / (1.0 + gv**2.0))
     gamma = gv / beta
     kinetic_energy = ejectile.mass * (gamma - 1.0)  # MeV
-    # return kinetic_energy - KE_LIMIT
     mass_u = ejectile.mass / AMU_2_MEV
     proj = catima.Projectile(mass_u, ejectile.Z)  # type: ignore
     proj.T(kinetic_energy / mass_u)
-    return catima.calculate(proj, target.material).range / target.density * 0.01 - KE_LIMIT  # type: ignore
+    return catima.calculate(proj, target.material).range / target.density * 0.01 - RANGE_LIMIT  # type: ignore
 
 
 # These function sigs must match the ODE function
@@ -401,8 +398,6 @@ def generate_track_mesh(params: MeshParameters, track_path: Path):
     flush_count = 0
 
     longest_time = 0.0
-    assoc_e = 0.0
-    assoc_p = 0.0
 
     # Set the conditions to be terminal for a given direction (approaching from positive or negative slope)
     # See scipy docs for details
@@ -429,10 +424,6 @@ def generate_track_mesh(params: MeshParameters, track_path: Path):
                     end="",
                 )
 
-            # e = 5.908309455587393
-            # p = 1.3339604361757873
-            # print(f"e: {e}")
-            # print(f"p: {p}")
             initial_state[:] = 0.0
 
             gamma = e / params.particle.mass + 1.0
@@ -452,27 +443,11 @@ def generate_track_mesh(params: MeshParameters, track_path: Path):
                     rho_bound_condition,
                 ],
                 args=(bfield, efield, params.target, params.particle),
-                # max_step=1.0e-7,
             )
-            vals = result.y.T
-            gv = np.linalg.norm(vals[:, 3:], axis=1)
-            beta = np.sqrt(gv**2.0 / (1.0 + gv**2.0))
-            rhos = np.linalg.norm(vals[:, :2], axis=1)
-            # print(f"Betas: {beta}")
-            # print(f"rhos: {rhos}")
-            # print(f"zs: {vals[:, 2]}")
-            # print(f"times: {result.t}")
-            # print(f"Status: {result.t_events}")
-            # print(f"Time: {result.t[-1]}")
-            # return
-            prev_t = longest_time
             longest_time = max(longest_time, result.t[-1])
-            if longest_time != prev_t:
-                assoc_e = e
-                assoc_p = p
 
     print("")
-    print(f"Estimated time window: {longest_time} for e: {assoc_e} p: {assoc_p}")
+    print(f"Estimated time window: {longest_time}")
     time_steps = np.geomspace(1.0e-11, longest_time, num=params.n_time_steps)
     # time_steps = np.linspace(0.0, longest_time, num=params.n_time_steps)
     flush_count = 0
@@ -576,18 +551,17 @@ def generate_interpolated_track(
     rho_bound_condition.direction = 1.0
 
     # Setup initial state
-    mass_kg = particle.mass * MEV_2_KG
     gamma = ke / particle.mass + 1.0
-    speed = math.sqrt(1.0 - 1.0 / (gamma**2.0)) * C
-    momentum = gamma * mass_kg * speed
+    speed = math.sqrt(1.0 - 1.0 / (gamma**2.0))
+    gv = gamma * speed
     initial_state = np.array(
         [
             vx,
             vy,
             vz,
-            momentum * math.sin(polar) * math.cos(azim),
-            momentum * math.sin(polar) * math.sin(azim),
-            momentum * math.cos(polar),
+            gv * math.sin(polar) * math.cos(azim),
+            gv * math.sin(polar) * math.sin(azim),
+            gv * math.cos(polar),
         ]
     )
 
@@ -596,7 +570,7 @@ def generate_interpolated_track(
         equation_of_motion,
         (0.0, COARSE_TIME_WINDOW),
         initial_state,
-        method="RK45",
+        method="Radau",
         events=[
             stop_condition,
             forward_z_bound_condition,
@@ -613,7 +587,7 @@ def generate_interpolated_track(
         equation_of_motion,
         (0.0, longest_time),
         initial_state,
-        method="RK45",
+        method="Radau",
         events=[
             stop_condition,
             forward_z_bound_condition,
