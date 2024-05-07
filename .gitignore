@@ -162,3 +162,8 @@ cython_debug/
 #.idea/
 
 .vscode/
+*.jpg
+*.png
+*.json
+*.yml
+.DS_Store

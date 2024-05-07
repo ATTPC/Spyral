@@ -7,6 +7,7 @@ from spyral import (
     ClusterParameters,
     SolverParameters,
     EstimateParameters,
+    INVALID_PATH,
 )
 
 from pathlib import Path
@@ -20,11 +21,13 @@ run_max = 94
 n_processes = 4
 
 pad_params = PadParameters(
-    pad_geometry_path=Path("/home/gordon/pipelines/Spyral/etc/padxy.csv"),
-    pad_gain_path=Path("/home/gordon/pipelines/Spyral/etc/pad_gain_map.csv"),
-    pad_time_path=Path("/home/gordon/pipelines/Spyral/etc/pad_time_correction.csv"),
-    pad_electronics_path=Path("/home/gordon/pipelines/Spyral/etc/pad_electronics.csv"),
-    pad_scale_path=Path("/home/gordon/pipelines/Spyral/etc/pad_scale.csv"),
+    is_default=True,
+    is_default_legacy=False,
+    pad_geometry_path=INVALID_PATH,
+    pad_gain_path=INVALID_PATH,
+    pad_time_path=INVALID_PATH,
+    pad_electronics_path=INVALID_PATH,
+    pad_scale_path=INVALID_PATH,
 )
 
 get_params = GetParameters(

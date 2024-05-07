@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from pathlib import Path
 
+INVALID_PATH: Path = Path("IllegalPath")
+
 
 @dataclass
 class PadParameters:
@@ -18,6 +20,8 @@ class PadParameters:
         Path to the csv file containing the pad electronics ids
     """
 
+    is_default: bool
+    is_default_legacy: bool
     pad_geometry_path: Path
     pad_gain_path: Path
     pad_time_path: Path
