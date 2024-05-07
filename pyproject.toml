@@ -27,3 +27,16 @@ build-backend = "pdm.backend"
 
 [tool.pdm]
 distribution = true
+
+[tool.pdm.dev-dependencies]
+test = [
+    "pytest>=8.2.0",
+]
+lint = [
+    "black>=24.4.2",
+]
+doc = [
+    "mkdocs-material>=9.5.21",
+    "mkdocstrings>=0.25.1",
+    "mkdocstrings-python>=1.10.0",
+]

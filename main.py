@@ -1,5 +1,6 @@
 from spyral import Pipeline, start_pipeline, PointcloudPhase, ClusterPhase
 from spyral import (
+    PadParameters,
     GetParameters,
     FribParameters,
     DetectorParameters,
@@ -11,19 +12,20 @@ from spyral import (
 from pathlib import Path
 import multiprocessing
 
-
-pad_geometry_path = Path("/home/gordon/pipelines/Spyral/etc/padxy.csv")
-pad_gain_path = Path("/home/gordon/pipelines/Spyral/etc/pad_gain_map.csv")
-pad_time_path = Path("/home/gordon/pipelines/Spyral/etc/pad_time_correction.csv")
-pad_electronics_path = Path("/home/gordon/pipelines/Spyral/etc/pad_electronics.csv")
-pad_scale_path = Path("/home/gordon/pipelines/Spyral/etc/pad_scale.csv")
-
 workspace_path = Path("/media/gordon/ThesisData/NewData/Pipeline/")
 trace_path = Path("/media/gordon/ThesisData/NewData/a1975/h5/")
 
 run_min = 94
 run_max = 94
 n_processes = 4
+
+pad_params = PadParameters(
+    pad_geometry_path=Path("/home/gordon/pipelines/Spyral/etc/padxy.csv"),
+    pad_gain_path=Path("/home/gordon/pipelines/Spyral/etc/pad_gain_map.csv"),
+    pad_time_path=Path("/home/gordon/pipelines/Spyral/etc/pad_time_correction.csv"),
+    pad_electronics_path=Path("/home/gordon/pipelines/Spyral/etc/pad_electronics.csv"),
+    pad_scale_path=Path("/home/gordon/pipelines/Spyral/etc/pad_scale.csv"),
+)
 
 get_params = GetParameters(
     baseline_window_scale=20.0,
@@ -92,11 +94,7 @@ pipe = Pipeline(
             get_params,
             frib_params,
             det_params,
-            pad_geometry_path,
-            pad_electronics_path,
-            pad_time_path,
-            pad_gain_path,
-            pad_scale_path,
+            pad_params,
         ),
         ClusterPhase(cluster_params, det_params),
     ],
