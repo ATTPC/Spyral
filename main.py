@@ -100,6 +100,7 @@ pipe = Pipeline(
         ),
         ClusterPhase(cluster_params, det_params),
     ],
+    [True, True],
     workspace_path,
     trace_path,
 )
