@@ -57,13 +57,12 @@ det_params = DetectorParameters(
     micromegas_time_bucket=10.0,
     window_time_bucket=560.0,
     get_frequency=6.25,
-    garfield_file_path="/path/to/some/garfield.txt",
+    garfield_file_path=Path("/path/to/some/garfield.txt"),
     do_garfield_correction=False,
 )
 
 cluster_params = ClusterParameters(
     min_cloud_size=50,
-    smoothing_neighbor_distance=15.0,
     min_points=3,
     min_size_scale_factor=0.05,
     min_size_lower_cutoff=10,
@@ -78,8 +77,8 @@ estimate_params = EstimateParameters(
 )
 
 solver_params = SolverParameters(
-    gas_data_path="/home/gordon/pipelines/Spyral/etc/deuterium_gas.json",
-    particle_id_filename="/media/gordon/ThesisData/NewData/Analyzed/a1975/gates/proton_gate.json",
+    gas_data_path=Path("/path/to/some/gas/data.json"),
+    particle_id_filename=Path("/path/to/some/particle/id.json"),
     ic_min_val=900.0,
     ic_max_val=1350.0,
     n_time_steps=10000,
