@@ -29,6 +29,18 @@ class EstimationPhase(PhaseLike):
     def create_assets(self, workspace_path: Path) -> bool:
         return True
 
+    def construct_artifact(
+        self, payload: PhaseResult, workspace_path: Path
+    ) -> PhaseResult:
+        result = PhaseResult(
+            artifact_path=self.get_artifact_path(workspace_path)
+            / f"{form_run_string(payload.run_number)}.parquet",
+            successful=True,
+            run_number=payload.run_number,
+            metadata={"cluster_path": payload.artifact_path},
+        )
+        return result
+
     def run(
         self,
         payload: PhaseResult,
@@ -43,12 +55,9 @@ class EstimationPhase(PhaseLike):
                 __name__,
                 f"Cluster file for run {payload.run_number} not present for phase 3. Skipping.",
             )
-            return PhaseResult(Path("null"), False, payload.run_number)
+            return PhaseResult.invalid_result(payload.run_number)
 
-        estimate_path = (
-            self.get_artifact_path(workspace_path)
-            / f"{form_run_string(payload.run_number)}.parquet"
-        )
+        result = self.construct_artifact(payload, workspace_path)
 
         cluster_file = h5.File(cluster_path, "r")
         cluster_group: h5.Group = cluster_file["cluster"]  # type: ignore
@@ -56,7 +65,7 @@ class EstimationPhase(PhaseLike):
             spyral_error(
                 __name__, f"Cluster group not present for run {payload.run_number}!"
             )
-            return PhaseResult(Path("null"), False, payload.run_number)
+            return PhaseResult.invalid_result(payload.run_number)
 
         min_event: int = cluster_group.attrs["min_event"]  # type: ignore
         max_event: int = cluster_group.attrs["max_event"]  # type: ignore
@@ -146,12 +155,7 @@ class EstimationPhase(PhaseLike):
 
         # Write the results to a DataFrame
         df = pl.DataFrame(data)
-        df.write_parquet(estimate_path)
+        df.write_parquet(result.artifact_path)
         spyral_info(__name__, "Phase 3 complete.")
         # Next step also needs to know where to find the clusters
-        return PhaseResult(
-            estimate_path,
-            True,
-            payload.run_number,
-            metadata={"cluster_path": cluster_path},
-        )
+        return result

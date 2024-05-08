@@ -86,6 +86,26 @@ class InterpSolverPhase(PhaseLike):
             print("Done.")
         return True
 
+    def construct_artifact(
+        self, payload: PhaseResult, workspace_path: Path
+    ) -> PhaseResult:
+        pid: ParticleID | None = deserialize_particle_id(
+            Path(self.solver_params.particle_id_filename), self.nuclear_map
+        )
+        if pid is None:
+            spyral_warn(
+                __name__,
+                f"Particle ID {self.solver_params.particle_id_filename} does not exist, Solver will not run!",
+            )
+            return PhaseResult.invalid_result(payload.run_number)
+        result = PhaseResult(
+            artifact_path=workspace_path
+            / form_physics_file_name(payload.run_number, pid),
+            successful=True,
+            run_number=payload.run_number,
+        )
+        return result
+
     def run(
         self,
         payload: PhaseResult,
@@ -125,7 +145,7 @@ class InterpSolverPhase(PhaseLike):
             return PhaseResult(Path("null"), False, payload.run_number)
 
         # Setup files
-        result_path = workspace_path / form_physics_file_name(payload.run_number, pid)
+        result = self.construct_artifact(payload, workspace_path)
         cluster_file = h5.File(cluster_path, "r")
         estimate_df = pl.scan_parquet(estimate_path)
 
@@ -175,7 +195,7 @@ class InterpSolverPhase(PhaseLike):
         )  # We always increment by 1
 
         # Result storage
-        results: dict[str, list] = {
+        phys_results: dict[str, list] = {
             "event": [],
             "cluster_index": [],
             "cluster_label": [],
@@ -228,11 +248,11 @@ class InterpSolverPhase(PhaseLike):
                 pid.nucleus,
                 interpolator,
                 self.det_params,
-                results,
+                phys_results,
             )
 
         # Write out the results
-        physics_df = pl.DataFrame(results)
-        physics_df.write_parquet(result_path)
+        physics_df = pl.DataFrame(phys_results)
+        physics_df.write_parquet(result.artifact_path)
         spyral_info(__name__, "Phase 4 complete.")
-        return PhaseResult(result_path, True, payload.run_number)
+        return result

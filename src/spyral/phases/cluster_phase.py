@@ -27,6 +27,17 @@ class ClusterPhase(PhaseLike):
     def create_assets(self, workspace_path: Path) -> bool:
         return True
 
+    def construct_artifact(
+        self, payload: PhaseResult, workspace_path: Path
+    ) -> PhaseResult:
+        result = PhaseResult(
+            artifact_path=self.get_artifact_path(workspace_path)
+            / f"{form_run_string(payload.run_number)}.h5",
+            successful=True,
+            run_number=payload.run_number,
+        )
+        return result
+
     def run(
         self,
         payload: PhaseResult,
@@ -41,22 +52,19 @@ class ClusterPhase(PhaseLike):
                 __name__,
                 f"Point cloud data does not exist for run {payload.run_number} at phase 2. Skipping.",
             )
-            return PhaseResult(Path("null"), False, payload.run_number)
+            return PhaseResult.invalid_result(payload.run_number)
 
-        cluster_path = (
-            self.get_artifact_path(workspace_path)
-            / f"{form_run_string(payload.run_number)}.h5"
-        )
+        result = self.construct_artifact(payload, workspace_path)
 
         point_file = h5.File(point_path, "r")
-        cluster_file = h5.File(cluster_path, "w")
+        cluster_file = h5.File(result.artifact_path, "w")
 
         cloud_group: h5.Group = point_file["cloud"]  # type: ignore
         if not isinstance(cloud_group, h5.Group):
             spyral_error(
                 __name__, f"Point cloud group not present in run {payload.run_number}!"
             )
-            return PhaseResult(Path("null"), False, payload.run_number)
+            return PhaseResult.invalid_result(payload.run_number)
 
         min_event: int = cloud_group.attrs["min_event"]  # type: ignore
         max_event: int = cloud_group.attrs["max_event"]  # type: ignore
@@ -119,4 +127,4 @@ class ClusterPhase(PhaseLike):
                 local_group.create_dataset("cloud", data=cluster.data)
 
         spyral_info(__name__, "Phase 2 complete.")
-        return PhaseResult(cluster_path, True, payload.run_number)
+        return result

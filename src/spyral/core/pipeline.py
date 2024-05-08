@@ -11,9 +11,23 @@ from numpy.random import SeedSequence, default_rng
 
 
 class Pipeline:
+    """A representation of an analysis pipeline in Spyral
 
-    def __init__(self, phases: list[PhaseLike], workspace_path: Path, trace_path: Path):
+    The Pipeline controls the analysis workflow. It is given a list
+    of PhaseLike objects and paths to workspace and trace data and runs the
+    data through the pipeline.
+
+    """
+
+    def __init__(
+        self,
+        phases: list[PhaseLike],
+        active: list[bool],
+        workspace_path: Path,
+        trace_path: Path,
+    ):
         self.phases = phases
+        self.active = active
         self.workspace = workspace_path
         if not self.workspace.exists():
             self.workspace.mkdir()
@@ -45,8 +59,11 @@ class Pipeline:
             )
             if not result.artifact_path.exists():
                 continue
-            for phase in self.phases:
-                result = phase.run(result, self.workspace, msg_queue, rng)
+            for idx, phase in enumerate(self.phases):
+                if self.active[idx]:
+                    result = phase.run(result, self.workspace, msg_queue, rng)
+                else:
+                    result = phase.construct_artifact(result, self.workspace)
 
 
 def _run_pipeline(

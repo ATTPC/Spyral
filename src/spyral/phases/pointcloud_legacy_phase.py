@@ -79,6 +79,17 @@ class PointcloudLegacyPhase(PhaseLike):
             )
         return True
 
+    def construct_artifact(
+        self, payload: PhaseResult, workspace_path: Path
+    ) -> PhaseResult:
+        result = PhaseResult(
+            artifact_path=self.get_artifact_path(workspace_path)
+            / f"{form_run_string(payload.run_number)}.h5",
+            successful=True,
+            run_number=payload.run_number,
+        )
+        return result
+
     def run(
         self,
         payload: PhaseResult,
@@ -92,15 +103,12 @@ class PointcloudLegacyPhase(PhaseLike):
                 __name__,
                 f"Run {payload.run_number} does not exist for phase 1, skipping.",
             )
-            return PhaseResult(Path("null"), True, payload.run_number)
+            return PhaseResult.invalid_result(payload.run_number)
 
         # Open files
-        point_path = (
-            self.get_artifact_path(workspace_path)
-            / f"{form_run_string(payload.run_number)}.h5"
-        )
+        result = self.construct_artifact(payload, workspace_path)
         trace_file = h5.File(trace_path, "r")
-        point_file = h5.File(point_path, "w")
+        point_file = h5.File(result.artifact_path, "w")
 
         min_event, max_event = get_event_range(trace_file)
 
@@ -116,7 +124,7 @@ class PointcloudLegacyPhase(PhaseLike):
                 __name__,
                 f"GET event group does not exist in run {payload.run_number}, phase 1 cannot be run!",
             )
-            return PhaseResult(Path("null"), True, payload.run_number)
+            return PhaseResult.invalid_result(payload.run_number)
 
         cloud_group = point_file.create_group("cloud")
         cloud_group.attrs["min_event"] = min_event
@@ -188,4 +196,4 @@ class PointcloudLegacyPhase(PhaseLike):
             pc_dataset[:] = pc.cloud
 
         spyral_info(__name__, "Phase 1 complete")
-        return PhaseResult(point_path, True, payload.run_number)
+        return result

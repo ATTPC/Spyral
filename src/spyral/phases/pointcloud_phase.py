@@ -81,6 +81,17 @@ class PointcloudPhase(PhaseLike):
             )
         return True
 
+    def construct_artifact(
+        self, payload: PhaseResult, workspace_path: Path
+    ) -> PhaseResult:
+        result = PhaseResult(
+            artifact_path=self.get_artifact_path(workspace_path)
+            / f"{form_run_string(payload.run_number)}.h5",
+            successful=True,
+            run_number=payload.run_number,
+        )
+        return result
+
     def run(
         self,
         payload: PhaseResult,
@@ -99,12 +110,9 @@ class PointcloudPhase(PhaseLike):
             return PhaseResult(Path("null"), True, payload.run_number)
 
         # Open files
-        point_path = (
-            self.get_artifact_path(workspace_path)
-            / f"{form_run_string(payload.run_number)}.h5"
-        )
+        result = self.construct_artifact(payload, workspace_path)
         trace_file = h5.File(trace_path, "r")
-        point_file = h5.File(point_path, "w")
+        point_file = h5.File(result.artifact_path, "w")
 
         min_event, max_event = get_event_range(trace_file)
 
@@ -120,7 +128,7 @@ class PointcloudPhase(PhaseLike):
                 __name__,
                 f"GET event group does not exist in run {payload.run_number}, phase 1 cannot be run!",
             )
-            return PhaseResult(Path("null"), True, payload.run_number)
+            return PhaseResult.invalid_result(payload.run_number)
 
         frib_group: h5.Group = trace_file["frib"]  # type: ignore
         if not isinstance(frib_group, h5.Group):
@@ -128,14 +136,14 @@ class PointcloudPhase(PhaseLike):
                 __name__,
                 f"FRIB group does not exist in run {payload.run_number}, phase 1 cannot be run!",
             )
-            return PhaseResult(Path("null"), True, payload.run_number)
+            return PhaseResult.invalid_result(payload.run_number)
         frib_evt_group: h5.Group = frib_group["evt"]  # type: ignore
         if not isinstance(frib_evt_group, h5.Group):
             spyral_error(
                 __name__,
                 f"FRIB event data group does not exist in run {payload.run_number}, phase 1 cannot be run!",
             )
-            return PhaseResult(Path("null"), True, payload.run_number)
+            return PhaseResult.invalid_result(payload.run_number)
 
         frib_scaler_group: h5.Group | None = frib_group["scaler"]  # type: ignore
         if not isinstance(frib_group, h5.Group):
@@ -279,4 +287,4 @@ class PointcloudPhase(PhaseLike):
             )
 
         spyral_info(__name__, "Phase 1 complete")
-        return PhaseResult(point_path, True, payload.run_number)
+        return result
