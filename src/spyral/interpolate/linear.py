@@ -20,13 +20,20 @@ class LinearInterpolator:
     We use numba to just-in-time compile these methods which results in a dramatic speed up on the order of
     a factor of 50.
 
-    If the
+
+    Parameters
+    ----------
+    x_vals: numpy.ndarray
+        The independent variable values, must be monotonically increasing.
+    y_vals: numpy.ndarray
+        The corresponding function output. Should be a two dimensional array. The first dimension should be the
+        same length as x. The second dimension is the length of the output of the interpolated function.
 
     Attributes
     ----------
-    x: ndarray
+    x: numpy.ndarray
         The independent variable values, must be monotonically increasing.
-    y: ndarray
+    y: numpy.ndarray
         The function values. Should be a two dimensional array. The first dimension should be the
         same length as x. The second dimension is the length of the output of the interpolated function.
     x_min: float
@@ -45,21 +52,6 @@ class LinearInterpolator:
     """
 
     def __init__(self, x_vals: np.ndarray, y_vals: np.ndarray):
-        """Construct the LinearInterpolator
-
-        Parameters
-        ----------
-        x_vals: ndarray
-            The independent variable values, must be monotonically increasing.
-        y_vals: ndarray
-            The corresponding function output. Should be a two dimensional array. The first dimension should be the
-            same length as x. The second dimension is the length of the output of the interpolated function.
-
-        Returns
-        -------
-        LinearInterpolator
-            An instance of the class
-        """
         self.x = x_vals
         self.y = y_vals
         self.x_min = x_vals[0]
@@ -87,12 +79,12 @@ class LinearInterpolator:
 
         Parameters
         ----------
-        xs: ndarray
+        xs: numpy.ndarray
             The x-values to perform interpolation on.
 
         Returns
         -------
-        ndarray
+        numpy.ndarray
             An 2-D array. Each row contains the corresponding interpolated value.
 
         """

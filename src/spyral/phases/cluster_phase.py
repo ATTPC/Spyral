@@ -14,6 +14,29 @@ from numpy.random import Generator
 
 
 class ClusterPhase(PhaseLike):
+    """The default Spyral clustering phase, inheriting from PhaseLike
+
+    The goal of the clustering phase is to take in a point cloud
+    and separate the points into individual particle trajectories. In
+    the default version here, we use scikit-learn's HDBSCAN clustering
+    algorithm. The clustering phase should come after the Pointcloud/PointcloudLegacy
+    Phase in the Pipeline and before the EstimationPhase.
+
+    Parameters
+    ----------
+    cluster_params: ClusterParameters
+        Parameters controlling the clustering algorithm
+    det_params: DetectorParameters
+        Parameters describing the detector
+
+    Attributes
+    ----------
+    cluster_params: ClusterParameters
+        Parameters controlling the clustering algorithm
+    det_params: DetectorParameters
+        Parameters describing the detector
+
+    """
 
     def __init__(
         self, cluster_params: ClusterParameters, det_params: DetectorParameters

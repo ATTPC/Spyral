@@ -23,7 +23,7 @@ def get_size_path(path: Path) -> int:
 
     Parameters
     ----------
-    path: Path
+    path: pathlib.Path
         the path item to be inspected
 
     Returns
@@ -50,7 +50,7 @@ def collect_runs(trace_path: Path, run_min: int, run_max: int) -> dict[int, int]
     ws: Workspace
         the project Workspace
     run_min: int
-        the first run
+        the first run, inclusive
     run_max: int
         the last run, inclusive
 
@@ -82,15 +82,19 @@ def create_run_stacks(
 
     Parameters
     ----------
-    config: Config
-        the project configuration
+    trace_path: pathlib.Path
+        The path to AT-TPC traces
+    run_min: int
+        The minimum run number, inclusive
+    run_max: int
+        The maximum run number, inclusive
     n_stacks: int
         the number of stacks, should be equal to number of processors
 
     Returns
     -------
     list[list[int]]
-    The stacks. Each stack is a list of ints, where each value is a run number for that stack to process.
+        The stacks. Each stack is a list of ints, where each value is a run number for that stack to process.
     """
 
     # create an empty list for each stack

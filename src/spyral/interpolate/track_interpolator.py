@@ -41,6 +41,33 @@ class TrackInterpolator:
     We use numba to just-in-time compile these methods, which results in a dramatic speed up on the order
     of a factor of 50.
 
+    Parameters
+    ----------
+    track_path: str
+        Path to an interpolation file
+    interpolators: ListType[BilinearInterpolator]
+        A set of BilinearInterpolators
+    particle_name: str
+        The isotopic symbol of the particle
+    gas_name: str
+        The gas target name
+    bfield: float
+        The magnetic field magnitude in T
+    efield: float
+        The electric field magnitude in V/m
+    ke_min: float
+        The minimum kinetic energy of the mesh in MeV
+    ke_max: float
+        The maximum kinetic energy of the mesh in MeV
+    ke_bins: int
+        The number of kinetic energy bins in the mesh
+    polar_min: float
+        The minimum polar angle of the mesh in degrees
+    polar_max: float
+        The maximum polar angle of the mesh in degrees
+    polar_bins: int
+        The number of polar angle bins in the mesh
+
     Attributes
     ----------
     file_path: str
@@ -95,40 +122,6 @@ class TrackInterpolator:
         polar_max: float,
         polar_bins: int,
     ):
-        """Construct a TrackInterpolator
-
-        Parameters
-        ----------
-        track_path: str
-            Path to an interpolation file
-        interpolators: ListType[BilinearInterpolator]
-            A set of BilinearInterpolators
-        particle_name: str
-            The isotopic symbol of the particle
-        gas_name: str
-            The gas target name
-        bfield: float
-            The magnetic field magnitude in T
-        efield: float
-            The electric field magnitude in V/m
-        ke_min: float
-            The minimum kinetic energy of the mesh in MeV
-        ke_max: float
-            The maximum kinetic energy of the mesh in MeV
-        ke_bins: int
-            The number of kinetic energy bins in the mesh
-        polar_min: float
-            The minimum polar angle of the mesh in degrees
-        polar_max: float
-            The maximum polar angle of the mesh in degrees
-        polar_bins: int
-            The number of polar angle bins in the mesh
-
-        Returns
-        -------
-        TrackInterpolator
-            An instance of the class
-        """
         self.filepath = track_path
         self.particle_name: str = particle_name
         self.gas_name: str = gas_name

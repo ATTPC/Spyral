@@ -47,6 +47,36 @@ def get_event_range(trace_file: h5.File) -> tuple[int, int]:
 
 
 class PointcloudPhase(PhaseLike):
+    """The point cloud phase, inheriting from PhaseLike
+
+    The goal of the point cloud phase is to convert AT-TPC trace data
+    into point clouds. It uses a combination of Fourier transform baseline removal
+    and scipy.signal.find_peaks to extract signals from the traces. PointcloudPhase
+    is expected to be the first phase in the Pipeline.
+
+    Parameters
+    ----------
+    get_params: GetParameters
+        Parameters controlling the GET-DAQ signal analysis
+    frib_params: FribParameters
+        Parameters controlling the FRIBDAQ signal analysis
+    detector_params: DetectorParameters
+        Parameters describing the detector
+    pad_params: PadParameters
+        Parameters describing the pad plane mapping
+
+    Attributes
+    ----------
+    get_params: GetParameters
+        Parameters controlling the GET-DAQ signal analysis
+    frib_params: FribParameters
+        Parameters controlling the FRIBDAQ signal analysis
+    det_params: DetectorParameters
+        Parameters describing the detector
+    pad_map: PadMap
+        Map which converts trace ID to pad ID
+
+    """
 
     def __init__(
         self,

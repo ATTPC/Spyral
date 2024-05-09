@@ -106,7 +106,7 @@ def check_mesh_needs_generation(track_path: Path, params: MeshParameters) -> boo
 
     Parameters
     ----------
-    track_path: Path
+    track_path: pathlib.Path
         Path to the track mesh data
     params: MeshParamters
         The parameters for this track mesh
@@ -369,9 +369,9 @@ def generate_track_mesh(params: MeshParameters, track_path: Path, meta_path: Pat
     ----------
     params: InterpolatorParameters
         parameters which control the tracks
-    track_path: Path
+    track_path: pathlib.Path
         where to write the tracks to
-    meta_path: Path
+    meta_path: pathlib.Path
         where to write the track metadata to
     """
     kes = np.linspace(params.ke_min, params.ke_max, params.ke_bins)

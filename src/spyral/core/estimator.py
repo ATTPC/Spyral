@@ -174,6 +174,9 @@ def estimate_physics_pass(
         Configuration parameters for the physical detector properties
     results: dict[str, int]
         Dictionary to store estimation results in
+    chosen_direction: Direction, default=Direction.NONE
+        Optional direction for the trajectory. Default
+        estimates the direction.
 
     """
     # Do some cleanup, reject clusters which have too many beam region points

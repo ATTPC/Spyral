@@ -53,6 +53,27 @@ class BilinearInterpolator:
 
     The grid is NxMxP shaped. N is the length of the grid in x, M the length in y, and P the length of the function output.
 
+    Parameters
+    ----------
+    x_min: float
+        Minimum value of the x-coordinate for the grid
+    x_max: float
+        Maximum value fo the x-coordinate for the grid
+    x_bins: int
+        Number of bins (cells) in the x-coordinate for the grid
+    y_min: float
+        Minimum value of the y-coordinate for the grid
+    y_max: float
+        Maximum value fo the y-coordinate for the grid
+    y_bins: int
+        Number of bins (cells) in the y-coordinate for the grid
+    data: ndarray
+        The NxMxP grid of data to interpolate on
+    nan: bool
+        The policy of handling requests to extrapolate on the grid. If nan is True,
+        requests to extrapolate will return arrays of NaN values. Otherwise the requests
+        are clamped to the edge of the grid. Default is True.
+
     Attributes
     ----------
     x_min: float
@@ -99,34 +120,6 @@ class BilinearInterpolator:
         data: np.ndarray,
         nan: bool = True,
     ):
-        """Construct the BilinearInterpolator
-
-        Parameters
-        ----------
-        x_min: float
-            Minimum value of the x-coordinate for the grid
-        x_max: float
-            Maximum value fo the x-coordinate for the grid
-        x_bins: int
-            Number of bins (cells) in the x-coordinate for the grid
-        y_min: float
-            Minimum value of the y-coordinate for the grid
-        y_max: float
-            Maximum value fo the y-coordinate for the grid
-        y_bins: int
-            Number of bins (cells) in the y-coordinate for the grid
-        data: ndarray
-            The NxMxP grid of data to interpolate on
-        nan: bool
-            The policy of handling requests to extrapolate on the grid. If nan is True,
-            requests to extrapolate will return arrays of NaN values. Otherwise the requests
-            are clamped to the edge of the grid. Default is True.
-
-        Returns
-        -------
-        BilinearInterpolator
-            An instance of the class
-        """
         self.x_min: float = x_min
         self.x_max: float = x_max
         self.x_bins: int = x_bins

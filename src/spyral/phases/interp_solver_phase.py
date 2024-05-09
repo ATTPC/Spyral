@@ -26,10 +26,54 @@ from numpy.random import Generator
 
 
 def form_physics_file_name(run_number: int, particle: ParticleID) -> str:
+    """Form a physics file string
+
+    Physics files are run number + solved for isotope
+
+    Parameters
+    ----------
+    run_number: int
+        The run number
+    particle: ParticleID
+        The particle ID used by the solver.
+
+    Returns
+    -------
+    str
+        The run file string
+
+    """
     return f"{form_run_string(run_number)}_{particle.nucleus.isotopic_symbol}.parquet"
 
 
 class InterpSolverPhase(PhaseLike):
+    """The default Spyral solver phase, inheriting from PhaseLike
+
+    The goal of the solver phase is to get exact (or as exact as possible) values
+    for the physical observables of a trajectory. InterpSolverPhase uses a pre-calculated
+    mesh of ODE solutions to interpolate a model particle trajectory for a given set of
+    kinematics (energy, angles, vertex) and fit the best model trajectory to the data. InterpSolverPhase
+    is expected to be run after the EstimationPhase.
+
+    Parameters
+    ----------
+    solver_params: SolverParameters
+        Parameters controlling the interpolation mesh and fitting
+    det_params: DetectorParameters
+        Parameters describing the detector
+
+    Attributes
+    ----------
+    solver_params: SolverParameters
+        Parameters controlling the interpolation mesh and fitting
+    det_params: DetectorParameters
+        Parameters describing the detector
+    nuclear_map: spyral_utils.nuclear.NuclearDataMap
+        A map containing isotopic information
+    track_path: pathlib.Path
+        Path to the ODE solution mesh
+    """
+
     def __init__(self, solver_params: SolverParameters, det_params: DetectorParameters):
         super().__init__(
             "InterpSolver",

@@ -43,13 +43,6 @@ class PointCloud:
     """
 
     def __init__(self):
-        """Create an empty point cloud
-
-        Returns
-        -------
-        PointCloud
-            An empty point cloud
-        """
         self.event_number: int = INVALID_EVENT_NUMBER
         self.cloud: np.ndarray = np.empty(0, dtype=np.float64)
 

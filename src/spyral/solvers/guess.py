@@ -26,7 +26,7 @@ class Guess:
 
     Methods
     -------
-    convert_to_array() -> ndarray
+    convert_to_array() -> numpy.ndarray
         Converts the Guess to an ndarray, excluding the direction attribute
     """
 
@@ -43,7 +43,7 @@ class Guess:
 
         Returns
         -------
-        ndarray:
+        numpy.ndarray:
             Format of [polar, azimuthal, brho, vertex_x, vertex_y, vertex_z]
         """
         return np.array(

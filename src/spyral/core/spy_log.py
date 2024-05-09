@@ -12,8 +12,8 @@ def init_spyral_logger_parent(workspace_path: Path):
 
     Parameters
     ----------
-    ws: Workspace
-        The project Workspace
+    workspace_path: pathlib.Path
+        The project workspace path
     """
     log_path = workspace_path / LOG_DIR
     if not log_path.exists():
@@ -38,8 +38,8 @@ def init_spyral_logger_child(workspace_path: Path, process_id: int):
 
     Parameters
     ----------
-    ws: Workspace
-        The project Workspace
+    workspace_path: pathlib.Path
+        The project workspace path
     process_id: int
         The process id used to name the log file
     """

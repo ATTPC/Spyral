@@ -26,6 +26,15 @@ class LabeledCloud:
 class Cluster:
     """Representation of trajectory cluster data.
 
+    Parameters
+    ----------
+    event: int
+        The event number (default = -1)
+    label: int
+        The label from the clustering algorithm (default = -1)
+    data: ndarray
+        The PointCloud data for the Cluster (default = empty array)
+
     Attributes
     ----------
     event: int
@@ -59,22 +68,6 @@ class Cluster:
         label: int = -1,
         data: np.ndarray = np.empty(0, dtype=np.float64),
     ):
-        """Construct the Cluster
-
-        Parameters
-        ----------
-        event: int
-            The event number (default = -1)
-        label: int
-            The label from the clustering algorithm (default = -1)
-        data: ndarray
-            The PointCloud data for the Cluster (default = empty array)
-
-        Returns
-        -------
-        Cluster
-            An instance of the class
-        """
         self.event = event
         self.label = label
         self.data = data

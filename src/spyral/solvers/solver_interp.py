@@ -22,9 +22,9 @@ def distances(track: np.ndarray, data: np.ndarray) -> float:
 
     Parameters
     ----------
-    track: ndarray
+    track: numpy.ndarray
         The track solution
-    data: ndarray
+    data: numpy.ndarray
         The data to compare to
 
     Returns
@@ -55,7 +55,7 @@ def interpolate_trajectory(
 
     Parameters
     ----------
-    fit_params: Parameters
+    fit_params: lmfit.Parameters
         the set of lmfit Parameters
     interpolator: TrackInterpolator
         the interpolation scheme
@@ -64,7 +64,7 @@ def interpolate_trajectory(
 
     Returns
     -------
-    ndarray | None
+    numpy.ndarray | None
         Returns a array of interpolated ODE trajectory data. Upon failure (typically an out of bounds for the interpolation scheme) returns None.
     """
     vertex_x = fit_params["vertex_x"].value
@@ -95,13 +95,13 @@ def objective_function(
 
     Parameters
     ----------
-    fit_params: Parameters
+    fit_params: lmfit.Parameters
         the set of lmfit Parameters
     x: ndarray
         the data to be fit (x,y,z) coordinates in meters
     interpolator: TrackInterpolator
         the interpolation scheme to be used
-    ejectile: NucleusData
+    ejectile: spyral_utils.nuclear.NucleusData
         the data for the particle being tracked
 
     Returns
@@ -129,7 +129,7 @@ def create_params(
     ----------
     guess: Guess
         the initial values of the parameters
-    ejectile: NucleusData
+    ejectile: spyral_utils.nuclear.NucleusData
         the data for the particle being tracked
     interpolator: TrackInterpolator
         the interpolation scheme to be used
@@ -138,7 +138,7 @@ def create_params(
 
     Returns
     -------
-    Parameters
+    lmfit.Parameters
         the lmfit parameters with bounds
     """
     interp_min_momentum = np.sqrt(
@@ -221,7 +221,7 @@ def fit_model_interp(
         the data to be fit
     guess: Guess
         the initial values of the parameters
-    ejectile: NucleusData
+    ejectile: spyral_utils.nuclear.NucleusData
         the data for the particle being tracked
     interpolator: TrackInterpolator
         the interpolation scheme to be used
@@ -230,7 +230,7 @@ def fit_model_interp(
 
     Returns
     -------
-    Parameters | None
+    lmfit.Parameters | None
         Returns the best fit Parameters upon success, or None upon failure
     """
     traj_data = cluster.data[:, :3] * 0.001
@@ -273,7 +273,7 @@ def solve_physics_interp(
         the data to be fit
     guess: Guess
         the initial values of the parameters
-    ejectile: NucleusData
+    ejectile: spyral_utils.nuclear.NucleusData
         the data for the particle being tracked
     interpolator: TrackInterpolator
         the interpolation scheme to be used

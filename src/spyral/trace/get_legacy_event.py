@@ -18,6 +18,19 @@ class GetLegacyEvent:
     as external signals in CoBo 10. At this time, we only support extraction
     of the IC from CoBo 10.
 
+    Parameters
+    ----------
+    raw_data: h5py.Dataset
+        The hdf5 Dataset that contains trace data
+    event_number: int
+        The event number
+    get_params: GetParameters
+        Configuration parameters controlling the GET signal analysis
+    ic_params: FribParameters
+        Configuration parameters controlling the ion chamber signal analysis
+    rng: numpy.random.Generator
+        A random number generator for use in the signal analysis
+
     Attributes
     ----------
     traces: list[GetTrace]
@@ -47,26 +60,6 @@ class GetLegacyEvent:
         ic_params: FribParameters,
         rng: np.random.Generator,
     ):
-        """Construct the event and process traces
-
-        Parameters
-        ----------
-        raw_data: h5py.Dataset
-            The hdf5 Dataset that contains trace data
-        event_number: int
-            The event number
-        get_params: GetParameters
-            Configuration parameters controlling the GET signal analysis
-        ic_params: FribParameters
-            Configuration parameters controlling the ion chamber signal analysis
-        rng: numpy.random.Generator
-            A random number generator for use in the signal analysis
-
-        Returns
-        -------
-        GetEvent
-            An instance of the class
-        """
         self.traces: list[GetTrace] = []
         self.ic_trace: GetTrace | None = None
         self.name: str = INVALID_EVENT_NAME

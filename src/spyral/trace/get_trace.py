@@ -12,6 +12,17 @@ class GetTrace:
 
     Represents a raw signal from the AT-TPC pad plane through the GET data acquisition.
 
+    Parameters
+    ----------
+    data: ndarray
+        The trace data
+    id: HardwareID
+        The HardwareID for the pad this trace came from
+    params: GetParameters
+        Configuration parameters controlling the GET signal analysis
+    rng: numpy.random.Generator
+        A random number generator for use in the signal analysis
+
     Attributes
     ----------
     trace: ndarray
@@ -46,24 +57,6 @@ class GetTrace:
         params: GetParameters,
         rng: np.random.Generator,
     ):
-        """Construct the GetTrace and find peaks
-
-        Parameters
-        ----------
-        data: ndarray
-            The trace data
-        id: HardwareID
-            The HardwareID for the pad this trace came from
-        params: GetParameters
-            Configuration parameters controlling the GET signal analysis
-        rng: numpy.random.Generator
-            A random number generator for use in the signal analysis
-
-        Returns
-        -------
-        GetTrace
-            An instance of this class
-        """
         self.trace: np.ndarray = np.empty(0, dtype=np.int32)
         self.peaks: list[Peak] = []
         self.hw_id: HardwareID = HardwareID()

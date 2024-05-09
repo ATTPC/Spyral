@@ -12,6 +12,13 @@ class FribTrace:
     Similar to GetTrace, FribTrace represents a raw signal from the SIS3300 module which is managed through the FRIBDAQ.
     Typically contains signals for the ion chamber (IC), auxillary silicon detectors (Si), and the mesh signal.
 
+    Parameters
+    ----------
+    data: ndarray
+        The raw trace data
+    params: FribParameters
+        Configuration parameters controlling the FRIBDAQ signal analysis.
+
     Attributes
     ----------
     trace: ndarray
@@ -36,20 +43,6 @@ class FribTrace:
     """
 
     def __init__(self, data: np.ndarray, params: FribParameters):
-        """Construct the FribTrace and find peaks
-
-        Parameters
-        ----------
-        data: ndarray
-            The raw trace data
-        params: FribParameters
-            Configuration parameters controlling the FRIBDAQ signal analysis.
-
-        Returns
-        -------
-        FribTrace
-            An instance of the class
-        """
         self.trace: np.ndarray = np.empty(0, dtype=np.int32)
         self.peaks: list[Peak] = []
         self.set_trace_data(data, params)

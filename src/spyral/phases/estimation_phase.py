@@ -15,6 +15,29 @@ from numpy.random import Generator
 
 
 class EstimationPhase(PhaseLike):
+    """The default Spyral estimation phase, inheriting from PhaseLike
+
+    The goal of the estimation phase is to get reasonable estimations of
+    the physical properties of a particle trajectory (B&rho; , reaction angle, etc.)
+    for use in the more complex solving phase to follow. EstimationPhase should come
+    after ClusterPhase and before InterpSolverPhase in the Pipeline.
+
+    Parameters
+    ----------
+    estimate_params: EstimateParameters
+        Parameters controlling the estimation algorithm
+    det_params: DetectorParameters
+        Parameters describing the detector
+
+    Attributes
+    ----------
+    estimate_params: EstimateParameters
+        Parameters controlling the estimation algorithm
+    det_params: DetectorParameters
+        Parameters describing the detector
+
+    """
+
     def __init__(
         self, estimate_params: EstimateParameters, det_params: DetectorParameters
     ):

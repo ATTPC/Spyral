@@ -20,6 +20,15 @@ class FribEvent:
     Contains traces from the SIS3300 module, typically encompassing the ion chamber,
     silicon detector, and mesh signals.
 
+    Parameters
+    ----------
+    raw_data: h5py.Dataset
+        The hdf5 dataset containing the FRIBDAQ traces
+    event_number: int
+        The event number
+    params: FribParameters
+        The configuration parameters for FRIBDAQ signal analysis
+
     Attributes
     ----------
     event_number: int
@@ -46,22 +55,6 @@ class FribEvent:
     """
 
     def __init__(self, raw_data: h5.Dataset, event_number: int, params: FribParameters):
-        """Construct the FribEvent and process the traces.
-
-        Parameters
-        ----------
-        raw_data: h5py.Dataset
-            The hdf5 dataset containing the FRIBDAQ traces
-        event_number: int
-            The event number
-        params: FribParameters
-            The configuration parameters for FRIBDAQ signal analysis
-
-        Returns
-        -------
-        FribEvent
-            An instance of FribEvent
-        """
         self.event_number = event_number
         self.event_name = str(raw_data.name)
         trace_data = preprocess_frib_traces(

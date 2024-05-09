@@ -8,6 +8,11 @@ class ElectronCorrector:
 
     AT-TPC electric field correction for electron drift time
 
+    Parameters
+    ----------
+    interp: BilinearInterpolator
+        The interpolator object
+
     Attributes
     ----------
     correction: BilinearInterpolator
@@ -23,18 +28,6 @@ class ElectronCorrector:
     """
 
     def __init__(self, interp: BilinearInterpolator):
-        """Construct the corrector
-
-        Parameters
-        ----------
-        interp: BilinearInterpolator
-            The interpolator object
-
-        Returns
-        -------
-        ElectronCorrector
-            An instance of the class
-        """
         self.correction: BilinearInterpolator = interp
 
     def correct_point(self, point: np.ndarray) -> np.ndarray:
@@ -78,7 +71,7 @@ def create_electron_corrector(ecorr_path: Path) -> ElectronCorrector:
 
     Parameters
     ----------
-    ecorr_path: Path
+    ecorr_path: pathlib.Path
         The path to the correction grid data
 
     Returns

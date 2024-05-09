@@ -56,6 +56,11 @@ class PhaseResult:
         The run number that was analyzed
     metadata: dict
         A dict containing any extra data needed for the next Phase
+
+    Methods
+    -------
+    invalid_result(run_number)
+        Create an invalid PhaseResult
     """
 
     artifact_path: Path

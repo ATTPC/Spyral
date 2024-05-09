@@ -21,7 +21,7 @@ def generate_circle_points(
 
     Returns
     -------
-    ndarray
+    numpy.ndarray
         A Nx2 array where the first column is the x-coordinate of a point on the circle
         and the second column is the y-coordinate of a point on the circle
 

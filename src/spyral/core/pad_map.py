@@ -38,6 +38,11 @@ class PadData:
 class PadMap:
     """A map of pad number to PadData
 
+    Parameters
+    ----------
+    params: PadParameters
+        Pad map configuration parameters
+
     Attributes
     ----------
     map: dict[int, PadData]
@@ -59,18 +64,6 @@ class PadMap:
     """
 
     def __init__(self, params: PadParameters):
-        """Construct the PadMap
-
-        Parameters
-        ----------
-        params: PadParameters
-            Paths to map files
-
-        Returns
-        -------
-        PadMap
-            An instance of the class
-        """
         self.map: dict[int, PadData] = {}
         self.elec_map: dict[int, int] = {}
         self.is_valid = False
@@ -80,7 +73,17 @@ class PadMap:
             self.load(params)
 
     def load_default(self, is_legacy: bool = False):
-        """Load maps with defaults shipped in the package"""
+        """Load maps with defaults shipped in the package
+
+        Spyral ships with default maps that should be maintained
+        for compatibility with the current detector configuration.
+
+        Parameters
+        ----------
+        is_legacy: bool, default=False
+            Optional flag indicating if the legacy maps should
+            be loaded
+        """
 
         suffix = ""
         if is_legacy:
@@ -237,4 +240,16 @@ class PadMap:
         return None
 
     def is_beam_pad(self, pad_id: int) -> bool:
+        """Check if a pad is a Beam Pad (TM)
+
+        Parameters
+        ----------
+        pad_id: int
+            The pad number to check
+
+        Returns
+        -------
+        bool
+            True if Beam Pad, False otherwise
+        """
         return pad_id in LEGACY_BEAM_PADS

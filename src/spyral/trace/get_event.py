@@ -16,6 +16,17 @@ class GetEvent:
 
     Contains traces (GetTraces) from the AT-TPC pad plane.
 
+    Parameters
+    ----------
+    raw_data: h5py.Dataset
+        The hdf5 Dataset that contains trace data
+    event_number: int
+        The event number
+    params: GetParameters
+        Configuration parameters controlling the GET signal analysis
+    rng: numpy.random.Generator
+        A random number generator for use with the signal analysis
+
     Attributes
     ----------
     traces: list[GetTrace]
@@ -42,24 +53,6 @@ class GetEvent:
         params: GetParameters,
         rng: np.random.Generator,
     ):
-        """Construct the event and process traces
-
-        Parameters
-        ----------
-        raw_data: h5py.Dataset
-            The hdf5 Dataset that contains trace data
-        event_number: int
-            The event number
-        params: GetParameters
-            Configuration parameters controlling the GET signal analysis
-        rng: numpy.random.Generator
-            A random number generator for use with the signal analysis
-
-        Returns
-        -------
-        GetEvent
-            An instance of the class
-        """
         self.traces: list[GetTrace] = []
         self.name: str = INVALID_EVENT_NAME
         self.number: int = INVALID_EVENT_NUMBER

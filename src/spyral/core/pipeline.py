@@ -1,6 +1,6 @@
 from .run_stacks import form_run_string, create_run_stacks
 from .status_message import StatusMessage
-from .phase import PhaseLike, PhaseResult, ArtifactSchema
+from .phase import PhaseLike, PhaseResult
 from .spy_log import init_spyral_logger_parent, init_spyral_logger_child
 
 from tqdm import tqdm
@@ -15,7 +15,47 @@ class Pipeline:
 
     The Pipeline controls the analysis workflow. It is given a list
     of PhaseLike objects and paths to workspace and trace data and runs the
-    data through the pipeline.
+    data through the pipeline. It also requires a list of booleans of the same
+    length as the list of PhaseLikes. Each bool in the list is a switch which
+    turns on/off that Phase. If the Phase is off (False), it is assumed that
+    any artifacts expected to be produced by that Phase have been made if
+    requested.
+
+    The first Phase in the Pipeline should always expect to recieve AT-TPC
+    trace data.
+
+    Parameters
+    ----------
+    phases: list[PhaseLike]
+        The Phases of the analysis pipeline
+    active: list[bool]
+        A list of boolean switches of the same length as phases. Each switch
+        controls the corresponding phase in the pipeline.
+    workspace_path: pathlib.Path
+        The path to the workspace (the place where Spyral will write data)
+    trace_path: pathlib.Path
+        The path to the AT-TPC trace data
+
+    Attributes
+    ----------
+    phases: list[PhaseLike]
+        The Phases of the analysis pipeline
+    active: list[bool]
+        A list of boolean switches of the same length as phases. Each switch
+        controls the corresponding phase in the pipeline.
+    workspace: pathlib.Path
+        The path to the workspace (the place where Spyral will write data)
+    traces: pathlib.Path
+        The path to the AT-TPC trace data
+
+    Methods
+    -------
+    create_assets()
+        Have each phase create any necessary assets.
+    validate()
+        Validate the pipeline by comparing the schema of the phases.
+    run(run_list, msg_queue, seed)
+        Run the pipeline for a set of runs
 
     """
 
@@ -34,12 +74,34 @@ class Pipeline:
         self.traces = trace_path
 
     def create_assets(self) -> bool:
+        """Have each phase create any necessary assets.
+
+        Call each PhaseLike's create_assets function.
+
+        Returns
+        -------
+        bool
+            True if all phases were successful, False otherwise
+        """
         for phase in self.phases:
             if not phase.create_assets(self.workspace):
                 return False
         return True
 
     def validate(self) -> dict[str, bool]:
+        """Validate the pipeline by comparing the schema of the phases.
+
+        Compare the expected incoming schema of a phase to the expected outgoing schema
+        of the previous phase. The only excption is the first phase, which should only
+        ever expect to recieve AT-TPC trace data.
+
+        Any Phase which has it's schema set to None automatically passes validation.
+
+        Returns
+        -------
+        dict[str, bool]
+            A dictionary mapping phase name to validation success.
+        """
         # First phase can't be validated, only user can control initial incoming format
         schema = self.phases[0].outgoing_schema
         success: dict[str, bool] = {}
@@ -51,6 +113,21 @@ class Pipeline:
     def run(
         self, run_list: list[int], msg_queue: SimpleQueue, seed: SeedSequence
     ) -> None:
+        """Run the pipeline for a set of runs
+
+        Each Phase is only run if it is active. Any artifact requested
+        from an inactive Phase is expected to have already been created.
+
+        Parameters
+        ----------
+        run_list: list[int]
+            List of run numbers to be processed
+        msg_queue: multiprocessing.SimpleQueue
+            A queue to transmit progress messages through
+        seed: numpy.random.SeedSequence
+            A seed to initialize the pipeline random number generator
+
+        """
 
         rng = default_rng(seed=seed)
         for run in run_list:
@@ -73,6 +150,7 @@ def _run_pipeline(
     seed: SeedSequence,
     process_id: int,
 ) -> None:
+    """A wrapper for multiprocessing. Do not call explicitly!"""
     init_spyral_logger_child(pipeline.workspace, process_id)
     pipeline.run(run_list, msg_queue, seed)
 
@@ -84,6 +162,27 @@ def start_pipeline(
     n_procs: int = 1,
     disable_display: bool = False,
 ) -> None:
+    """Function from which a Pipeline should be run
+
+    Use this function to start running the Pipeline system. It
+    will create a multiprocessed version of the pipeline and
+    run a balanced load across the processes.
+
+    Parameters
+    ----------
+    pipeline: Pipeline
+        The pipeline to be run
+    run_min: int
+        The minimum run number (inclusive)
+    run_max: int
+        The maximum run number (inclusive)
+    n_procs: int
+        The number of parallel processes
+    disable_display: bool, default=False
+        Option to turn off terminal display. Default is False,
+        i.e. terminal interface will be displayed.
+
+    """
 
     init_spyral_logger_parent(pipeline.workspace)
 

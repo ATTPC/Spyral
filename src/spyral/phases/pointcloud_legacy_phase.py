@@ -45,6 +45,36 @@ def get_event_range(trace_file: h5.File) -> tuple[int, int]:
 
 
 class PointcloudLegacyPhase(PhaseLike):
+    """The legacy point cloud phase, inheriting from PhaseLike
+
+    The goal of the legacy point cloud phase is to convert legacy (pre-FRIBDAQ) AT-TPC
+    trace data into point clouds. It uses a combination of Fourier transform baseline
+    removal and scipy.signal.find_peaks to extract signals from the traces. PointcloudLegacyPhase
+    is expected to be the first phase in the Pipeline.
+
+    Parameters
+    ----------
+    get_params: GetParameters
+        Parameters controlling the GET-DAQ signal analysis
+    frib_params: FribParameters
+        Parameters repurposed in legacy to analyze auxilary detectors (IC, Si, etc)
+    detector_params: DetectorParameters
+        Parameters describing the detector
+    pad_params: PadParameters
+        Parameters describing the pad plane mapping
+
+    Attributes
+    ----------
+    get_params: GetParameters
+        Parameters controlling the GET-DAQ signal analysis
+    frib_params: FribParameters
+        Parameters repurposed in legacy to analyze auxilary detectors (IC, Si, etc)
+    det_params: DetectorParameters
+        Parameters describing the detector
+    pad_map: PadMap
+        Map which converts trace ID to pad ID
+
+    """
 
     def __init__(
         self,
