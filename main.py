@@ -1,4 +1,11 @@
-from spyral import Pipeline, start_pipeline, PointcloudPhase, ClusterPhase
+from spyral import (
+    Pipeline,
+    start_pipeline,
+    PointcloudPhase,
+    ClusterPhase,
+    EstimationPhase,
+    InterpSolverPhase,
+)
 from spyral import (
     PadParameters,
     GetParameters,
@@ -99,8 +106,10 @@ pipe = Pipeline(
             pad_params,
         ),
         ClusterPhase(cluster_params, det_params),
+        EstimationPhase(estimate_params, det_params),
+        InterpSolverPhase(solver_params, det_params),
     ],
-    [True, True],
+    [True, True, True, True],
     workspace_path,
     trace_path,
 )
