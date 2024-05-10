@@ -80,7 +80,7 @@ cluster_params = ClusterParameters(
 )
 
 estimate_params = EstimateParameters(
-    min_total_trajectory_points=30, smoothing_factor=1.0
+    min_total_trajectory_points=30, smoothing_factor=100.0
 )
 
 solver_params = SolverParameters(

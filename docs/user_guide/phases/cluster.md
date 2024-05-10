@@ -1,4 +1,4 @@
-# The Second Phase: Clustering
+# The Second Phase: ClusterPhase
 
 Once point clouds have been created in the first phase, the next phase aims to break the point clouds into clusters. Clusters are collections of points which are presumed to belong to a single particle trajectory. Clustering is a very common form of unsupervised machine learning, clustering takes a dataset and applies labels to samples (points) based on the features (coordinates, charge). In this phase we make use of the [scikit-learn](https://scikit-learn.org/stable/modules/clustering.html#clustering) algorithms.
 
@@ -8,7 +8,7 @@ There are three steps to this phase:
 2. Joining of clusters using circle-fitting and relative charge
 3. Cleanup of joined clusters
 
-Below we'll break down each of these steps
+Below we'll break down each of these steps. This phase is called `ClusterPhase`.
 
 ## Initial Clustering with HDBSCAN
 
@@ -22,7 +22,7 @@ However, this doesn't perfectly cluster our data right off the bat. HDBSCAN will
 
 Note that, before clustering, we prune the point cloud of any points which lie outside the legal bounds of the detector on the z-axis (i.e. remove all points for which z < 0.0 or z > detector length). This helps us avoid including any extra noise in the algorithm.
 
-The code for this is found in `spyral/core/clusterize.py` in the function `form_clusters`. There are several parameters to HDBSCAN that are exposed in the [configuration](../config/cluster.md) of Spyral.
+There are several parameters to HDBSCAN that are exposed in the [configuration](../config/cluster.md) of Spyral.
 
 ## Joining of Clusters
 
@@ -30,16 +30,10 @@ The core method of joining is relatively simple: each initial cluster is fit wit
 
 Joining is repeated until clusters can no longer be joined together. These clusters are then taken to represent the complete detected particle trajectories for that event.
 
-The code for this is found in `spyral/core/clusterize.py` in the functions `join_clusters` and `join_clusters_depth`.
-
 ## Cleanup of the Final Clusters
 
 As a last stage, a final noise removal is applied to each cluster. The [Local Outlier Factor](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.LocalOutlierFactor.html#sklearn.neighbors.LocalOutlierFactor) is an outlier test which compares the distance to nearest neighbors (neighbor density) to determine outlier points. The number of neighbors is controlled using the [`outlier_scale_factor`](../config/cluster.md) parameter.
 
-The code for this is found in `spyral/core/cluster.py`.
-
 ## Final Thoughts
 
 The intial clustering and joining are two of the most important steps in Spyral, but they often require compromises. In our experience, there is no perfect set of parameters that will allow the clustering to work flawlessly for all events in a dataset; in fact given the inhomogenetiy of AT-TPC data, expecting one set of parameters to work all the time is somewhat crazy. In general, it is best to shoot for parameters that *generally* work. There will always be events that are too noisy or too fragmented for the clustering algorithm to work correctly. As such, this is the section of the code that most often requires fine tuning by hand.
-
-In general, clustering is the second longest analysis phase, which makes sense given the complexity of much of the analysis. However, it is still typically fast compared to the point cloud phase.

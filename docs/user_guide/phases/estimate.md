@@ -1,4 +1,4 @@
-# Estimating the Physics
+# Estimating the Physics: EstimationPhase
 
 Now that we formed our particle trajectory clusters, it is time to think about extracting our physical observables. In general we want the following
 
@@ -8,7 +8,7 @@ Now that we formed our particle trajectory clusters, it is time to think about e
 
 The sort of natural physics way to think of this is to generate a model trajectory using these parameters and the equations of motion of a particle in an electromagnetic field coupled to an energy loss model for the gas, and then determine the best possible set of parameters using some optimization method (i.e. least-squares fitting). But before we jump into the deep end there we need some way to get good initial guesses for these values, otherwise it is really unlikely that our optimizer will ever find a good minimum for such a complex problem.
 
-That is the goal of the estimation phase: try to find some way to estimate a value for these key trajectory observables so that we have a good starting point for a fit.
+That is the goal of the estimation phase: try to find some way to estimate a value for these key trajectory observables so that we have a good starting point for a fit. This phase is called `EstimationPhase`.
 
 ## How it Works
 
@@ -43,7 +43,7 @@ Finally, we extract the stopping power (dE/dx) by adding the integrated charge a
 
 ## Output
 
-The output of the estimation phase is a set of dataframes saved to parquet files on a run-by-run basis in the `estimates` directory of the workspace. The following fields are available in the dataframes:
+The output of the estimation phase is a set of dataframes saved to parquet files in the workspace. The following fields are available in the dataframes:
 
 - event: the event number associated with this data
 - cluster_index: the cluster index asscociated with this data
@@ -70,17 +70,7 @@ Units are given where relevant.
 
 ## Plotting and Particle ID
 
-Once estimation is done, you can check the progress of the work and see how well Spyral is doing from a physics perspective. This involves plotting the B&rho; vs. dE/dx relationship to examine particle groups as well as kinematics in the relationship B&rho; vs. &theta;. To help with this Spyral ships with a notebook `particle_id.ipynb` which will allow you to plot and gate on particle groups. To launch the notebook use the following command from the Spyral repo:
-
-```bash
-jupyter-lab --notebook-dir=./notebooks
-```
-
-Be sure your Spyral virtualenv is active to run this.
-
-Some important notes about gate drawing
-
-Gates are drawn using matplotlib. Settings can be altered within the notebook to change file names and other properties. The format for a particle ID gate is the following in JSON:
+Once estimation is done, you can check the progress of the work and see how well Spyral is doing from a physics perspective. This involves plotting the B&rho; vs. dE/dx relationship to examine particle groups (to make a particle ID) as well as kinematics in the relationship B&rho; vs. &theta;. The format for a particle ID gate is the following in JSON, defined by [spyral-utils](https://attpc.github.io/spyral-utils):
 
 ```json
 {
@@ -97,12 +87,8 @@ Gates are drawn using matplotlib. Settings can be altered within the notebook to
 }
 ```
 
-Here the gate is specified to be for protons. A particle ID gate is *required* to move on to the final phase. You do not need to use the notebook to make a particle ID gate. You simply need to have a JSON file of the correct format. By default the notebook stores the particle ID gate in the `gates` directory of the workspace. This is where the solver will look for the particle ID by default.
-
-The notebook will typically need tweaking from experiment to experiment. The histogram ranges often need extending/shrinking, and the number of bins will vary depending on total statistics. It also gives users a chance to see some of the [spyral-utils](https://github.com/gwm17/spyral-utils/) package (which contains the relevant code for a `ParticleID`), which can be used outside of Spyral to do further analysis.
+Here the gate is specified to be for protons. A particle ID gate is *required* to move on to the final phase.
 
 ## Final Thoughts
 
 Estimating, as the name implies, is the least precise of all of the phases. It doesn't have as many parameters as the others because it's not clear at the time of writing which parts change significantly from experiment to experiment. Feedback on this section is welcome; it remains one of the areas where improvement is most desired.
-
-Estimating is fast, and should not represent a signficant bottleneck to analysis.

@@ -1,28 +1,26 @@
 # GET & FRIB DAQ Trace Analysis Configuration
 
-The GET and FRIB parameters control the trace analysis for each acquisition. The default detector parameters in `config.json` are:
+The GET and FRIB parameters control the trace analysis for each acquisition. The default trace parameter objects are:
 
-```json
-"GET":
-{
-    "baseline_window_scale": 20.0,
-    "peak_separation": 50.0,
-    "peak_prominence": 20.0,
-    "peak_max_width": 100.0,
-    "peak_threshold": 25.0
-},
+```python
+get_params = GetParameters(
+    baseline_window_scale=20.0,
+    peak_separation=50.0,
+    peak_prominence=20.0,
+    peak_max_width=50.0,
+    peak_threshold=40.0,
+)
 
-"FRIB":
-{
-    "baseline_window_scale": 100.0,
-    "peak_separation": 50.0,
-    "peak_prominence": 20.0,
-    "peak_max_width": 500.0,
-    "peak_threshold": 100.0,
-    "ic_delay_time_bucket": 1100,
-    "event_ic_multiplicity": 1,
-    "event_correct_ic_time": true
-},
+frib_params = FribParameters(
+    baseline_window_scale=100.0,
+    peak_separation=50.0,
+    peak_prominence=20.0,
+    peak_max_width=500.0,
+    peak_threshold=100.0,
+    ic_delay_time_bucket=1100,
+    ic_multiplicity=1,
+    correct_ic_time=True,
+)
 ```
 
 A break down of each parameter:
@@ -61,4 +59,4 @@ Turn on/off the ion chamber time correction. Sometimes, the wrong beam triggers 
 
 ## Important Note
 
-If the `is_legacy` switch is turned on in the Run parameters, the FRIB parameters are used to process the ion chamber, even though the ion chamber data is recorded through the GET acquisition. This allows for the setting of independent parameters for analyzing the IC. However some of the FRIB parameters are unused in this case. In particular, the `event_correct_ic_time` and `event_ic_multiplicity` are not used. Additionally, the baseline of the IC signal is analyzed using the GET `baseline_window_scale`.
+If the PointcloudLegacyPhase is used, the FRIB parameters are used to process the ion chamber, even though the ion chamber data is recorded through the GET acquisition. This allows for the setting of independent parameters for analyzing the IC. However some of the FRIB parameters are unused in this case. In particular, the `event_correct_ic_time` and `event_ic_multiplicity` are not used. Additionally, the baseline of the IC signal is analyzed using the GET `baseline_window_scale`.
