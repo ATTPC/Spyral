@@ -74,7 +74,7 @@ The above example is for Linux/MacOS. Windows users will need to use the slightl
 pip install -r requirements.txt
 ```
 
-**Note**: if you installed Python through Anaconda (i.e. the methods described by the [Python @ FRIB](#python--frib) section) you *do not* need to create a virtual environment as descirbed in this section. You already created a conda virtual environment instead. Simply skip right to using `pip install -r requirements.txt` after downloading Spyral and setting up the conda environment.
+**Note**: if you installed Python through Anaconda (i.e. the methods described by the [Python @ FRIB](#python-frib) section) you *do not* need to create a virtual environment as descirbed in this section. You already created a conda virtual environment instead. Simply skip right to using `pip install -r requirements.txt` after downloading Spyral and setting up the conda environment.
 
 To make sure everything went ok you can then run
 

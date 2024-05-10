@@ -47,8 +47,8 @@ def collect_runs(trace_path: Path, run_min: int, run_max: int) -> dict[int, int]
 
     Parameters
     ----------
-    ws: Workspace
-        the project Workspace
+    trace_path: pathlib.Path
+        the path to AT-TPC trace data
     run_min: int
         the first run, inclusive
     run_max: int

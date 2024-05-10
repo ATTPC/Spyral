@@ -30,12 +30,6 @@ nav:
     - After Spyral: user_guide/continuing.md
   - API Reference:
     - Spyral Reference: api/index.md
-    - run_parallel: api/run_parallel.md
-    - run: api/run.md
-    - phase_pointcloud: api/phase_pointcloud.md
-    - phase_cluster: api/phase_cluster.md
-    - phase_estimate: api/phase_estimate.md
-    - phase_solve: api/phase_solve.md
     - core:
       - About core: api/core/index.md
       - cluster: api/core/cluster.md
@@ -45,10 +39,13 @@ nav:
       - estimator: api/core/estimator.md
       - hardware_id: api/core/hardware_id.md
       - pad_map: api/core/pad_map.md
+      - phase: api/core/phase.md
+      - pipeline: api/core/pipeline.md
       - point_cloud: api/core/point_cloud.md
+      - run_stacks: api/core/run_stacks.md
       - spy_log: api/core/spy_log.md
+      - status_message: api/core/status_message.md
       - track_generator: api/core/track_generator.md
-      - workspace: api/core/workspace.md
       - legacy_beam_pads: api/core/legacy_beam_pads.md
     - correction:
       - About correction: api/correction/index.md
@@ -62,10 +59,14 @@ nav:
       - bilinear: api/interpolate/bilinear.md
       - linear: api/interpolate/linear.md
       - track_interpolator: api/interpolate/track_interpolator.md
-    - parallel:
-      - About parallel: api/parallel/index.md
-      - run_stack: api/parallel/run_stack.md
-      - status_message: api/parallel/status_message.md
+    - phases:
+      - About phases: api/phases/index.md
+      - pointcloud_phase: api/phases/pointcloud_phase.md
+      - pointcloud_legacy_phase: api/phases/pointcloud_legacy_phase.md
+      - cluster_phase: api/phases/cluster_phase.md
+      - estimation_phase: api/phases/estimation_phase.md
+      - interp_solver_phase: api/phases/interp_solver_phase.md
+      - schema: api/phases/schema.md
     - solvers:
       - About solvers: api/solvers/index.md
       - guess: api/solvers/guess.md

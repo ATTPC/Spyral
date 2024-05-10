@@ -8,7 +8,6 @@ This section is deciated to the full Spyral API documentation. Below are links t
 - [correction](correction/index.md)
 - [geometry](geometry/index.md)
 - [interpolate](interpolate/index.md)
-- [parallel](parallel/index.md)
 - [solvers](solvers/index.md)
 - [trace](trace/index.md)
 - [phases](phases/index.md)
