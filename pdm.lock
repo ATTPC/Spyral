@@ -5,7 +5,7 @@
 groups = ["default", "test", "lint", "doc"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:245cb09f77439d095d4d37c5c664843e6970080e46d2923d24cb6e8a0ceaa9c3"
+content_hash = "sha256:b19db916fda5467035f9106a14c91edd1453e481797489f5800e046f4a16c953"
 
 [[package]]
 name = "asteval"
@@ -1110,7 +1110,6 @@ version = "4.11.0"
 requires_python = ">=3.8"
 summary = "Backported and Experimental Type Hints for Python 3.8+"
 groups = ["default", "lint"]
-marker = "python_version < \"3.11\""
 files = [
     {file = "typing_extensions-4.11.0-py3-none-any.whl", hash = "sha256:c1f94d72897edaf4ce775bb7558d5b79d8126906a14ea5ed1635921406c0387a"},
     {file = "typing_extensions-4.11.0.tar.gz", hash = "sha256:83f085bd5ca59c80295fc2a82ab5dac679cbe02b9f33f7d83af68e241bea51b0"},

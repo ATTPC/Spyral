@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from multiprocessing import SimpleQueue
 from numpy.random import Generator
+import typing_extensions
 from typing import Any, Self
 
 
