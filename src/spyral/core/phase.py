@@ -1,10 +1,15 @@
+import sys
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from pathlib import Path
 from multiprocessing import SimpleQueue
 from numpy.random import Generator
-import typing_extensions
-from typing import Any, Self
+
+if sys.version_info < (3, 11):
+    from typing_extensions import Self
+else:
+    from typing import Self
+from typing import Any
 
 
 @dataclass
