@@ -4,10 +4,7 @@ on:
         branches:
             - '*'
             - '!gh-pages'
-    pull_request:
-        branches:
-            - '*'
-            - '!gh-pages'
+    
 jobs:
     run-tets:
         runs-on: ${{ matrix.os }}
