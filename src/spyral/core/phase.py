@@ -214,8 +214,6 @@ class PhaseLike(ABC):
 
         """
         path = workspace_path / f"{self.name}"
-        if not path.exists():
-            path.mkdir()
         return path
 
     def get_asset_storage_path(self, workspace_path: Path) -> Path:
@@ -236,8 +234,6 @@ class PhaseLike(ABC):
 
         """
         path = workspace_path / f"{self.name}_assets"
-        if not path.exists():
-            path.mkdir()
         return path
 
     def validate(

@@ -50,6 +50,8 @@ class Pipeline:
 
     Methods
     -------
+    create_workspace()
+        Create the workspace and subdirectories
     create_assets()
         Have each phase create any necessary assets.
     validate()
@@ -69,14 +71,31 @@ class Pipeline:
         self.phases = phases
         self.active = active
         self.workspace = workspace_path
+        self.traces = trace_path
+
+    def create_workspace(self) -> None:
+        """Create the workspace and all child directories.
+
+        This should be called before running the pipeline.
+
+        """
+
         if not self.workspace.exists():
             self.workspace.mkdir()
-        self.traces = trace_path
+
+        for phase in self.phases:
+            asset_dir = phase.get_asset_storage_path(self.workspace)
+            artifact_dir = phase.get_artifact_path(self.workspace)
+            if not asset_dir.exists():
+                asset_dir.mkdir()
+            if not artifact_dir.exists():
+                artifact_dir.mkdir()
 
     def create_assets(self) -> bool:
         """Have each phase create any necessary assets.
 
         Call each PhaseLike's create_assets function.
+        This should be called before running the pipeline.
 
         Returns
         -------
@@ -186,6 +205,8 @@ def start_pipeline(
 
     init_spyral_logger_parent(pipeline.workspace)
 
+    # Setup
+    pipeline.create_workspace()
     pipeline.create_assets()
     result = pipeline.validate()
     if False in result.values():
