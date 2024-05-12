@@ -17,7 +17,6 @@ from spyral import (
 )
 
 from pathlib import Path
-import shutil
 
 workspace_path = Path(__file__).parent / "test_workspace"
 trace_path = Path(__file__).parent
