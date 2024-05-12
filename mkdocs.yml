@@ -1,6 +1,6 @@
 site_name: Spyral
 site_url: https://example.com/
-repo_url: https://github.com/turinath/Spyral/
+repo_url: https://github.com/ATTPC/Spyral/
 site_description: Documentation for the Spyral AT-TPC analysis framework
 
 nav:
