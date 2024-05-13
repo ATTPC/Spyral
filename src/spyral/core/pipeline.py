@@ -1,13 +1,26 @@
 from .run_stacks import form_run_string, create_run_stacks
 from .status_message import StatusMessage
 from .phase import PhaseLike, PhaseResult
-from .spy_log import init_spyral_logger_parent, init_spyral_logger_child
+from .spy_log import init_spyral_logger_parent, init_spyral_logger_child, spyral_info
 
 from tqdm import tqdm
 from pathlib import Path
 from multiprocessing import SimpleQueue, Process
 from copy import deepcopy
 from numpy.random import SeedSequence, default_rng
+import time
+
+# Generated using https://www.asciiart.eu
+SPLASH: str = r"""
+-------------------------------
+ ____                        _ 
+/ ___| _ __  _   _ _ __ __ _| |
+\___ \|  _ \| | | |  __/ _  | |
+ ___| | |_| | |_| | | | |_| | |
+|____/|  __/ \__  |_|  \__ _|_|
+      |_|    |___/             
+-------------------------------
+"""
 
 
 class Pipeline:
@@ -202,20 +215,28 @@ def start_pipeline(
         i.e. terminal interface will be displayed.
 
     """
-
-    init_spyral_logger_parent(pipeline.workspace)
-
     # Setup
+    print(SPLASH)
+    print(f"Creating workspace: {pipeline.workspace} ...", end=" ")
     pipeline.create_workspace()
+    print("Done.")
+    print("Initializing logs...", end=" ")
+    init_spyral_logger_parent(pipeline.workspace)
+    print("Done.")
+    print("Creating any phase assets...", end=" ")
     pipeline.create_assets()
+    print("Done.")
+    print("Validating Pipeline...", end=" ")
     result = pipeline.validate()
     if False in result.values():
+        print("")
         print("Pipeline validation failed!")
         print(f"Status: {result}")
         return
     print("Pipeline successfully validated.")
 
     stacks = create_run_stacks(pipeline.traces, run_min, run_max, n_procs)
+    spyral_info(__name__, f"Run stacks: {stacks}")
 
     seq = SeedSequence()
 
@@ -225,6 +246,8 @@ def start_pipeline(
     active_phases: list[str] = []
     seeds = seq.spawn(len(stacks))
 
+    print("Running Spyral...")
+    start = time.time()
     # Create the child processes
     for s in range(0, len(stacks)):
         local_pipeline = deepcopy(pipeline)
@@ -280,3 +303,11 @@ def start_pipeline(
 
     for process in processes:
         process.join()
+
+    stop = time.time()
+    duration = stop - start
+    hours, sec = divmod(duration, 3600)
+    minutes, sec = divmod(sec, 60)
+    spyral_info(
+        __name__, f"Total ellapsed time: {int(hours)} hrs {int(minutes)} min {sec:.4} s"
+    )

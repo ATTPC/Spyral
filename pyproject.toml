@@ -1,5 +1,5 @@
 [project]
-name = "Spyral"
+name = "attpc_spyral"
 version = "0.6.0"
 description = "AT-TPC analysis pipeline"
 authors = [

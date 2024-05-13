@@ -8,13 +8,13 @@ solver_params = SolverParameters(
     particle_id_filename=Path("/path/to/some/particle/id.json"),
     ic_min_val=900.0,
     ic_max_val=1350.0,
-    n_time_steps=10000,
-    interp_ke_min=0.05,
+    n_time_steps=1000,
+    interp_ke_min=0.1,
     interp_ke_max=70.0,
-    interp_ke_bins=400,
+    interp_ke_bins=350,
     interp_polar_min=2.0,
     interp_polar_max=88.0,
-    interp_polar_bins=170,
+    interp_polar_bins=166,
 )
 ```
 
