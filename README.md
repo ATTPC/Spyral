@@ -1,5 +1,9 @@
 # Spyral
 
+![CI](https://github.com/ATTPC/Spyral/actions/workflows/ci.yml/badge.svg)
+[![PyPI version shields.io](https://img.shields.io/pypi/v/attpc_spyral.svg)](https://pypi.python.org/pypi/attpc_spyral/)
+[![PyPI license](https://img.shields.io/pypi/l/attpc_spyral.svg)](https://pypi.python.org/pypi/attpc_spyral/)
+
 Spyral is an analysis library for data from the Active Target Time Projection Chamber (AT-TPC). Spyral provides a flexible analysis pipeline, transforming the raw trace data into physical observables over several tunable steps. The analysis pipeline is also extensible, supporting a diverse array of datasets. Sypral can process multiple data files in parallel, allowing for scalable performance over larger experiment datasets.
 
 ## Installation
