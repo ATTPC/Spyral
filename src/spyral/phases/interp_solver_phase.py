@@ -143,7 +143,7 @@ class InterpSolverPhase(PhaseLike):
             )
             return PhaseResult.invalid_result(payload.run_number)
         result = PhaseResult(
-            artifact_path=workspace_path
+            artifact_path=self.get_artifact_path(workspace_path)
             / form_physics_file_name(payload.run_number, pid),
             successful=True,
             run_number=payload.run_number,
