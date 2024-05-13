@@ -1,3 +1,3 @@
-# Jupyter Notebooks
+# Spyral_notebooks
 
-Spyral comes with several notebooks (in the `notebooks/` directory). There is a notebook for each phase of the analysis, plus an extra one for FRIBDAQ traces and one for post-Spyral analysis, as well as a particle ID notebook. These are designed to be readable and self-explanatory, so we won't cover them much here other than to say they are a great way to test out new parameters and to try out new data. This is another area where we are looking for feedback. Let us know if the notebooks are missing something useful or if there is a cool notebook feature we aren't taking advantage of!
+To test some parameters and see what is happening in each phase, checkout the [spyral_notebooks](https://github.com/attpc/spyral_notebooks) repository. This contains notebooks for every phase and even a notebook for making a particle ID gate!

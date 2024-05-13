@@ -1,0 +1,16 @@
+name: Test Release
+run-name: ${{ github.actor }} Publishing to testpypi
+on: workflow_dispatch
+
+jobs:
+    testpypi-publish:
+        name: Publish to TestPyPI
+        runs-on: ubuntu-latest
+        environment: test-release
+        permissions:
+            id-token: write
+        steps:
+            - uses: actions/checkout@v4
+            - uses: pdm-project/setup-pdm@v4
+            - name: Publish packages to TestPyPI
+              run: pdm publish --repository testpypi

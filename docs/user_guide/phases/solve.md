@@ -19,19 +19,17 @@ Finally, when a trajectory is requested, Spyral interpolates on energy and angle
 
 When a trajectory is requested, the full energy, polar angle, azimuthal angle, and reaction vertex must be given. The azimuthal angle and vertex are used to rotate and translate the trajectory to the proper orientation (this reduces the phase space of the interpolation mesh).
 
-In general, it has been found that 0.5 degree steps in polar angle are best, while 500 keV steps in energy are acceptable. However, this may need tuning from experiment to experiment. The interpolation code can be found in `spyral/core/track_generator.py` as well as `spyral/interpolate/`
+In general, it has been found that 0.5 degree steps in polar angle are best, while 200 keV steps in energy are acceptable. However, this may need tuning from experiment to experiment.
 
 ## Fitting to Data
 
-Spyral performs a least squares fit to data using the [lmfit](https://lmfit.github.io/lmfit-py/) library. Spyral uses the L-BFGS-B quasi-Newton minimization scheme to minimize the average error between the data and the trajectory. The average error is computed by looping over the data and the trajectory and calculating the smallest distance between the given data point and a point on the trajectory. These minimum distances are then averaged.
+Spyral uses the L-BFGS-B quasi-Newton minimization scheme to minimize the average error between the data and the trajectory. The average error is computed by looping over the data and the trajectory and calculating the smallest distance between the given data point and a point on the trajectory. These minimum distances are then averaged.
 
-The best fit parameters and their uncertainties are written to disk in an Apache parquet file. The &chi;<sup>2</sup> and reduced &chi;<sup>2</sup> are also written.
-
-Solver code can be found in `spyral/solvers/solver_interp.py`.
+The best fit parameters and their uncertainties (when possible) are written to disk in an Apache parquet file. The reduced &chi;<sup>2</sup> is also written.
 
 ## Output
 
-The output of the solver phase is a dataframe written to a parquet file in the `physics` directory of the workspace. Files are named by run and the particle species from the particle ID gate. The available values in the data frame are as follows:
+The output of the solver phase is a dataframe written to a parquet file in the workspace. Files are named by run and the particle species from the particle ID gate. The available values in the data frame are as follows:
 
 - event: The event number associated with this data
 - cluster_index: the cluster index associated with this data
@@ -56,12 +54,4 @@ The error values are unused because the L-BFGS-B optimization scheme does not ge
 
 Generating a good interpolation mesh is key. If the mesh is too coarse the results will become equally coarse.
 
-Through testing, it was found that the reaction vertex is *highly* correlated to the azimuthal and polar angles. As such, only the vertex z position is acutally fit; x and y are fixed. This greatly reduces the correlation. More testing should be done to look for alternatives.
-
 To make performance reasonable [Numba](../numba.md) is used to just-in-time compile the interpolation scheme and objective function. Checkout that section of the docs for more details.
-
-Other solvers have been used/tried. Of particular interest is using the Unscented Kalman Filter, which feels like a really great solution to our problem, but has some critical issues (uneven step size, gaps in trajectories, etc.). See `spyral/solvers/solver_kalman.py` if you're curious. Note that that code is out-of-date with the rest of Spyral. In the future it will most likely be relegated to an isolated branch of the repository.
-
-An additional method of interest is least-squares fitting using a secondary interpolation on z from the trajectory. However, in practice, this was tested to give generally worse results than this method. But more concrete testing is needed to verify this behavior.
-
-Solving is typically fast relative to  the longer phases like the point cloud phase, however, if the previous phases are not optimized well, the solver can take significantly longer due to noisy data.
