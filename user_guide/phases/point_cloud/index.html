@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.14">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.21">
     
     
       
@@ -28,10 +28,10 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.fad675c6.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.66ac8b77.min.css">
       
         
-        <link rel="stylesheet" href="../../../assets/stylesheets/palette.356b1318.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -72,16 +72,13 @@
     <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green">
   
     
-    
-      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
-    
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
         
-        <a href="#the-first-phase-point-clouds" class="md-skip">
+        <a href="#the-first-phase-pointcloudphase" class="md-skip">
           Skip to content
         </a>
       
@@ -130,9 +127,9 @@
     
     
     
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="green" data-md-color-accent="green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
     
-      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
       </label>
     
@@ -140,9 +137,9 @@
     
     
     
-    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="lime"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="lime"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
     
-      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
       </label>
     
@@ -151,13 +148,16 @@
       
     
     
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
     
     
       <div class="md-header__source">
-        <a href="https://github.com/turinath/Spyral/" title="Go to repository" class="md-source" data-md-component="source">
+        <a href="https://github.com/ATTPC/Spyral/" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
@@ -200,10 +200,10 @@
   </label>
   
     <div class="md-nav__source">
-      <a href="https://github.com/turinath/Spyral/" title="Go to repository" class="md-source" data-md-component="source">
+      <a href="https://github.com/ATTPC/Spyral/" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
     GitHub
@@ -237,31 +237,10 @@
       
   
   
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../quick_start/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Quick Start
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
     
   
   
   
-    
     
     
     
@@ -270,11 +249,10 @@
       
         
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -285,12 +263,33 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             User Guide
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Setup and Installation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -323,16 +322,14 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_3" >
         
           
-          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_3" id="__nav_2_3_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -343,8 +340,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_2">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_3">
             <span class="md-nav__icon md-icon"></span>
             Configuration
           </label>
@@ -378,32 +375,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../../config/workspace/" class="md-nav__link">
+      <a href="../../config/pad/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Workspace
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../config/run/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Run
+    Pad Plane
   </span>
   
 
@@ -518,27 +494,6 @@
 
               
             
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../config/extending/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Extending the Config
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -559,16 +514,14 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_4" checked>
         
           
-          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_4" id="__nav_2_4_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -579,8 +532,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="true">
-          <label class="md-nav__title" for="__nav_3_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_4">
             <span class="md-nav__icon md-icon"></span>
             Analysis Phases
           </label>
@@ -887,6 +840,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../../extending/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Extending Spyral
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../continuing/" class="md-nav__link">
         
   
@@ -918,16 +892,14 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -938,8 +910,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             API Reference
           </label>
@@ -972,133 +944,6 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../../../api/run_parallel/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    run_parallel
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../api/run/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    run
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../api/phase_pointcloud/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    phase_pointcloud
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../api/phase_cluster/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    phase_cluster
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../api/phase_estimate/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    phase_estimate
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../api/phase_solve/" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    phase_solve
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    
     
     
     
@@ -1107,11 +952,10 @@
       
         
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_8" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_2" >
         
           
-          <label class="md-nav__link" for="__nav_4_8" id="__nav_4_8_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_2" id="__nav_3_2_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1122,8 +966,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_8_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_8">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_2">
             <span class="md-nav__icon md-icon"></span>
             core
           </label>
@@ -1304,11 +1148,74 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../api/core/phase/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    phase
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/core/pipeline/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    pipeline
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../api/core/point_cloud/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
     point_cloud
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/core/run_stacks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    run_stacks
   </span>
   
 
@@ -1346,11 +1253,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api/core/track_generator/" class="md-nav__link">
+      <a href="../../../api/core/status_message/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    track_generator
+    status_message
   </span>
   
 
@@ -1367,11 +1274,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api/core/workspace/" class="md-nav__link">
+      <a href="../../../api/core/track_generator/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    workspace
+    track_generator
   </span>
   
 
@@ -1420,16 +1327,14 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_9" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
         
           
-          <label class="md-nav__link" for="__nav_4_9" id="__nav_4_9_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1440,8 +1345,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_9_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_9">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
             <span class="md-nav__icon md-icon"></span>
             correction
           </label>
@@ -1528,16 +1433,14 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_10" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
         
           
-          <label class="md-nav__link" for="__nav_4_10" id="__nav_4_10_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1548,8 +1451,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_10_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_10">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
             <span class="md-nav__icon md-icon"></span>
             geometry
           </label>
@@ -1615,16 +1518,14 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_11" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" >
         
           
-          <label class="md-nav__link" for="__nav_4_11" id="__nav_4_11_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1635,8 +1536,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_11_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_11">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5">
             <span class="md-nav__icon md-icon"></span>
             interpolate
           </label>
@@ -1744,30 +1645,28 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_12" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
         
           
-          <label class="md-nav__link" for="__nav_4_12" id="__nav_4_12_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
             
   
   <span class="md-ellipsis">
-    parallel
+    phases
   </span>
   
 
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_12_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_12">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
             <span class="md-nav__icon md-icon"></span>
-            parallel
+            phases
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -1778,11 +1677,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api/parallel/" class="md-nav__link">
+      <a href="../../../api/phases/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    About parallel
+    About phases
   </span>
   
 
@@ -1799,11 +1698,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api/parallel/run_stack/" class="md-nav__link">
+      <a href="../../../api/phases/pointcloud_phase/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    run_stack
+    pointcloud_phase
   </span>
   
 
@@ -1820,11 +1719,95 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api/parallel/status_message/" class="md-nav__link">
+      <a href="../../../api/phases/pointcloud_legacy_phase/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    status_message
+    pointcloud_legacy_phase
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/phases/cluster_phase/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    cluster_phase
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/phases/estimation_phase/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    estimation_phase
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/phases/interp_solver_phase/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    interp_solver_phase
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/phases/schema/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    schema
   </span>
   
 
@@ -1852,16 +1835,14 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_13" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_7" >
         
           
-          <label class="md-nav__link" for="__nav_4_13" id="__nav_4_13_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_7" id="__nav_3_7_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1872,8 +1853,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_13_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_13">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_7">
             <span class="md-nav__icon md-icon"></span>
             solvers
           </label>
@@ -1960,16 +1941,14 @@
     
     
     
-    
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_14" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_8" >
         
           
-          <label class="md-nav__link" for="__nav_4_14" id="__nav_4_14_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_8" id="__nav_3_8_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1980,8 +1959,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_14_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4_14">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_8">
             <span class="md-nav__icon md-icon"></span>
             trace
           </label>
@@ -2311,15 +2290,15 @@
   
 
 
-<h1 id="the-first-phase-point-clouds">The First Phase: Point Clouds</h1>
-<p>The first phase of the analysis is the transformation of raw AT-TPC digitized waveforms (often called traces) into a point cloud geometry. There are four steps to this part of the analysis:</p>
+<h1 id="the-first-phase-pointcloudphase">The First Phase: PointcloudPhase</h1>
+<p>The first phase of the defualt Pipeline is the transformation of raw AT-TPC digitized waveforms (often called traces) into a point cloud geometry. There are four steps to this part of the analysis:</p>
 <ol>
 <li>Removal of the trace baselines</li>
 <li>Identifying signal peaks in the traces</li>
 <li>Consolidation of the signals into point clouds</li>
 <li>Identifying associated auxilary detectors and applying corrections</li>
 </ol>
-<p>Below we'll walk through each of these steps</p>
+<p>Below we'll walk through each of these steps. This is run through the <code>PointcloudPhase</code>.</p>
 <h2 id="baseline-removal">Baseline Removal</h2>
 <p>Each trace has some DC offset, that is a shift from 0 on the ADC scale of the trace. To correct for this, a Fourier analysis techinque is employed. This technique was first used in AT-TPC analysis by J. Bradt in his <a href="https://d.lib.msu.edu/etd/4837?q=Bradt%20at-tpc">thesis work</a>. Very breifly we will go over some of the details here. A Fourier transform can be written as</p>
 <div class="arithmatex">\[
@@ -2340,25 +2319,23 @@
 \]</div>
 <p>We introduce an aditional scaling parameter <span class="arithmatex">\(a\)</span> so that <span class="arithmatex">\(\hat{g}(\xi) = \text{sinc}(\xi/a)\)</span> and the size of the baseline window can be controlled. This means that all we need to do is take the Fourier transform of our trace, multiply it by our <span class="arithmatex">\(\hat{g}\)</span>, and then take the inverse fourier transform of that! We can even do this in one shot for the GET traces, correcting all of the baselines at once using the 2-D Fourier transform algorithms of Numpy.</p>
 <p>There are some small details that can be interesting. Before taking the Fourier transform of the trace, we need to remove singals from the trace, otherwise they will upset the baseline, moving the average up. This is done removing any time-buckets which have a value <span class="arithmatex">\(\ge 1.5 \sigma\)</span> away from the mean amplitude of the trace where <span class="arithmatex">\(\sigma\)</span> is the standard deviation of the trace amplitude.</p>
-<p>This code is entirely contained in <code>spyral/trace/get_event.py</code> in the <code>preprocess_traces</code> function.</p>
 <h2 id="identifying-signal-peaks">Identifying Signal Peaks</h2>
 <p>Identifying peaks in spectra (traces) can be a tedious, delicate, and time consuming task. Thankfully, it is a common enough problem that someone already solved it. Scipy has a <code>signal</code> library that contains the <code>find_peaks</code> function. <code>find_peaks</code> takes a lot of different arguments that can greatly impact the quality of the peak finding. Chekcout our <a href="../../config/traces/">configuration</a> description to see which parameters are exposed and what they do.</p>
 <p>Once peaks are identified, centroids, amplitudes, integrals are extracted. Centroids are smeared within a single time bucket when converted to floating point values for subsequent calculations. This accounts for the binning behavior of sampling the electronic signal.</p>
-<p>This code is contained in <code>spyral/trace/get_trace.py</code> and <code>spyral/trace/get_event.py</code>.</p>
 <h2 id="consolidation-into-point-clouds">Consolidation into Point Clouds</h2>
-<p>Once peaks have been identified, it is time to convert from signals into geometry. Each signal represents a measurement of the electrons ionized by the flight path of a particle through the AT-TPC (in principle anyways, there's a lot of noise). Coordinates in the AT-TPC pad plane (X-Y) are taken using the pad ID in which the signal occurred and looking up the pad position from a CSV file (again see the <a href="../../config/workspace/">config</a> docs). The beam-axis coordinate (Z) is extracted by calibrating the centroid location of the peak, which originally is in units of GET time-buckets, to millimeters. This is done using two aboslute reference points: the window and the micromegas. The time bucket of the window and micromegas can be extracted by examining events with long trajectories such as events where the beam reacted with the window. The calibration is then</p>
+<p>Once peaks have been identified, it is time to convert from signals into geometry. Each signal represents a measurement of the electrons ionized by the flight path of a particle through the AT-TPC (in principle anyways, there's a lot of noise). Coordinates in the AT-TPC pad plane (X-Y) are taken using the pad ID in which the signal occurred and looking up the pad position from a CSV file (again see the <a href="../../config/pad/">configuration</a> docs). The beam-axis coordinate (Z) is extracted by calibrating the centroid location of the peak, which originally is in units of GET time-buckets, to millimeters. This is done using two aboslute reference points: the window and the micromegas. The time bucket of the window and micromegas can be extracted by examining events with long trajectories such as events where the beam reacted with the window. The calibration is then</p>
 <div class="arithmatex">\[
     z_{signal} = \frac{t_{window} - t_{signal}}{t_{window} - t_{micromegas}} l_{attpc}
 \]</div>
 <p>where <span class="arithmatex">\(l_{attpc}\)</span> is the length of the AT-TPC in millimeters.</p>
 <h2 id="auxilary-detectors-and-corrections">Auxilary Detectors and Corrections</h2>
 <p>The AT-TPC has at minimum one auxilary detector, the upstream ion chamber. The ion chamber (IC) is used to generate the AT-TPC trigger (in conjunction with the mesh) and identify beam species, and is recorded using the FRIBDAQ framework. Its data is analyzed very similarly to the GET data; baselines are removed and signals are extracted. Users can specify the maximum allowed ion chamber multiplicty to reject data with has an inconsistent trigger. Usually the AT-TPC also has a silicon detector downstream within the hole of the pad plane. This is useful for correcting the time of an event which triggered from the wrong IC signal by examining coincidences between the silicon and IC; only IC events which do not have a silicon coincidence are valid triggers. See the code in <code>spyral/traces/frib_traces.py</code> and <code>spyral/traces/frib_event.py</code> for details.</p>
-<p>Additionally, it has been found that in some cases the AT-TPC needs a correction for distortions to the electric field. The correction is calculated using <a href="https://gitlab.cern.ch/garfield/garfieldpp">Garfield++</a> externally from Spyral. Spyral takes in a correction file containing initial electron positions and final drift positions and times. Spyral generates an interpolation mesh to calculate corrections for each point. The mesh is calculated and stored in a Numpy format file (<code>.npy</code>). It is not clear how impactful this correction is anymore; it was seemingly most important early on in the AT-TPC development. The associated code can be found in <code>spyral/correction</code>. This correction is optional, and can be turned off and on using the configuration.</p>
+<p>Additionally, it has been found that in some cases the AT-TPC needs a correction for distortions to the electric field. The correction is calculated using <a href="https://gitlab.cern.ch/garfield/garfieldpp">Garfield++</a> externally from Spyral. Spyral takes in a correction file containing initial electron positions and final drift positions and times. Spyral generates an interpolation mesh to calculate corrections for each point. The mesh is calculated and stored in a Numpy format file (<code>.npy</code>). It is not clear how impactful this correction is anymore; it was seemingly most important early on in the AT-TPC development. This correction is optional, and can be turned off and on using the configuration.</p>
 <p>Point clouds are also sorted in z for ease of use later.</p>
 <h3 id="the-ion-chamber-and-the-trigger">The Ion Chamber and the Trigger</h3>
-<p>Some additional discussion needs to be had about the behavior of the ion chamber as it pertains to the trigger (start) of events. The ion chamber recieves a beam particle, which causes a singal to be registered. This ion chamber signal is then delayed by 100 &mu;s. The beam then enters the AT-TPC active volume, electrons are ionized, and the electrons drift toward the mesh. The mesh registers a singal, and this signal generates a 120 &mu;s gate. The coincidence of this mesh gate and the ion chamber delayed signal is then the trigger for an event. This effects the analysis of the ion chamber because the recording window for the module recieving the ion chamber recieves this delayed IC signal, and so can have peaks in the waveform that occured <em>before</em> the event trigger. To compensate for this there is a configuration parameter to set the delay in FRIBDAQ time buckets; all peaks before the delay time bucket are ignored and not used in subsequent ion chamber analysis. See <a href="../../config/traces/">here</a> and the code in <code>spyral/traces/frib_event.py</code> for more details. (We should probably put a diagram of what is happening here)</p>
+<p>Some additional discussion needs to be had about the behavior of the ion chamber as it pertains to the trigger (start) of events. The ion chamber recieves a beam particle, which causes a singal to be registered. This ion chamber signal is then delayed by 100 &mu;s. The beam then enters the AT-TPC active volume, electrons are ionized, and the electrons drift toward the mesh. The mesh registers a singal, and this signal generates a 120 &mu;s gate. The coincidence of this mesh gate and the ion chamber delayed signal is then the trigger for an event. This effects the analysis of the ion chamber because the recording window for the module recieving the ion chamber recieves this delayed IC signal, and so can have peaks in the waveform that occured <em>before</em> the event trigger. To compensate for this there is a configuration parameter to set the delay in FRIBDAQ time buckets; all peaks before the delay time bucket are ignored and not used in subsequent ion chamber analysis. See <a href="../../config/traces/">here</a> for more details. (We should probably put a diagram of what is happening here)</p>
 <h2 id="legacy-data">Legacy Data</h2>
-<p>In the past, the AT-TPC was not run with a split DAQ. That is, all signals were recorded using the GET data aquisition, including auxilary detectors like the ion chamber. In the configuration, one can indicate to Spyral that legacy data is being analyzed (see <a href="../../config/run/">here</a>). If this is turned on Spyral assumes that any data in CoBo 10 is exclusively from auxilary detectors. Legacy mappings and corrections are included in the <code>etc</code> directory. Legacy IC data is analyzed for peaks using the <code>FRIB</code> parameters even though the data is acquired using the GET DAQ (see <a href="../../config/traces/">here</a>). Legacy analysis is an advanced feature, and requires some experience with using Spyral. This phase is the only phase significantly impacted by legacy analysis.</p>
+<p>In the past, the AT-TPC was not run with a split DAQ. That is, all signals were recorded using the GET data aquisition, including auxilary detectors like the ion chamber. To support this older data Spyral also provides a <code>PointcloudLegacyPhase</code>. If this phase is used Spyral assumes that any data in CoBo 10 is exclusively from auxilary detectors. Legacy pad mappings and corrections are also bundled in the package. Legacy IC data is analyzed for peaks using the <code>FRIBParameters</code> parameters even though the data is acquired using the GET DAQ (see <a href="../../config/traces/">here</a>). Legacy analysis is an advanced feature, and requires some experience with using Spyral. This phase is the only phase significantly impacted by legacy analysis.</p>
 <h2 id="scalers">Scalers</h2>
 <p>The FRIBDAQ data does not only contain auxilary detectors. It also contains scalers, or counters. These scalers are readout independently from the main acquisition and represent statistics of the experiment. The most common scaler to use is the downscaled ion chamber trigger, which is a measurement of the total beam count over the course of the experiment. Scalers are read out run by run and are written to the <code>scaler</code> directory of the workspace as dataframes in parquet files. The available columns in the dataframe are:</p>
 <ul>
@@ -2381,11 +2358,19 @@
 
 
 
+
+
+
+
+
+
+
                 
               </article>
             </div>
           
           
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
         
       </main>
@@ -2414,10 +2399,10 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../../..", "features": [], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.cd18aaf1.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.a7c05c9e.min.js"></script>
       
         <script src="../../../javascript/mathjax.js"></script>
       
