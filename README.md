@@ -1,28 +1,16 @@
 # Spyral
 
-Spyral is an analysis application for data from the Active Target Time Projection Chamber (AT-TPC). Spyral provides a flexible analysis pipeline, transforming the raw trace data into physical observables over several tunable steps. Sypral can process multiple data files in parallel, allowing for scalable performance over larger experiment datasets.
+Spyral is an analysis library for data from the Active Target Time Projection Chamber (AT-TPC). Spyral provides a flexible analysis pipeline, transforming the raw trace data into physical observables over several tunable steps. The analysis pipeline is also extensible, supporting a diverse array of datasets. Sypral can process multiple data files in parallel, allowing for scalable performance over larger experiment datasets.
 
 ## Installation
 
-### Download
+Install using pip:
 
-To download the repository use `git clone https://github.com/attpc/Spyral.git`
-
-To install the required packages it is recommended to create a virtual environment with python/pip, detailed below.
-
-### Pip
-Create a virtual environment using
-```[bash]
-python -m venv </some/path/to/your/new/environment>
+```bash
+pip install attpc_spyral
 ```
 
-Activate the environment using `source </some/path/to/your/new/environment/>/bin/activate`, then install all required dependencies using
-
-```[bash]
-pip install -r requirements.txt
-```
-
-All dependencies for Spyral will then be installed to your virtual environment
+It is recommended to install Spyral to a virtual environment.
 
 ## Requirements
 
@@ -33,61 +21,147 @@ are not guaranteed to work; if there is a problem please make an issue on the Gi
 
 ## Usage
 
-For a full user guide and documentation see [our docs](https://attpc.github.io/Spyral/). Below is a very brief sketch of using Spyral.
+For a full user guide and documentation with examples, see [our docs](https://attpc.github.io/Spyral/). Below is an example script of using Spyral with the default pipeline
 
-### Configuration
+```python
+from spyral import (
+    Pipeline,
+    start_pipeline,
+    PointcloudPhase,
+    ClusterPhase,
+    EstimationPhase,
+    InterpSolverPhase,
+)
+from spyral import (
+    PadParameters,
+    GetParameters,
+    FribParameters,
+    DetectorParameters,
+    ClusterParameters,
+    SolverParameters,
+    EstimateParameters,
+    INVALID_PATH,
+)
 
-User configuration parameters are passed through JSON files. Configuration files are passed at runtime to the script.
+from pathlib import Path
+import multiprocessing
 
-Configurations contain many parameters. These can be seen in the config.json example given with the repo. These parameters are grouped by the use case:
+workspace_path = Path("/some/workspace/path/")
+trace_path = Path("/some/trace/path/")
 
-- Workspace parameters: These are file paths to either raw data, the workspace, or various AT-TPC pad data files.
-- Run parameters: Run numbers over which the data should be processed, as well as indications of which types of analysis to run
-- Detector parameters: detector conditions and configuration
-- GET parameters: parameters which are used in the peak identification and baseline removal analysis for the GET data (AT-TPC pads)
-- FRIB trace parameters: parameters used in the peak identification of FRIBDAQ signals (ion chamber, auxilary silicon, etc)
-- Clustering parameters: point cloud clustering parameters
-- Estimation parameters: used to generate estimates of physical observables
-- Solver parameters: used to control the physics solver
+run_min = 94
+run_max = 94
+n_processes = 4
 
-### Running
+pad_params = PadParameters(
+    is_default=True,
+    is_default_legacy=False,
+    pad_geometry_path=INVALID_PATH,
+    pad_gain_path=INVALID_PATH,
+    pad_time_path=INVALID_PATH,
+    pad_electronics_path=INVALID_PATH,
+    pad_scale_path=INVALID_PATH,
+)
 
-To use Spyral, run the main.py script located at the top level of the repository with the virtual environment activated. Example:
+get_params = GetParameters(
+    baseline_window_scale=20.0,
+    peak_separation=50.0,
+    peak_prominence=20.0,
+    peak_max_width=50.0,
+    peak_threshold=40.0,
+)
 
-```[bash]
-python main.py CONFIG
+frib_params = FribParameters(
+    baseline_window_scale=100.0,
+    peak_separation=50.0,
+    peak_prominence=20.0,
+    peak_max_width=500.0,
+    peak_threshold=100.0,
+    ic_delay_time_bucket=1100,
+    ic_multiplicity=1,
+    correct_ic_time=True,
+)
+
+det_params = DetectorParameters(
+    magnetic_field=2.85,
+    electric_field=45000.0,
+    detector_length=1000.0,
+    beam_region_radius=25.0,
+    micromegas_time_bucket=10.0,
+    window_time_bucket=560.0,
+    get_frequency=6.25,
+    garfield_file_path=Path("/path/to/some/garfield.txt"),
+    do_garfield_correction=False,
+)
+
+cluster_params = ClusterParameters(
+    min_cloud_size=50,
+    min_points=3,
+    min_size_scale_factor=0.05,
+    min_size_lower_cutoff=10,
+    cluster_selection_epsilon=0.3,
+    circle_overlap_ratio=0.5,
+    fractional_charge_threshold=0.8,
+    outlier_scale_factor=0.05,
+)
+
+estimate_params = EstimateParameters(
+    min_total_trajectory_points=30, smoothing_factor=100.0
+)
+
+solver_params = SolverParameters(
+    gas_data_path=Path("/path/to/some/gas/data.json"),
+    particle_id_filename=Path("/path/to/some/particle/id.json"),
+    ic_min_val=900.0,
+    ic_max_val=1350.0,
+    n_time_steps=10000,
+    interp_ke_min=0.05,
+    interp_ke_max=70.0,
+    interp_ke_bins=400,
+    interp_polar_min=2.0,
+    interp_polar_max=88.0,
+    interp_polar_bins=170,
+)
+
+pipe = Pipeline(
+    [
+        PointcloudPhase(
+            get_params,
+            frib_params,
+            det_params,
+            pad_params,
+        ),
+        ClusterPhase(cluster_params, det_params),
+        EstimationPhase(estimate_params, det_params),
+        InterpSolverPhase(solver_params, det_params),
+    ],
+    [True, True, True, True],
+    workspace_path,
+    trace_path,
+)
+
+
+def main():
+    start_pipeline(pipe, run_min, run_max, n_processes)
+
+
+if __name__ == "__main__":
+    multiprocessing.set_start_method("spawn")
+    main()
+
 ```
 
-Replace `CONFIG` with the path to your configuration file. For complete list of options use
+### Pipeline
 
-```[bash]
-python main.py --help
-```
-
-### Performance
-
-Spyral attempts to be as performant as possible while also being flexible enough to handle the broad sea of data that is generated by the AT-TPC. To that end, below are some useful tips
-on extracting the most performance out of the application.
-
-- The point cloud phase (first phase of the analysis) is by far the most time consuming task by our benchmarks. Some of the bottleneck is the I/O on the raw traces; raw trace files range in size from 10 GB to 50 GB, and an event can be several MB on it's own. As such it is highly recommended to store the trace data on a SSD rather than an HDD. Additionally, when possible, it is also recommended to store the data on a local disk (i.e. SATA or NVME/PCIe). USB connected removable drives can represent serious bottlenecks to this part of the analysis.
-- The clustering phase is entirely limited by the clustering algorithm chosen. As such there is little that can be done to improve the performance of this section. In general, clustering is the second most time consuming task, but is still much faster than generating the point clouds (typically a factor of 2).
-- The estimating phase is very performant due to the relative simplicity of the analysis. In general estimating should not be considered expensive
-- For the solving phase the story is complicated and will be described in more detail below.
-
-### Solving
-
-The final phase of the analysis involves using the equations of motion of a charged ion in a electromagnetic field to extract physics parameters. As it might sound, this isn't that straight forward. The simple approach is to fit ODE solutions to the data, but it can prove quite expensive to solve the ODE's the hundreds of times it takes to minimize per event. To bypass this expense, Spyral pre-calculates many of these ODE solutions and then interpolates on them to find a best fit. To make this even faster, Numba is used to just-in-time compile a lot of the interpolation code. As such, the first time you run phase 4, it might take a while because Spyral is generating the interpolation scheme. But after that it will be really fast!
-
-An alternative approach, the Unscented Kalman Filter, also exists. But this approach is not sound yet; more testing and development needs to be done before this method is ready to be used in production.
+The core of Spyral is the Pipeline. A Pipeline in a complete description of an analysis, made up of individual Phases. Each Phase is a unit of analysis to be performed on data. Spyral provides a complete set of default Phases which can be used to completely analyze an AT-TPC dataset. Custom Phases can also be created to extend the functionality of Spyral.
 
 ### Parallel Processing
 
-As was mentioned previously, Spyral is capable of running multiple data files in parallel. This is acheived through the python `multiprocessing` library. In the configuration file, there is a parameter named `n_processors`. The value of this parameter indicates to Spyral the *maximum* number of processors which can be spawned. Spyral will then inspect the data load that was submitted in the configuration and attempt to balance the load across the processors as equally as possible.
+Spyral is capable of running multiple data files in parallel. This is acheived through the python `multiprocessing` library. In the `start_pipeline` function a parameter named `n_processors indicates to Spyral the *maximum* number of processors which can be spawned. Spyral will then inspect the data load that was submitted in the configuration and attempt to balance the load across the processors as equally as possible.
 
 Some notes about parallel processing:
 
-- In job environments (SLURM, etc.), you won't want to have the typical progress display provided by Spyral. Disable terminal output using the `--no-term` flag (i.e. `python main.py --no-term CONFIG`).
-- The number of processors should not exceed the number of physical cores in the system being used *MINUS* one (the extra one is the parent process which is monitoring the children). Doing so could result in extreme slow down and potential unresponsive behavior.
+- In job environments (SLURM, etc.), you won't want to have the typical progress display provided by Spyral. Set the `disable_display` argument of `start_pipeline` to `False` in this case.
 - In general, it is best if the number of data files to be processed is evenly divisible by the number of processors. Otherwise, by necessity, the work load will be uneven across the processors.
 - Spyral will sometimes run fewer processes than requested. This is usually in the case where the number of requested processors is greater than the number of files to be processed.
 
@@ -95,13 +169,7 @@ Some notes about parallel processing:
 
 Spyral creates a set of logfiles when it is run (located in the log directory of the workspace). These logfiles can contain critical information describing the state of Spyral. In particular, if Spyral has a crash, the logfiles can be useful for determining what went wrong. A logfile is created for each process (including the parent process). The files are labeld by process number (or as parent in the case of the parent).
 
-By default, Spyral prints some basic information to the terminal and provides progress monitoring in the form of a progress bar for each processor. This can be disabled by passing the `--no-term` option
-
-```[bash]
-python main.py --no-term CONFIG
-```
-
 ## Notebooks
 
-The notebook directory of Spyral contains several useful Jupyter notebooks for data visualization, including making particle ID gates.
+See the [spyral_notebooks](https://github.com/attpc/spyral_notebooks) repository for notebooks which demonstrate the behavior of the default Phases of Spyral.
 

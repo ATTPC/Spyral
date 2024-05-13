@@ -1,19 +1,18 @@
 # Clustering Configuration
 
-The Cluster parameters which control the clustering, joining, and outlier detection algorithms. The default cluster parameters given in `config.json` are:
+The Cluster parameters which control the clustering, joining, and outlier detection algorithms. The default cluster parameter object is:
 
-```json
-"Cluster":
-{
-    "min_cloud_size": 50,
-    "minimum_points": 5,
-    "minimum_size_scale_factor": 0.05,
-    "minimum_size_lower_cutoff": 10,
-    "cluster_selection_epsilon": 0.3,
-    "circle_overlap_ratio": 0.50,
-    "fractional_charge_threshold": 0.7,
-    "outlier_scale_factor": 0.05
-},
+```python
+cluster_params = ClusterParameters(
+    min_cloud_size=50,
+    min_points=3,
+    min_size_scale_factor=0.05,
+    min_size_lower_cutoff=10,
+    cluster_selection_epsilon=0.3,
+    circle_overlap_ratio=0.5,
+    fractional_charge_threshold=0.8,
+    outlier_scale_factor=0.05,
+)
 ```
 
 A break down of each parameter:

@@ -1,6 +1,6 @@
 # Spyral in Parallel
 
-One of the other important performance features of Spyral is parallel processing of runs. In the [configuration](config/run.md), you can specify a range of runs to process as well as the number of processors. Each processor is an independent Python interpreter process, running it's own instance of Spyral. Below we'll describe a little bit about how this works and what some of the strenghts and limitations are.
+One of the other important performance features of Spyral is parallel processing of runs. In `start_pipeline` function you can specify a range of runs to process as well as the number of processors. Each processor is an independent Python interpreter process, running it's own instance of Spyral. Below we'll describe a little bit about how this works and what some of the strenghts and limitations are.
 
 ## How it Works
 
@@ -34,8 +34,4 @@ In general more processors is more better, but this isn't always the case. The f
 
 The final consideration is memory. This is mostly important for the solving phase. The interpolation mesh can be quite large (somtimes GBs) and needs to be stored in active memory *for each processor*. You need enough system memory (RAM) for each processor to completely load the mesh.
 
-If you are using Spyral in a job environment (SLURM, etc), you can run with the `--no-term` option to disable printing to the terminal
-
-```bash
-python main.py --no-term local_config.json
-```
+If you are using Spyral in a job environment (SLURM, etc), you can run with the Pipeline with the `no_display` argument in `start_pipeline` set to `True`. This will avoid the overhead of SLURM writting all the progress bar prints to a file.

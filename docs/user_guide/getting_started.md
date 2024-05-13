@@ -1,120 +1,228 @@
-# Getting Started with Spyral
+# Getting Started
 
-## Python and Pip
+With Spyral installed to your environment, we can now get started using Spyral to analyze some data! Below is an example python script that would run the default Spyral analysis Pipeline for data from the a1975 experiment run with AT-TPC at Argonne National Lab.
 
-Spyral requires a Python of version > 3.10 and < 3.13. Most operating systems do not have one of these installed, and you will need to install it yourself. The recommended (minimum) version is 3.11.
+```python
+from spyral import (
+    Pipeline,
+    start_pipeline,
+    PointcloudPhase,
+    ClusterPhase,
+    EstimationPhase,
+    InterpSolverPhase,
+)
+from spyral import (
+    PadParameters,
+    GetParameters,
+    FribParameters,
+    DetectorParameters,
+    ClusterParameters,
+    SolverParameters,
+    EstimateParameters,
+    INVALID_PATH,
+)
 
-### Linux
+from pathlib import Path
+import multiprocessing
 
-To install on Linux (Debian flavor) use
+workspace_path = Path("/path/to/your/workspace/")
+trace_path = Path("/path/to/your/attpc/traces/")
 
-```bash
-sudo apt install python3.11
+run_min = 94
+run_max = 94
+n_processes = 4
+
+pad_params = PadParameters(
+    is_default=True,
+    is_default_legacy=False,
+    pad_geometry_path=INVALID_PATH,
+    pad_gain_path=INVALID_PATH,
+    pad_time_path=INVALID_PATH,
+    pad_electronics_path=INVALID_PATH,
+    pad_scale_path=INVALID_PATH,
+)
+
+get_params = GetParameters(
+    baseline_window_scale=20.0,
+    peak_separation=50.0,
+    peak_prominence=20.0,
+    peak_max_width=50.0,
+    peak_threshold=40.0,
+)
+
+frib_params = FribParameters(
+    baseline_window_scale=100.0,
+    peak_separation=50.0,
+    peak_prominence=20.0,
+    peak_max_width=500.0,
+    peak_threshold=100.0,
+    ic_delay_time_bucket=1100,
+    ic_multiplicity=1,
+    correct_ic_time=True,
+)
+
+det_params = DetectorParameters(
+    magnetic_field=2.85,
+    electric_field=45000.0,
+    detector_length=1000.0,
+    beam_region_radius=25.0,
+    micromegas_time_bucket=10.0,
+    window_time_bucket=560.0,
+    get_frequency=6.25,
+    garfield_file_path=Path("/path/to/some/garfield.txt"),
+    do_garfield_correction=False,
+)
+
+cluster_params = ClusterParameters(
+    min_cloud_size=50,
+    min_points=3,
+    min_size_scale_factor=0.05,
+    min_size_lower_cutoff=10,
+    cluster_selection_epsilon=0.3,
+    circle_overlap_ratio=0.5,
+    fractional_charge_threshold=0.8,
+    outlier_scale_factor=0.05,
+)
+
+estimate_params = EstimateParameters(
+    min_total_trajectory_points=30, smoothing_factor=100.0
+)
+
+solver_params = SolverParameters(
+    gas_data_path=Path("/path/to/some/gas/data.json"),
+    particle_id_filename=Path("/path/to/some/particle/id.json"),
+    ic_min_val=900.0,
+    ic_max_val=1350.0,
+    n_time_steps=10000,
+    interp_ke_min=0.05,
+    interp_ke_max=70.0,
+    interp_ke_bins=400,
+    interp_polar_min=2.0,
+    interp_polar_max=88.0,
+    interp_polar_bins=170,
+)
+
+pipe = Pipeline(
+    [
+        PointcloudPhase(
+            get_params,
+            frib_params,
+            det_params,
+            pad_params,
+        ),
+        ClusterPhase(cluster_params, det_params),
+        EstimationPhase(estimate_params, det_params),
+        InterpSolverPhase(solver_params, det_params),
+    ],
+    [True, True, True, True],
+    workspace_path,
+    trace_path,
+)
+
+
+def main():
+    start_pipeline(pipe, run_min, run_max, n_processes)
+
+
+if __name__ == "__main__":
+    multiprocessing.set_start_method("spawn")
+    main()
+
 ```
 
-You will also to install the appropriate pip using
+If that looks overwhelming, don't worry, we'll break down each section step by step and explain what is going on here. First let's identify some key ideas. First, we import all the Spyral functionality we need using the `from spyral import ...` statements. We also import the Python standard library `Path` object and a function from `multiprocessing` to make our code compatible with specific flavors of Linux. We then define the paths to the Spyral workspace as well as AT-TPC trace data.
 
-```bash
-sudo apt install python3-pip
+## Workspace and Trace Data
+
+Let's start by discussing the workspace which is defined in the example. The workspace path is a path to a directory where Spyral is allowed to write data. Spyral stores intermediate results as well as necessary assets for performing analysis. In the example we defined it as
+
+```python
+workspace_path = Path("/path/to/your/workspace/")
 ```
 
-### MacOS
+Note that we defined it as a `Path` object. This is necessary. Path objects can be inspected for whether or not the path exists. If the workspace does not exist, Spyral will attempt to create it. Obviously, the path we defined here is not a real path, so you should change this for your specific use case.
 
-Python can be easily installed using [homebrew](https://brew.sh/). To install Python 3.11 use
+The other path we need to define, is the path to the AT-TPC trace data. AT-TPC trace data is the raw AT-TPC data after it has been merged (see [attpc_merger](https://github.com/attpc/attpc_merger)) into single run files. In the example we define it as
 
-```bash
-brew install python@3.11
+```python
+trace_path = Path("/path/to/your/attpc/traces/")
 ```
 
-This will also install the appropriate pip.
+Again, it is important that this is a `Path` object. And similarly to the workspace path, the example dummy value should be replaced with a real path when you write your script. The runs stored should be named with the standard AT-TPC convention (`run_0001.h5`, etc.)
 
-### Windows
+## Run Range and Processors
 
-Windows is mostly a mess for this. You can download from the official [Python](https://www.python.org/downloads/windows/) if you want and manual install. However, I recommend using Visual Studio Installer (see [here](https://learn.microsoft.com/en-us/visualstudio/install/install-visual-studio?view=vs-2022)) to install everything. It will make sure your paths are set and not a huge mess. However, Visual Studio is quite heavy, so your mileage may vary.
+Next we define our range of run numbers that we want to analyze. In the example we set it as
 
-### Python @ FRIB
-
-When working on the FRIB systems (both Windows and Linux), in many cases you will not have control over which versions of python are available to you. Instead, the recommended solution is often to use the pre-installed Anaconda distributions on the systems. Below is the Spyral approved method for setting up an environment:
-
-- First setup a new conda environment for Spyral. To do this run: `conda create --name spyral-env python=3.11`. The Python flag `python=3.11` tells conda to use Python version 3.11 for this environment. You can set the version number to any of the supported versions for Spyral.
-- Once that environment is setup, it can be activated at anytime using `conda activate spyral-env`. To deactivate (return to `base`) use `conda activate`. To completely deactivate any conda virtual environment use `conda deactivate`
-- Once the environment is activated (you should see `(spyral-env)` on your terminal tag) you can install the dependencies using `pip install -r requirements.txt` from the Spyral repository.
-
-Note that you can't use `conda install` for the requirements. Several of our dependencies are only available via PyPI and not conda or conda-forge. This also can refer to the bundled versions of some libraries like scipy and numpy for Anaconda. We only support using the versions pinned in the requirements.txt file.
-
-This method is tested during development and should work in general even on systems not at FRIB where Anaconda is installed and you have limited control over what Python is avaliable to you. However, our general recommendation remains, where possible, to install and manage your Python distributions yourself to avoid overlarge installs and possible dependency clashing (or at the very least use miniconda instead of a full Anaconda).
-
-### Using the right Python
-
-In general when a newer version of Python is installed it is aliased as `python3`. Sometimes if multiple new versions are installed you may have to get more specific and use something like `python3.11`. You can always check by running the interpreter to see which version you are actively using.
-
-## Installation
-
-To download Spyral it is recommend to use `git`
-
-```bash
-git clone https://github.com/attpc/Spyral.git
+```python
+run_min = 94
+run_max = 94
 ```
 
-This will download the Spyral source code and install it to a directory named `Spyral`. To install all of the necessary dependencies it is recommended to create a virtual environment and use pip. To create a new virtual environment navigate to the Spyral directory and run the following command:
+These values are inclusive, so in this case our range covers exactly one run, run 94. The range can have gaps; say you have runs 54, 55, 57, 59 you can put the range to 54 to 59 and Spyral will just skip the runs that don't exist.
 
-```bash
-python -m venv .venv
+Next we set the number of processors. Spyral will analyze the runs in parallel, dividing up the tasks amongst a set of independent parallel processes. For more details on how this works and how to determine a good number of processes, see the [Parallel](parallel.md) docs. In the example we set it as
+
+```python
+n_processes = 4
 ```
 
-Note that on some operating systems you may need to use `python3` instead of `python`. Once your virtual environment is created, activate it by running
+It is important to note that in this case, because we only have one run, even though we request four processes, only one will be created.
 
-```bash
-source .venv/bin/activate
+## Parameters, Phases, and the Pipeline
+
+Most of the remaining script pertains to the heart of Spyral: Phases and the Pipeline. A Phase (or in Spyral code a `PhaseLike`) is a unit of work to be done upon the data. Typically, a Phase will alter the data in some way, generating a new representation or organization of data. Phases can be chained together into a Pipeline, where a Pipeline represents a complete analysis. Each Phase emits a result (a `PhaseResult`) containing information about what data it output and where it can be found. Phases operate at the run level. That is, each `PhaseLike` implements a `run` function which performs that analysis upon a single run. The Pipeline can accept a run list and will exhaustively call the Phases, in order, to analyze the list. Spyral ships with default Phases, which have been used to analyze AT-TPC data and have been found to be generally successful.
+
+Now that we've laid the ground work here, let's look at the example. First we define a bunch of parameter groups. This essentially represents the configuration of Spyral. We group the parameters into classes to keep things more organized and more efficiently pass them around. We won't go through the details of each individual group here; you can find documentation on the different parameters in the [Configuration](config/about.md) section. With our parameters defined we then create our Pipeline
+
+```python
+pipe = Pipeline(
+    [
+        PointcloudPhase(
+            get_params,
+            frib_params,
+            det_params,
+            pad_params,
+        ),
+        ClusterPhase(cluster_params, det_params),
+        EstimationPhase(estimate_params, det_params),
+        InterpSolverPhase(solver_params, det_params),
+    ],
+    [True, True, True, True],
+    workspace_path,
+    trace_path,
+)
 ```
 
-The above example is for Linux/MacOS. Windows users will need to use the slightly different commands. More details on virtualenvs can be found [here](https://docs.python.org/3/library/venv.html). Once the virtualenv is active, use pip to install the dependencies.
+The first argument to the Pipeline constructor is a list of `PhaseLike` objects. Here we use the Spyral provided defaults. There are some important things to note here. First is that the **order of the phases matters**! The PointcloudPhase operates on AT-TPC trace data, the ClusterPhase operates on PointcloudPhase data, and so on. The Pipeline will check to make sure that you put things in order though, so don't worry too much (unless you're using custom Phases). For details on each default phases and info on custom Phases see the [Phases](phases/about.md) section of the documentation.
 
-```bash
-pip install -r requirements.txt
+The next argument is a list of booleans of the same length as the list of Phases. These are switches that can selectively turn on or off a Phase in the Pipeline. If the switch is True, the corresponding Phase will be run. If False, the Phase will be skipped.
+
+We then also pass along our workspace and trace paths.
+
+Finally we define a main function for our script
+
+```python
+def main():
+    start_pipeline(pipe, run_min, run_max, n_processes)
 ```
 
-**Note**: if you installed Python through Anaconda (i.e. the methods described by the [Python @ FRIB](#python--frib) section) you *do not* need to create a virtual environment as descirbed in this section. You already created a conda virtual environment instead. Simply skip right to using `pip install -r requirements.txt` after downloading Spyral and setting up the conda environment.
+And set this up as an entry point
 
-To make sure everything went ok you can then run
-
-```bash
-python main.py --help
+```python
+if __name__ == "__main__":
+    multiprocessing.set_start_method("spawn")
+    main()
 ```
 
-from the top level of the repository. This should display the Spyral help message if everything went well.
+Note the `multiprocessing` function we use here is for compatibility with some Linux flavors.
 
-### Why use virtual environments?
+## Run the Script
 
-This allows us to keep all of the Spyral dependencies isolated from any other projects you have! Otherwise versions of libraries might clash and result in all kinds of nasty side effects.
+Now you can run your script as
 
-### Do I need anything else?
+```bash
+python <your_script_file.py>
+```
 
-The only other thing you'll need is some data to analyze!
-
-### What are the Spyral dependencies?
-
-These are the packages Spyral needs to run. Here we've listed the big dependencies
-
-- [spyral-utils](https://github.com/gwm17/spyral-utils/) - This includes
-  - [shapely](https://shapely.readthedocs.io/en/stable/manual.html)
-  - [scipy](https://scipy.org/)
-  - [numpy](https://numpy.org/)
-  - [polars](https://pola.rs)
-  - [pycatima](https://github.com/hrosiak/pycatima)
-- [scikit-learn](https://scikit-learn.org/stable/)
-- [click](https://click.palletsprojects.com/en/8.1.x/)
-- [contourpy](https://contourpy.readthedocs.io/en/v1.2.0/)
-- [h5py](https://www.h5py.org/)
-- [ipywidgets](https://ipywidgets.readthedocs.io/en/stable/)
-- [ipympl](https://matplotlib.org/ipympl/)
-- [jupyterlab](https://jupyter.org/)
-- [lmfit](https://lmfit.github.io/lmfit-py/)
-- [matplotlib](https://matplotlib.org/)
-- [nbformat](https://nbformat.readthedocs.io/en/latest/)
-- [numba](https://numba.readthedocs.io/en/stable/)
-- [plotly](https://plotly.com/)
-- [rocket-fft](https://pypi.org/project/rocket-fft/)
-- [tqdm](https://github.com/tqdm/tqdm)
-
-Without these amazing packages, Spyral wouldn't be anywhere near as useful. Thank you to all of these amazing projects!
+and begin your analysis!

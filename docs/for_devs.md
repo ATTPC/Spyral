@@ -1,16 +1,26 @@
 # For Developers
 
-Spyral is always looking for input and improvements! Pull requests are always welcome, however, they may not always be accepted. Spyral aims to be as experiment agnostic as possible; this means that some improvements which only work for one type of experiment may not be reasonable to integrate with the framework. Please keep this in mind when submitting a new feature!
+Spyral is always looking for input and improvements! If you would like to join in our collaboration, please notify a maintainer of the [AT-TPC GitHub](https://github.com/attpc/) or Spyral. They can add you as a collaborator and setup a development branch for you in Spyral. New ideas are always welcome! Below are some outlines for working in the Spyral collaboration.
 
-Below we've outlined some of the rules for additions to the Spyral framework:
+## Required Development Tools
 
-## Statement of Intent
+### PDM
+
+Spyral uses [PDM](https://pdm-project.org/en/latest/) as it's project management tool.
+
+## Pull Requests
+
+### Statement of Intent
 
 Please state in the pull request what the goal of is of this modification to Spyral and what was changed to accomplish this. If there is no statement of intent, the pull request will not be accepted.
 
-## Statement of Dependencies
+### Statement of Dependencies
 
 Please state in the pull request what new dependencies (if any) were added and please make sure that these new dependencies were added to the Spyral `requirements.txt` with a version pinned. If the dependencies were not stated, the pull request will not be accepted. Please check to make sure that any new dependencies are compliant with the [GPL3](https://www.gnu.org/licenses/gpl-3.0.en.html) license which is used by Spyral.
+
+### Review
+
+Any pull request will require at least one reviewer.
 
 ## Code Requirements
 
@@ -34,9 +44,9 @@ Spyral uses the black formatter. The appropriate version of black is included in
 
 Please try to keep files from being monster 1000 lines of code documents. This is not a hard and fast rule, but in general files should contain a unqiue individual unit of code which interfaces with the rest of the framework. There can be execptions.
 
-### Notebooks
+### Unit Tests
 
-The main rule for contributing notebooks is that they should only really show example implementations of Spyral in action, not provide any unique analysis that isn't included in the parent Spyral framework. That is, you shouldn't be implementing new functions or classes in the notebooks; you should only be using the tools already available in Spyral or its dependencies.
+Where reasonable, please provide unit tests in the tests directory for code you add. Obviously, as a data analysis library, there are limitations to what tests we can automate. But they are really helpful for making sure things don't break.
 
 ### Documentation
 
