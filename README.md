@@ -1,5 +1,9 @@
 # Spyral
 
+![CI](https://github.com/ATTPC/Spyral/actions/workflows/ci.yml/badge.svg)
+[![PyPI version shields.io](https://img.shields.io/pypi/v/attpc_spyral.svg)](https://pypi.python.org/pypi/attpc_spyral/)
+[![PyPI license](https://img.shields.io/pypi/l/attpc_spyral.svg)](https://pypi.python.org/pypi/attpc_spyral/)
+
 Spyral is an analysis library for data from the Active Target Time Projection Chamber (AT-TPC). Spyral provides a flexible analysis pipeline, transforming the raw trace data into physical observables over several tunable steps. The analysis pipeline is also extensible, supporting a diverse array of datasets. Sypral can process multiple data files in parallel, allowing for scalable performance over larger experiment datasets.
 
 ## Installation
@@ -99,7 +103,7 @@ cluster_params = ClusterParameters(
     min_points=3,
     min_size_scale_factor=0.05,
     min_size_lower_cutoff=10,
-    cluster_selection_epsilon=0.3,
+    cluster_selection_epsilon=10.0,
     circle_overlap_ratio=0.5,
     fractional_charge_threshold=0.8,
     outlier_scale_factor=0.05,
@@ -114,13 +118,13 @@ solver_params = SolverParameters(
     particle_id_filename=Path("/path/to/some/particle/id.json"),
     ic_min_val=900.0,
     ic_max_val=1350.0,
-    n_time_steps=10000,
-    interp_ke_min=0.05,
+    n_time_steps=1000,
+    interp_ke_min=0.1,
     interp_ke_max=70.0,
-    interp_ke_bins=400,
+    interp_ke_bins=350,
     interp_polar_min=2.0,
     interp_polar_max=88.0,
-    interp_polar_bins=170,
+    interp_polar_bins=166,
 )
 
 pipe = Pipeline(
