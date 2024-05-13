@@ -105,8 +105,8 @@ class PointcloudPhase(PhaseLike):
             and self.det_params.do_garfield_correction
         ):
             generate_electron_correction(
-                self.electron_correction_path,
                 garf_path,
+                self.electron_correction_path,
                 self.det_params,
             )
         return True

@@ -202,11 +202,9 @@ def start_pipeline(
         i.e. terminal interface will be displayed.
 
     """
-
-    init_spyral_logger_parent(pipeline.workspace)
-
     # Setup
     pipeline.create_workspace()
+    init_spyral_logger_parent(pipeline.workspace)
     pipeline.create_assets()
     result = pipeline.validate()
     if False in result.values():
