@@ -26,13 +26,15 @@ There are several parameters to HDBSCAN that are exposed in the [configuration](
 
 ## Joining of Clusters
 
-The core method of joining is relatively simple: each initial cluster is fit with a circle in the X-Y plane. If the circles overlap significantly they are taken to be from the same trajectory. The required amount of overlap is a [configuration](../config/cluster.md) parameter to be tuned for each experiment. A secondary joining parameter is the relative mean charge of the two clusters to be joined; the two clusters should have a similar mean charge otherwise they do not belong together. Again, the threshold is a tunable parameter in the configuration.
-
-Joining is repeated until clusters can no longer be joined together. These clusters are then taken to represent the complete detected particle trajectories for that event.
+The core method of joining is relatively simple: each initial cluster is fit with a circle in the X-Y plane. If the circles overlap significantly they are taken to be from the same trajectory. The required amount of overlap is a [configuration](../config/cluster.md) parameter to be tuned for each experiment. Joining is repeated until clusters can no longer be joined together. These clusters are then taken to represent the complete detected particle trajectories for that event.
 
 ## Cleanup of the Final Clusters
 
 As a last stage, a final noise removal is applied to each cluster. The [Local Outlier Factor](https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.LocalOutlierFactor.html#sklearn.neighbors.LocalOutlierFactor) is an outlier test which compares the distance to nearest neighbors (neighbor density) to determine outlier points. The number of neighbors is controlled using the [`outlier_scale_factor`](../config/cluster.md) parameter.
+
+## Note
+
+All of these steps will return a set of cluster representation (the acutal cluster objects) as well as an array of labels. The array of labels contains the label for each point in the *original* point cloud all of the clusters derived from. This is not really used in the actual analysis, but it is extremely useful for plotting the effects of the clustering.
 
 ## Final Thoughts
 

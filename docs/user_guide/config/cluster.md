@@ -10,7 +10,6 @@ cluster_params = ClusterParameters(
     min_size_lower_cutoff=10,
     cluster_selection_epsilon=10.0,
     circle_overlap_ratio=0.5,
-    fractional_charge_threshold=0.8,
     outlier_scale_factor=0.05,
 )
 ```
@@ -40,10 +39,6 @@ A re-exposure of the `cluster_selection_epsilon` paramter of [scikit-learn's HDB
 ## circle_overlap_ratio
 
 The minimum amount of overlap between circles fit to two clusters for the clusters to be joined together into a single cluster. HDBSCAN often fractures trajectories into multiple clusters as the point density changes due to the pad size, gaps, etc. These fragments are grouped together based on how much circles fit on their 2-D projections (X-Y) overlap.
-
-## fractional_charge_threshold
-
-The maximum allowed difference between the mean charge of two clusters (relative to the larger of the two means) for the clusters to be joined together into a single cluster. HDBSCAN often fractures trajectories into multiple clusters as the point density changes due to the pad size, gaps, etc. These fragments are grouped together based on how similar their mean charges are.
 
 ## outlier_scale_factor
 

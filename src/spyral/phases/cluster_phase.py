@@ -131,9 +131,11 @@ class ClusterPhase(PhaseLike):
             cloud = PointCloud()
             cloud.load_cloud_from_hdf5_data(cloud_data[:].copy(), idx)
 
-            clusters = form_clusters(cloud, self.cluster_params)
-            joined = join_clusters(clusters, self.cluster_params)
-            cleaned = cleanup_clusters(joined, self.cluster_params)
+            # Here we don't need to use the labels array.
+            # We just pass it along as needed.
+            clusters, labels = form_clusters(cloud, self.cluster_params)
+            joined, labels = join_clusters(clusters, self.cluster_params, labels)
+            cleaned, _ = cleanup_clusters(joined, self.cluster_params, labels)
 
             # Each event can contain many clusters
             cluster_event_group = cluster_group.create_group(f"event_{idx}")
