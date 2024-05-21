@@ -95,7 +95,7 @@ class ClusterPhase(PhaseLike):
         cluster_group.attrs["min_event"] = min_event
         cluster_group.attrs["max_event"] = max_event
 
-        nevents = max_event - min_event
+        nevents = max_event - min_event + 1
         total: int
         flush_val: int
         if nevents < 100:

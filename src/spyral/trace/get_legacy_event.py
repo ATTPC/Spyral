@@ -1,5 +1,5 @@
 from .get_trace import GetTrace
-from ..core.config import GetParameters, FribParameters
+from ..core.config import GetParameters
 from ..core.constants import INVALID_EVENT_NAME, INVALID_EVENT_NUMBER
 from ..core.hardware_id import hardware_id_from_array
 
@@ -57,7 +57,7 @@ class GetLegacyEvent:
         raw_data: h5.Dataset,
         event_number: int,
         get_params: GetParameters,
-        ic_params: FribParameters,
+        ic_params: GetParameters,
         rng: np.random.Generator,
     ):
         self.traces: list[GetTrace] = []
@@ -71,7 +71,7 @@ class GetLegacyEvent:
         raw_data: h5.Dataset,
         event_number: int,
         get_params: GetParameters,
-        ic_params: FribParameters,
+        ic_params: GetParameters,
         rng: np.random.Generator,
     ):
         """Process the traces
@@ -110,7 +110,7 @@ class GetLegacyEvent:
                 and trace.hw_id.aget_channel == 0
             ):
                 self.ic_trace = trace
-                self.ic_trace.find_peaks(ic_params, rel_height=0.8)  # type: ignore
+                self.ic_trace.find_peaks(ic_params, rng, rel_height=0.8)  # type: ignore
                 break
         # Remove CoBo 10 from our normal traces
         self.traces = [trace for trace in self.traces if trace.hw_id.cobo_id != 10]
