@@ -71,7 +71,7 @@ Some additional discussion needs to be had about the behavior of the ion chamber
 
 ## Legacy Data
 
-In the past, the AT-TPC was not run with a split DAQ. That is, all signals were recorded using the GET data aquisition, including auxilary detectors like the ion chamber. To support this older data Spyral also provides a `PointcloudLegacyPhase`. If this phase is used Spyral assumes that any data in CoBo 10 is exclusively from auxilary detectors. Legacy pad mappings and corrections are also bundled in the package. Legacy IC data is analyzed for peaks using the `FRIBParameters` parameters even though the data is acquired using the GET DAQ (see [here](../config/traces.md)). Legacy analysis is an advanced feature, and requires some experience with using Spyral. This phase is the only phase significantly impacted by legacy analysis.
+In the past, the AT-TPC was not run with a split DAQ. That is, all signals were recorded using the GET data aquisition, including auxilary detectors like the ion chamber. To support this older data Spyral also provides a `PointcloudLegacyPhase`. If this phase is used Spyral assumes that any data in CoBo 10 is exclusively from auxilary detectors. Legacy pad mappings and corrections are also bundled in the package. Legacy IC data is analyzed for peaks using an additional `GetParameters` instance. Legacy analysis is an advanced feature, and requires some experience with using Spyral. This phase is the only phase significantly impacted by legacy analysis.
 
 ## Scalers
 

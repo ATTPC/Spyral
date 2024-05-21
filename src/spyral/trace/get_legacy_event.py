@@ -26,7 +26,7 @@ class GetLegacyEvent:
         The event number
     get_params: GetParameters
         Configuration parameters controlling the GET signal analysis
-    ic_params: FribParameters
+    ic_params: GetParameters
         Configuration parameters controlling the ion chamber signal analysis
     rng: numpy.random.Generator
         A random number generator for use in the signal analysis
@@ -84,7 +84,7 @@ class GetLegacyEvent:
             The event number
         get_params: GetParameters
             Configuration parameters controlling the GET signal analysis
-        ic_params: FribParameters
+        ic_params: GetParameters
             Configuration parameters controlling the ion chamber signal analysis
         rng: numpy.random.Generator
             A random number generator for use in the signal analysis

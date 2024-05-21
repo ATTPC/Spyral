@@ -55,8 +55,8 @@ class PointcloudLegacyPhase(PhaseLike):
     ----------
     get_params: GetParameters
         Parameters controlling the GET-DAQ signal analysis
-    frib_params: FribParameters
-        Parameters repurposed in legacy to analyze auxilary detectors (IC, Si, etc)
+    ic_params: GetParameters
+        Parameters in legacy to analyze auxilary detectors (IC, Si, etc)
     detector_params: DetectorParameters
         Parameters describing the detector
     pad_params: PadParameters
@@ -66,8 +66,8 @@ class PointcloudLegacyPhase(PhaseLike):
     ----------
     get_params: GetParameters
         Parameters controlling the GET-DAQ signal analysis
-    frib_params: FribParameters
-        Parameters repurposed in legacy to analyze auxilary detectors (IC, Si, etc)
+    ic_params: GetParameters
+        Parameters in legacy to analyze auxilary detectors (IC, Si, etc)
     det_params: DetectorParameters
         Parameters describing the detector
     pad_map: PadMap
