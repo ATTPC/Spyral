@@ -168,6 +168,10 @@ def join_clusters_step(
             new_cluster.point_cloud.cloud = np.concatenate(
                 (new_cluster.point_cloud.cloud, clusters[idx].point_cloud.cloud), axis=0
             )
+            # Merge the indicies
+            new_cluster.parent_indicies = np.concatenate(
+                (new_cluster.parent_indicies, clusters[idx].parent_indicies)
+            )
         new_clusters.append(new_cluster)
 
     # Now replace the labels in the label array with the joined

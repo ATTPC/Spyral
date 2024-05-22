@@ -133,15 +133,23 @@ class InterpSolverPhase(PhaseLike):
     def construct_artifact(
         self, payload: PhaseResult, workspace_path: Path
     ) -> PhaseResult:
+        if not self.solver_params.particle_id_filename.exists():
+            spyral_warn(
+                __name__,
+                f"Particle ID {self.solver_params.particle_id_filename} does not exist, Solver will not run!",
+            )
+            return PhaseResult.invalid_result(payload.run_number)
+
         pid: ParticleID | None = deserialize_particle_id(
             Path(self.solver_params.particle_id_filename), self.nuclear_map
         )
         if pid is None:
             spyral_warn(
                 __name__,
-                f"Particle ID {self.solver_params.particle_id_filename} does not exist, Solver will not run!",
+                f"Particle ID {self.solver_params.particle_id_filename} is not valid, Solver will not run!",
             )
             return PhaseResult.invalid_result(payload.run_number)
+
         result = PhaseResult(
             artifact_path=self.get_artifact_path(workspace_path)
             / form_physics_file_name(payload.run_number, pid),
