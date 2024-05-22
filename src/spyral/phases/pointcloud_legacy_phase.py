@@ -2,7 +2,6 @@ from ..core.phase import PhaseLike, PhaseResult
 from ..core.run_stacks import form_run_string
 from ..core.status_message import StatusMessage
 from ..core.config import (
-    FribParameters,
     GetParameters,
     DetectorParameters,
     PadParameters,
@@ -56,8 +55,8 @@ class PointcloudLegacyPhase(PhaseLike):
     ----------
     get_params: GetParameters
         Parameters controlling the GET-DAQ signal analysis
-    frib_params: FribParameters
-        Parameters repurposed in legacy to analyze auxilary detectors (IC, Si, etc)
+    ic_params: GetParameters
+        Parameters in legacy to analyze auxilary detectors (IC, Si, etc)
     detector_params: DetectorParameters
         Parameters describing the detector
     pad_params: PadParameters
@@ -67,8 +66,8 @@ class PointcloudLegacyPhase(PhaseLike):
     ----------
     get_params: GetParameters
         Parameters controlling the GET-DAQ signal analysis
-    frib_params: FribParameters
-        Parameters repurposed in legacy to analyze auxilary detectors (IC, Si, etc)
+    ic_params: GetParameters
+        Parameters in legacy to analyze auxilary detectors (IC, Si, etc)
     det_params: DetectorParameters
         Parameters describing the detector
     pad_map: PadMap
@@ -79,7 +78,7 @@ class PointcloudLegacyPhase(PhaseLike):
     def __init__(
         self,
         get_params: GetParameters,
-        frib_params: FribParameters,
+        ic_params: GetParameters,
         detector_params: DetectorParameters,
         pad_params: PadParameters,
     ):
@@ -89,7 +88,7 @@ class PointcloudLegacyPhase(PhaseLike):
             outgoing_schema=POINTCLOUD_SCHEMA,
         )
         self.get_params = get_params
-        self.frib_params = frib_params
+        self.ic_params = ic_params
         self.det_params = detector_params
         self.pad_map = PadMap(pad_params)
 
@@ -103,8 +102,8 @@ class PointcloudLegacyPhase(PhaseLike):
             and self.det_params.do_garfield_correction
         ):
             generate_electron_correction(
-                self.electron_correction_path,
                 garf_path,
+                self.electron_correction_path,
                 self.det_params,
             )
         return True
@@ -160,7 +159,7 @@ class PointcloudLegacyPhase(PhaseLike):
         cloud_group.attrs["min_event"] = min_event
         cloud_group.attrs["max_event"] = max_event
 
-        nevents = max_event - min_event
+        nevents = max_event - min_event + 1
         total: int
         flush_val: int
         if nevents < 100:
@@ -189,7 +188,7 @@ class PointcloudLegacyPhase(PhaseLike):
                 continue
 
             event = GetLegacyEvent(
-                event_data, idx, self.get_params, self.frib_params, rng
+                event_data, idx, self.get_params, self.ic_params, rng
             )
 
             pc = PointCloud()

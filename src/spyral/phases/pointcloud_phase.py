@@ -186,7 +186,7 @@ class PointcloudPhase(PhaseLike):
         cloud_group.attrs["min_event"] = min_event
         cloud_group.attrs["max_event"] = max_event
 
-        nevents = max_event - min_event
+        nevents = max_event - min_event + 1
         total: int
         flush_val: int
         if nevents < 100:
@@ -199,7 +199,9 @@ class PointcloudPhase(PhaseLike):
 
         count = 0
 
-        msg = StatusMessage(self.name, 1, total, 1)  # We always increment by 1
+        msg = StatusMessage(
+            self.name, 1, total, payload.run_number
+        )  # We always increment by 1
 
         # Process the data
         for idx in range(min_event, max_event + 1):

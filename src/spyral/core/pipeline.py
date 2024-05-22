@@ -115,7 +115,10 @@ class Pipeline:
         bool
             True if all phases were successful, False otherwise
         """
-        for phase in self.phases:
+        for idx, phase in enumerate(self.phases):
+            # Skip inactive phases
+            if not self.active[idx]:
+                continue
             if not phase.create_assets(self.workspace):
                 return False
         return True

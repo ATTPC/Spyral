@@ -15,12 +15,17 @@ class LabeledCloud:
     label: int
         The label from the clustering algorithm
     point_cloud:
-        The cluster data
+        The cluster data in original point cloud coordinates
+    clustered_data:
+        The acutal data clustering was perfomed on, in transformed coordinates
+    parent_indicies:
+        The incidies of this cluster's data in the original parent point cloud
     """
 
     label: int = -1  # default is noise label
     point_cloud: PointCloud = field(default_factory=PointCloud)
     clustered_data: np.ndarray = field(default_factory=lambda: np.zeros(0))
+    parent_indicies: np.ndarray = field(default_factory=lambda: np.zeros(0))
 
 
 class Cluster:
@@ -75,7 +80,9 @@ class Cluster:
         self.y_spline: BSpline | None = None
         self.c_spline: BSpline | None = None
 
-    def from_labeled_cloud(self, cloud: LabeledCloud, params: ClusterParameters):
+    def from_labeled_cloud(
+        self, cloud: LabeledCloud, params: ClusterParameters
+    ) -> np.ndarray:
         """Convert a LabeledCloud to a Cluster, dropping any outliers
 
         Parameters
@@ -84,11 +91,16 @@ class Cluster:
             The LabeledCloud to convert
         params: ClusterParameters
             Configuration parameters for the cluster
+
+        Returns
+        -------
+        numpy.ndarray
+            The indicies of points labeled outliers
         """
         self.event = cloud.point_cloud.event_number
         self.label = cloud.label
         self.copy_cloud(cloud.point_cloud)
-        self.drop_outliers(params.outlier_scale_factor)
+        return self.drop_outliers(params.outlier_scale_factor)
 
     def copy_cloud(self, cloud: PointCloud):
         """Copy PointCloud data to the cluster
@@ -107,7 +119,7 @@ class Cluster:
         self.data[:, 3] = cloud.cloud[:, 4]  # peak integral
         self.data[:, 4] = cloud.cloud[:, 7]  # scale (big or small)
 
-    def drop_outliers(self, scale: float = 0.05):
+    def drop_outliers(self, scale: float = 0.05) -> np.ndarray:
         """Use scikit-learn LocalOutlierFactor to test the cluster for spatial outliers.
 
         This helps reduce noise when fitting the data.
@@ -117,6 +129,11 @@ class Cluster:
         scale: float
             Scale factor to be multiplied by the length of the trajectory to get
             the number of neighbors over which to test
+
+        Returns
+        -------
+        numpy.ndarray
+            The indicies of points labeled as outliers
         """
         neighbors = int(scale * len(self.data))  # 0.05 default
         if neighbors < 2:
@@ -124,7 +141,9 @@ class Cluster:
         test_data = self.data[:, :3].copy()
         neigh = LocalOutlierFactor(n_neighbors=neighbors)
         result = neigh.fit_predict(test_data)
-        self.data = self.data[result > 0]  # label=-1 is an outlier
+        mask = result > 0
+        self.data = self.data[mask]  # label=-1 is an outlier
+        return np.flatnonzero(mask)
 
     def create_splines(self, smoothing: float = 1.0) -> None:
         """Create smoothing splines for the x,y,charge dimensions
@@ -175,7 +194,7 @@ class Cluster:
 
 def convert_labeled_to_cluster(
     cloud: LabeledCloud, params: ClusterParameters
-) -> Cluster:
+) -> tuple[Cluster, np.ndarray]:
     """Function which takes in a LabeledCloud and ClusterParamters and returns a Cluster
 
     Parameters
@@ -187,9 +206,11 @@ def convert_labeled_to_cluster(
 
     Returns
     -------
-    Cluster
-        The Cluster object
+    tuple[Cluster, np.ndarray]
+        A two element tuple containing first the Cluster,
+        and second a list of indicies in the preciding
+        cloud that were labeled as noise.
     """
     cluster = Cluster()
-    cluster.from_labeled_cloud(cloud, params)
-    return cluster
+    outliers = cluster.from_labeled_cloud(cloud, params)
+    return (cluster, outliers)
