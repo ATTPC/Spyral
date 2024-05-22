@@ -540,15 +540,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fractional_charge_threshold" class="md-nav__link">
-    <span class="md-ellipsis">
-      fractional_charge_threshold
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#outlier_scale_factor" class="md-nav__link">
     <span class="md-ellipsis">
       outlier_scale_factor
@@ -2243,15 +2234,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fractional_charge_threshold" class="md-nav__link">
-    <span class="md-ellipsis">
-      fractional_charge_threshold
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#outlier_scale_factor" class="md-nav__link">
     <span class="md-ellipsis">
       outlier_scale_factor
@@ -2287,9 +2269,8 @@
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">min_size_lower_cutoff</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">cluster_selection_epsilon</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">circle_overlap_ratio</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">fractional_charge_threshold</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">outlier_scale_factor</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
-</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="p">)</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">outlier_scale_factor</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">)</span>
 </span></code></pre></div>
 <p>A break down of each parameter:</p>
 <h2 id="min_cloud_size">min_cloud_size</h2>
@@ -2304,8 +2285,6 @@
 <p>A re-exposure of the <code>cluster_selection_epsilon</code> paramter of <a href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html#sklearn.cluster.HDBSCAN">scikit-learn's HDBSCAN</a>. This parameter will merge clusters that are less than epsilon apart. Note that this epsilon must be on the scale of the scaled data (i.e. it is not in normal units). The impact of this parameter is large, and small changes to this value can produce dramatically different results. Larger values will bias the clustering to assume the point cloud is onesingle cluster (or all noise), while smaller values will cause the algorithm to revert to the default result of HDBSCAN. See the original <a href="https://hdbscan.readthedocs.io/en/latest/parameter_selection.html#">HDBSCAN docs</a> for details on why this parameter is important and how it can impact the data.</p>
 <h2 id="circle_overlap_ratio">circle_overlap_ratio</h2>
 <p>The minimum amount of overlap between circles fit to two clusters for the clusters to be joined together into a single cluster. HDBSCAN often fractures trajectories into multiple clusters as the point density changes due to the pad size, gaps, etc. These fragments are grouped together based on how much circles fit on their 2-D projections (X-Y) overlap.</p>
-<h2 id="fractional_charge_threshold">fractional_charge_threshold</h2>
-<p>The maximum allowed difference between the mean charge of two clusters (relative to the larger of the two means) for the clusters to be joined together into a single cluster. HDBSCAN often fractures trajectories into multiple clusters as the point density changes due to the pad size, gaps, etc. These fragments are grouped together based on how similar their mean charges are.</p>
 <h2 id="outlier_scale_factor">outlier_scale_factor</h2>
 <p>We use <a href="https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.LocalOutlierFactor.html">scikit-learn's LocalOutlierFactor</a> as a last round of noise elimination on a cluster-by-cluster basis. This algorithim requires a number of neighbors to search over (the <code>n_neighbors</code> parameter). As with the <code>min_cluster_size</code> in HDBSCAN, we need to scale this value off the size of the cluster. This factor multiplied by the size of the cluster gives the number of neighbors to search over (<code>n_neighbors = outlier_scale_factor * cluster_size</code>). This value tends to have a "sweet spot" where it is most effective. If it is too large, every point has basically the same outlier factor as you're including the entire cluster for every point. If it is too small the variance between neighbors can be too large and the results will be unpredictable. Note that if the value of <code>outlier_scale_factor * cluster_size</code> is less than 2, <code>n_neighbors</code> will be set to 2 as this is the minimum allowed value.</p>
 

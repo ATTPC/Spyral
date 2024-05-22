@@ -661,6 +661,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#note" class="md-nav__link">
+    <span class="md-ellipsis">
+      Note
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#final-thoughts" class="md-nav__link">
     <span class="md-ellipsis">
       Final Thoughts
@@ -2180,6 +2189,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#note" class="md-nav__link">
+    <span class="md-ellipsis">
+      Note
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#final-thoughts" class="md-nav__link">
     <span class="md-ellipsis">
       Final Thoughts
@@ -2223,10 +2241,11 @@
 <p>Note that, before clustering, we prune the point cloud of any points which lie outside the legal bounds of the detector on the z-axis (i.e. remove all points for which z &lt; 0.0 or z &gt; detector length). This helps us avoid including any extra noise in the algorithm.</p>
 <p>There are several parameters to HDBSCAN that are exposed in the <a href="../../config/cluster/">configuration</a> of Spyral.</p>
 <h2 id="joining-of-clusters">Joining of Clusters</h2>
-<p>The core method of joining is relatively simple: each initial cluster is fit with a circle in the X-Y plane. If the circles overlap significantly they are taken to be from the same trajectory. The required amount of overlap is a <a href="../../config/cluster/">configuration</a> parameter to be tuned for each experiment. A secondary joining parameter is the relative mean charge of the two clusters to be joined; the two clusters should have a similar mean charge otherwise they do not belong together. Again, the threshold is a tunable parameter in the configuration.</p>
-<p>Joining is repeated until clusters can no longer be joined together. These clusters are then taken to represent the complete detected particle trajectories for that event.</p>
+<p>The core method of joining is relatively simple: each initial cluster is fit with a circle in the X-Y plane. If the circles overlap significantly they are taken to be from the same trajectory. The required amount of overlap is a <a href="../../config/cluster/">configuration</a> parameter to be tuned for each experiment. Joining is repeated until clusters can no longer be joined together. These clusters are then taken to represent the complete detected particle trajectories for that event.</p>
 <h2 id="cleanup-of-the-final-clusters">Cleanup of the Final Clusters</h2>
 <p>As a last stage, a final noise removal is applied to each cluster. The <a href="https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.LocalOutlierFactor.html#sklearn.neighbors.LocalOutlierFactor">Local Outlier Factor</a> is an outlier test which compares the distance to nearest neighbors (neighbor density) to determine outlier points. The number of neighbors is controlled using the <a href="../../config/cluster/"><code>outlier_scale_factor</code></a> parameter.</p>
+<h2 id="note">Note</h2>
+<p>All of these steps will return a set of cluster representation (the acutal cluster objects) as well as an array of labels. The array of labels contains the label for each point in the <em>original</em> point cloud all of the clusters derived from. This is not really used in the actual analysis, but it is extremely useful for plotting the effects of the clustering.</p>
 <h2 id="final-thoughts">Final Thoughts</h2>
 <p>The intial clustering and joining are two of the most important steps in Spyral, but they often require compromises. In our experience, there is no perfect set of parameters that will allow the clustering to work flawlessly for all events in a dataset; in fact given the inhomogenetiy of AT-TPC data, expecting one set of parameters to work all the time is somewhat crazy. In general, it is best to shoot for parameters that <em>generally</em> work. There will always be events that are too noisy or too fragmented for the clustering algorithm to work correctly. As such, this is the section of the code that most often requires fine tuning by hand.</p>
 

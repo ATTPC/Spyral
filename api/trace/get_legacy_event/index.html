@@ -2317,7 +2317,7 @@ of the IC from CoBo 10.</p>
         <tr class="doc-section-item">
           <td><code>ic_params</code></td>
           <td>
-                <code><a class="autorefs autorefs-internal" title="spyral.core.config.FribParameters" href="../../core/config/#spyral.core.config.FribParameters">FribParameters</a></code>
+                <code><a class="autorefs autorefs-internal" title="spyral.core.config.GetParameters" href="../../core/config/#spyral.core.config.GetParameters">GetParameters</a></code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2564,7 +2564,7 @@ of the IC from CoBo 10.</p>
 </span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26"></a><span class="sd">        The event number</span>
 </span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27"></a><span class="sd">    get_params: GetParameters</span>
 </span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28"></a><span class="sd">        Configuration parameters controlling the GET signal analysis</span>
-</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="sd">    ic_params: FribParameters</span>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29"></a><span class="sd">    ic_params: GetParameters</span>
 </span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30"></a><span class="sd">        Configuration parameters controlling the ion chamber signal analysis</span>
 </span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31"></a><span class="sd">    rng: numpy.random.Generator</span>
 </span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32"></a><span class="sd">        A random number generator for use in the signal analysis</span>
@@ -2595,7 +2595,7 @@ of the IC from CoBo 10.</p>
 </span><span id="__span-0-57"><a id="__codelineno-0-57" name="__codelineno-0-57"></a>        <span class="n">raw_data</span><span class="p">:</span> <span class="n">h5</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
 </span><span id="__span-0-58"><a id="__codelineno-0-58" name="__codelineno-0-58"></a>        <span class="n">event_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
 </span><span id="__span-0-59"><a id="__codelineno-0-59" name="__codelineno-0-59"></a>        <span class="n">get_params</span><span class="p">:</span> <span class="n">GetParameters</span><span class="p">,</span>
-</span><span id="__span-0-60"><a id="__codelineno-0-60" name="__codelineno-0-60"></a>        <span class="n">ic_params</span><span class="p">:</span> <span class="n">FribParameters</span><span class="p">,</span>
+</span><span id="__span-0-60"><a id="__codelineno-0-60" name="__codelineno-0-60"></a>        <span class="n">ic_params</span><span class="p">:</span> <span class="n">GetParameters</span><span class="p">,</span>
 </span><span id="__span-0-61"><a id="__codelineno-0-61" name="__codelineno-0-61"></a>        <span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">,</span>
 </span><span id="__span-0-62"><a id="__codelineno-0-62" name="__codelineno-0-62"></a>    <span class="p">):</span>
 </span><span id="__span-0-63"><a id="__codelineno-0-63" name="__codelineno-0-63"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">traces</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">GetTrace</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -2609,7 +2609,7 @@ of the IC from CoBo 10.</p>
 </span><span id="__span-0-71"><a id="__codelineno-0-71" name="__codelineno-0-71"></a>        <span class="n">raw_data</span><span class="p">:</span> <span class="n">h5</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
 </span><span id="__span-0-72"><a id="__codelineno-0-72" name="__codelineno-0-72"></a>        <span class="n">event_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
 </span><span id="__span-0-73"><a id="__codelineno-0-73" name="__codelineno-0-73"></a>        <span class="n">get_params</span><span class="p">:</span> <span class="n">GetParameters</span><span class="p">,</span>
-</span><span id="__span-0-74"><a id="__codelineno-0-74" name="__codelineno-0-74"></a>        <span class="n">ic_params</span><span class="p">:</span> <span class="n">FribParameters</span><span class="p">,</span>
+</span><span id="__span-0-74"><a id="__codelineno-0-74" name="__codelineno-0-74"></a>        <span class="n">ic_params</span><span class="p">:</span> <span class="n">GetParameters</span><span class="p">,</span>
 </span><span id="__span-0-75"><a id="__codelineno-0-75" name="__codelineno-0-75"></a>        <span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">,</span>
 </span><span id="__span-0-76"><a id="__codelineno-0-76" name="__codelineno-0-76"></a>    <span class="p">):</span>
 </span><span id="__span-0-77"><a id="__codelineno-0-77" name="__codelineno-0-77"></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;Process the traces</span>
@@ -2622,7 +2622,7 @@ of the IC from CoBo 10.</p>
 </span><span id="__span-0-84"><a id="__codelineno-0-84" name="__codelineno-0-84"></a><span class="sd">            The event number</span>
 </span><span id="__span-0-85"><a id="__codelineno-0-85" name="__codelineno-0-85"></a><span class="sd">        get_params: GetParameters</span>
 </span><span id="__span-0-86"><a id="__codelineno-0-86" name="__codelineno-0-86"></a><span class="sd">            Configuration parameters controlling the GET signal analysis</span>
-</span><span id="__span-0-87"><a id="__codelineno-0-87" name="__codelineno-0-87"></a><span class="sd">        ic_params: FribParameters</span>
+</span><span id="__span-0-87"><a id="__codelineno-0-87" name="__codelineno-0-87"></a><span class="sd">        ic_params: GetParameters</span>
 </span><span id="__span-0-88"><a id="__codelineno-0-88" name="__codelineno-0-88"></a><span class="sd">            Configuration parameters controlling the ion chamber signal analysis</span>
 </span><span id="__span-0-89"><a id="__codelineno-0-89" name="__codelineno-0-89"></a><span class="sd">        rng: numpy.random.Generator</span>
 </span><span id="__span-0-90"><a id="__codelineno-0-90" name="__codelineno-0-90"></a><span class="sd">            A random number generator for use in the signal analysis</span>
@@ -2648,7 +2648,7 @@ of the IC from CoBo 10.</p>
 </span><span id="__span-0-110"><a id="__codelineno-0-110" name="__codelineno-0-110"></a>                <span class="ow">and</span> <span class="n">trace</span><span class="o">.</span><span class="n">hw_id</span><span class="o">.</span><span class="n">aget_channel</span> <span class="o">==</span> <span class="mi">0</span>
 </span><span id="__span-0-111"><a id="__codelineno-0-111" name="__codelineno-0-111"></a>            <span class="p">):</span>
 </span><span id="__span-0-112"><a id="__codelineno-0-112" name="__codelineno-0-112"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">ic_trace</span> <span class="o">=</span> <span class="n">trace</span>
-</span><span id="__span-0-113"><a id="__codelineno-0-113" name="__codelineno-0-113"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">ic_trace</span><span class="o">.</span><span class="n">find_peaks</span><span class="p">(</span><span class="n">ic_params</span><span class="p">,</span> <span class="n">rel_height</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+</span><span id="__span-0-113"><a id="__codelineno-0-113" name="__codelineno-0-113"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">ic_trace</span><span class="o">.</span><span class="n">find_peaks</span><span class="p">(</span><span class="n">ic_params</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">rel_height</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
 </span><span id="__span-0-114"><a id="__codelineno-0-114" name="__codelineno-0-114"></a>                <span class="k">break</span>
 </span><span id="__span-0-115"><a id="__codelineno-0-115" name="__codelineno-0-115"></a>        <span class="c1"># Remove CoBo 10 from our normal traces</span>
 </span><span id="__span-0-116"><a id="__codelineno-0-116" name="__codelineno-0-116"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">traces</span> <span class="o">=</span> <span class="p">[</span><span class="n">trace</span> <span class="k">for</span> <span class="n">trace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traces</span> <span class="k">if</span> <span class="n">trace</span><span class="o">.</span><span class="n">hw_id</span><span class="o">.</span><span class="n">cobo_id</span> <span class="o">!=</span> <span class="mi">10</span><span class="p">]</span>
@@ -2743,7 +2743,7 @@ of the IC from CoBo 10.</p>
         <tr class="doc-section-item">
           <td><code>ic_params</code></td>
           <td>
-                <code><a class="autorefs autorefs-internal" title="spyral.core.config.FribParameters" href="../../core/config/#spyral.core.config.FribParameters">FribParameters</a></code>
+                <code><a class="autorefs autorefs-internal" title="spyral.core.config.GetParameters" href="../../core/config/#spyral.core.config.GetParameters">GetParameters</a></code>
           </td>
           <td>
             <div class="doc-md-description">
@@ -2825,7 +2825,7 @@ of the IC from CoBo 10.</p>
 </span><span id="__span-0-71"><a id="__codelineno-0-71" name="__codelineno-0-71"></a>    <span class="n">raw_data</span><span class="p">:</span> <span class="n">h5</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
 </span><span id="__span-0-72"><a id="__codelineno-0-72" name="__codelineno-0-72"></a>    <span class="n">event_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
 </span><span id="__span-0-73"><a id="__codelineno-0-73" name="__codelineno-0-73"></a>    <span class="n">get_params</span><span class="p">:</span> <span class="n">GetParameters</span><span class="p">,</span>
-</span><span id="__span-0-74"><a id="__codelineno-0-74" name="__codelineno-0-74"></a>    <span class="n">ic_params</span><span class="p">:</span> <span class="n">FribParameters</span><span class="p">,</span>
+</span><span id="__span-0-74"><a id="__codelineno-0-74" name="__codelineno-0-74"></a>    <span class="n">ic_params</span><span class="p">:</span> <span class="n">GetParameters</span><span class="p">,</span>
 </span><span id="__span-0-75"><a id="__codelineno-0-75" name="__codelineno-0-75"></a>    <span class="n">rng</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">,</span>
 </span><span id="__span-0-76"><a id="__codelineno-0-76" name="__codelineno-0-76"></a><span class="p">):</span>
 </span><span id="__span-0-77"><a id="__codelineno-0-77" name="__codelineno-0-77"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Process the traces</span>
@@ -2838,7 +2838,7 @@ of the IC from CoBo 10.</p>
 </span><span id="__span-0-84"><a id="__codelineno-0-84" name="__codelineno-0-84"></a><span class="sd">        The event number</span>
 </span><span id="__span-0-85"><a id="__codelineno-0-85" name="__codelineno-0-85"></a><span class="sd">    get_params: GetParameters</span>
 </span><span id="__span-0-86"><a id="__codelineno-0-86" name="__codelineno-0-86"></a><span class="sd">        Configuration parameters controlling the GET signal analysis</span>
-</span><span id="__span-0-87"><a id="__codelineno-0-87" name="__codelineno-0-87"></a><span class="sd">    ic_params: FribParameters</span>
+</span><span id="__span-0-87"><a id="__codelineno-0-87" name="__codelineno-0-87"></a><span class="sd">    ic_params: GetParameters</span>
 </span><span id="__span-0-88"><a id="__codelineno-0-88" name="__codelineno-0-88"></a><span class="sd">        Configuration parameters controlling the ion chamber signal analysis</span>
 </span><span id="__span-0-89"><a id="__codelineno-0-89" name="__codelineno-0-89"></a><span class="sd">    rng: numpy.random.Generator</span>
 </span><span id="__span-0-90"><a id="__codelineno-0-90" name="__codelineno-0-90"></a><span class="sd">        A random number generator for use in the signal analysis</span>
@@ -2864,7 +2864,7 @@ of the IC from CoBo 10.</p>
 </span><span id="__span-0-110"><a id="__codelineno-0-110" name="__codelineno-0-110"></a>            <span class="ow">and</span> <span class="n">trace</span><span class="o">.</span><span class="n">hw_id</span><span class="o">.</span><span class="n">aget_channel</span> <span class="o">==</span> <span class="mi">0</span>
 </span><span id="__span-0-111"><a id="__codelineno-0-111" name="__codelineno-0-111"></a>        <span class="p">):</span>
 </span><span id="__span-0-112"><a id="__codelineno-0-112" name="__codelineno-0-112"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">ic_trace</span> <span class="o">=</span> <span class="n">trace</span>
-</span><span id="__span-0-113"><a id="__codelineno-0-113" name="__codelineno-0-113"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">ic_trace</span><span class="o">.</span><span class="n">find_peaks</span><span class="p">(</span><span class="n">ic_params</span><span class="p">,</span> <span class="n">rel_height</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+</span><span id="__span-0-113"><a id="__codelineno-0-113" name="__codelineno-0-113"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">ic_trace</span><span class="o">.</span><span class="n">find_peaks</span><span class="p">(</span><span class="n">ic_params</span><span class="p">,</span> <span class="n">rng</span><span class="p">,</span> <span class="n">rel_height</span><span class="o">=</span><span class="mf">0.8</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
 </span><span id="__span-0-114"><a id="__codelineno-0-114" name="__codelineno-0-114"></a>            <span class="k">break</span>
 </span><span id="__span-0-115"><a id="__codelineno-0-115" name="__codelineno-0-115"></a>    <span class="c1"># Remove CoBo 10 from our normal traces</span>
 </span><span id="__span-0-116"><a id="__codelineno-0-116" name="__codelineno-0-116"></a>    <span class="bp">self</span><span class="o">.</span><span class="n">traces</span> <span class="o">=</span> <span class="p">[</span><span class="n">trace</span> <span class="k">for</span> <span class="n">trace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traces</span> <span class="k">if</span> <span class="n">trace</span><span class="o">.</span><span class="n">hw_id</span><span class="o">.</span><span class="n">cobo_id</span> <span class="o">!=</span> <span class="mi">10</span><span class="p">]</span>
