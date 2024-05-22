@@ -181,9 +181,6 @@ class ClusterParameters:
         are merged in the hierarchy
     circle_overlap_ratio: float
         minimum overlap ratio between two circles in the cluster joining algorithm
-    fractional_charge_threshold: float
-        The maximum allowed difference between two clusters mean charge (relative to the larger mean charge of the two)
-        for them to be joined
     outlier_scale_factor: float
         Factor which is multiplied by the number of points in a trajectory to set the number of neighbors parameter
         for scikit-learns LocalOutlierFactor test
@@ -195,7 +192,6 @@ class ClusterParameters:
     min_size_lower_cutoff: int
     cluster_selection_epsilon: float
     circle_overlap_ratio: float
-    fractional_charge_threshold: float
     outlier_scale_factor: float
 
 

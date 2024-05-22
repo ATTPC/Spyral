@@ -93,7 +93,7 @@ class EstimationPhase(PhaseLike):
         min_event: int = cluster_group.attrs["min_event"]  # type: ignore
         max_event: int = cluster_group.attrs["max_event"]  # type: ignore
 
-        nevents = max_event - min_event
+        nevents = max_event - min_event + 1
         total: int
         flush_val: int
         if nevents < 100:

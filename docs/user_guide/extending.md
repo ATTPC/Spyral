@@ -45,7 +45,7 @@ from spyral import ArtifactSchema
 
 MY_SOLVER_SCHEMA = ArtifactSchema(
     extension=".parquet",
-    schema=[
+    structure=[
         "value_a",
         "value_b",
         "value_c"
@@ -60,7 +60,7 @@ Still not anything too crazy. But it is important to define schema, otherwise th
 All Phases inherit from the [`PhaseLike`](../api/core/phase.md) abstract base class. As such your Phase will have to adhere to the predefined strutrue of `PhaseLike`. Lets look at what we would put in `my_phases/my_sovler_phase.py`.
 
 ```python
-from spyral import PhaseLike, PhaseResult, ESTIMATION_SCHEMA
+from spyral import PhaseLike, PhaseResult, ESTIMATE_SCHEMA
 from spyral.core.run_stacks import form_run_string
 
 from .schema import MY_SOLVER_SCHEMA
@@ -79,7 +79,7 @@ def load_asset(path: Path) -> SomeType:
 
 class MySolverPhase(PhaseLike):
 
-    def __init__(self, solver_params: MySolverParameters)
+    def __init__(self, solver_params: MySolverParameters):
         super().__init__(name="MySolver", incoming_schema=ESTIMATION_SCHEMA, outgoing_schema=MY_SOLVER_SCHEMA)
         self.params = solver_params
 

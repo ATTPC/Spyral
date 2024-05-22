@@ -179,17 +179,6 @@ def estimate_physics_pass(
         estimates the direction.
 
     """
-    # Do some cleanup, reject clusters which have too many beam region points
-    beam_region_fraction = float(
-        len(
-            cluster.data[
-                np.linalg.norm(cluster.data[:, :2], axis=1)
-                < detector_params.beam_region_radius
-            ]
-        )
-    ) / float(len(cluster.data))
-    if beam_region_fraction > 0.9:
-        return (False, Direction.NONE)
 
     direction = chosen_direction
     vertex = np.array([0.0, 0.0, 0.0])  # reaction vertex
