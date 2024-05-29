@@ -23,7 +23,6 @@ class PadParameters:
     is_default: bool
     is_default_legacy: bool
     pad_geometry_path: Path
-    pad_gain_path: Path
     pad_time_path: Path
     pad_electronics_path: Path
     pad_scale_path: Path
