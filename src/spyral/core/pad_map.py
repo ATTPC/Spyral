@@ -91,7 +91,7 @@ class PadMap:
 
         directory = resources.files("spyral.data")
 
-        geom_handle = directory.joinpath(f"padxy{suffix}.csv")
+        geom_handle = directory.joinpath(f"padxy.csv")
         with resources.as_file(geom_handle) as geopath:
             geofile = open(geopath, "r")
             geofile.readline()  # Remove header
