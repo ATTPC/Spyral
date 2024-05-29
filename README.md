@@ -105,7 +105,6 @@ cluster_params = ClusterParameters(
     min_size_lower_cutoff=10,
     cluster_selection_epsilon=10.0,
     circle_overlap_ratio=0.5,
-    fractional_charge_threshold=0.8,
     outlier_scale_factor=0.05,
 )
 
@@ -176,4 +175,3 @@ Spyral creates a set of logfiles when it is run (located in the log directory of
 ## Notebooks
 
 See the [spyral_notebooks](https://github.com/attpc/spyral_notebooks) repository for notebooks which demonstrate the behavior of the default Phases of Spyral.
-

@@ -80,7 +80,6 @@ cluster_params = ClusterParameters(
     min_size_lower_cutoff=10,
     cluster_selection_epsilon=10.0,
     circle_overlap_ratio=0.5,
-    fractional_charge_threshold=0.8,
     outlier_scale_factor=0.05,
 )
 
