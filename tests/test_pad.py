@@ -8,7 +8,6 @@ def test_default_pads():
         is_default=True,
         is_default_legacy=False,
         pad_geometry_path=INVALID_PATH,
-        pad_gain_path=INVALID_PATH,
         pad_time_path=INVALID_PATH,
         pad_electronics_path=INVALID_PATH,
         pad_scale_path=INVALID_PATH,
@@ -22,7 +21,7 @@ def test_default_pads():
     assert pad0 is not None
     assert pad0.x == -269.95294
     assert pad0.y == 4.2506561
-    assert pad0.gain == 1.3
+    assert pad0.gain == 1.0
     assert pad0.time_offset == 0
     assert pad0.scale == 1.0
 
@@ -36,7 +35,6 @@ def test_default_legacy_pads():
         is_default=False,
         is_default_legacy=True,
         pad_geometry_path=INVALID_PATH,
-        pad_gain_path=INVALID_PATH,
         pad_time_path=INVALID_PATH,
         pad_electronics_path=INVALID_PATH,
         pad_scale_path=INVALID_PATH,
@@ -50,7 +48,7 @@ def test_default_legacy_pads():
     assert pad0 is not None
     assert pad0.x == -269.95294
     assert pad0.y == 4.2506561
-    assert pad0.gain == 1.3
+    assert pad0.gain == 1.0
     assert pad0.time_offset == 0
     assert pad0.scale == 1.0
 
