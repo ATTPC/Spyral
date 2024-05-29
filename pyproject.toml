@@ -4,6 +4,7 @@ version = "0.7.0"
 description = "AT-TPC analysis pipeline"
 authors = [
     {name = "gwm17", email = "gordonmccann215@gmail.com"},
+    {name = "turinath", email = "turi@frib.msu.edu"},
 ]
 dependencies = [
     "spyral-utils>=1.0.0",
