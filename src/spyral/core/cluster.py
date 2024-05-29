@@ -143,7 +143,7 @@ class Cluster:
         result = neigh.fit_predict(test_data)
         mask = result > 0
         self.data = self.data[mask]  # label=-1 is an outlier
-        return np.flatnonzero(mask)
+        return np.flatnonzero(~mask)  # Invert the mask to get outliers
 
     def create_splines(self, smoothing: float = 1.0) -> None:
         """Create smoothing splines for the x,y,charge dimensions
