@@ -80,6 +80,7 @@ nav:
       - peak: api/trace/peak.md
   - FAQ: faq.md
   - For Developers: for_devs.md
+  - Contributors: contributors.md
 
 theme:
   name: material

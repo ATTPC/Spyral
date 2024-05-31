@@ -91,7 +91,7 @@ class PadMap:
 
         directory = resources.files("spyral.data")
 
-        geom_handle = directory.joinpath(f"padxy{suffix}.csv")
+        geom_handle = directory.joinpath(f"padxy.csv")
         with resources.as_file(geom_handle) as geopath:
             geofile = open(geopath, "r")
             geofile.readline()  # Remove header
@@ -100,15 +100,21 @@ class PadMap:
                 entries = line.split(",")
                 self.map[pad_number] = PadData(x=float(entries[0]), y=float(entries[1]))
             geofile.close()
-        gain_handle = directory.joinpath("pad_gain_map.csv")
-        with resources.as_file(gain_handle) as gainpath:
-            gainfile = open(gainpath, "r")
-            gainfile.readline()
-            lines = gainfile.readlines()
-            for pad_number, line in enumerate(lines):
-                entries = line.split(",")
-                self.map[pad_number].gain = float(entries[0])
-            gainfile.close()
+        #
+        # NOTE This is left in as a comment to show how a gain map could
+        # be implemented. This is not used in current Spyral as it has no
+        # impact on the analysis
+        #
+        # gain_handle = directory.joinpath("pad_gain_map.csv")
+        # with resources.as_file(gain_handle) as gainpath:
+        #     gainfile = open(gainpath, "r")
+        #     gainfile.readline()
+        #     lines = gainfile.readlines()
+        #     for pad_number, line in enumerate(lines):
+        #         entries = line.split(",")
+        #         self.map[pad_number].gain = float(entries[0])
+        #     gainfile.close()
+        #
         time_handle = directory.joinpath("pad_time_correction.csv")
         with resources.as_file(time_handle) as timepath:
             timefile = open(timepath, "r")
@@ -160,12 +166,18 @@ class PadMap:
             for pad_number, line in enumerate(lines):
                 entries = line.split(",")
                 self.map[pad_number] = PadData(x=float(entries[0]), y=float(entries[1]))
-        with open(params.pad_gain_path, "r") as gainfile:
-            gainfile.readline()
-            lines = gainfile.readlines()
-            for pad_number, line in enumerate(lines):
-                entries = line.split(",")
-                self.map[pad_number].gain = float(entries[0])
+        #
+        # NOTE This is left in as a comment to show how a gain map could
+        # be implemented. This is not used in current Spyral as it has no
+        # impact on the analysis
+        #
+        # with open(params.pad_gain_path, "r") as gainfile:
+        #     gainfile.readline()
+        #     lines = gainfile.readlines()
+        #     for pad_number, line in enumerate(lines):
+        #         entries = line.split(",")
+        #         self.map[pad_number].gain = float(entries[0])
+        #
         with open(params.pad_time_path, "r") as timefile:
             timefile.readline()
             lines = timefile.readlines()
