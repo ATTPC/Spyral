@@ -36,7 +36,6 @@ pad_params = PadParameters(
     is_default=True,
     is_default_legacy=False,
     pad_geometry_path=INVALID_PATH,
-    pad_gain_path=INVALID_PATH,
     pad_time_path=INVALID_PATH,
     pad_electronics_path=INVALID_PATH,
     pad_scale_path=INVALID_PATH,

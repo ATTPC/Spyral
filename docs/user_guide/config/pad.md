@@ -7,7 +7,6 @@ pad_params = PadParameters(
     is_default=True,
     is_default_legacy=False,
     pad_geometry_path=INVALID_PATH,
-    pad_gain_path=INVALID_PATH,
     pad_time_path=INVALID_PATH,
     pad_electronics_path=INVALID_PATH,
     pad_scale_path=INVALID_PATH,
@@ -27,10 +26,6 @@ A switch which indicates if the default legacy (pre-FRIBDAQ), which are shipped 
 ## pad_geometry_path
 
 This is the path to a `.csv` file containing the mapping of pad number to X-Y coordinate location in millimeters.
-
-## pad_gain_path
-
-This is the path to a `.csv` file containing the mapping of pad number to a gain correction factor. It corrects the relative gain offset of the small and large pads. This currently has essentially no impact on the Spyral analysis and is in the process of being removed.
 
 ## pad_time_path
 
