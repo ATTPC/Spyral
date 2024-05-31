@@ -2112,6 +2112,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#i-am-using-linux-and-spyral-crashes-when-i-try-to-use-more-than-one-or-two-processes" class="md-nav__link">
+    <span class="md-ellipsis">
+      I am using Linux and Spyral crashes when I try to use more than one or two processes
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2132,6 +2141,26 @@
   
   <span class="md-ellipsis">
     For Developers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributors/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributors
   </span>
   
 
@@ -2220,6 +2249,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#i-am-using-linux-and-spyral-crashes-when-i-try-to-use-more-than-one-or-two-processes" class="md-nav__link">
+    <span class="md-ellipsis">
+      I am using Linux and Spyral crashes when I try to use more than one or two processes
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2251,6 +2289,17 @@
 <p>In general, yes. Spyral has a legacy mode that supports analyzing data taken before AT-TPC's data acquisition was split (pre-FRIBDAQ): see <a href="../user_guide/phases/point_cloud/">here</a> for more details. However, at this time, it only supports analyzing the ion chamber data out of CoBo 10. Any other auxilary signals will have to be extended or requested.</p>
 <h2 id="i-just-ran-spyral-and-it-seems-like-everything-went-well-but-there-is-no-output-datathe-results-didnt-change">I just ran Spyral and it seems like everything went well, but there is no output data/the results didn't change</h2>
 <p>Check the log files in your workspace (in the <code>&lt;your_workspace&gt;/log</code> directory). Spyral will try to catch-and-continue most errors that aren't directly related to reading the configuration and spawning the processes. This helps us not crash out if one single file out 100 files to be analyzed is not formated correctly, but can sometimes make it look like Spyral ran but didn't do anything. The logs should contain lines indicating if a crash happened and what was detected as a possible error.</p>
+<h2 id="i-am-using-linux-and-spyral-crashes-when-i-try-to-use-more-than-one-or-two-processes">I am using Linux and Spyral crashes when I try to use more than one or two processes</h2>
+<p>This is most likely related to <a href="https://github.com/ATTPC/Spyral/issues/135">this issue</a>. You can modify your script with the following edit</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span> <span class="nn">os</span> <span class="c1"># Add this import</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="o">...</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;main&#39;</span><span class="p">:</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s1">&#39;taskset -cp 0-</span><span class="si">%d</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">n_processes</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()))</span> <span class="c1"># Add this line</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">multiprocessing</span><span class="o">.</span><span class="n">set_start_method</span><span class="p">(</span><span class="s2">&quot;spawn&quot;</span><span class="p">)</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">main</span><span class="p">()</span>
+</span></code></pre></div>
+<p>This is due to a known issue with multiprocessing and some versions of OpenBLAS, where the processor affinity is overriden by OpenBLAS.</p>
 
 
 

@@ -2177,6 +2177,26 @@
   
 
     
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../contributors/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributors
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
   </ul>
 </nav>
                   </div>
@@ -2739,7 +2759,7 @@ Each row is [x,y,z,amplitude,integral,pad id,time,scale]</p>
 </span><span id="__span-0-96"><a id="__codelineno-0-96" name="__codelineno-0-96"></a>                    <span class="n">peak</span><span class="o">.</span><span class="n">centroid</span> <span class="o">+</span> <span class="n">pad</span><span class="o">.</span><span class="n">time_offset</span>
 </span><span id="__span-0-97"><a id="__codelineno-0-97" name="__codelineno-0-97"></a>                <span class="p">)</span>  <span class="c1"># Z-coordinate, time with correction until calibrated with calibrate_z_position()</span>
 </span><span id="__span-0-98"><a id="__codelineno-0-98" name="__codelineno-0-98"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">amplitude</span>
-</span><span id="__span-0-99"><a id="__codelineno-0-99" name="__codelineno-0-99"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">integral</span> <span class="o">*</span> <span class="n">pad</span><span class="o">.</span><span class="n">gain</span>
+</span><span id="__span-0-99"><a id="__codelineno-0-99" name="__codelineno-0-99"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">integral</span>
 </span><span id="__span-0-100"><a id="__codelineno-0-100" name="__codelineno-0-100"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">trace</span><span class="o">.</span><span class="n">hw_id</span><span class="o">.</span><span class="n">pad_id</span>
 </span><span id="__span-0-101"><a id="__codelineno-0-101" name="__codelineno-0-101"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
 </span><span id="__span-0-102"><a id="__codelineno-0-102" name="__codelineno-0-102"></a>                    <span class="n">peak</span><span class="o">.</span><span class="n">centroid</span> <span class="o">+</span> <span class="n">pad</span><span class="o">.</span><span class="n">time_offset</span>
@@ -3266,7 +3286,7 @@ the pad relative gain correction and the pad time correction</p>
 </span><span id="__span-0-96"><a id="__codelineno-0-96" name="__codelineno-0-96"></a>                <span class="n">peak</span><span class="o">.</span><span class="n">centroid</span> <span class="o">+</span> <span class="n">pad</span><span class="o">.</span><span class="n">time_offset</span>
 </span><span id="__span-0-97"><a id="__codelineno-0-97" name="__codelineno-0-97"></a>            <span class="p">)</span>  <span class="c1"># Z-coordinate, time with correction until calibrated with calibrate_z_position()</span>
 </span><span id="__span-0-98"><a id="__codelineno-0-98" name="__codelineno-0-98"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">amplitude</span>
-</span><span id="__span-0-99"><a id="__codelineno-0-99" name="__codelineno-0-99"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">integral</span> <span class="o">*</span> <span class="n">pad</span><span class="o">.</span><span class="n">gain</span>
+</span><span id="__span-0-99"><a id="__codelineno-0-99" name="__codelineno-0-99"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">integral</span>
 </span><span id="__span-0-100"><a id="__codelineno-0-100" name="__codelineno-0-100"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">trace</span><span class="o">.</span><span class="n">hw_id</span><span class="o">.</span><span class="n">pad_id</span>
 </span><span id="__span-0-101"><a id="__codelineno-0-101" name="__codelineno-0-101"></a>            <span class="bp">self</span><span class="o">.</span><span class="n">cloud</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
 </span><span id="__span-0-102"><a id="__codelineno-0-102" name="__codelineno-0-102"></a>                <span class="n">peak</span><span class="o">.</span><span class="n">centroid</span> <span class="o">+</span> <span class="n">pad</span><span class="o">.</span><span class="n">time_offset</span>
