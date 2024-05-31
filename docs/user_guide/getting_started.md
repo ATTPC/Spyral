@@ -36,7 +36,6 @@ pad_params = PadParameters(
     is_default=True,
     is_default_legacy=False,
     pad_geometry_path=INVALID_PATH,
-    pad_gain_path=INVALID_PATH,
     pad_time_path=INVALID_PATH,
     pad_electronics_path=INVALID_PATH,
     pad_scale_path=INVALID_PATH,
@@ -80,7 +79,6 @@ cluster_params = ClusterParameters(
     min_size_lower_cutoff=10,
     cluster_selection_epsilon=10.0,
     circle_overlap_ratio=0.5,
-    fractional_charge_threshold=0.8,
     outlier_scale_factor=0.05,
 )
 

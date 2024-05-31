@@ -96,7 +96,7 @@ class PointCloud:
                     peak.centroid + pad.time_offset
                 )  # Z-coordinate, time with correction until calibrated with calibrate_z_position()
                 self.cloud[idx, 3] = peak.amplitude
-                self.cloud[idx, 4] = peak.integral * pad.gain
+                self.cloud[idx, 4] = peak.integral
                 self.cloud[idx, 5] = trace.hw_id.pad_id
                 self.cloud[idx, 6] = (
                     peak.centroid + pad.time_offset

@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from multiprocessing import SimpleQueue
 from numpy.random import Generator
+from collections import Counter
 
 if sys.version_info < (3, 11):
     from typing_extensions import Self
@@ -45,7 +46,9 @@ class ArtifactSchema:
             True if the schemas are equivalent or False if they are different
 
         """
-        return self.extension == value.extension and self.structure == value.structure
+        return self.extension == value.extension and (
+            Counter(self.structure) == Counter(value.structure)
+        )
 
 
 @dataclass

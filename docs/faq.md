@@ -23,3 +23,20 @@ In general, yes. Spyral has a legacy mode that supports analyzing data taken bef
 ## I just ran Spyral and it seems like everything went well, but there is no output data/the results didn't change
 
 Check the log files in your workspace (in the `<your_workspace>/log` directory). Spyral will try to catch-and-continue most errors that aren't directly related to reading the configuration and spawning the processes. This helps us not crash out if one single file out 100 files to be analyzed is not formated correctly, but can sometimes make it look like Spyral ran but didn't do anything. The logs should contain lines indicating if a crash happened and what was detected as a possible error.
+
+## I am using Linux and Spyral crashes when I try to use more than one or two processes
+
+This is most likely related to [this issue](https://github.com/ATTPC/Spyral/issues/135). You can modify your script with the following edit
+
+```python
+
+import os # Add this import
+...
+
+if name == 'main':
+    os.system('taskset -cp 0-%d %s' % (n_processes, os.getpid())) # Add this line
+    multiprocessing.set_start_method("spawn")
+    main()
+```
+
+This is due to a known issue with multiprocessing and some versions of OpenBLAS, where the processor affinity is overriden by OpenBLAS.
