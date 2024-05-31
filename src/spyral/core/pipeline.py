@@ -1,7 +1,12 @@
 from .run_stacks import form_run_string, create_run_stacks
 from .status_message import StatusMessage
 from .phase import PhaseLike, PhaseResult
-from .spy_log import init_spyral_logger_parent, init_spyral_logger_child, spyral_info
+from .spy_log import (
+    init_spyral_logger_parent,
+    init_spyral_logger_child,
+    spyral_info,
+    spyral_warn,
+)
 
 from tqdm import tqdm
 from pathlib import Path
@@ -239,6 +244,14 @@ def start_pipeline(
     print("Pipeline successfully validated.")
 
     stacks = create_run_stacks(pipeline.traces, run_min, run_max, n_procs)
+    stack_count = 0
+    for stack in stacks:
+        stack_count += len(stack)
+    if len(stack) == 0:
+        spyral_warn(
+            __name__,
+            f"No runs were found in trace path: {pipeline.traces}. Traces must exist to create workload!",
+        )
     spyral_info(__name__, f"Run stacks: {stacks}")
 
     seq = SeedSequence()
