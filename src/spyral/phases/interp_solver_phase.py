@@ -10,7 +10,10 @@ from ..core.track_generator import (
     check_mesh_needs_generation,
 )
 from ..core.estimator import Direction
-from ..interpolate.track_interpolator import create_interpolator
+from ..interpolate.track_interpolator import (
+    create_interpolator,
+    create_interpolator_from_array,
+)
 from ..solvers.guess import Guess
 from ..solvers.solver_interp import solve_physics_interp
 from .schema import ESTIMATE_SCHEMA, INTERP_SOLVER_SCHEMA
@@ -21,8 +24,11 @@ from spyral_utils.nuclear.nuclear_map import NuclearDataMap
 import h5py as h5
 import polars as pl
 from pathlib import Path
-from multiprocessing import SimpleQueue
+from multiprocessing import SimpleQueue, Array
+from ctypes import c_double
 from numpy.random import Generator
+import numpy as np
+from typing import Any
 
 
 def form_physics_file_name(run_number: int, particle: ParticleID) -> str:
@@ -83,7 +89,8 @@ class InterpSolverPhase(PhaseLike):
         self.solver_params = solver_params
         self.det_params = det_params
         self.nuclear_map = NuclearDataMap()
-        self.track_path = Path("Invalid")
+        self.shared_mesh_buffer: Array | None = None  # type: ignore
+        self.shared_mesh_shape: tuple | None = None
 
     def create_assets(self, workspace_path: Path) -> bool:
         target = load_target(Path(self.solver_params.gas_data_path), self.nuclear_map)
@@ -128,6 +135,23 @@ class InterpSolverPhase(PhaseLike):
             print("Creating the trajectory mesh... This may take some time...")
             generate_track_mesh(mesh_params, self.track_path, meta_path)
             print("Done.")
+
+        # Shared memory shenanigans
+        self.shared_mesh_buffer = Array(
+            c_double,
+            mesh_params.n_time_steps * mesh_params.ke_bins * mesh_params.polar_bins * 3,
+            lock=False,
+        )
+        mesh_data = np.load(self.track_path)
+        buffer = np.frombuffer(self.shared_mesh_buffer, dtype=float)  # type: ignore
+        buffer = np.reshape(
+            buffer,
+            (mesh_params.n_time_steps, 3, mesh_params.ke_bins, mesh_params.polar_bins),
+        )
+        buffer[:, :, :, :] = mesh_data[:, :, :, :]  # type: ignore
+        self.shared_mesh_shape = buffer.shape
+        # End Shared memory shenanigans
+
         return True
 
     def construct_artifact(
@@ -165,7 +189,7 @@ class InterpSolverPhase(PhaseLike):
         msg_queue: SimpleQueue,
         rng: Generator,
     ) -> PhaseResult:
-        # Need particle ID and target to select the correct data subset/interpolation scheme
+        # Need particle ID the correct data subset
         pid: ParticleID | None = deserialize_particle_id(
             Path(self.solver_params.particle_id_filename), self.nuclear_map
         )
@@ -174,14 +198,6 @@ class InterpSolverPhase(PhaseLike):
             spyral_warn(
                 __name__,
                 f"Particle ID {self.solver_params.particle_id_filename} does not exist, Solver will not run!",
-            )
-            return PhaseResult(Path("null"), False, payload.run_number)
-        target = load_target(Path(self.solver_params.gas_data_path), self.nuclear_map)
-        if not isinstance(target, GasTarget):
-            msg_queue.put(StatusMessage("Waiting", 0, 0, payload.run_number))
-            spyral_warn(
-                __name__,
-                f"Target {self.solver_params.gas_data_path} is not of the correct format, Solver will not run!",
             )
             return PhaseResult(Path("null"), False, payload.run_number)
 
@@ -264,7 +280,21 @@ class InterpSolverPhase(PhaseLike):
         }
 
         # load the ODE solution interpolator
-        interpolator = create_interpolator(self.track_path)
+        # interpolator = create_interpolator(self.track_path)
+        if self.shared_mesh_buffer is None or self.shared_mesh_shape is None:
+            spyral_warn(
+                __name__,
+                f"Could not run the interpolation scheme as there is no shared memory!",
+            )
+            return PhaseResult.invalid_result(payload.run_number)
+
+        interpolator = create_interpolator_from_array(
+            self.track_path,
+            np.reshape(
+                np.frombuffer(self.shared_mesh_buffer, dtype=float),
+                self.shared_mesh_shape,
+            ),  # type: ignore
+        )
 
         # Process the data
         for row, event in enumerate(estimates_gated["event"]):
@@ -288,7 +318,7 @@ class InterpSolverPhase(PhaseLike):
                 estimates_gated["vertex_x"][row],
                 estimates_gated["vertex_y"][row],
                 estimates_gated["vertex_z"][row],
-                Direction.NONE,
+                Direction.NONE,  # type: ignore
             )
             solve_physics_interp(
                 cidx,
