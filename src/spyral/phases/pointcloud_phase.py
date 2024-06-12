@@ -137,7 +137,7 @@ class PointcloudPhase(PhaseLike):
                 __name__,
                 f"Run {payload.run_number} does not exist for phase 1, skipping.",
             )
-            return PhaseResult(Path("null"), True, payload.run_number)
+            return PhaseResult.invalid_result(payload.run_number)
 
         # Open files
         result = self.construct_artifact(payload, workspace_path)
