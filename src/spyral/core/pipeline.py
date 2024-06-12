@@ -266,12 +266,17 @@ def start_pipeline(
     start = time.time()
     # Create the child processes
     for s in range(0, len(stacks)):
-        local_pipeline = deepcopy(pipeline)
         queues.append(SimpleQueue())
         processes.append(
             Process(
                 target=_run_pipeline,
-                args=(local_pipeline, stacks[s], queues[-1], seeds[s], s),
+                args=(
+                    pipeline,
+                    stacks[s],
+                    queues[-1],
+                    seeds[s],
+                    s,
+                ),  # All of this gets pickled/unpickled
                 daemon=False,
             )
         )
