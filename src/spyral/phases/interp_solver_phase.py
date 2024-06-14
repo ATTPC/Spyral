@@ -28,7 +28,10 @@ from multiprocessing import SimpleQueue, Array
 from ctypes import c_double
 from numpy.random import Generator
 import numpy as np
-from typing import Any
+
+
+class InterpSolverError(Exception):
+    pass
 
 
 def form_physics_file_name(run_number: int, particle: ParticleID) -> str:
@@ -98,17 +101,13 @@ class InterpSolverPhase(PhaseLike):
             Path(self.solver_params.particle_id_filename), self.nuclear_map
         )
         if pid is None:
-            print(
-                "Could not create trajectory mesh, particle ID does not have the correct format!"
+            raise InterpSolverError(
+                "Could not create trajectory mesh, particle ID is not formatted correctly!"
             )
-            print("Particle ID is required for running the solver stage (phase 4).")
-            raise Exception
         if not isinstance(target, GasTarget):
-            print(
-                "Could not create trajectory mesh, target data does not have the correct format for a GasTarget!"
+            raise InterpSolverError(
+                "Could not create trajectory mesh, target is not a GasTarget!"
             )
-            print("Gas Target is required for running the solver stage (phase 4).")
-            raise Exception
         mesh_params = MeshParameters(
             target,
             pid.nucleus,
@@ -137,18 +136,25 @@ class InterpSolverPhase(PhaseLike):
             print("Done.")
 
         # Shared memory shenanigans
+        # Create a block of shared memory of the same total size as the mesh
+        # Note that we don't have a lock on the shared memory as the mesh is
+        # used read-only
         self.shared_mesh_buffer = Array(
             c_double,
             mesh_params.n_time_steps * mesh_params.ke_bins * mesh_params.polar_bins * 3,
             lock=False,
         )
+        # load back up the mesh
         mesh_data = np.load(self.track_path)
+        # Reinterpret the shared block as a numpy array with the correct shape
         buffer = np.frombuffer(self.shared_mesh_buffer, dtype=float)  # type: ignore
         buffer = np.reshape(
             buffer,
             (mesh_params.n_time_steps, 3, mesh_params.ke_bins, mesh_params.polar_bins),
         )
+        # Copy the data into the shared location
         buffer[:, :, :, :] = mesh_data[:, :, :, :]  # type: ignore
+        # Store the shape for later use
         self.shared_mesh_shape = buffer.shape
         # End Shared memory shenanigans
 
@@ -199,7 +205,7 @@ class InterpSolverPhase(PhaseLike):
                 __name__,
                 f"Particle ID {self.solver_params.particle_id_filename} does not exist, Solver will not run!",
             )
-            return PhaseResult(Path("null"), False, payload.run_number)
+            return PhaseResult.invalid_result(payload.run_number)
 
         # Check the cluster phase and estimate phase data
         cluster_path: Path = payload.metadata["cluster_path"]
@@ -210,7 +216,7 @@ class InterpSolverPhase(PhaseLike):
                 __name__,
                 f"Either clusters or esitmates do not exist for run {payload.run_number} at phase 4. Skipping.",
             )
-            return PhaseResult(Path("null"), False, payload.run_number)
+            return PhaseResult.invalid_result(payload.run_number)
 
         # Setup files
         result = self.construct_artifact(payload, workspace_path)
@@ -223,7 +229,7 @@ class InterpSolverPhase(PhaseLike):
                 __name__,
                 f"Cluster group does not eixst for run {payload.run_number} at phase 4!",
             )
-            return PhaseResult(Path("null"), False, payload.run_number)
+            return PhaseResult.invalid_result(payload.run_number)
 
         # Select the particle group data, beam region of ic, convert to dictionary for row-wise operations
         estimates_gated = (
@@ -240,7 +246,7 @@ class InterpSolverPhase(PhaseLike):
         if len(estimates_gated["event"]) == 0:
             msg_queue.put(StatusMessage("Waiting", 0, 0, payload.run_number))
             spyral_warn(__name__, f"No events within PID for run {payload.run_number}!")
-            return PhaseResult(Path("null"), False, payload.run_number)
+            return PhaseResult.invalid_result(payload.run_number)
 
         nevents = len(estimates_gated["event"])
         total: int
@@ -288,12 +294,17 @@ class InterpSolverPhase(PhaseLike):
             )
             return PhaseResult.invalid_result(payload.run_number)
 
+        # Reinterpret the shared block as a numpy array with the correct shape
+        # Note that we explicitly set WRITEABLE to false to raise an error
+        # if our program tries to modify the mesh data
+        mesh_handle = np.frombuffer(self.shared_mesh_buffer, dtype=float)
+        mesh_handle.setflags(write=False)
         interpolator = create_interpolator_from_array(
             self.track_path,
             np.reshape(
-                np.frombuffer(self.shared_mesh_buffer, dtype=float),
+                mesh_handle,
                 self.shared_mesh_shape,
-            ),  # type: ignore
+            ),
         )
 
         # Process the data

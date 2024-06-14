@@ -6,6 +6,7 @@ from .spy_log import (
     init_spyral_logger_child,
     spyral_info,
     spyral_warn,
+    spyral_except,
 )
 
 from tqdm import tqdm
@@ -170,17 +171,21 @@ class Pipeline:
         """
 
         rng = default_rng(seed=seed)
-        for run in run_list:
-            result = PhaseResult(
-                Path(self.traces / f"{form_run_string(run)}.h5"), True, run
-            )
-            if not result.artifact_path.exists():
-                continue
-            for idx, phase in enumerate(self.phases):
-                if self.active[idx]:
-                    result = phase.run(result, self.workspace, msg_queue, rng)
-                else:
-                    result = phase.construct_artifact(result, self.workspace)
+        try:
+            for run in run_list:
+                result = PhaseResult(
+                    Path(self.traces / f"{form_run_string(run)}.h5"), True, run
+                )
+                if not result.artifact_path.exists():
+                    continue
+                for idx, phase in enumerate(self.phases):
+                    if self.active[idx]:
+                        result = phase.run(result, self.workspace, msg_queue, rng)
+                    else:
+                        result = phase.construct_artifact(result, self.workspace)
+        except Exception as e:
+            spyral_except(__name__, e)
+        msg_queue.put(StatusMessage("Complete", 0, 0, -1))
 
 
 def _run_pipeline(

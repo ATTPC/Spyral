@@ -211,10 +211,11 @@ class PointcloudPhase(PhaseLike):
                 msg_queue.put(msg)
 
             event_data: h5.Dataset
-            try:
-                event_data = event_group[f"evt{idx}_data"]  # type: ignore
-            except Exception:
+            event_name = f"evt{idx}_data"
+            if event_name not in event_group:
                 continue
+            else:
+                event_data = event_group[event_name]  # type: ignore
 
             event = GetEvent(event_data, idx, self.get_params, rng)
 
