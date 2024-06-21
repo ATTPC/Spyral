@@ -12,7 +12,7 @@ from .spy_log import (
 from tqdm import tqdm
 from pathlib import Path
 from multiprocessing import SimpleQueue, Process
-from copy import deepcopy
+from multiprocessing.managers import SharedMemoryManager
 from numpy.random import SeedSequence, default_rng
 import time
 
@@ -129,6 +129,26 @@ class Pipeline:
                 return False
         return True
 
+    def create_shared_data(self, manager: SharedMemoryManager) -> None:
+        """Have each phase create any shared memory
+
+        Call each PhaseLike's create_shared_data function.
+        This should be called before running the pipeline with a
+        valid, started SharedMemoryManager.
+
+        Parameters
+        ----------
+        manager: multiprocessing.manager.SharedMemoryManager
+            The manager of the program's shared memory
+
+        """
+        for idx, phase in enumerate(self.phases):
+            # Skip inactive phases
+            if not self.active[idx]:
+                continue
+            else:
+                phase.create_shared_data(self.workspace, manager)
+
     def validate(self) -> dict[str, bool]:
         """Validate the pipeline by comparing the schema of the phases.
 
@@ -229,6 +249,10 @@ def start_pipeline(
 
     """
     # Setup
+    # Note the manager exists outside the pipeline
+    shared_manager = SharedMemoryManager(("", 50000))
+    shared_manager.start()
+
     print(SPLASH)
     print(f"Creating workspace: {pipeline.workspace} ...", end=" ")
     pipeline.create_workspace()
@@ -238,6 +262,9 @@ def start_pipeline(
     print("Done.")
     print("Creating any phase assets...", end=" ")
     pipeline.create_assets()
+    print("Done.")
+    print("Initializing shared memory...", end=" ")
+    pipeline.create_shared_data(shared_manager)
     print("Done.")
     print("Validating Pipeline...", end=" ")
     result = pipeline.validate()
@@ -329,6 +356,8 @@ def start_pipeline(
 
     for process in processes:
         process.join()
+
+    shared_manager.shutdown()
 
     stop = time.time()
     duration = stop - start

@@ -24,10 +24,11 @@ from spyral_utils.nuclear.nuclear_map import NuclearDataMap
 import h5py as h5
 import polars as pl
 from pathlib import Path
-from multiprocessing import SimpleQueue, Array
-from ctypes import c_double
+from multiprocessing import SimpleQueue
 from numpy.random import Generator
 import numpy as np
+from multiprocessing.shared_memory import SharedMemory
+from multiprocessing.managers import SharedMemoryManager
 
 
 class InterpSolverError(Exception):
@@ -92,10 +93,12 @@ class InterpSolverPhase(PhaseLike):
         self.solver_params = solver_params
         self.det_params = det_params
         self.nuclear_map = NuclearDataMap()
-        self.shared_mesh_buffer: Array | None = None  # type: ignore
         self.shared_mesh_shape: tuple | None = None
+        self.shared_mesh_name: str | None = None
+        self.shared_mesh_type: np.dtype | None = None
 
     def create_assets(self, workspace_path: Path) -> bool:
+        global manager
         target = load_target(Path(self.solver_params.gas_data_path), self.nuclear_map)
         pid = deserialize_particle_id(
             Path(self.solver_params.particle_id_filename), self.nuclear_map
@@ -135,30 +138,24 @@ class InterpSolverPhase(PhaseLike):
             generate_track_mesh(mesh_params, self.track_path, meta_path)
             print("Done.")
 
-        # Shared memory shenanigans
+        return True
+
+    def create_shared_data(
+        self, workspace_path: Path, manager: SharedMemoryManager
+    ) -> None:
         # Create a block of shared memory of the same total size as the mesh
         # Note that we don't have a lock on the shared memory as the mesh is
         # used read-only
-        self.shared_mesh_buffer = Array(
-            c_double,
-            mesh_params.n_time_steps * mesh_params.ke_bins * mesh_params.polar_bins * 3,
-            lock=False,
+        mesh_data: np.ndarray = np.load(self.track_path)
+        memory = manager.SharedMemory(mesh_data.nbytes)
+        memory_array = np.ndarray(
+            mesh_data.shape, dtype=mesh_data.dtype, buffer=memory.buf
         )
-        # load back up the mesh
-        mesh_data = np.load(self.track_path)
-        # Reinterpret the shared block as a numpy array with the correct shape
-        buffer = np.frombuffer(self.shared_mesh_buffer, dtype=float)  # type: ignore
-        buffer = np.reshape(
-            buffer,
-            (mesh_params.n_time_steps, 3, mesh_params.ke_bins, mesh_params.polar_bins),
-        )
-        # Copy the data into the shared location
-        buffer[:, :, :, :] = mesh_data[:, :, :, :]  # type: ignore
-        # Store the shape for later use
-        self.shared_mesh_shape = buffer.shape
-        # End Shared memory shenanigans
-
-        return True
+        memory_array[:, :, :, :] = mesh_data[:, :, :, :]
+        # The name allows us to access later, shape and dtype are for casting to numpy
+        self.shared_mesh_name = memory.name
+        self.shared_mesh_shape = memory_array.shape
+        self.shared_mesh_type = memory_array.dtype
 
     def construct_artifact(
         self, payload: PhaseResult, workspace_path: Path
@@ -286,26 +283,20 @@ class InterpSolverPhase(PhaseLike):
         }
 
         # load the ODE solution interpolator
-        # interpolator = create_interpolator(self.track_path)
-        if self.shared_mesh_buffer is None or self.shared_mesh_shape is None:
+        if self.shared_mesh_shape is None or self.shared_mesh_name is None:
             spyral_warn(
                 __name__,
                 f"Could not run the interpolation scheme as there is no shared memory!",
             )
             return PhaseResult.invalid_result(payload.run_number)
-
-        # Reinterpret the shared block as a numpy array with the correct shape
-        # Note that we explicitly set WRITEABLE to false to raise an error
-        # if our program tries to modify the mesh data
-        mesh_handle = np.frombuffer(self.shared_mesh_buffer, dtype=float)
-        mesh_handle.setflags(write=False)
-        interpolator = create_interpolator_from_array(
-            self.track_path,
-            np.reshape(
-                mesh_handle,
-                self.shared_mesh_shape,
-            ),
+        # Ask for the shared memory by name and cast it to a numpy array of the correct shape
+        mesh_buffer = SharedMemory(self.shared_mesh_name)
+        mesh_handle = np.ndarray(
+            self.shared_mesh_shape, dtype=self.shared_mesh_type, buffer=mesh_buffer.buf
         )
+        mesh_handle.setflags(write=False)
+        # Create our interpolator
+        interpolator = create_interpolator_from_array(self.track_path, mesh_handle)
 
         # Process the data
         for row, event in enumerate(estimates_gated["event"]):

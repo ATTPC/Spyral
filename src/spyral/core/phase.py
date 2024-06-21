@@ -5,6 +5,7 @@ from pathlib import Path
 from multiprocessing import SimpleQueue
 from numpy.random import Generator
 from collections import Counter
+from multiprocessing.managers import SharedMemoryManager
 
 if sys.version_info < (3, 11):
     from typing_extensions import Self
@@ -180,6 +181,27 @@ class PhaseLike(ABC):
             True if artifacts are successfully created, False if unsuccessful
         """
         raise NotImplementedError
+
+    def create_shared_data(
+        self, workspace_path: Path, manager: SharedMemoryManager
+    ) -> None:
+        """Create shared-memory data for use across all processes
+
+        This should be used sparingly, in cases where it would be beneficial to share large memory
+        footprints across processes in a read-only way. In general, most phases should not override
+        and re-implement this method.
+
+        The obvious case for this is in the default InterpSolverPhase where we want to share
+        the interpolation mesh across processes.
+
+        Parameters
+        ----------
+        workspace_path: Path
+            The path tot he workspace
+        manager: SharedMemoryManager
+            A resource manager for parallel processes
+        """
+        return
 
     @abstractmethod
     def construct_artifact(
