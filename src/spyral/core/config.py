@@ -29,41 +29,6 @@ class PadParameters:
 
 
 @dataclass
-class RunParameters:
-    """Parameters describing the set of operations to be peformed by Spyral
-
-    Attributes
-    ----------
-    run_min: int
-        The first run number, inclusive
-    run_max: int
-        The last run number, inclusive
-    n_processes: int
-        The number of child processes
-    do_pointcloud: bool
-        If true, data is run through the pointcloud phase
-    do_cluster: bool
-        If true, data is run through the cluster phase
-    do_estimate: bool
-        If true, data is run through the estimate phase
-    do_solve: bool
-        If true, data is run through the solve phase
-    is_legacy: bool
-        If true, data is considered AT-TPC legacy format,
-        before the introduction of the FRIBDAQ.
-    """
-
-    run_min: int = -1
-    run_max: int = -1
-    n_processes: int = -1
-    do_pointcloud: bool = False
-    do_cluster: bool = False
-    do_estimate: bool = False
-    do_solve: bool = False
-    is_legacy: bool = False
-
-
-@dataclass
 class DetectorParameters:
     """Parameters describing the detector configuration
 

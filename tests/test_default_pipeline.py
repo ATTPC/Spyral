@@ -17,6 +17,7 @@ from spyral import (
 )
 
 from pathlib import Path
+from dill import pickles
 
 workspace_path = Path(__file__).parent / "test_workspace"
 trace_path = Path(__file__).parent
@@ -153,3 +154,24 @@ def test_create_workspace():
     for phase in pipe.phases:
         assert phase.get_artifact_path(workspace_path).exists()
         assert phase.get_asset_storage_path(workspace_path).exists()
+
+
+def test_pickleable():
+    good_pipe = Pipeline(
+        [
+            PointcloudPhase(
+                get_params,
+                frib_params,
+                det_params,
+                pad_params,
+            ),
+            ClusterPhase(cluster_params, det_params),
+            EstimationPhase(estimate_params, det_params),
+            InterpSolverPhase(solver_params, det_params),
+        ],
+        [True, True, True, True],
+        workspace_path,
+        trace_path,
+    )
+    assert not False in good_pipe.validate().values()
+    assert pickles(good_pipe)

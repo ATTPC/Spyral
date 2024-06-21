@@ -137,7 +137,7 @@ class PointcloudPhase(PhaseLike):
                 __name__,
                 f"Run {payload.run_number} does not exist for phase 1, skipping.",
             )
-            return PhaseResult(Path("null"), True, payload.run_number)
+            return PhaseResult.invalid_result(payload.run_number)
 
         # Open files
         result = self.construct_artifact(payload, workspace_path)
@@ -211,10 +211,11 @@ class PointcloudPhase(PhaseLike):
                 msg_queue.put(msg)
 
             event_data: h5.Dataset
-            try:
-                event_data = event_group[f"evt{idx}_data"]  # type: ignore
-            except Exception:
+            event_name = f"evt{idx}_data"
+            if event_name not in event_group:
                 continue
+            else:
+                event_data = event_group[event_name]  # type: ignore
 
             event = GetEvent(event_data, idx, self.get_params, rng)
 

@@ -141,10 +141,11 @@ class EstimationPhase(PhaseLike):
                 msg_queue.put(msg)
 
             event: h5.Group | None = None
-            try:
-                event = cluster_group[f"event_{idx}"]  # type: ignore
-            except Exception:
+            event_name = f"event_{idx}"
+            if event_name not in cluster_group:
                 continue
+            else:
+                event = cluster_group[event_name]  # type: ignore
 
             nclusters: int = event.attrs["nclusters"]  # type: ignore
             ic_amp = float(event.attrs["ic_amplitude"])  # type: ignore
@@ -154,10 +155,11 @@ class EstimationPhase(PhaseLike):
             # Go through every cluster in each event
             for cidx in range(0, nclusters):
                 local_cluster: h5.Group | None = None
-                try:
-                    local_cluster = event[f"cluster_{cidx}"]  # type: ignore
-                except Exception:
+                cluster_name = f"cluster_{cidx}"
+                if cluster_name not in event:  # type: ignore
                     continue
+                else:
+                    local_cluster = event[cluster_name]  # type: ignore
 
                 cluster = Cluster(
                     idx, local_cluster.attrs["label"], local_cluster["cloud"][:].copy()  # type: ignore
