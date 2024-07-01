@@ -275,7 +275,7 @@ def start_pipeline(
         return
     print("Pipeline successfully validated.")
 
-    stacks = create_run_stacks(pipeline.traces, run_min, run_max, n_procs)
+    stacks, stack_load = create_run_stacks(pipeline.traces, run_min, run_max, n_procs)
     stack_count = 0
     for stack in stacks:
         stack_count += len(stack)
@@ -285,6 +285,8 @@ def start_pipeline(
             f"No runs were found in trace path: {pipeline.traces}. Traces must exist to create workload!",
         )
     spyral_info(__name__, f"Run stacks: {stacks}")
+    for idx, load in enumerate(stack_load):
+        spyral_info(__name__, f"Stack {idx} load: {load:.2}")
 
     seq = SeedSequence()
 
