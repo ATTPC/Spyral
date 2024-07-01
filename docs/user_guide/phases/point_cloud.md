@@ -57,6 +57,17 @@ $$
 
 where $l_{attpc}$ is the length of the AT-TPC in millimeters.
 
+The available columns (in order) in a point cloud are:
+
+- x-position(mm)
+- y-position(mm)
+- z-position(mm if calibrated, TB if not)
+- charge(amplitude)
+- charge(integral)
+- pad ID
+- z-time(TB)
+- scale(relative, indicates Big Pad or Small Pad)
+
 ## Auxilary Detectors and Corrections
 
 The AT-TPC has at minimum one auxilary detector, the upstream ion chamber. The ion chamber (IC) is used to generate the AT-TPC trigger (in conjunction with the mesh) and identify beam species, and is recorded using the FRIBDAQ framework. Its data is analyzed very similarly to the GET data; baselines are removed and signals are extracted. Users can specify the maximum allowed ion chamber multiplicty to reject data with has an inconsistent trigger. Usually the AT-TPC also has a silicon detector downstream within the hole of the pad plane. This is useful for correcting the time of an event which triggered from the wrong IC signal by examining coincidences between the silicon and IC; only IC events which do not have a silicon coincidence are valid triggers. See the code in `spyral/traces/frib_traces.py` and `spyral/traces/frib_event.py` for details.

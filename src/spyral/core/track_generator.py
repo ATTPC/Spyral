@@ -427,7 +427,7 @@ def generate_track_mesh(params: MeshParameters, track_path: Path, meta_path: Pat
                 count = 0
                 flush_count += 1
                 print(
-                    f"\rPercent of data generated: {int(flush_count * flush_percent * 100)}%",
+                    f"\rPercent of mesh evaluated: {int(flush_count * flush_percent * 100)}%",
                     end="",
                 )
 
@@ -468,7 +468,7 @@ def generate_track_mesh(params: MeshParameters, track_path: Path, meta_path: Pat
                 count = 0
                 flush_count += 1
                 print(
-                    f"\rPercent of data generated: {int(flush_count * flush_percent * 100)}%",
+                    f"\rPercent of mesh generated: {int(flush_count * flush_percent * 100)}%",
                     end="",
                 )
 

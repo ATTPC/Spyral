@@ -419,6 +419,9 @@ def create_interpolator_from_array(
     ----------
     track_path: Path
         Path to the track mesh data
+    array: numpy.ndarray
+        The numpy array wrapping the shared memory. Contains
+        the data to interpolate on.
 
     Returns
     -------

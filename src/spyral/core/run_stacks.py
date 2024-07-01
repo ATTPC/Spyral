@@ -71,7 +71,7 @@ def collect_runs(trace_path: Path, run_min: int, run_max: int) -> dict[int, int]
 
 def create_run_stacks(
     trace_path: Path, run_min: int, run_max: int, n_stacks: int
-) -> list[list[int]]:
+) -> tuple[list[list[int]], list[float]]:
     """Create a set of runs to be processed for each stack in n_stacks.
 
     Each stack is intended to be handed off to a single processor. As such,
@@ -93,8 +93,11 @@ def create_run_stacks(
 
     Returns
     -------
-    list[list[int]]
-        The stacks. Each stack is a list of ints, where each value is a run number for that stack to process.
+    tuple[list[list[int]], list[float]]
+        The stacks and their approximate load. Each stack is a list of ints, where each value is a run
+        number for that stack to process. The first element of the tuple is the stacks the second element
+        is the percent load in each stack estimated from the trace data.
+
     """
 
     # create an empty list for each stack
@@ -103,7 +106,7 @@ def create_run_stacks(
     load_per_stack = [0 for _ in range(0, n_stacks)]
     sorted_runs = collect_runs(trace_path, run_min, run_max)
     if len(sorted_runs) == 0:
-        return stacks
+        return stacks, [0.0 for _ in load_per_stack]
 
     # Snake through the stacks, putting the next run in the next stack
     # This should put the most equal data load across the stacks
@@ -132,9 +135,6 @@ def create_run_stacks(
 
     # Remove any unused processors
     stacks = [s for s in stacks if len(s) != 0]
+    percent_load = [float(load / total_load) * 100.0 for load in load_per_stack]
 
-    print("Approximate data load per process:")
-    for idx, load in enumerate(load_per_stack):
-        print(f"Process {idx}: {float(load/total_load) * 100:.2f}%")
-
-    return stacks
+    return stacks, percent_load
