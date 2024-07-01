@@ -4,6 +4,10 @@ from numba import njit, int32, float64, boolean
 from numba.experimental import jitclass
 
 
+class BilinearInterpError(Exception):
+    pass
+
+
 @njit
 def clamp(value: float | int, low: float | int, hi: float | int) -> float | int:
     """Clamp a value to a range
@@ -140,20 +144,17 @@ class BilinearInterpolator:
         """
         values_shape = self.values.shape
         if len(values_shape) < 3:
-            print(
-                f"The values given to BilinearInterpolator do not have the correct dimensionality! Given {values_shape}, requires a minimum 3 dimensions"
+            raise BilinearInterpError(
+                f"BilinearInterpolator data has incorrect dimensionality! Given {values_shape}, requires a minimum 3 dimensions"
             )
-            raise Exception
         if values_shape[0] != self.x_bins:
-            print(
-                f"The shape of the values given to BilinearInterpolator along the x-axis does not match the given x-axis! axis={self.x_bins} values={values_shape[0]}"
+            raise BilinearInterpError(
+                f"BilinearInterpolator data has mismatched length! X-axis={self.x_bins} X-data={values_shape[0]}"
             )
-            raise Exception
         if values_shape[1] != self.y_bins:
-            print(
-                f"The shape of the values given to BilinearInterpolator along the y-axis does not match the given y-axis! axis={self.y_bins} values={values_shape[1]}"
+            raise BilinearInterpError(
+                f"BilinearInterpolator data has mismatched length! Y-axis={self.y_bins} Y-data={values_shape[1]}"
             )
-            raise Exception
 
     def get_edges_x(self, value: float) -> tuple[int, float, int, float]:
         """Get the edges of the grid cell in the x-coordinate in coordinate and bin space for a given value

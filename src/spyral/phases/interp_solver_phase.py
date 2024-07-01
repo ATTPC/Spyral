@@ -11,7 +11,6 @@ from ..core.track_generator import (
 )
 from ..core.estimator import Direction
 from ..interpolate.track_interpolator import (
-    create_interpolator,
     create_interpolator_from_array,
 )
 from ..solvers.guess import Guess
@@ -134,9 +133,7 @@ class InterpSolverPhase(PhaseLike):
         )
         do_gen = check_mesh_needs_generation(self.track_path, mesh_params)
         if do_gen:
-            print("Creating the trajectory mesh... This may take some time...")
             generate_track_mesh(mesh_params, self.track_path, meta_path)
-            print("Done.")
 
         return True
 
@@ -148,6 +145,10 @@ class InterpSolverPhase(PhaseLike):
         # used read-only
         mesh_data: np.ndarray = np.load(self.track_path)
         memory = manager.SharedMemory(mesh_data.nbytes)
+        spyral_info(
+            __name__,
+            f"Allocated {mesh_data.nbytes * 1.0e-9:.2} GB of memory for shared mesh.",
+        )
         memory_array = np.ndarray(
             mesh_data.shape, dtype=mesh_data.dtype, buffer=memory.buf
         )

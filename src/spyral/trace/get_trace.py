@@ -7,6 +7,10 @@ from scipy import signal
 import numpy as np
 
 
+class GetTraceError(Exception):
+    pass
+
+
 class GetTrace:
     """A single trace from the GET DAQ data
 
@@ -85,10 +89,9 @@ class GetTrace:
         """
         data_shape = np.shape(data)
         if data_shape[0] != NUMBER_OF_TIME_BUCKETS:
-            print(
+            raise GetTraceError(
                 f"GetTrace was given data that did not have the correct shape! Expected 512 time buckets, instead got {data_shape[0]}"
             )
-            return
 
         self.trace = data.astype(np.int32)  # Widen the type and sign it
         self.hw_id = id
