@@ -9,6 +9,8 @@
         <meta name="description" content="Documentation for the Spyral AT-TPC analysis framework">
       
       
+        <meta name="author" content="Gordon McCann">
+      
       
         <link rel="canonical" href="https://example.com/user_guide/phases/solve/">
       
@@ -2236,7 +2238,7 @@
 <h2 id="generating-the-interpolation-mesh">Generating the Interpolation Mesh</h2>
 <p>Before Spyral does anything, it will check to see if you're planning to run the solve phase. If you are, it will check to see if the interpolation mesh you requested (see the <a href="../../config/solver/">configuration</a>); if the mesh does not exist, it will generate one.</p>
 <p>In the <a href="../../config/solver/">configuration</a> you can specify the coarseness of the mesh; the particle species is taken from the given particle ID gate. Spyral walks through the kinetic energy, polar angle range at the steps needed for the number of bins requested, making a complete trajectory for each energy, angle. Care is taken to handle the time range of the solving. First, Spyral will walk through the phase space of the configuration and find the time range of the longest trajectory (in time) using an inital coarse time window of 1 &mu;s. Then Spyral generates the acutal mesh using this refined time window. The number of time steps is a configuration parameter and can be used to optimize resolution. Each step saves 3 double precision floats (8 bytes) for 24 bytes per point. Multiply this by the total number of bins (energy bins x angle bins x timesteps) to get the total size of the mesh in bytes. Even trajectories which stop before the 1.0 &mu;s time window have the same total data size. This will give you an idea of what the size of your mesh will be.</p>
-<p>The mesh size is important for several reasons. First is, obviously, a finer mesh (more bins) gives better results, as it reduces the degree of interpolation. But since a finer mesh is bigger, the computational strain is larger. The interpolation is a bilinear interpolation; it requires the <em>entire</em> mesh be loaded into memory. This limits the size of the mesh to the amount of memory in your machine divided by the number of parallel processes.</p>
+<p>The mesh size is important for several reasons. First is, obviously, a finer mesh (more bins) gives better results, as it reduces the degree of interpolation. But since a finer mesh is bigger, the computational strain is larger. The interpolation is a bilinear interpolation; it requires the <em>entire</em> mesh be loaded into memory. To alleviate this, Spyral shares the mesh memory between processes. You should always have more than 2x as much memory (read: RAM) available compared to the size of the mesh.</p>
 <p>Finally, when a trajectory is requested, Spyral interpolates on energy and angle to get a trajectory points or fewer (points where the particle stopped are trimmed).</p>
 <p>When a trajectory is requested, the full energy, polar angle, azimuthal angle, and reaction vertex must be given. The azimuthal angle and vertex are used to rotate and translate the trajectory to the proper orientation (this reduces the phase space of the interpolation mesh).</p>
 <p>In general, it has been found that 0.5 degree steps in polar angle are best, while 200 keV steps in energy are acceptable. However, this may need tuning from experiment to experiment.</p>

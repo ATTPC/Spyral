@@ -9,6 +9,8 @@
         <meta name="description" content="Documentation for the Spyral AT-TPC analysis framework">
       
       
+        <meta name="author" content="Gordon McCann">
+      
       
         <link rel="canonical" href="https://example.com/user_guide/phases/point_cloud/">
       
@@ -2348,6 +2350,17 @@
     z_{signal} = \frac{t_{window} - t_{signal}}{t_{window} - t_{micromegas}} l_{attpc}
 \]</div>
 <p>where <span class="arithmatex">\(l_{attpc}\)</span> is the length of the AT-TPC in millimeters.</p>
+<p>The available columns (in order) in a point cloud are:</p>
+<ul>
+<li>x-position(mm)</li>
+<li>y-position(mm)</li>
+<li>z-position(mm if calibrated, TB if not)</li>
+<li>charge(amplitude)</li>
+<li>charge(integral)</li>
+<li>pad ID</li>
+<li>z-time(TB)</li>
+<li>scale(relative, indicates Big Pad or Small Pad)</li>
+</ul>
 <h2 id="auxilary-detectors-and-corrections">Auxilary Detectors and Corrections</h2>
 <p>The AT-TPC has at minimum one auxilary detector, the upstream ion chamber. The ion chamber (IC) is used to generate the AT-TPC trigger (in conjunction with the mesh) and identify beam species, and is recorded using the FRIBDAQ framework. Its data is analyzed very similarly to the GET data; baselines are removed and signals are extracted. Users can specify the maximum allowed ion chamber multiplicty to reject data with has an inconsistent trigger. Usually the AT-TPC also has a silicon detector downstream within the hole of the pad plane. This is useful for correcting the time of an event which triggered from the wrong IC signal by examining coincidences between the silicon and IC; only IC events which do not have a silicon coincidence are valid triggers. See the code in <code>spyral/traces/frib_traces.py</code> and <code>spyral/traces/frib_event.py</code> for details.</p>
 <p>Additionally, it has been found that in some cases the AT-TPC needs a correction for distortions to the electric field. The correction is calculated using <a href="https://gitlab.cern.ch/garfield/garfieldpp">Garfield++</a> externally from Spyral. Spyral takes in a correction file containing initial electron positions and final drift positions and times. Spyral generates an interpolation mesh to calculate corrections for each point. The mesh is calculated and stored in a Numpy format file (<code>.npy</code>). It is not clear how impactful this correction is anymore; it was seemingly most important early on in the AT-TPC development. This correction is optional, and can be turned off and on using the configuration.</p>

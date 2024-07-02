@@ -9,6 +9,8 @@
         <meta name="description" content="Documentation for the Spyral AT-TPC analysis framework">
       
       
+        <meta name="author" content="Gordon McCann">
+      
       
         <link rel="canonical" href="https://example.com/user_guide/parallel/">
       
@@ -727,6 +729,15 @@
   <a href="#how-it-works" class="md-nav__link">
     <span class="md-ellipsis">
       How it Works
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#shared-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      Shared Memory
     </span>
   </a>
   
@@ -2162,6 +2173,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#shared-memory" class="md-nav__link">
+    <span class="md-ellipsis">
+      Shared Memory
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#optimizing-performance" class="md-nav__link">
     <span class="md-ellipsis">
       Optimizing Performance
@@ -2206,10 +2226,13 @@
 <p>This way works generally well at load balancing (assuming all runs are equal in data complexity for analysis).</p>
 <p>Each processor is given a queue it uses to communicate to the parent process. Messages are sent to the parent when the analysis status changes (new phase, increment progress, etc). The awesome <a href="https://github.com/tqdm/tqdm">tqdm</a> library is used to monitor the progress of each child processor.</p>
 <p>Each processor (including the parent) writes its own log file, which can be found in the <code>log/</code> directory of the workspace. This allows for error reporting and finer grained messaging, so that way when something goes wrong you can find out why!</p>
+<h2 id="shared-memory">Shared Memory</h2>
+<p>In some select cases it can be advantageous to share memory between the Spyral processes. The main example of this is the interpolation mesh created as an asset for the InterpSolverPhase. Typically the mesh is several GB in size, and as  such it is very expensive to allocate a mesh per process (particularly if you want to run 50 processes!). To address this, Spyral allows Phases to allocate shared memory using the <code>multiprocessing.shared_memory</code> library. Each Phase can override the <code>create_shared_data</code> function inherited from the base PhaseLike; if this function isn't overriden, the phase doesn't utilize shared memory. In general, shared memory should be used sparingly. Shared memory is somewhat difficult to guarantee safety on; shared memory as implemented should be strictly read-only within the context of the phases.</p>
+<p>It is also important to note: any shared memory that is created exists for the <em>entire duration</em> of Spyral's runtime. That is, if you create a big shared memory block that is only used once for a very brief moment in the pipeline, you will still have that memory load for the entire rest of the time that Spyral is running.</p>
 <h2 id="optimizing-performance">Optimizing Performance</h2>
 <p>To get the best performance, the number of runs to be analyzed should be evenly divisible by the number of processors. Otherwise, by necessity some of the processors will  generally <em>have</em> to run longer.  Also its best if runs are all of uniform size (but that's not usually within our control).</p>
 <p>In general more processors is more better, but this isn't always the case. The first limit is the total number of cores in your machine. You need <code>n_processors</code>+1 physical cores, otherwise things are guaranteed to slow down. Another consideration is your CPU architecture. Intel i-series and Apple ARM use P-core and E-core packages. P-cores are performance cores which hit higher clock speeds and are optimized for expensive tasks. E-cores are efficiency cores, which run slower but are less power hungry, best suited to background tasks. Spyral is best suited to P-cores; as such you should use only P-cores as the number of processors available.</p>
-<p>The final consideration is memory. This is mostly important for the solving phase. The interpolation mesh can be quite large (somtimes GBs) and needs to be stored in active memory <em>for each processor</em>. You need enough system memory (RAM) for each processor to completely load the mesh.</p>
+<p>The final consideration is memory. This is mostly important for the solving phase. The interpolation mesh can be quite large (somtimes GBs) will briefly need to be loaded <em>twice</em> into memory (from file into the shared memory). This means you should have at least as much RAM as two times the mesh size (leave room to spare fo the rest of the memory we allocate!).</p>
 <p>If you are using Spyral in a job environment (SLURM, etc), you can run with the Pipeline with the <code>no_display</code> argument in <code>start_pipeline</code> set to <code>True</code>. This will avoid the overhead of SLURM writting all the progress bar prints to a file.</p>
 
 
