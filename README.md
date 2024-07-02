@@ -181,4 +181,4 @@ See the [spyral_notebooks](https://github.com/attpc/spyral_notebooks) repository
 
 ## Contributing
 
-Please see the [For Developers](https://attpc.github.io/Spyral/for_devs) section of our documentation.
+Please see the [For Developers](https://attpc.github.io/Spyral/CONTRIBUTING) section of our documentation.

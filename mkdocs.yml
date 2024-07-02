@@ -80,7 +80,7 @@ nav:
       - frib_trace: api/trace/frib_trace.md
       - peak: api/trace/peak.md
   - FAQ: faq.md
-  - For Developers: for_devs.md
+  - For Developers: CONTRIBUTING.md
   - Contributors: contributors.md
 
 theme:

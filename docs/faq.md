@@ -6,7 +6,7 @@ See the [API docs](api/index.md) for API level documentation.
 
 ## How can I contriubte to Spyral?
 
-See [For Developers](for_devs.md)
+See [For Developers](CONTRIBUTING.md)
 
 ## I just installed Spyral and nothing is working
 
