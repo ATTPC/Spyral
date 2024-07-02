@@ -15,7 +15,8 @@ from .core.config import (
     ClusterParameters,
     EstimateParameters,
     SolverParameters,
-    INVALID_PATH,
+    DEFAULT_MAP,
+    DEFAULT_LEGACY_MAP,
 )
 from .phases.pointcloud_phase import PointcloudPhase
 from .phases.pointcloud_legacy_phase import PointcloudLegacyPhase
