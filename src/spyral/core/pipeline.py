@@ -286,7 +286,8 @@ def start_pipeline(
         )
     spyral_info(__name__, f"Run stacks: {stacks}")
     for idx, load in enumerate(stack_load):
-        spyral_info(__name__, f"Stack {idx} load: {load:.2}")
+        if load != 0.0:
+            spyral_info(__name__, f"Stack {idx} load: {load:.2f}%")
 
     seq = SeedSequence()
 

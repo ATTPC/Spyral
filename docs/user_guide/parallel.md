@@ -28,7 +28,9 @@ Each processor (including the parent) writes its own log file, which can be foun
 
 ## Shared Memory
 
-In some select cases it can be advantageous to share memory between the Spyral processes. The main example of this is the interpolation mesh created as an asset for the InterpSolverPhase. Typically the mesh is several GB in size, and as  such it is very expensive to allocate a mesh per process (particularly if you want to run 50 processes!). To address this, Spyral allows Phases to allocate shared memory using the `multiprocessing.shared_memory` library. Each Phase can override the `create_shared_data` function inherited from the base PhaseLike; if this function isn't overriden, the phase doesn't utilize shared memory. In general, shared memory should be used sparingly. Shared memory is somewhat difficult to guarantee safety on; shared memory as implemented should be strictly read-only within the context of the phases. 
+In some select cases it can be advantageous to share memory between the Spyral processes. The main example of this is the interpolation mesh created as an asset for the InterpSolverPhase. Typically the mesh is several GB in size, and as  such it is very expensive to allocate a mesh per process (particularly if you want to run 50 processes!). To address this, Spyral allows Phases to allocate shared memory using the `multiprocessing.shared_memory` library. Each Phase can override the `create_shared_data` function inherited from the base PhaseLike; if this function isn't overriden, the phase doesn't utilize shared memory. In general, shared memory should be used sparingly. Shared memory is somewhat difficult to guarantee safety on; shared memory as implemented should be strictly read-only within the context of the phases.
+
+It is also important to note: any shared memory that is created exists for the *entire duration* of Spyral's runtime. That is, if you create a big shared memory block that is only used once for a very brief moment in the pipeline, you will still have that memory load for the entire rest of the time that Spyral is running.
 
 ## Optimizing Performance
 

@@ -20,7 +20,27 @@ dependencies = [
 ]
 requires-python = ">=3.10,<3.13"
 readme = "README.md"
-license = {text = "GPL-3"}
+license = {file = "LICENSE"}
+
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: Microsoft :: Windows :: Windows 10",
+    "Operating System :: Microsoft :: Windows :: Windows 11",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Typing :: Typed"
+]
+
+[project.urls]
+Documentation = "https://attpc.github.io/Spyral"
+Repository = "https://github.com/ATTPC/Spyral"
+Issues = "https://github.com/ATTPC/Spyral/issues"
 
 [build-system]
 requires = ["pdm-backend"]
