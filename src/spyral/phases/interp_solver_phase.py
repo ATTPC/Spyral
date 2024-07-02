@@ -29,6 +29,9 @@ import numpy as np
 from multiprocessing.shared_memory import SharedMemory
 from multiprocessing.managers import SharedMemoryManager
 
+DEFAULT_PID_XAXIS = "dEdx"
+DEFAULT_PID_YAXIS = "brho"
+
 
 class InterpSolverError(Exception):
     pass
@@ -229,10 +232,17 @@ class InterpSolverPhase(PhaseLike):
             )
             return PhaseResult.invalid_result(payload.run_number)
 
+        # Extract cut axis names if present. Otherwise default to dEdx, brho
+        xaxis = DEFAULT_PID_XAXIS
+        yaxis = DEFAULT_PID_YAXIS
+        if not pid.cut.is_default_x_axis() and not pid.cut.is_default_y_axis():
+            xaxis = pid.cut.get_x_axis()
+            yaxis = pid.cut.get_y_axis()
+
         # Select the particle group data, beam region of ic, convert to dictionary for row-wise operations
         estimates_gated = (
             estimate_df.filter(
-                pl.struct(["dEdx", "brho"]).map_batches(pid.cut.is_cols_inside)
+                pl.struct([xaxis, yaxis]).map_batches(pid.cut.is_cols_inside)
                 & (pl.col("ic_amplitude") > self.solver_params.ic_min_val)
                 & (pl.col("ic_amplitude") < self.solver_params.ic_max_val)
             )
@@ -276,6 +286,8 @@ class InterpSolverPhase(PhaseLike):
             "sigma_vz": [],
             "brho": [],
             "sigma_brho": [],
+            "ke": [],
+            "sigma_ke": [],
             "polar": [],
             "sigma_polar": [],
             "azimuthal": [],

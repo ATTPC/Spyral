@@ -297,6 +297,9 @@ def solve_physics_interp(
         method="lbfgsb",
     )
 
+    p = best_fit.params["brho"].value * QBRHO_2_P * ejectile.Z  # type: ignore
+    ke = np.sqrt(p**2.0 + ejectile.mass**2.0) - ejectile.mass
+
     results["event"].append(cluster.event)
     results["cluster_index"].append(cluster_index)
     results["cluster_label"].append(cluster.label)
@@ -305,6 +308,7 @@ def solve_physics_interp(
     results["vertex_y"].append(best_fit.params["vertex_y"].value)  # type: ignore
     results["vertex_z"].append(best_fit.params["vertex_z"].value)  # type: ignore
     results["brho"].append(best_fit.params["brho"].value)  # type: ignore
+    results["ke"].append(ke)
     results["polar"].append(best_fit.params["polar"].value)  # type: ignore
     results["azimuthal"].append(best_fit.params["azimuthal"].value)  # type: ignore
     results["redchisq"].append(best_fit.redchi)
@@ -314,5 +318,6 @@ def solve_physics_interp(
     results["sigma_vy"].append(1.0e6)
     results["sigma_vz"].append(1.0e6)
     results["sigma_brho"].append(1.0e6)
+    results["sigma_ke"].append(1.0e6)
     results["sigma_polar"].append(1.0e6)
     results["sigma_azimuthal"].append(1.0e6)

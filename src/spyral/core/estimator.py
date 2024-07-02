@@ -22,9 +22,9 @@ class Direction(Enum):
         Trajectory traveling in the negative z-direction (1)
     """
 
-    NONE: int = -1  # type: ignore
-    FORWARD: int = 0  # type: ignore
-    BACKWARD: int = 1  # type: ignore
+    NONE = -1  # type: ignore
+    FORWARD = 0  # type: ignore
+    BACKWARD = 1  # type: ignore
 
 
 def estimate_physics(
@@ -294,6 +294,10 @@ def estimate_physics_pass(
     results["azimuthal"].append(azimuthal)
     results["brho"].append(brho)
     results["dEdx"].append(dEdx)
+    if dEdx != 0.0:
+        results["log_dEdx"].append(np.log(dEdx))
+    else:
+        results["log_dEdx"].append(0.0)
     results["dE"].append(charge_deposited)
     results["arclength"].append(arclength)
     results["direction"].append(direction.value)

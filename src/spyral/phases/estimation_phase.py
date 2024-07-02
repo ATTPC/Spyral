@@ -125,6 +125,7 @@ class EstimationPhase(PhaseLike):
             "azimuthal": [],
             "brho": [],
             "dEdx": [],
+            "log_dEdx": [],
             "dE": [],
             "arclength": [],
             "direction": [],
