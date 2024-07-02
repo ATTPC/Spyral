@@ -3,6 +3,10 @@ from numba import float64
 from numba.experimental import jitclass
 
 
+class LinearInterpError(Exception):
+    pass
+
+
 # To use numba with a class we need to declare the types of all members of the class
 # and use the @jitclass decorator
 linear_spec = [
@@ -61,18 +65,13 @@ class LinearInterpolator:
     def check_values(self):
         """Internal consistency check. Raises an Exception on failure."""
         if len(self.y.shape) < 2:
-            print(
-                f"The y values have the wrong shape for LinearInterpolator! Shape {self.y.shape} must have at minimum 2 dimensions."
+            raise LinearInterpError(
+                f"LinearInterpolator y-axis has invalid shape! Shape {self.y.shape} must be at minimum 2."
             )
-            print(
-                "If you just want to interpolate a simple one dimensional function, use numpy.interp."
-            )
-            raise Exception
         if len(self.x) != len(self.y[1]):
-            print(
-                f"The values given to LinearInterpolator do not have the correct dimensionality! x: {len(self.x)} y: {len(self.y[1])}"
+            raise LinearInterpError(
+                f"LinearInterpolator axes do not match in length! x: {len(self.x)} y: {len(self.y[1])}"
             )
-            raise Exception
 
     def interpolate(self, xs: np.ndarray) -> np.ndarray:
         """Perform interpolation for a set of x-coordinate values.

@@ -120,10 +120,11 @@ class ClusterPhase(PhaseLike):
                 msg_queue.put(msg)
 
             cloud_data: h5.Dataset | None = None
-            try:
-                cloud_data = cloud_group[f"cloud_{idx}"]  # type: ignore
-            except Exception:
+            cloud_name = f"cloud_{idx}"
+            if cloud_name not in cloud_group:
                 continue
+            else:
+                cloud_data = cloud_group[cloud_name]  # type: ignore
 
             if cloud_data is None:
                 continue

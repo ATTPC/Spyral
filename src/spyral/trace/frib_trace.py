@@ -6,6 +6,10 @@ import numpy as np
 from scipy import signal
 
 
+class FribTraceError(Exception):
+    pass
+
+
 class FribTrace:
     """A single trace from the FRIBDAQ data
 
@@ -58,10 +62,9 @@ class FribTrace:
             Configuration parameters controlling the FRIBDAQ signal analysis.
         """
         if len(data) != FRIB_TRACE_LENGTH:
-            print(
+            raise FribTraceError(
                 f"Error at ICTrace, trace was given with length {len(data)}, expected {FRIB_TRACE_LENGTH}"
             )
-            return
 
         self.trace = data.astype(np.int32)
         self.find_peaks(params)

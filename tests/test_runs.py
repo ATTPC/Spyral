@@ -32,7 +32,7 @@ def test_collect():
 def test_tall_create_run_stack():
     n_stacks = 1
     fake_trace_path = Path(__file__).parent
-    tall_stack = create_run_stacks(fake_trace_path, 0, 1, n_stacks)
+    tall_stack, load = create_run_stacks(fake_trace_path, 0, 1, n_stacks)
 
     assert len(tall_stack) == 1
     assert tall_stack[0][0] == 1
@@ -42,7 +42,7 @@ def test_tall_create_run_stack():
 def test_wide_create_run_stack():
     n_stacks = 2
     fake_trace_path = Path(__file__).parent
-    wide_stack = create_run_stacks(fake_trace_path, 0, 1, n_stacks)
+    wide_stack, load = create_run_stacks(fake_trace_path, 0, 1, n_stacks)
 
     assert len(wide_stack) == 2
     assert wide_stack[0][0] == 1

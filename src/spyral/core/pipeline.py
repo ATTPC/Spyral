@@ -6,12 +6,13 @@ from .spy_log import (
     init_spyral_logger_child,
     spyral_info,
     spyral_warn,
+    spyral_except,
 )
 
 from tqdm import tqdm
 from pathlib import Path
 from multiprocessing import SimpleQueue, Process
-from copy import deepcopy
+from multiprocessing.managers import SharedMemoryManager
 from numpy.random import SeedSequence, default_rng
 import time
 
@@ -128,6 +129,26 @@ class Pipeline:
                 return False
         return True
 
+    def create_shared_data(self, manager: SharedMemoryManager) -> None:
+        """Have each phase create any shared memory
+
+        Call each PhaseLike's create_shared_data function.
+        This should be called before running the pipeline with a
+        valid, started SharedMemoryManager.
+
+        Parameters
+        ----------
+        manager: multiprocessing.manager.SharedMemoryManager
+            The manager of the program's shared memory
+
+        """
+        for idx, phase in enumerate(self.phases):
+            # Skip inactive phases
+            if not self.active[idx]:
+                continue
+            else:
+                phase.create_shared_data(self.workspace, manager)
+
     def validate(self) -> dict[str, bool]:
         """Validate the pipeline by comparing the schema of the phases.
 
@@ -170,17 +191,21 @@ class Pipeline:
         """
 
         rng = default_rng(seed=seed)
-        for run in run_list:
-            result = PhaseResult(
-                Path(self.traces / f"{form_run_string(run)}.h5"), True, run
-            )
-            if not result.artifact_path.exists():
-                continue
-            for idx, phase in enumerate(self.phases):
-                if self.active[idx]:
-                    result = phase.run(result, self.workspace, msg_queue, rng)
-                else:
-                    result = phase.construct_artifact(result, self.workspace)
+        try:
+            for run in run_list:
+                result = PhaseResult(
+                    Path(self.traces / f"{form_run_string(run)}.h5"), True, run
+                )
+                if not result.artifact_path.exists():
+                    continue
+                for idx, phase in enumerate(self.phases):
+                    if self.active[idx]:
+                        result = phase.run(result, self.workspace, msg_queue, rng)
+                    else:
+                        result = phase.construct_artifact(result, self.workspace)
+        except Exception as e:
+            spyral_except(__name__, e)
+        msg_queue.put(StatusMessage("Complete", 0, 0, -1))
 
 
 def _run_pipeline(
@@ -224,6 +249,10 @@ def start_pipeline(
 
     """
     # Setup
+    # Note the manager exists outside the pipeline
+    shared_manager = SharedMemoryManager(("", 50000))
+    shared_manager.start()
+
     print(SPLASH)
     print(f"Creating workspace: {pipeline.workspace} ...", end=" ")
     pipeline.create_workspace()
@@ -234,6 +263,9 @@ def start_pipeline(
     print("Creating any phase assets...", end=" ")
     pipeline.create_assets()
     print("Done.")
+    print("Initializing shared memory...", end=" ")
+    pipeline.create_shared_data(shared_manager)
+    print("Done.")
     print("Validating Pipeline...", end=" ")
     result = pipeline.validate()
     if False in result.values():
@@ -243,7 +275,7 @@ def start_pipeline(
         return
     print("Pipeline successfully validated.")
 
-    stacks = create_run_stacks(pipeline.traces, run_min, run_max, n_procs)
+    stacks, stack_load = create_run_stacks(pipeline.traces, run_min, run_max, n_procs)
     stack_count = 0
     for stack in stacks:
         stack_count += len(stack)
@@ -253,6 +285,9 @@ def start_pipeline(
             f"No runs were found in trace path: {pipeline.traces}. Traces must exist to create workload!",
         )
     spyral_info(__name__, f"Run stacks: {stacks}")
+    for idx, load in enumerate(stack_load):
+        if load != 0.0:
+            spyral_info(__name__, f"Stack {idx} load: {load:.2f}%")
 
     seq = SeedSequence()
 
@@ -266,12 +301,17 @@ def start_pipeline(
     start = time.time()
     # Create the child processes
     for s in range(0, len(stacks)):
-        local_pipeline = deepcopy(pipeline)
         queues.append(SimpleQueue())
         processes.append(
             Process(
                 target=_run_pipeline,
-                args=(local_pipeline, stacks[s], queues[-1], seeds[s], s),
+                args=(
+                    pipeline,
+                    stacks[s],
+                    queues[-1],
+                    seeds[s],
+                    s,
+                ),  # All of this gets pickled/unpickled
                 daemon=False,
             )
         )
@@ -319,6 +359,8 @@ def start_pipeline(
 
     for process in processes:
         process.join()
+
+    shared_manager.shutdown()
 
     stop = time.time()
     duration = stop - start

@@ -20,8 +20,12 @@ It is recommended to install Spyral to a virtual environment.
 
 Python >= 3.10, < 3.13
 
-Spyral aims to be cross platform and to support Linux, MacOS, and Windows. Currently Spyral has been tested and confirmed on MacOS and Ubuntu 22.04 Linux. Other platforms
+Spyral aims to be cross platform and to support Linux, MacOS, and Windows. Currently Spyral has been tested and confirmed on MacOS, Ubuntu 22.04 Linux, and Windows 11. Other platforms
 are not guaranteed to work; if there is a problem please make an issue on the GitHub page, and it will be resolved as quickly as possible.
+
+## Documentation
+
+The documentation for Spyral can be found [here](https://attpc.github.io/Spyral/).
 
 ## Usage
 
@@ -159,7 +163,7 @@ The core of Spyral is the Pipeline. A Pipeline in a complete description of an a
 
 ### Parallel Processing
 
-Spyral is capable of running multiple data files in parallel. This is acheived through the python `multiprocessing` library. In the `start_pipeline` function a parameter named `n_processors indicates to Spyral the *maximum* number of processors which can be spawned. Spyral will then inspect the data load that was submitted in the configuration and attempt to balance the load across the processors as equally as possible.
+Spyral is capable of running multiple data files in parallel. This is acheived through the python `multiprocessing` library. In the `start_pipeline` function a parameter named `n_processors` indicates to Spyral the *maximum* number of processors which can be spawned. Spyral will then inspect the data load that was submitted in the configuration and attempt to balance the load across the processors as equally as possible.
 
 Some notes about parallel processing:
 
@@ -174,3 +178,7 @@ Spyral creates a set of logfiles when it is run (located in the log directory of
 ## Notebooks
 
 See the [spyral_notebooks](https://github.com/attpc/spyral_notebooks) repository for notebooks which demonstrate the behavior of the default Phases of Spyral.
+
+## Contributing
+
+Please see the [For Developers](https://attpc.github.io/Spyral/for_devs) section of our documentation.

@@ -1,10 +1,12 @@
 from ..core.constants import DEG2RAD
+from ..core.track_generator import MeshParameters
 from .bilinear import BilinearInterpolator
 from .linear import LinearInterpolator
 
 import numpy as np
 from pathlib import Path
 import json
+from typing import Any
 
 from numba import float64, int32
 from numba.types import string, ListType  # type: ignore
@@ -387,6 +389,69 @@ def create_interpolator(track_path: Path) -> TrackInterpolator:
             )
         )
         for time in data
+    ]
+
+    return TrackInterpolator(
+        str(track_path),
+        typed_interpolators,
+        meta_dict["particle"],
+        meta_dict["gas"],
+        meta_dict["bfield"],
+        meta_dict["efield"],
+        meta_dict["ke_min"],
+        meta_dict["ke_max"],
+        meta_dict["ke_bins"],
+        meta_dict["polar_min"],
+        meta_dict["polar_max"],
+        meta_dict["polar_bins"],
+    )
+
+
+def create_interpolator_from_array(
+    track_path: Path, array: np.ndarray
+) -> TrackInterpolator:
+    """Create a TrackInterpolator, loading a mesh of trajectories from a shared memory buffer
+
+    This is a utility function wrapping the creation of a TrackInterpolator. We do this outside
+    of the jitclass as I/O seems to only be somewhat supported in numba.
+
+    Parameters
+    ----------
+    track_path: Path
+        Path to the track mesh data
+    array: numpy.ndarray
+        The numpy array wrapping the shared memory. Contains
+        the data to interpolate on.
+
+    Returns
+    -------
+    TrackInterpolator
+        The constructed interpolator
+    """
+
+    track_meta_path = track_path.parents[0] / f"{track_path.stem}.json"
+    meta_dict: dict
+    with open(track_meta_path, "r") as metafile:
+        meta_dict = json.load(metafile)
+
+    pmin_rad = meta_dict["polar_min"] * DEG2RAD
+    pmax_rad = meta_dict["polar_max"] * DEG2RAD
+
+    typed_interpolators = List()  # type: ignore
+
+    [
+        typed_interpolators.append(
+            BilinearInterpolator(
+                pmin_rad,
+                pmax_rad,
+                meta_dict["polar_bins"],
+                meta_dict["ke_min"],
+                meta_dict["ke_max"],
+                meta_dict["ke_bins"],
+                time.T[:, :, :3],
+            )
+        )
+        for time in array
     ]
 
     return TrackInterpolator(

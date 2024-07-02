@@ -10,7 +10,9 @@ from ..core.track_generator import (
     check_mesh_needs_generation,
 )
 from ..core.estimator import Direction
-from ..interpolate.track_interpolator import create_interpolator
+from ..interpolate.track_interpolator import (
+    create_interpolator_from_array,
+)
 from ..solvers.guess import Guess
 from ..solvers.solver_interp import solve_physics_interp
 from .schema import ESTIMATE_SCHEMA, INTERP_SOLVER_SCHEMA
@@ -23,6 +25,13 @@ import polars as pl
 from pathlib import Path
 from multiprocessing import SimpleQueue
 from numpy.random import Generator
+import numpy as np
+from multiprocessing.shared_memory import SharedMemory
+from multiprocessing.managers import SharedMemoryManager
+
+
+class InterpSolverError(Exception):
+    pass
 
 
 def form_physics_file_name(run_number: int, particle: ParticleID) -> str:
@@ -83,25 +92,24 @@ class InterpSolverPhase(PhaseLike):
         self.solver_params = solver_params
         self.det_params = det_params
         self.nuclear_map = NuclearDataMap()
-        self.track_path = Path("Invalid")
+        self.shared_mesh_shape: tuple | None = None
+        self.shared_mesh_name: str | None = None
+        self.shared_mesh_type: np.dtype | None = None
 
     def create_assets(self, workspace_path: Path) -> bool:
+        global manager
         target = load_target(Path(self.solver_params.gas_data_path), self.nuclear_map)
         pid = deserialize_particle_id(
             Path(self.solver_params.particle_id_filename), self.nuclear_map
         )
         if pid is None:
-            print(
-                "Could not create trajectory mesh, particle ID does not have the correct format!"
+            raise InterpSolverError(
+                "Could not create trajectory mesh, particle ID is not formatted correctly!"
             )
-            print("Particle ID is required for running the solver stage (phase 4).")
-            raise Exception
         if not isinstance(target, GasTarget):
-            print(
-                "Could not create trajectory mesh, target data does not have the correct format for a GasTarget!"
+            raise InterpSolverError(
+                "Could not create trajectory mesh, target is not a GasTarget!"
             )
-            print("Gas Target is required for running the solver stage (phase 4).")
-            raise Exception
         mesh_params = MeshParameters(
             target,
             pid.nucleus,
@@ -125,10 +133,30 @@ class InterpSolverPhase(PhaseLike):
         )
         do_gen = check_mesh_needs_generation(self.track_path, mesh_params)
         if do_gen:
-            print("Creating the trajectory mesh... This may take some time...")
             generate_track_mesh(mesh_params, self.track_path, meta_path)
-            print("Done.")
+
         return True
+
+    def create_shared_data(
+        self, workspace_path: Path, manager: SharedMemoryManager
+    ) -> None:
+        # Create a block of shared memory of the same total size as the mesh
+        # Note that we don't have a lock on the shared memory as the mesh is
+        # used read-only
+        mesh_data: np.ndarray = np.load(self.track_path)
+        memory = manager.SharedMemory(mesh_data.nbytes)
+        spyral_info(
+            __name__,
+            f"Allocated {mesh_data.nbytes * 1.0e-9:.2} GB of memory for shared mesh.",
+        )
+        memory_array = np.ndarray(
+            mesh_data.shape, dtype=mesh_data.dtype, buffer=memory.buf
+        )
+        memory_array[:, :, :, :] = mesh_data[:, :, :, :]
+        # The name allows us to access later, shape and dtype are for casting to numpy
+        self.shared_mesh_name = memory.name
+        self.shared_mesh_shape = memory_array.shape
+        self.shared_mesh_type = memory_array.dtype
 
     def construct_artifact(
         self, payload: PhaseResult, workspace_path: Path
@@ -165,7 +193,7 @@ class InterpSolverPhase(PhaseLike):
         msg_queue: SimpleQueue,
         rng: Generator,
     ) -> PhaseResult:
-        # Need particle ID and target to select the correct data subset/interpolation scheme
+        # Need particle ID the correct data subset
         pid: ParticleID | None = deserialize_particle_id(
             Path(self.solver_params.particle_id_filename), self.nuclear_map
         )
@@ -175,15 +203,7 @@ class InterpSolverPhase(PhaseLike):
                 __name__,
                 f"Particle ID {self.solver_params.particle_id_filename} does not exist, Solver will not run!",
             )
-            return PhaseResult(Path("null"), False, payload.run_number)
-        target = load_target(Path(self.solver_params.gas_data_path), self.nuclear_map)
-        if not isinstance(target, GasTarget):
-            msg_queue.put(StatusMessage("Waiting", 0, 0, payload.run_number))
-            spyral_warn(
-                __name__,
-                f"Target {self.solver_params.gas_data_path} is not of the correct format, Solver will not run!",
-            )
-            return PhaseResult(Path("null"), False, payload.run_number)
+            return PhaseResult.invalid_result(payload.run_number)
 
         # Check the cluster phase and estimate phase data
         cluster_path: Path = payload.metadata["cluster_path"]
@@ -194,7 +214,7 @@ class InterpSolverPhase(PhaseLike):
                 __name__,
                 f"Either clusters or esitmates do not exist for run {payload.run_number} at phase 4. Skipping.",
             )
-            return PhaseResult(Path("null"), False, payload.run_number)
+            return PhaseResult.invalid_result(payload.run_number)
 
         # Setup files
         result = self.construct_artifact(payload, workspace_path)
@@ -207,7 +227,7 @@ class InterpSolverPhase(PhaseLike):
                 __name__,
                 f"Cluster group does not eixst for run {payload.run_number} at phase 4!",
             )
-            return PhaseResult(Path("null"), False, payload.run_number)
+            return PhaseResult.invalid_result(payload.run_number)
 
         # Select the particle group data, beam region of ic, convert to dictionary for row-wise operations
         estimates_gated = (
@@ -224,7 +244,7 @@ class InterpSolverPhase(PhaseLike):
         if len(estimates_gated["event"]) == 0:
             msg_queue.put(StatusMessage("Waiting", 0, 0, payload.run_number))
             spyral_warn(__name__, f"No events within PID for run {payload.run_number}!")
-            return PhaseResult(Path("null"), False, payload.run_number)
+            return PhaseResult.invalid_result(payload.run_number)
 
         nevents = len(estimates_gated["event"])
         total: int
@@ -264,7 +284,20 @@ class InterpSolverPhase(PhaseLike):
         }
 
         # load the ODE solution interpolator
-        interpolator = create_interpolator(self.track_path)
+        if self.shared_mesh_shape is None or self.shared_mesh_name is None:
+            spyral_warn(
+                __name__,
+                f"Could not run the interpolation scheme as there is no shared memory!",
+            )
+            return PhaseResult.invalid_result(payload.run_number)
+        # Ask for the shared memory by name and cast it to a numpy array of the correct shape
+        mesh_buffer = SharedMemory(self.shared_mesh_name)
+        mesh_handle = np.ndarray(
+            self.shared_mesh_shape, dtype=self.shared_mesh_type, buffer=mesh_buffer.buf
+        )
+        mesh_handle.setflags(write=False)
+        # Create our interpolator
+        interpolator = create_interpolator_from_array(self.track_path, mesh_handle)
 
         # Process the data
         for row, event in enumerate(estimates_gated["event"]):
@@ -288,7 +321,7 @@ class InterpSolverPhase(PhaseLike):
                 estimates_gated["vertex_x"][row],
                 estimates_gated["vertex_y"][row],
                 estimates_gated["vertex_z"][row],
-                Direction.NONE,
+                Direction.NONE,  # type: ignore
             )
             solve_physics_interp(
                 cidx,
