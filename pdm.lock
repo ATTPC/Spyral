@@ -5,7 +5,7 @@
 groups = ["default", "test", "lint", "doc"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:8de665c79188b933b72badb0e9844e472b5a198ae8a6f8019b2b30368a108be8"
+content_hash = "sha256:ff18b8756f476f1a4255f16cc92e9baa9277f8fb021e638ccf5720255566eb32"
 
 [[package]]
 name = "asteval"
@@ -604,6 +604,20 @@ files = [
     {file = "numba-0.59.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:f7ad1d217773e89a9845886401eaaab0a156a90aa2f179fdc125261fd1105096"},
     {file = "numba-0.59.1-cp312-cp312-win_amd64.whl", hash = "sha256:5bf68f4d69dd3a9f26a9b23548fa23e3bcb9042e2935257b471d2a8d3c424b7f"},
     {file = "numba-0.59.1.tar.gz", hash = "sha256:76f69132b96028d2774ed20415e8c528a34e3299a40581bae178f0994a2f370b"},
+]
+
+[[package]]
+name = "numdifftools"
+version = "0.9.41"
+summary = "Solves automatic numerical differentiation problems in one or more variables."
+groups = ["default"]
+dependencies = [
+    "numpy>=1.9",
+    "scipy>=0.8",
+]
+files = [
+    {file = "numdifftools-0.9.41-py2.py3-none-any.whl", hash = "sha256:a8b162e06889ea73643a47b84935a63d8214d4b4b0805d36a3c28c56379b3e51"},
+    {file = "numdifftools-0.9.41.tar.gz", hash = "sha256:4ef705cd3c06211b3a4e9fd05ad622be916dcfda40732f0128805a2c4be389b4"},
 ]
 
 [[package]]
