@@ -19,7 +19,8 @@ from spyral import (
     ClusterParameters,
     SolverParameters,
     EstimateParameters,
-    INVALID_PATH,
+    DEFAULT_MAP,
+    DEFAULT_LEGACY_MAP,
 )
 
 from pathlib import Path
@@ -33,12 +34,10 @@ run_max = 94
 n_processes = 4
 
 pad_params = PadParameters(
-    is_default=True,
-    is_default_legacy=False,
-    pad_geometry_path=INVALID_PATH,
-    pad_time_path=INVALID_PATH,
-    pad_electronics_path=INVALID_PATH,
-    pad_scale_path=INVALID_PATH,
+    pad_geometry_path=DEFAULT_MAP,
+    pad_time_path=DEFAULT_MAP,
+    pad_electronics_path=DEFAULT_MAP,
+    pad_scale_path=DEFAULT_MAP,
 )
 
 get_params = GetParameters(

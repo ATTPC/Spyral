@@ -1,6 +1,7 @@
 from .guess import Guess
 from ..core.cluster import Cluster
 from ..interpolate.track_interpolator import TrackInterpolator
+from ..interpolate.linear import LinearInterpolator
 from ..core.constants import QBRHO_2_P, BIG_PAD_HEIGHT
 from ..core.config import DetectorParameters
 
@@ -9,48 +10,11 @@ from spyral_utils.nuclear import NucleusData
 from lmfit import Parameters, minimize, fit_report
 from lmfit.minimizer import MinimizerResult
 import numpy as np
-from numba import njit, prange
-
-
-@njit(fastmath=True, error_model="numpy", inline="always")
-def distances(track: np.ndarray, data: np.ndarray, weights: np.ndarray) -> float:
-    """Calculate the average distance (error) of a track solution to the data
-
-    Loop over the data and approximate the error as the closest distance of a point in the
-    track solution to the data. JIT-ed for speed
-
-    Parameters
-    ----------
-    track: numpy.ndarray
-        The track solution
-    data: numpy.ndarray
-        The data to compare to
-
-    Returns
-    -------
-    float
-        The average distance (error)
-    """
-    assert track.shape[1] == 3
-    assert data.shape[1] == 3
-    assert len(data) == len(weights)
-
-    dists = np.zeros((len(data), len(track)))
-    error = 0.0
-    for i in prange(len(data)):
-        for j in prange(len(track)):
-            dists[i, j] = np.sqrt(
-                (track[j, 0] - data[i, 0]) ** 2.0
-                + (track[j, 1] - data[i, 1]) ** 2.0
-                + (track[j, 2] - data[i, 2]) ** 2.0
-            )
-        error += np.min(dists[i]) * weights[i]
-    return error / np.sum(weights)
 
 
 def interpolate_trajectory(
     fit_params: Parameters, interpolator: TrackInterpolator, ejectile: NucleusData
-) -> np.ndarray | None:
+) -> LinearInterpolator | None:
     """Use the interpolation scheme to generate a trajectory from the given fit parameters.
 
     Parameters
@@ -75,7 +39,7 @@ def interpolate_trajectory(
     polar = fit_params["polar"].value
     azimuthal = fit_params["azimuthal"].value
 
-    return interpolator.get_trajectory(
+    return interpolator.get_interpolated_trajectory(
         vertex_x,
         vertex_y,
         vertex_z,
@@ -91,7 +55,7 @@ def objective_function(
     weights: np.ndarray,
     interpolator: TrackInterpolator,
     ejectile: NucleusData,
-) -> float:
+) -> np.ndarray:
     """Function to be minimized. Returns errors for data compared to estimated track.
 
     Parameters
@@ -112,8 +76,9 @@ def objective_function(
     """
     trajectory = interpolate_trajectory(fit_params, interpolator, ejectile)
     if trajectory is None:
-        return 1.0e6
-    return distances(trajectory, x, weights)
+        return np.full(len(x), 1.0e6)
+    interp_xy = trajectory.interpolate(x[:, 2])
+    return np.linalg.norm(x[:, :2] - interp_xy, axis=1) * weights
 
 
 def create_params(
@@ -154,7 +119,7 @@ def create_params(
     interp_max_polar = interpolator.polar_max * np.pi / 180.0
 
     uncertainty_position_z = 0.1
-    uncertainty_brho = 1.0
+    uncertainty_brho = 0.05
 
     min_brho = guess.brho - uncertainty_brho * 2.0
     if min_brho < interp_min_brho:
@@ -196,7 +161,7 @@ def create_params(
         value=vert_rho,
         min=0.0,
         max=det_params.beam_region_radius * 0.001,
-        vary=True,
+        vary=False,
     )
     fit_params.add("vertex_phi", value=vert_phi, min=0.0, max=np.pi * 2.0, vary=True)
     fit_params.add("vertex_x", expr="vertex_rho * cos(vertex_phi)")
@@ -248,9 +213,9 @@ def fit_model_interp(
     )
     # uncertainty due to pad size, treat as box
     xy_error = cluster.data[:, 4] * BIG_PAD_HEIGHT
-    # total positional variance per point
-    total_var = 2.0 * (xy_error**2.0) + z_error**2.0
-    weights = 1.0 / total_var
+    # total positional error per point
+    total_error = np.sqrt(2.0 * (xy_error**2.0) + z_error**2.0)
+    weights = 1.0 / total_error
 
     fit_params = create_params(guess, ejectile, interpolator, det_params)
 
@@ -258,7 +223,7 @@ def fit_model_interp(
         objective_function,
         fit_params,
         args=(traj_data, weights, interpolator, ejectile),
-        method="lbfgsb",
+        method="leastsq",
     )
     print(fit_report(result))
 
@@ -310,8 +275,8 @@ def solve_physics_interp(
     # uncertainty due to pad size, treat as box
     xy_error = cluster.data[:, 4] * BIG_PAD_HEIGHT
     # total positional variance per point
-    total_var = 2.0 * (xy_error**2.0) + z_error**2.0
-    weights = 1.0 / total_var
+    total_error = np.sqrt(2.0 * (xy_error**2.0) + z_error**2.0)
+    weights = 1.0 / total_error
 
     fit_params = create_params(guess, ejectile, interpolator, det_params)
 
@@ -319,7 +284,7 @@ def solve_physics_interp(
         objective_function,
         fit_params,
         args=(traj_data, weights, interpolator, ejectile),
-        method="lbfgsb",
+        method="leastsq",
     )
 
     p = best_fit.params["brho"].value * QBRHO_2_P * ejectile.Z  # type: ignore

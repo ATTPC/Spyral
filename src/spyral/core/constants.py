@@ -84,3 +84,5 @@ QBRHO_2_P: float = 1.0e-9 * 10.0 * 100.0 * speed_of_light  # T * m -> MeV/c^2
 C = speed_of_light  # m/s
 
 E_CHARGE = elementary_charge  # Coulombs
+
+BIG_PAD_HEIGHT = 0.01  # meters

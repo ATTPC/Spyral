@@ -1,6 +1,6 @@
 from .constants import INVALID_PAD_ID
 from .hardware_id import HardwareID, generate_electronics_id
-from .config import PadParameters
+from .config import PadParameters, DEFAULT_MAP, DEFAULT_LEGACY_MAP
 from dataclasses import dataclass, field
 from importlib import resources
 
@@ -67,90 +67,7 @@ class PadMap:
         self.map: dict[int, PadData] = {}
         self.elec_map: dict[int, int] = {}
         self.is_valid = False
-        if params.is_default or params.is_default_legacy:
-            self.load_default(params.is_default_legacy)
-        else:
-            self.load(params)
-
-    def load_default(self, is_legacy: bool = False):
-        """Load maps with defaults shipped in the package
-
-        Spyral ships with default maps that should be maintained
-        for compatibility with the current detector configuration.
-
-        Parameters
-        ----------
-        is_legacy: bool, default=False
-            Optional flag indicating if the legacy maps should
-            be loaded
-        """
-
-        suffix = ""
-        if is_legacy:
-            suffix = "_legacy"
-
-        directory = resources.files("spyral.data")
-
-        geom_handle = directory.joinpath(f"padxy.csv")
-        with resources.as_file(geom_handle) as geopath:
-            geofile = open(geopath, "r")
-            geofile.readline()  # Remove header
-            lines = geofile.readlines()
-            for pad_number, line in enumerate(lines):
-                entries = line.split(",")
-                self.map[pad_number] = PadData(x=float(entries[0]), y=float(entries[1]))
-            geofile.close()
-        #
-        # NOTE This is left in as a comment to show how a gain map could
-        # be implemented. This is not used in current Spyral as it has no
-        # impact on the analysis
-        #
-        # gain_handle = directory.joinpath("pad_gain_map.csv")
-        # with resources.as_file(gain_handle) as gainpath:
-        #     gainfile = open(gainpath, "r")
-        #     gainfile.readline()
-        #     lines = gainfile.readlines()
-        #     for pad_number, line in enumerate(lines):
-        #         entries = line.split(",")
-        #         self.map[pad_number].gain = float(entries[0])
-        #     gainfile.close()
-        #
-        time_handle = directory.joinpath("pad_time_correction.csv")
-        with resources.as_file(time_handle) as timepath:
-            timefile = open(timepath, "r")
-            timefile.readline()
-            lines = timefile.readlines()
-            for pad_number, line in enumerate(lines):
-                entries = line.split(",")
-                self.map[pad_number].time_offset = float(entries[0])
-            timefile.close()
-        elec_handle = directory.joinpath(f"pad_electronics{suffix}.csv")
-        with resources.as_file(elec_handle) as elecpath:
-            elecfile = open(elecpath, "r")
-            elecfile.readline()
-            lines = elecfile.readlines()
-            for line in lines:
-                entries = line.split(",")
-                hardware = HardwareID(
-                    int(entries[4]),
-                    int(entries[0]),
-                    int(entries[1]),
-                    int(entries[2]),
-                    int(entries[3]),
-                )
-                self.map[hardware.pad_id].hardware = hardware
-                self.elec_map[generate_electronics_id(hardware)] = hardware.pad_id
-            elecfile.close()
-        scale_handle = directory.joinpath("pad_scale.csv")
-        with resources.as_file(scale_handle) as scalepath:
-            scalefile = open(scalepath, "r")
-            scalefile.readline()
-            lines = scalefile.readlines()
-            for pad_number, line in enumerate(lines):
-                entries = line.split(",")
-                self.map[pad_number].scale = float(entries[0])
-            scalefile.close()
-        self.is_valid = True
+        self.load(params)
 
     def load(self, params: PadParameters):
         """Load the map data
@@ -160,52 +77,132 @@ class PadMap:
         params: PadParameters
             Paths to map files
         """
-        with open(params.pad_geometry_path, "r") as geofile:
-            geofile.readline()  # Remove header
-            lines = geofile.readlines()
-            for pad_number, line in enumerate(lines):
-                entries = line.split(",")
-                self.map[pad_number] = PadData(x=float(entries[0]), y=float(entries[1]))
-        #
-        # NOTE This is left in as a comment to show how a gain map could
-        # be implemented. This is not used in current Spyral as it has no
-        # impact on the analysis
-        #
-        # with open(params.pad_gain_path, "r") as gainfile:
-        #     gainfile.readline()
-        #     lines = gainfile.readlines()
-        #     for pad_number, line in enumerate(lines):
-        #         entries = line.split(",")
-        #         self.map[pad_number].gain = float(entries[0])
-        #
-        with open(params.pad_time_path, "r") as timefile:
-            timefile.readline()
-            lines = timefile.readlines()
-            for pad_number, line in enumerate(lines):
-                entries = line.split(",")
-                self.map[pad_number].time_offset = float(entries[0])
+        # Defaults are here
+        directory = resources.files("spyral.data")
 
-        with open(params.pad_electronics_path, "r") as elecfile:
-            elecfile.readline()
-            lines = elecfile.readlines()
-            for line in lines:
-                entries = line.split(",")
-                hardware = HardwareID(
-                    int(entries[4]),
-                    int(entries[0]),
-                    int(entries[1]),
-                    int(entries[2]),
-                    int(entries[3]),
-                )
-                self.map[hardware.pad_id].hardware = hardware
-                self.elec_map[generate_electronics_id(hardware)] = hardware.pad_id
+        # Geometry
+        if (
+            params.pad_geometry_path == DEFAULT_MAP
+            or params.pad_geometry_path == DEFAULT_LEGACY_MAP
+        ):
+            geom_handle = directory.joinpath(f"padxy.csv")
+            with resources.as_file(geom_handle) as geopath:
+                geofile = open(geopath, "r")
+                geofile.readline()  # Remove header
+                lines = geofile.readlines()
+                for pad_number, line in enumerate(lines):
+                    entries = line.split(",")
+                    self.map[pad_number] = PadData(
+                        x=float(entries[0]), y=float(entries[1])
+                    )
+                geofile.close()
+        else:
+            with open(params.pad_geometry_path, "r") as geofile:
+                geofile.readline()  # Remove header
+                lines = geofile.readlines()
+                for pad_number, line in enumerate(lines):
+                    entries = line.split(",")
+                    self.map[pad_number] = PadData(
+                        x=float(entries[0]), y=float(entries[1])
+                    )
 
-        with open(params.pad_scale_path, "r") as scalefile:
-            scalefile.readline()
-            lines = scalefile.readlines()
-            for pad_number, line in enumerate(lines):
-                entries = line.split(",")
-                self.map[pad_number].scale = float(entries[0])
+        # Time
+        if (
+            params.pad_time_path == DEFAULT_MAP
+            or params.pad_time_path == DEFAULT_LEGACY_MAP
+        ):
+            time_handle = directory.joinpath("pad_time_correction.csv")
+            with resources.as_file(time_handle) as timepath:
+                timefile = open(timepath, "r")
+                timefile.readline()
+                lines = timefile.readlines()
+                for pad_number, line in enumerate(lines):
+                    entries = line.split(",")
+                    self.map[pad_number].time_offset = float(entries[0])
+                timefile.close()
+        else:
+            with open(params.pad_time_path, "r") as timefile:
+                timefile.readline()
+                lines = timefile.readlines()
+                for pad_number, line in enumerate(lines):
+                    entries = line.split(",")
+                    self.map[pad_number].time_offset = float(entries[0])
+
+        # Electronics
+        if params.pad_electronics_path == DEFAULT_MAP:
+            elec_handle = directory.joinpath(f"pad_electronics.csv")
+            with resources.as_file(elec_handle) as elecpath:
+                elecfile = open(elecpath, "r")
+                elecfile.readline()
+                lines = elecfile.readlines()
+                for line in lines:
+                    entries = line.split(",")
+                    hardware = HardwareID(
+                        int(entries[4]),
+                        int(entries[0]),
+                        int(entries[1]),
+                        int(entries[2]),
+                        int(entries[3]),
+                    )
+                    self.map[hardware.pad_id].hardware = hardware
+                    self.elec_map[generate_electronics_id(hardware)] = hardware.pad_id
+                elecfile.close()
+        elif params.pad_electronics_path == DEFAULT_LEGACY_MAP:
+            elec_handle = directory.joinpath(f"pad_electronics_legacy.csv")
+            with resources.as_file(elec_handle) as elecpath:
+                elecfile = open(elecpath, "r")
+                elecfile.readline()
+                lines = elecfile.readlines()
+                for line in lines:
+                    entries = line.split(",")
+                    hardware = HardwareID(
+                        int(entries[4]),
+                        int(entries[0]),
+                        int(entries[1]),
+                        int(entries[2]),
+                        int(entries[3]),
+                    )
+                    self.map[hardware.pad_id].hardware = hardware
+                    self.elec_map[generate_electronics_id(hardware)] = hardware.pad_id
+                elecfile.close()
+        else:
+            with open(params.pad_electronics_path, "r") as elecfile:
+                elecfile.readline()
+                lines = elecfile.readlines()
+                for line in lines:
+                    entries = line.split(",")
+                    hardware = HardwareID(
+                        int(entries[4]),
+                        int(entries[0]),
+                        int(entries[1]),
+                        int(entries[2]),
+                        int(entries[3]),
+                    )
+                    self.map[hardware.pad_id].hardware = hardware
+                    self.elec_map[generate_electronics_id(hardware)] = hardware.pad_id
+
+        # Scale
+        if (
+            params.pad_scale_path == DEFAULT_MAP
+            or params.pad_scale_path == DEFAULT_LEGACY_MAP
+        ):
+            scale_handle = directory.joinpath("pad_scale.csv")
+            with resources.as_file(scale_handle) as scalepath:
+                scalefile = open(scalepath, "r")
+                scalefile.readline()
+                lines = scalefile.readlines()
+                for pad_number, line in enumerate(lines):
+                    entries = line.split(",")
+                    self.map[pad_number].scale = float(entries[0])
+                scalefile.close()
+        else:
+            with open(params.pad_scale_path, "r") as scalefile:
+                scalefile.readline()
+                lines = scalefile.readlines()
+                for pad_number, line in enumerate(lines):
+                    entries = line.split(",")
+                    self.map[pad_number].scale = float(entries[0])
+
         self.is_valid = True
 
     def get_pad_data(self, pad_number: int) -> PadData | None:

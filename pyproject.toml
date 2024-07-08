@@ -1,13 +1,13 @@
 [project]
 name = "attpc_spyral"
-version = "0.9.0"
+version = "0.10.0rc0"
 description = "AT-TPC analysis pipeline"
 authors = [
     {name = "gwm17", email = "gordonmccann215@gmail.com"},
     {name = "turinath", email = "turi@frib.msu.edu"},
 ]
 dependencies = [
-    "spyral-utils>=1.0.0",
+    "spyral-utils>=1.1.0",
     "black>=24.4.0",
     "contourpy>=1.2.1",
     "h5py>=3.11.0",
@@ -17,6 +17,7 @@ dependencies = [
     "tqdm>=4.66.2",
     "rocket-fft>=0.2.5",
     "typing-extensions>=4.11.0",
+    "numdifftools>=0.9.41",
 ]
 requires-python = ">=3.10,<3.13"
 readme = "README.md"

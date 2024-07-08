@@ -62,6 +62,7 @@ The output of the estimation phase is a set of dataframes saved to parquet files
 - azimuthal: the estimated trajectory azimuthal angle (radians)
 - brho: the estimated trajectory total B&rho; (Tm)
 - dEdx: the estimated trajectory stopping power (average energy loss) (arb.)
+- log_dEdx: the natural log of dEdx
 - dE: the total integrated charge sum over the length of the first arc (arb.)
 - arclength: the length of the first arc (mm)
 - direction: indicates the detected direction of the trajectory (forward or backward)
@@ -87,7 +88,26 @@ Once estimation is done, you can check the progress of the work and see how well
 }
 ```
 
-Here the gate is specified to be for protons. A particle ID gate is *required* to move on to the final phase.
+Here the gate is specified to be for protons. A particle ID gate is *required* to move on to the final phase. Additionally, you can specify the xaxis and yaxis of the cut as
+
+```json
+{
+    "name": "my_pid",
+    "Z": 1,
+    "A": 1,
+    "xaxis": "dEdx",
+    "yaxis": "brho",
+    "vertices": [
+        [0.0, 0.0],
+        [1.0, 0.0],
+        [1.0, 1.0],
+        [0.0, 1.0],
+        [0.0, 0.0]
+    ]
+}
+```
+
+This allows you to specify which columns of the estimation dataframe are used to make the cut. The names of the axes should match *exactly* with the names of columns in the data frame. Note that you do not need to specify axes; if not specified the default (dEdx vs. brho) will be used.
 
 ## Final Thoughts
 

@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-INVALID_PATH: Path = Path("IllegalPath")
+DEFAULT_MAP: Path = Path("DefaultPath")
+DEFAULT_LEGACY_MAP: Path = Path("DefaultLegacyPath")
 
 
 @dataclass
@@ -11,17 +12,19 @@ class PadParameters:
     Attributes
     ----------
     pad_geometry_path: Path
-        Path to the csv file containing the pad geometry
+        Path to the csv file containing the pad geometry. If set to DEFAULT_MAP
+        or DEFAULT_LEGACY_MAP uses the packaged maps.
     pad_gain_path: Path
-        Path to the csv file containing the relative pad gains
+        Path to the csv file containing the relative pad gains. If set to DEFAULT_MAP
+        or DEFAULT_LEGACY_MAP uses the packaged maps.
     pad_time_path: Path
-        Path to the csv file containing the pad time corrections
+        Path to the csv file containing the pad time corrections. If set to DEFAULT_MAP
+        or DEFAULT_LEGACY_MAP uses the packaged maps.
     pad_electronics_path: Path
-        Path to the csv file containing the pad electronics ids
+        Path to the csv file containing the pad electronics ids. If set to DEFAULT_MAP
+        or DEFAULT_LEGACY_MAP uses the packaged maps.
     """
 
-    is_default: bool
-    is_default_legacy: bool
     pad_geometry_path: Path
     pad_time_path: Path
     pad_electronics_path: Path

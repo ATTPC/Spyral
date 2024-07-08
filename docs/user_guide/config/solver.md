@@ -57,7 +57,28 @@ Name of a JSON file containing the following [spyral-utils](https://attpc.github
 }
 ```
 
-`name` is the name of the gate, `Z` is the atomic number of the particle in the gate, `A` is the mass number, and `verticies` is a list of points which form a closed polygon in B&rho;-dEdx. The above data describes protons in a very silly box. Note that the first and last point in verticies should be the same. Typically gates are made using the particle ID notebook.
+`name` is the name of the gate, `Z` is the atomic number of the particle in the gate, `A` is the mass number, and `verticies` is a list of points which form a closed polygon in B&rho;-dEdx. The above data describes protons in a very silly box. Note that the first and last point in verticies should be the same. Additionally, you can specify the xaxis and yaxis of the cut as
+
+```json
+{
+    "name": "my_pid",
+    "Z": 1,
+    "A": 1,
+    "xaxis": "dEdx",
+    "yaxis": "brho",
+    "vertices": [
+        [0.0, 0.0],
+        [1.0, 0.0],
+        [1.0, 1.0],
+        [0.0, 1.0],
+        [0.0, 0.0]
+    ]
+}
+```
+
+This allows you to specify which columns of the estimation dataframe are used to make the cut. The names of the axes should match *exactly* with the names of columns in the data frame (see [here](../phases/estimate.md) for a list of column names). Note that you do not need to specify axes; if not specified the default (dEdx vs. brho) will be used.
+
+Typically gates are made using the [particle ID notebook](https://github.com/ATTPC/spyral_notebooks).
 
 ## ic_min_val
 

@@ -15,4 +15,4 @@ Many thanks to Daniel Bazin ([DBazin](https://github.com/dbazin)) and Zach Serik
 
 ## How can I join as a contributor?
 
-If you would like to join the Spyral team please contact the active maintainer (currently Gordon McCann [gwm17](https://github.com/gwm17)). See [For Developers](for_devs.md) for more details.
+If you would like to join the Spyral team please contact the active maintainer (currently Gordon McCann [gwm17](https://github.com/gwm17)). See [For Developers](CONTRIBUTING.md) for more details.

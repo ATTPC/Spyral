@@ -13,7 +13,7 @@ from spyral import (
     ClusterParameters,
     SolverParameters,
     EstimateParameters,
-    INVALID_PATH,
+    DEFAULT_MAP,
 )
 
 from pathlib import Path
@@ -23,12 +23,10 @@ workspace_path = Path(__file__).parent / "test_workspace"
 trace_path = Path(__file__).parent
 
 pad_params = PadParameters(
-    is_default=True,
-    is_default_legacy=False,
-    pad_geometry_path=INVALID_PATH,
-    pad_time_path=INVALID_PATH,
-    pad_electronics_path=INVALID_PATH,
-    pad_scale_path=INVALID_PATH,
+    pad_geometry_path=DEFAULT_MAP,
+    pad_time_path=DEFAULT_MAP,
+    pad_electronics_path=DEFAULT_MAP,
+    pad_scale_path=DEFAULT_MAP,
 )
 get_params = GetParameters(
     baseline_window_scale=20.0,
