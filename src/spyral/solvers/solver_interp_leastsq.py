@@ -338,11 +338,24 @@ def solve_physics_interp(
     results["azimuthal"].append(best_fit.params["azimuthal"].value)  # type: ignore
     results["redchisq"].append(best_fit.redchi)
 
-    # Right now we can't quantify uncertainties
-    results["sigma_vx"].append(1.0e6)
-    results["sigma_vy"].append(1.0e6)
-    results["sigma_vz"].append(1.0e6)
-    results["sigma_brho"].append(1.0e6)
-    results["sigma_ke"].append(1.0e6)
-    results["sigma_polar"].append(1.0e6)
-    results["sigma_azimuthal"].append(1.0e6)
+    if hasattr(best_fit, "uvars"):
+        results["sigma_vx"].append(best_fit.uvars["vertex_x"].std_dev)  # type: ignore
+        results["sigma_vy"].append(best_fit.uvars["vertex_y"].std_dev)  # type: ignore
+        results["sigma_vz"].append(best_fit.uvars["vertex_z"].std_dev)  # type: ignore
+        results["sigma_brho"].append(best_fit.uvars["brho"].std_dev)  # type: ignore
+        ke_std_dev = (
+            ke
+            * best_fit.uvars["brho"].std_dev  # type: ignore
+            / best_fit.uvars["brho"].nominal_value  # type:ignore
+        )
+        results["sigma_ke"].append(ke_std_dev)
+        results["sigma_polar"].append(best_fit.uvars["polar"].std_dev)  # type: ignore
+        results["sigma_azimuthal"].append(best_fit.uvars["azimuthal"].std_dev)  # type: ignore
+    else:
+        results["sigma_vx"].append(1.0e6)
+        results["sigma_vy"].append(1.0e6)
+        results["sigma_vz"].append(1.0e6)
+        results["sigma_brho"].append(1.0e6)
+        results["sigma_ke"].append(1.0e6)
+        results["sigma_polar"].append(1.0e6)
+        results["sigma_azimuthal"].append(1.0e6)
