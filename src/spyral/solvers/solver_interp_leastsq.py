@@ -196,7 +196,7 @@ def create_params(
         value=vert_rho,
         min=0.0,
         max=det_params.beam_region_radius * 0.001,
-        vary=False,
+        vary=True,
     )
     fit_params.add("vertex_phi", value=vert_phi, min=0.0, max=np.pi * 2.0, vary=True)
     fit_params.add("vertex_x", expr="vertex_rho * cos(vertex_phi)")
