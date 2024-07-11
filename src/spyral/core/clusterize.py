@@ -4,6 +4,7 @@ from .config import ClusterParameters
 from ..geometry.circle import least_squares_circle
 
 import sklearn.cluster as skcluster
+from sklearn.neighbors import LocalOutlierFactor
 import numpy as np
 
 NOISE_LABEL: int = -1
@@ -261,14 +262,26 @@ def form_clusters(
     cluster_data = np.empty(shape=(len(pc.cloud), 3))
     cluster_data[:, :] = pc.cloud[:, :3]
 
+    # Remove outliers
+    lof = LocalOutlierFactor(min_size)
+    lof_result = lof.fit_predict(cluster_data)
+    inliers = lof_result > 0.0
+    cluster_data = cluster_data[inliers]
+
     # Unfiy feature ranges to their means and have standard variance (1)
     cluster_data[:, 2] *= 584.0 / 1000.0
+
+    z_min = np.min(cluster_data[:, 2])
+    z_max = np.max(cluster_data[:, 2])
+    epsilon = params.epsilon_scale_factor * (z_max - z_min)
+    if epsilon < params.epsilon_lower_cutoff:
+        epsilon = params.epsilon_lower_cutoff
 
     clusterizer = skcluster.HDBSCAN(  # type: ignore
         min_cluster_size=min_size,
         min_samples=params.min_points,
         allow_single_cluster=True,
-        cluster_selection_epsilon=params.cluster_selection_epsilon,
+        cluster_selection_epsilon=epsilon,
     )
 
     fitted_clusters = clusterizer.fit(cluster_data)
