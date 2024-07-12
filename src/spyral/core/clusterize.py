@@ -284,16 +284,36 @@ def form_clusters(
         cluster_selection_epsilon=epsilon,
     )
 
+    all_labels = np.zeros(len(pc.cloud))
     fitted_clusters = clusterizer.fit(cluster_data)
+    all_labels[inliers] = fitted_clusters.labels_
+    all_labels[~inliers] = -1
     labels = np.unique(fitted_clusters.labels_)
 
     # Select out data into clusters
     clusters: list[LabeledCloud] = []
-    for idx, label in enumerate(labels):
+
+    # Handle the noise including outliers from LOF
+    noise_mask = np.full(len(pc.cloud), False)
+    noise_mask[~inliers] = True
+    noise_mask[inliers][fitted_clusters.labels_ == NOISE_LABEL] = True
+    noise_cluster = LabeledCloud(NOISE_LABEL, PointCloud(), np.empty(0))
+    noise_cluster.point_cloud.cloud = pc.cloud[noise_mask]
+    noise_cluster.point_cloud.event_number = pc.event_number
+    noise_cluster.clustered_data = cluster_data[fitted_clusters.labels_ == NOISE_LABEL]
+    noise_cluster.parent_indicies = np.flatnonzero(noise_mask)
+    clusters.append(noise_cluster)
+
+    # Now get the real clusters
+    mask = np.full(len(pc.cloud), False)
+    for label in labels:
+        if label == NOISE_LABEL:  # We already did noise
+            continue
+        mask[:] = False
         clusters.append(LabeledCloud(label, PointCloud(), np.empty(0)))
-        mask = fitted_clusters.labels_ == label
-        clusters[idx].point_cloud.cloud = pc.cloud[mask]
-        clusters[idx].point_cloud.event_number = pc.event_number
-        clusters[idx].clustered_data = cluster_data[mask]
-        clusters[idx].parent_indicies = np.flatnonzero(mask)
-    return (clusters, fitted_clusters.labels_)
+        mask[inliers] = fitted_clusters.labels_ == label
+        clusters[-1].point_cloud.cloud = pc.cloud[mask]
+        clusters[-1].point_cloud.event_number = pc.event_number
+        clusters[-1].clustered_data = cluster_data[fitted_clusters.labels_ == label]
+        clusters[-1].parent_indicies = np.flatnonzero(mask)
+    return (clusters, all_labels)
