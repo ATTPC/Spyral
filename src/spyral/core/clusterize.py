@@ -263,7 +263,10 @@ def form_clusters(
     cluster_data[:, :] = pc.cloud[:, :3]
 
     # Remove outliers
-    lof = LocalOutlierFactor(min_size)
+    neighbors = int(params.outlier_scale_factor * len(pc.cloud))
+    if neighbors < 2:
+        neighbors = 2
+    lof = LocalOutlierFactor(neighbors)
     lof_result = lof.fit_predict(cluster_data)
     inliers = lof_result > 0.0
     cluster_data = cluster_data[inliers]
@@ -295,7 +298,7 @@ def form_clusters(
     # Handle the noise including outliers from LOF
     noise_mask = np.full(len(pc.cloud), False)
     noise_mask[~inliers] = True
-    noise_mask[inliers][fitted_clusters.labels_ == NOISE_LABEL] = True
+    noise_mask[inliers] = fitted_clusters.labels_ == NOISE_LABEL
     noise_cluster = LabeledCloud(NOISE_LABEL, PointCloud(), np.empty(0))
     noise_cluster.point_cloud.cloud = pc.cloud[noise_mask]
     noise_cluster.point_cloud.event_number = pc.event_number
