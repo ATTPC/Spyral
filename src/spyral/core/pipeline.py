@@ -250,7 +250,7 @@ def start_pipeline(
     """
     # Setup
     # Note the manager exists outside the pipeline
-    shared_manager = SharedMemoryManager(("", 50000))
+    shared_manager = SharedMemoryManager()
     shared_manager.start()
 
     print(SPLASH)

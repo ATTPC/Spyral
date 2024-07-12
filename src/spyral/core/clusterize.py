@@ -280,7 +280,6 @@ def form_clusters(
     clusterizer = skcluster.HDBSCAN(  # type: ignore
         min_cluster_size=min_size,
         min_samples=params.min_points,
-        allow_single_cluster=True,
         cluster_selection_epsilon=epsilon,
     )
 
