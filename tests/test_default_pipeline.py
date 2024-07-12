@@ -61,7 +61,8 @@ cluster_params = ClusterParameters(
     min_points=3,
     min_size_scale_factor=0.05,
     min_size_lower_cutoff=10,
-    cluster_selection_epsilon=0.3,
+    epsilon_scale_factor=0.05,
+    epsilon_lower_cutoff=5.0,
     circle_overlap_ratio=0.5,
     outlier_scale_factor=0.05,
 )
