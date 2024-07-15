@@ -90,7 +90,12 @@ def join_clusters_step(
     for idx, center in enumerate(centers):
         cluster = clusters[idx]
         # Reject noise
-        if cluster.label == NOISE_LABEL or np.isnan(center[0]) or center[2] < 10.0:
+        if (
+            cluster.label == NOISE_LABEL
+            or np.isnan(center[0])
+            or center[2] < 10.0
+            or len(cluster.point_cloud.cloud) < params.min_cluster_size_join
+        ):
             continue
         radius = center[2]
         area = np.pi * radius**2.0
@@ -104,6 +109,7 @@ def join_clusters_step(
                 or np.isnan(comp_center[0])
                 or center[2] < 10.0
                 or cidx == idx
+                or len(comp_cluster.point_cloud.cloud) < params.min_cluster_size_join
             ):
                 continue
 
@@ -248,7 +254,7 @@ def form_clusters(
         that point's label.
     """
 
-    # Smooth out the point cloud by averaging over neighboring points within a distance, droping any duplicate points
+    # Remove any points outside the legal detector bounds
     pc.remove_illegal_points()
     if len(pc.cloud) < params.min_cloud_size:
         return ([], np.empty(0))
@@ -258,64 +264,29 @@ def form_clusters(
     if min_size < params.min_size_lower_cutoff:
         min_size = params.min_size_lower_cutoff
 
-    # Use spatial dimensions and integrated charge
+    # Use spatial dimensions
     cluster_data = np.empty(shape=(len(pc.cloud), 3))
     cluster_data[:, :] = pc.cloud[:, :3]
 
-    # Remove outliers
-    neighbors = int(params.outlier_scale_factor * len(pc.cloud))
-    if neighbors < 2:
-        neighbors = 2
-    lof = LocalOutlierFactor(neighbors)
-    lof_result = lof.fit_predict(cluster_data)
-    inliers = lof_result > 0.0
-    cluster_data = cluster_data[inliers]
-
-    # Unfiy feature ranges to their means and have standard variance (1)
+    # Rescale z to have same dims as x,y. Otherwise clusters too likely to break on z
     cluster_data[:, 2] *= 584.0 / 1000.0
-
-    z_min = np.min(cluster_data[:, 2])
-    z_max = np.max(cluster_data[:, 2])
-    epsilon = params.epsilon_scale_factor * (z_max - z_min)
-    if epsilon < params.epsilon_lower_cutoff:
-        epsilon = params.epsilon_lower_cutoff
 
     clusterizer = skcluster.HDBSCAN(  # type: ignore
         min_cluster_size=min_size,
         min_samples=params.min_points,
-        cluster_selection_epsilon=epsilon,
+        cluster_selection_epsilon=params.cluster_selection_epsilon,
     )
 
-    all_labels = np.zeros(len(pc.cloud))
     fitted_clusters = clusterizer.fit(cluster_data)
-    all_labels[inliers] = fitted_clusters.labels_
-    all_labels[~inliers] = -1
     labels = np.unique(fitted_clusters.labels_)
 
     # Select out data into clusters
     clusters: list[LabeledCloud] = []
-
-    # Handle the noise including outliers from LOF
-    noise_mask = np.full(len(pc.cloud), False)
-    noise_mask[~inliers] = True
-    noise_mask[inliers] = fitted_clusters.labels_ == NOISE_LABEL
-    noise_cluster = LabeledCloud(NOISE_LABEL, PointCloud(), np.empty(0))
-    noise_cluster.point_cloud.cloud = pc.cloud[noise_mask]
-    noise_cluster.point_cloud.event_number = pc.event_number
-    noise_cluster.clustered_data = cluster_data[fitted_clusters.labels_ == NOISE_LABEL]
-    noise_cluster.parent_indicies = np.flatnonzero(noise_mask)
-    clusters.append(noise_cluster)
-
-    # Now get the real clusters
-    mask = np.full(len(pc.cloud), False)
     for label in labels:
-        if label == NOISE_LABEL:  # We already did noise
-            continue
-        mask[:] = False
         clusters.append(LabeledCloud(label, PointCloud(), np.empty(0)))
-        mask[inliers] = fitted_clusters.labels_ == label
+        mask = fitted_clusters.labels_ == label
         clusters[-1].point_cloud.cloud = pc.cloud[mask]
         clusters[-1].point_cloud.event_number = pc.event_number
         clusters[-1].clustered_data = cluster_data[fitted_clusters.labels_ == label]
         clusters[-1].parent_indicies = np.flatnonzero(mask)
-    return (clusters, all_labels)
+    return (clusters, fitted_clusters.labels_)
