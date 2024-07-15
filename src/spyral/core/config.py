@@ -157,8 +157,8 @@ class ClusterParameters:
     min_points: int
     min_size_scale_factor: float
     min_size_lower_cutoff: int
-    epsilon_scale_factor: float
-    epsilon_lower_cutoff: float
+    cluster_selection_epsilon: float
+    min_cluster_size_join: int
     circle_overlap_ratio: float
     outlier_scale_factor: float
 
