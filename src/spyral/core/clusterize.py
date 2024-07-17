@@ -4,7 +4,6 @@ from .config import ClusterParameters
 from ..geometry.circle import least_squares_circle
 
 import sklearn.cluster as skcluster
-from sklearn.neighbors import LocalOutlierFactor
 import numpy as np
 
 NOISE_LABEL: int = -1
@@ -46,8 +45,9 @@ def join_clusters_step(
 ) -> tuple[list[LabeledCloud], np.ndarray]:
     """A single step of joining clusters
 
-    Combine clusters based on the center around which they orbit. This is necessary because often times tracks are
-    fractured or contain regions of varying density which causes clustering algorithms to separate them.
+    Combine clusters based on the amount of overlap between circles fit to their x-y (pad plane) projection.
+    This is necessary because often times tracks are fractured or contain regions of varying density
+    which causes clustering algorithms to separate them.
 
     Parameters
     ----------
@@ -198,6 +198,9 @@ def cleanup_clusters(
 ) -> tuple[list[Cluster], np.ndarray]:
     """Converts the LabeledClouds to Clusters
 
+    In this conversion, the LocalOutlierFactor algorithm is applied to the data
+    to remove any spurious points.
+
     Parameters
     ----------
     clusters: list[LabeledCloud]
@@ -233,11 +236,13 @@ def form_clusters(
 ) -> tuple[list[LabeledCloud], np.ndarray]:
     """Apply the HDBSCAN clustering algorithm to a PointCloud
 
-    Analyze a point cloud, and group the points into clusters which in principle should correspond to particle trajectories. This analysis contains several steps,
-    and revolves around the HDBSCAN clustering algorithm implemented in scikit-learn (see [their description](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html) for details)
-    First the point cloud is smoothed by averaging over nearest neighbors (defined by the smoothing_neighbor_distance parameter) to remove small deviations.
-    The data is then scaled where each coordinate (x,y,z,int) is centered to its mean and then scaled to its std deviation using the scikit-learn StandardScaler. This data is then
-    clustered by HDBSCAN and the clusters are returned.
+    Analyze a point cloud, and group the points into clusters which in principle should correspond to particle trajectories.
+    This analysis revolves around the HDBSCAN clustering algorithm implemented in scikit-learn
+    See [their description](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html) for details. We trim
+    illegal (out-of-bounds) points from the point cloud, and cluster on spatial dimensions (x,y,z). Z is rescaled to match the X-Y
+    scale to avoid over-emphasizing separation in Z in the clustering algorithm. The minimum size of a cluster is scaled off of the
+    size of the original point cloud.
+
 
     Parameters
     ----------

@@ -9,7 +9,8 @@ cluster_params = ClusterParameters(
     min_size_scale_factor=0.05,
     min_size_lower_cutoff=10,
     cluster_selection_epsilon=10.0,
-    circle_overlap_ratio=0.5,
+    min_cluster_size_join=15.0,
+    circle_overlap_ratio=0.25,
     outlier_scale_factor=0.05,
 )
 ```
@@ -35,6 +36,10 @@ As discussed in the above `minimum_size_scale_factor`, we need to scale the `min
 ## cluster_selection_epsilon
 
 A re-exposure of the `cluster_selection_epsilon` paramter of [scikit-learn's HDBSCAN](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html#sklearn.cluster.HDBSCAN). This parameter will merge clusters that are less than epsilon apart. Note that this epsilon must be on the scale of the scaled data (i.e. it is not in normal units). The impact of this parameter is large, and small changes to this value can produce dramatically different results. Larger values will bias the clustering to assume the point cloud is onesingle cluster (or all noise), while smaller values will cause the algorithm to revert to the default result of HDBSCAN. See the original [HDBSCAN docs](https://hdbscan.readthedocs.io/en/latest/parameter_selection.html#) for details on why this parameter is important and how it can impact the data.
+
+## min_cluster_size_join
+
+The minimum size of a cluster for it to be considered in the joining step of the clustering. After HDBSCAN has made the initial clusters we attempt to combine any clusters which have overlapping circles in the 2-D projection (see `circle_overlap_ratio`). However, many times, small pockets of noise will be clustered and often sit within the larger trajectory. To avoid these being joined we require a cluster to have a minimum size.
 
 ## circle_overlap_ratio
 
