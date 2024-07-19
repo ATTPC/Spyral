@@ -533,6 +533,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#min_cluster_size_join" class="md-nav__link">
+    <span class="md-ellipsis">
+      min_cluster_size_join
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#circle_overlap_ratio" class="md-nav__link">
     <span class="md-ellipsis">
       circle_overlap_ratio
@@ -1790,6 +1799,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../api/phases/interp_leastsq_solver_phase/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    interp_leastsq_solver_phase
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../api/phases/schema/" class="md-nav__link">
         
   
@@ -1901,6 +1931,27 @@
   
   <span class="md-ellipsis">
     solver_interp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/solvers/solver_interp_leastsq/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    solver_interp_leastsq
   </span>
   
 
@@ -2142,7 +2193,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../for_devs/" class="md-nav__link">
+      <a href="../../../CONTRIBUTING/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2247,6 +2298,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#min_cluster_size_join" class="md-nav__link">
+    <span class="md-ellipsis">
+      min_cluster_size_join
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#circle_overlap_ratio" class="md-nav__link">
     <span class="md-ellipsis">
       circle_overlap_ratio
@@ -2290,9 +2350,10 @@
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">min_size_scale_factor</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">min_size_lower_cutoff</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">cluster_selection_epsilon</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">circle_overlap_ratio</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">outlier_scale_factor</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="p">)</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">min_cluster_size_join</span><span class="o">=</span><span class="mf">15.0</span><span class="p">,</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a>    <span class="n">circle_overlap_ratio</span><span class="o">=</span><span class="mf">0.25</span><span class="p">,</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a>    <span class="n">outlier_scale_factor</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a><span class="p">)</span>
 </span></code></pre></div>
 <p>A break down of each parameter:</p>
 <h2 id="min_cloud_size">min_cloud_size</h2>
@@ -2305,6 +2366,8 @@
 <p>As discussed in the above <code>minimum_size_scale_factor</code>, we need to scale the <code>min_cluster_size</code> parameter to the size of the point cloud. However, there must be a lower limit (i.e. you can't have a minimum cluster size of 0). This parameter sets the lower limit; that is any <code>min_cluster_size</code> calculated using the scale factor that is smaller than this cutoff is replaced with the cutoff value. As an example, if the cutoff is set to 10 and the calculated value is 50, the calculated value would be used. However, if the calculated value is 5, the cutoff would be used instead.</p>
 <h2 id="cluster_selection_epsilon">cluster_selection_epsilon</h2>
 <p>A re-exposure of the <code>cluster_selection_epsilon</code> paramter of <a href="https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html#sklearn.cluster.HDBSCAN">scikit-learn's HDBSCAN</a>. This parameter will merge clusters that are less than epsilon apart. Note that this epsilon must be on the scale of the scaled data (i.e. it is not in normal units). The impact of this parameter is large, and small changes to this value can produce dramatically different results. Larger values will bias the clustering to assume the point cloud is onesingle cluster (or all noise), while smaller values will cause the algorithm to revert to the default result of HDBSCAN. See the original <a href="https://hdbscan.readthedocs.io/en/latest/parameter_selection.html#">HDBSCAN docs</a> for details on why this parameter is important and how it can impact the data.</p>
+<h2 id="min_cluster_size_join">min_cluster_size_join</h2>
+<p>The minimum size of a cluster for it to be considered in the joining step of the clustering. After HDBSCAN has made the initial clusters we attempt to combine any clusters which have overlapping circles in the 2-D projection (see <code>circle_overlap_ratio</code>). However, many times, small pockets of noise will be clustered and often sit within the larger trajectory. To avoid these being joined we require a cluster to have a minimum size.</p>
 <h2 id="circle_overlap_ratio">circle_overlap_ratio</h2>
 <p>The minimum amount of overlap between circles fit to two clusters for the clusters to be joined together into a single cluster. HDBSCAN often fractures trajectories into multiple clusters as the point density changes due to the pad size, gaps, etc. These fragments are grouped together based on how much circles fit on their 2-D projections (X-Y) overlap.</p>
 <h2 id="outlier_scale_factor">outlier_scale_factor</h2>

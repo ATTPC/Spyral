@@ -425,24 +425,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#is_default" class="md-nav__link">
-    <span class="md-ellipsis">
-      is_default
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#is_default_legacy" class="md-nav__link">
-    <span class="md-ellipsis">
-      is_default_legacy
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#pad_geometry_path" class="md-nav__link">
     <span class="md-ellipsis">
       pad_geometry_path
@@ -1781,6 +1763,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../api/phases/interp_leastsq_solver_phase/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    interp_leastsq_solver_phase
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../api/phases/schema/" class="md-nav__link">
         
   
@@ -1892,6 +1895,27 @@
   
   <span class="md-ellipsis">
     solver_interp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/solvers/solver_interp_leastsq/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    solver_interp_leastsq
   </span>
   
 
@@ -2133,7 +2157,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../for_devs/" class="md-nav__link">
+      <a href="../../../CONTRIBUTING/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2193,24 +2217,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#is_default" class="md-nav__link">
-    <span class="md-ellipsis">
-      is_default
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#is_default_legacy" class="md-nav__link">
-    <span class="md-ellipsis">
-      is_default_legacy
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#pad_geometry_path" class="md-nav__link">
     <span class="md-ellipsis">
       pad_geometry_path
@@ -2267,21 +2273,15 @@
 <h1 id="pad-plane-parameters">Pad Plane Parameters</h1>
 <p>The AT-TPC Pad Plane mapping of electronics channel to physical pad is controlled by several map files that are passed as the following data structure:</p>
 <div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">pad_params</span> <span class="o">=</span> <span class="n">PadParameters</span><span class="p">(</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">is_default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">is_default_legacy</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">pad_geometry_path</span><span class="o">=</span><span class="n">INVALID_PATH</span><span class="p">,</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">pad_time_path</span><span class="o">=</span><span class="n">INVALID_PATH</span><span class="p">,</span>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>    <span class="n">pad_electronics_path</span><span class="o">=</span><span class="n">INVALID_PATH</span><span class="p">,</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>    <span class="n">pad_scale_path</span><span class="o">=</span><span class="n">INVALID_PATH</span><span class="p">,</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="p">)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>    <span class="n">pad_geometry_path</span><span class="o">=</span><span class="n">DEFAULT_MAP</span><span class="p">,</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>    <span class="n">pad_time_path</span><span class="o">=</span><span class="n">DEFAULT_MAP</span><span class="p">,</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>    <span class="n">pad_electronics_path</span><span class="o">=</span><span class="n">DEFAULT_MAP</span><span class="p">,</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>    <span class="n">pad_scale_path</span><span class="o">=</span><span class="n">DEFAULT_MAP</span><span class="p">,</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="p">)</span>
 </span></code></pre></div>
-<p>Below we will define each individual parameter.</p>
-<h2 id="is_default">is_default</h2>
-<p><code>is_default</code> is a switch which indicates if the default pad maps, which are shipped with Spyral, should be used. The default maps should be up to date with the latest Spyral experiments; as such older data may not be compatible with the defaults. If this is set to <code>True</code> all other parameters in the group are ignored.</p>
-<h2 id="is_default_legacy">is_default_legacy</h2>
-<p>A switch which indicates if the default legacy (pre-FRIBDAQ), which are shipped with Spyral, pad maps should be used. These maps are contemporary with the e20009 experiment. If this is set to <code>True</code> all other parameters in the group are ignored.</p>
+<p>Below we will define each individual parameter. If a path is set to <code>DEFAULT_MAP</code> the current AT-TPC default pad mapping is used for that specific path. If a path is set to <code>DEFAULT_LEGACY_MAP</code> the default pre-FRIBDAQ AT-TPC mapping is used for that specific path. In this way some paths may be set to defaults while others can be customized.</p>
 <h2 id="pad_geometry_path">pad_geometry_path</h2>
-<p>This is the path to a <code>.csv</code> file containing the mapping of pad number to X-Y coordinate location in millimeters.</p>
+<p>This is the path to a <code>.csv</code> file containing the mapping of pad number to X-Y coordinate location in millimeters. </p>
 <h2 id="pad_time_path">pad_time_path</h2>
 <p>This is the path to a <code>.csv</code> file containing the mapping of pad number to a time offset. This corrects for small jitters in the timestamp on a channel by channel basis. This is parameter is currently under investigation for it's impact.</p>
 <h2 id="pad_electronics_path">pad_electronics_path</h2>

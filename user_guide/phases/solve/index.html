@@ -705,6 +705,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#choice-of-fitting-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      Choice of Fitting Method
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#final-thoughts" class="md-nav__link">
     <span class="md-ellipsis">
       Final Thoughts
@@ -1763,6 +1772,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../api/phases/interp_leastsq_solver_phase/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    interp_leastsq_solver_phase
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../api/phases/schema/" class="md-nav__link">
         
   
@@ -1874,6 +1904,27 @@
   
   <span class="md-ellipsis">
     solver_interp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/solvers/solver_interp_leastsq/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    solver_interp_leastsq
   </span>
   
 
@@ -2115,7 +2166,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../for_devs/" class="md-nav__link">
+      <a href="../../../CONTRIBUTING/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2202,6 +2253,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#choice-of-fitting-method" class="md-nav__link">
+    <span class="md-ellipsis">
+      Choice of Fitting Method
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#final-thoughts" class="md-nav__link">
     <span class="md-ellipsis">
       Final Thoughts
@@ -2252,20 +2312,29 @@
 <li>cluster_index: the cluster index associated with this data</li>
 <li>cluster_label: the cluster label associated with this data</li>
 <li>vertex_x: the fitted vertex x-coordinate</li>
-<li>sigma_vx: the error on the fitted vertex x-coordinate (unused) in meters</li>
+<li>sigma_vx: the error on the fitted vertex x-coordinate in meters</li>
 <li>vertex_y: the fitted vertex y-coordinate in meters</li>
-<li>sigma_vy: the error on the fitted vertex y-coordinate (unused) in meters</li>
+<li>sigma_vy: the error on the fitted vertex y-coordinate in meters</li>
 <li>vertex_z: the fitted vertex z-coordinate in meters</li>
-<li>sigma_vz: the error on the fitted vertex z-coordinate (unused) in meters</li>
+<li>sigma_vz: the error on the fitted vertex z-coordinate in meters</li>
 <li>brho: the fitted (total) B&rho; in Tm</li>
-<li>sigma_brho: the error on the fitted total B&rho; in Tm (unused)</li>
+<li>sigma_brho: the error on the fitted total B&rho; in Tm</li>
+<li>ke: the kinetic energy of the particle in MeV calculated from the fitted B&rho; and the known mass</li>
+<li>sigma_ke: the error on kinetic energy of the particle in MeV calculated from the fitted B&rho; and its uncertainty</li>
 <li>polar: the fitted polar angle of the trajectory in radians</li>
-<li>sigma_polar: the error on the fitted polar angle of the trajectory in radians (unused)</li>
+<li>sigma_polar: the error on the fitted polar angle of the trajectory in radians</li>
 <li>azimuthal: the resulting azimuthal angle (not fitted) in radians. This calculated from the best fit vertex position.</li>
-<li>sigma_azimuthal: error on the resulting azimuthal angle (not fitted) in radians (unused)</li>
+<li>sigma_azimuthal: error on the resulting azimuthal angle (not fitted) in radians</li>
 <li>redchisq: the reduced &chi;<sup>2</sup> of the fit (error)</li>
 </ul>
-<p>The error values are unused because the L-BFGS-B optimization scheme does not generally report parameter uncertainties.</p>
+<h2 id="choice-of-fitting-method">Choice of Fitting Method</h2>
+<p>Spyral has two solving phases available: <code>InterpSolverPhase</code> and <code>InterpLeastSqSolverPhase</code>. <code>InterpSolverPhase</code> uses the L-BFGS-B optimization routine to determine the best trajectory from the <em>mean</em> error between the points on the ODE solution and the data. <code>InterpLeastSqSolverPhase</code> uses non-linear least-squares with the Levenberg-Marquardt algorithm to optimize based on the residuals. In both cases error bars based on the size of the pads in the pad plane and the width of a time bucket are included with the data (in L-BFGS-B these errors are used to form an error-weighted average). The key difference is that <code>InterpSolverPhase</code> cannot estimate uncertainties on the fit parameters while <code>InterpLeastSqSolverPhase</code> can. However, this is somewhat more nuanced in practice.</p>
+<ul>
+<li>Non-linear least-squares is very sensitive to outliers. Noisy data will often cause this method to fail dramatically. L-BFGS-B is less sensitive to outliers in general, and will typically still arrive at a sane value even in the presence of noisy data. <em>However</em>, because L-BFGS-B doesn't report parameter uncertainties, it is hard to quantify how <em>well</em> it performs on this data and testing has shown that <em>sane</em> does not always mean <em>good</em>.</li>
+<li>Non-linear least-squares makes many approximations about the underlying error distributions of the data. It is not clear how well these approximations apply to AT-TPC data.</li>
+<li>In general, when testing least-squares, it was observed to determine at the same conclusion as our L-BFGS-B solution <em>except</em> in the case of low-energy data near 90 degrees in the lab polar angle. This is data where we have always suspected we perform poorly, but if this region is critical for your analysis, it may be best to use L-BFGS-B, which is less rejective.</li>
+</ul>
+<p>In general, the offical Spyral recommendation is to use <code>InterpLeastSqSolverPhase</code>; reporting errors is a critical part of understanding a fit to data, and provides a more robust understanding of the analysis performance. But given the wide range of datasets and configurations of the AT-TPC, we can not say that this is the correct method for <em>every</em> dataset.</p>
 <h2 id="final-thoughts">Final Thoughts</h2>
 <p>Generating a good interpolation mesh is key. If the mesh is too coarse the results will become equally coarse.</p>
 <p>To make performance reasonable <a href="../../numba/">Numba</a> is used to just-in-time compile the interpolation scheme and objective function. Checkout that section of the docs for more details.</p>

@@ -1763,6 +1763,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../api/phases/interp_leastsq_solver_phase/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    interp_leastsq_solver_phase
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../api/phases/schema/" class="md-nav__link">
         
   
@@ -1874,6 +1895,27 @@
   
   <span class="md-ellipsis">
     solver_interp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/solvers/solver_interp_leastsq/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    solver_interp_leastsq
   </span>
   
 
@@ -2115,7 +2157,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../for_devs/" class="md-nav__link">
+      <a href="../../../CONTRIBUTING/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2276,6 +2318,7 @@
 <li>azimuthal: the estimated trajectory azimuthal angle (radians)</li>
 <li>brho: the estimated trajectory total B&rho; (Tm)</li>
 <li>dEdx: the estimated trajectory stopping power (average energy loss) (arb.)</li>
+<li>log_dEdx: the natural log of dEdx</li>
 <li>dE: the total integrated charge sum over the length of the first arc (arb.)</li>
 <li>arclength: the length of the first arc (mm)</li>
 <li>direction: indicates the detected direction of the trajectory (forward or backward)</li>
@@ -2296,7 +2339,23 @@
 </span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="w">    </span><span class="p">]</span>
 </span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="p">}</span>
 </span></code></pre></div>
-<p>Here the gate is specified to be for protons. A particle ID gate is <em>required</em> to move on to the final phase.</p>
+<p>Here the gate is specified to be for protons. A particle ID gate is <em>required</em> to move on to the final phase. Additionally, you can specify the xaxis and yaxis of the cut as</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="p">{</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my_pid&quot;</span><span class="p">,</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="w">    </span><span class="nt">&quot;Z&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="w">    </span><span class="nt">&quot;A&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="nt">&quot;xaxis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dEdx&quot;</span><span class="p">,</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="w">    </span><span class="nt">&quot;yaxis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;brho&quot;</span><span class="p">,</span>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="nt">&quot;vertices&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">        </span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">],</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">        </span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">],</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">        </span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">],</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="w">        </span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">],</span>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">        </span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">]</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">    </span><span class="p">]</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>This allows you to specify which columns of the estimation dataframe are used to make the cut. The names of the axes should match <em>exactly</em> with the names of columns in the data frame. Note that you do not need to specify axes; if not specified the default (dEdx vs. brho) will be used.</p>
 <h2 id="final-thoughts">Final Thoughts</h2>
 <p>Estimating, as the name implies, is the least precise of all of the phases. It doesn't have as many parameters as the others because it's not clear at the time of writing which parts change significantly from experiment to experiment. Feedback on this section is welcome; it remains one of the areas where improvement is most desired.</p>
 

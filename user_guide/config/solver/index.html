@@ -1826,6 +1826,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../api/phases/interp_leastsq_solver_phase/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    interp_leastsq_solver_phase
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../api/phases/schema/" class="md-nav__link">
         
   
@@ -1937,6 +1958,27 @@
   
   <span class="md-ellipsis">
     solver_interp
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/solvers/solver_interp_leastsq/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    solver_interp_leastsq
   </span>
   
 
@@ -2178,7 +2220,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../for_devs/" class="md-nav__link">
+      <a href="../../../CONTRIBUTING/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2398,7 +2440,24 @@
 </span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a><span class="w">    </span><span class="p">]</span>
 </span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="p">}</span>
 </span></code></pre></div>
-<p><code>name</code> is the name of the gate, <code>Z</code> is the atomic number of the particle in the gate, <code>A</code> is the mass number, and <code>verticies</code> is a list of points which form a closed polygon in B&rho;-dEdx. The above data describes protons in a very silly box. Note that the first and last point in verticies should be the same. Typically gates are made using the particle ID notebook.</p>
+<p><code>name</code> is the name of the gate, <code>Z</code> is the atomic number of the particle in the gate, <code>A</code> is the mass number, and <code>verticies</code> is a list of points which form a closed polygon in B&rho;-dEdx. The above data describes protons in a very silly box. Note that the first and last point in verticies should be the same. Additionally, you can specify the xaxis and yaxis of the cut as</p>
+<div class="language-json highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="p">{</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;my_pid&quot;</span><span class="p">,</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="w">    </span><span class="nt">&quot;Z&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="w">    </span><span class="nt">&quot;A&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="w">    </span><span class="nt">&quot;xaxis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dEdx&quot;</span><span class="p">,</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="w">    </span><span class="nt">&quot;yaxis&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;brho&quot;</span><span class="p">,</span>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="w">    </span><span class="nt">&quot;vertices&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="w">        </span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">],</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a><span class="w">        </span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">],</span>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="w">        </span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">],</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="w">        </span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">1.0</span><span class="p">],</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a><span class="w">        </span><span class="p">[</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">]</span>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="w">    </span><span class="p">]</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="p">}</span>
+</span></code></pre></div>
+<p>This allows you to specify which columns of the estimation dataframe are used to make the cut. The names of the axes should match <em>exactly</em> with the names of columns in the data frame (see <a href="../../phases/estimate/">here</a> for a list of column names). Note that you do not need to specify axes; if not specified the default (dEdx vs. brho) will be used.</p>
+<p>Typically gates are made using the <a href="https://github.com/ATTPC/spyral_notebooks">particle ID notebook</a>.</p>
 <h2 id="ic_min_val">ic_min_val</h2>
 <p>The minimum value for the ion chamber amplitude. Used to make a gate on beam species.</p>
 <h2 id="ic_max_val">ic_max_val</h2>
