@@ -16,6 +16,10 @@ See the [User Guide](user_guide/getting_started.md)
 
 See [Configuration](user_guide/config/about.md)
 
+## Which solver should I use?
+
+See [Solving](user_guide/phases/solve.md)
+
 ## I have some old data I want to analyze, can I use Spyral?
 
 In general, yes. Spyral has a legacy mode that supports analyzing data taken before AT-TPC's data acquisition was split (pre-FRIBDAQ): see [here](user_guide/phases/point_cloud.md) for more details. However, at this time, it only supports analyzing the ion chamber data out of CoBo 10. Any other auxilary signals will have to be extended or requested.

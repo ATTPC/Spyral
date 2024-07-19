@@ -25,11 +25,13 @@ def distances(track: np.ndarray, data: np.ndarray, weights: np.ndarray) -> np.nd
         The track solution
     data: numpy.ndarray
         The data to compare to
+    weights: numpy.ndarray
+        The weights due to data uncertainty (1/sigma)
 
     Returns
     -------
     np.ndarray
-        The minimum error for each data point
+        The minimum error for each data point weighted by uncertainty
     """
     assert track.shape[1] == 3
     assert data.shape[1] == 3
@@ -98,8 +100,10 @@ def objective_function(
     ----------
     fit_params: lmfit.Parameters
         the set of lmfit Parameters
-    x: ndarray
+    x: numpy.ndarray
         the data to be fit (x,y,z) coordinates in meters
+    weights: numpy.ndarray
+        The assoicated weights due uncertainties of the data (1/sigma)
     interpolator: TrackInterpolator
         the interpolation scheme to be used
     ejectile: spyral_utils.nuclear.NucleusData
@@ -107,8 +111,8 @@ def objective_function(
 
     Returns
     -------
-    float
-        the error between the estimate and the data
+    numpy.ndarray
+        the residuals weighted by uncertainty
     """
     trajectory = interpolate_trajectory(fit_params, interpolator, ejectile)
     if trajectory is None:
@@ -245,9 +249,9 @@ def fit_model_interp(
         det_params.detector_length
         / float(det_params.window_time_bucket - det_params.micromegas_time_bucket)
         * 0.001
-    )
+    ) * 0.5
     # uncertainty due to pad size, treat as box
-    xy_error = cluster.data[:, 4] * BIG_PAD_HEIGHT
+    xy_error = cluster.data[:, 4] * BIG_PAD_HEIGHT * 0.5
     # total positional error per point
     total_error = np.sqrt(2.0 * (xy_error**2.0) + z_error**2.0)
     weights = 1.0 / total_error
@@ -306,9 +310,9 @@ def solve_physics_interp(
         det_params.detector_length
         / float(det_params.window_time_bucket - det_params.micromegas_time_bucket)
         * 0.001
-    )
+    ) * 0.5
     # uncertainty due to pad size, treat as box
-    xy_error = cluster.data[:, 4] * BIG_PAD_HEIGHT
+    xy_error = cluster.data[:, 4] * BIG_PAD_HEIGHT * 0.5
     # total positional variance per point
     total_error = np.sqrt(2.0 * (xy_error**2.0) + z_error**2.0)
     weights = 1.0 / total_error
@@ -322,7 +326,9 @@ def solve_physics_interp(
         method="leastsq",
     )
 
-    p = best_fit.params["brho"].value * QBRHO_2_P * ejectile.Z  # type: ignore
+    scale_factor = QBRHO_2_P * float(ejectile.Z)
+    brho: float = best_fit.params["brho"].value  # type: ignore
+    p = brho * scale_factor  # type: ignore
     ke = np.sqrt(p**2.0 + ejectile.mass**2.0) - ejectile.mass
 
     results["event"].append(cluster.event)
@@ -343,12 +349,16 @@ def solve_physics_interp(
         results["sigma_vy"].append(best_fit.uvars["vertex_y"].std_dev)  # type: ignore
         results["sigma_vz"].append(best_fit.uvars["vertex_z"].std_dev)  # type: ignore
         results["sigma_brho"].append(best_fit.uvars["brho"].std_dev)  # type: ignore
-        ke_std_dev = (
-            ke
+
+        # sigma_f = sqrt((df/dx)^2*sigma_x^2 + ...)
+        ke_std_dev = np.fabs(
+            scale_factor**2.0
+            * brho
+            / np.sqrt((brho * scale_factor) ** 2.0 + ejectile.mass**2.0)
             * best_fit.uvars["brho"].std_dev  # type: ignore
-            / best_fit.uvars["brho"].nominal_value  # type:ignore
         )
         results["sigma_ke"].append(ke_std_dev)
+
         results["sigma_polar"].append(best_fit.uvars["polar"].std_dev)  # type: ignore
         results["sigma_azimuthal"].append(best_fit.uvars["azimuthal"].std_dev)  # type: ignore
     else:

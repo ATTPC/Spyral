@@ -146,6 +146,8 @@ class ClusterParameters:
     cluster_selection_epsilon: float
         cluster_selection_epsilon parameter in scikit-learn's HDBSCAN algorithm. Clusters less than this distance apart
         are merged in the hierarchy
+    min_cluster_size_join: int
+        The minimum size of a cluster for it to be included in the joining algorithm
     circle_overlap_ratio: float
         minimum overlap ratio between two circles in the cluster joining algorithm
     outlier_scale_factor: float

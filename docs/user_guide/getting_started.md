@@ -9,7 +9,7 @@ from spyral import (
     PointcloudPhase,
     ClusterPhase,
     EstimationPhase,
-    InterpSolverPhase,
+    InterpLeastSqSolverPhase,
 )
 from spyral import (
     PadParameters,
@@ -77,7 +77,8 @@ cluster_params = ClusterParameters(
     min_size_scale_factor=0.05,
     min_size_lower_cutoff=10,
     cluster_selection_epsilon=10.0,
-    circle_overlap_ratio=0.5,
+    min_cluster_size_join=15,
+    circle_overlap_ratio=0.25,
     outlier_scale_factor=0.05,
 )
 
@@ -109,7 +110,7 @@ pipe = Pipeline(
         ),
         ClusterPhase(cluster_params, det_params),
         EstimationPhase(estimate_params, det_params),
-        InterpSolverPhase(solver_params, det_params),
+        InterpLeastSqSolverPhase(solver_params, det_params),
     ],
     [True, True, True, True],
     workspace_path,
@@ -183,7 +184,7 @@ pipe = Pipeline(
         ),
         ClusterPhase(cluster_params, det_params),
         EstimationPhase(estimate_params, det_params),
-        InterpSolverPhase(solver_params, det_params),
+        InterpLeastSqSolverPhase(solver_params, det_params),
     ],
     [True, True, True, True],
     workspace_path,

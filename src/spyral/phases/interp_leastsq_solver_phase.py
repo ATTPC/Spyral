@@ -88,7 +88,7 @@ class InterpLeastSqSolverPhase(PhaseLike):
 
     def __init__(self, solver_params: SolverParameters, det_params: DetectorParameters):
         super().__init__(
-            "InterpSolver",
+            "InterpLeastSqSolver",
             incoming_schema=ESTIMATE_SCHEMA,
             outgoing_schema=INTERP_SOLVER_SCHEMA,
         )
@@ -270,7 +270,7 @@ class InterpLeastSqSolverPhase(PhaseLike):
         count = 0
 
         msg = StatusMessage(
-            "Interp. Solver", 1, total, payload.run_number
+            "Interp. LS Solver", 1, total, payload.run_number
         )  # We always increment by 1
 
         # Result storage

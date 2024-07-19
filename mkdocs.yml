@@ -66,11 +66,13 @@ nav:
       - cluster_phase: api/phases/cluster_phase.md
       - estimation_phase: api/phases/estimation_phase.md
       - interp_solver_phase: api/phases/interp_solver_phase.md
+      - interp_leastsq_solver_phase: api/phases/interp_leastsq_solver_phase.md
       - schema: api/phases/schema.md
     - solvers:
       - About solvers: api/solvers/index.md
       - guess: api/solvers/guess.md
       - solver_interp: api/solvers/solver_interp.md
+      - solver_interp_leastsq: api/solvers/solver_interp_leastsq.md
     - trace:
       - About trace: api/trace/index.md
       - get_event: api/trace/get_event.md

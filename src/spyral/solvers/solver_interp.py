@@ -25,11 +25,13 @@ def distances(track: np.ndarray, data: np.ndarray, weights: np.ndarray) -> float
         The track solution
     data: numpy.ndarray
         The data to compare to
+    weights: numpy.ndarray
+        The weights due to data uncertainty (1/sigma)
 
     Returns
     -------
     float
-        The average distance (error)
+        The average distance (error) weighted by uncertainty
     """
     assert track.shape[1] == 3
     assert data.shape[1] == 3
@@ -100,6 +102,8 @@ def objective_function(
         the set of lmfit Parameters
     x: ndarray
         the data to be fit (x,y,z) coordinates in meters
+    weights: numpy.ndarray
+        The weights due to data uncertainty (1/sigma)
     interpolator: TrackInterpolator
         the interpolation scheme to be used
     ejectile: spyral_utils.nuclear.NucleusData
@@ -245,9 +249,9 @@ def fit_model_interp(
         det_params.detector_length
         / float(det_params.window_time_bucket - det_params.micromegas_time_bucket)
         * 0.001
-    )
+    ) * 0.5
     # uncertainty due to pad size, treat as box
-    xy_error = cluster.data[:, 4] * BIG_PAD_HEIGHT
+    xy_error = cluster.data[:, 4] * BIG_PAD_HEIGHT * 0.5
     # total positional variance per point
     total_var = 2.0 * (xy_error**2.0) + z_error**2.0
     weights = 1.0 / total_var
@@ -306,9 +310,9 @@ def solve_physics_interp(
         det_params.detector_length
         / float(det_params.window_time_bucket - det_params.micromegas_time_bucket)
         * 0.001
-    )
+    ) * 0.5
     # uncertainty due to pad size, treat as box
-    xy_error = cluster.data[:, 4] * BIG_PAD_HEIGHT
+    xy_error = cluster.data[:, 4] * BIG_PAD_HEIGHT * 0.5
     # total positional variance per point
     total_var = 2.0 * (xy_error**2.0) + z_error**2.0
     weights = 1.0 / total_var
@@ -338,7 +342,7 @@ def solve_physics_interp(
     results["azimuthal"].append(best_fit.params["azimuthal"].value)  # type: ignore
     results["redchisq"].append(best_fit.redchi)
 
-    # Right now we can't quantify uncertainties
+    # This method cannot quantify uncertainties
     results["sigma_vx"].append(1.0e6)
     results["sigma_vy"].append(1.0e6)
     results["sigma_vz"].append(1.0e6)
