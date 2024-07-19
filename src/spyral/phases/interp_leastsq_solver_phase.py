@@ -270,7 +270,7 @@ class InterpLeastSqSolverPhase(PhaseLike):
         count = 0
 
         msg = StatusMessage(
-            "Interp. Solver", 1, total, payload.run_number
+            "Interp. LS Solver", 1, total, payload.run_number
         )  # We always increment by 1
 
         # Result storage
