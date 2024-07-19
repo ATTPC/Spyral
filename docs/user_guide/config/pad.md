@@ -4,28 +4,18 @@ The AT-TPC Pad Plane mapping of electronics channel to physical pad is controlle
 
 ```python
 pad_params = PadParameters(
-    is_default=True,
-    is_default_legacy=False,
-    pad_geometry_path=INVALID_PATH,
-    pad_time_path=INVALID_PATH,
-    pad_electronics_path=INVALID_PATH,
-    pad_scale_path=INVALID_PATH,
+    pad_geometry_path=DEFAULT_MAP,
+    pad_time_path=DEFAULT_MAP,
+    pad_electronics_path=DEFAULT_MAP,
+    pad_scale_path=DEFAULT_MAP,
 )
 ```
 
-Below we will define each individual parameter.
-
-## is_default
-
-`is_default` is a switch which indicates if the default pad maps, which are shipped with Spyral, should be used. The default maps should be up to date with the latest Spyral experiments; as such older data may not be compatible with the defaults. If this is set to `True` all other parameters in the group are ignored.
-
-## is_default_legacy
-
-A switch which indicates if the default legacy (pre-FRIBDAQ), which are shipped with Spyral, pad maps should be used. These maps are contemporary with the e20009 experiment. If this is set to `True` all other parameters in the group are ignored.
+Below we will define each individual parameter. If a path is set to `DEFAULT_MAP` the current AT-TPC default pad mapping is used for that specific path. If a path is set to `DEFAULT_LEGACY_MAP` the default pre-FRIBDAQ AT-TPC mapping is used for that specific path. In this way some paths may be set to defaults while others can be customized.
 
 ## pad_geometry_path
 
-This is the path to a `.csv` file containing the mapping of pad number to X-Y coordinate location in millimeters.
+This is the path to a `.csv` file containing the mapping of pad number to X-Y coordinate location in millimeters. 
 
 ## pad_time_path
 

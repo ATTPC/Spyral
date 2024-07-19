@@ -13,8 +13,8 @@ from numba import njit, prange
 
 
 @njit(fastmath=True, error_model="numpy", inline="always")
-def distances(track: np.ndarray, data: np.ndarray, weights: np.ndarray) -> float:
-    """Calculate the average distance (error) of a track solution to the data
+def distances(track: np.ndarray, data: np.ndarray, weights: np.ndarray) -> np.ndarray:
+    """Calculate the distance (error) of a track solution to the data
 
     Loop over the data and approximate the error as the closest distance of a point in the
     track solution to the data. JIT-ed for speed
@@ -30,15 +30,15 @@ def distances(track: np.ndarray, data: np.ndarray, weights: np.ndarray) -> float
 
     Returns
     -------
-    float
-        The average distance (error) weighted by uncertainty
+    np.ndarray
+        The minimum error for each data point weighted by uncertainty
     """
     assert track.shape[1] == 3
     assert data.shape[1] == 3
     assert len(data) == len(weights)
 
     dists = np.zeros((len(data), len(track)))
-    error = 0.0
+    error = np.zeros(len(data))
     for i in prange(len(data)):
         for j in prange(len(track)):
             dists[i, j] = np.sqrt(
@@ -46,8 +46,8 @@ def distances(track: np.ndarray, data: np.ndarray, weights: np.ndarray) -> float
                 + (track[j, 1] - data[i, 1]) ** 2.0
                 + (track[j, 2] - data[i, 2]) ** 2.0
             )
-        error += np.min(dists[i]) * weights[i]
-    return error / np.sum(weights)
+        error[i] = np.min(dists[i]) * weights[i]
+    return error
 
 
 def interpolate_trajectory(
@@ -93,17 +93,17 @@ def objective_function(
     weights: np.ndarray,
     interpolator: TrackInterpolator,
     ejectile: NucleusData,
-) -> float:
+) -> np.ndarray:
     """Function to be minimized. Returns errors for data compared to estimated track.
 
     Parameters
     ----------
     fit_params: lmfit.Parameters
         the set of lmfit Parameters
-    x: ndarray
+    x: numpy.ndarray
         the data to be fit (x,y,z) coordinates in meters
     weights: numpy.ndarray
-        The weights due to data uncertainty (1/sigma)
+        The assoicated weights due uncertainties of the data (1/sigma)
     interpolator: TrackInterpolator
         the interpolation scheme to be used
     ejectile: spyral_utils.nuclear.NucleusData
@@ -111,12 +111,12 @@ def objective_function(
 
     Returns
     -------
-    float
-        the error between the estimate and the data
+    numpy.ndarray
+        the residuals weighted by uncertainty
     """
     trajectory = interpolate_trajectory(fit_params, interpolator, ejectile)
     if trajectory is None:
-        return 1.0e6
+        return np.full(len(x), 1.0e6)
     return distances(trajectory, x, weights)
 
 
@@ -158,7 +158,7 @@ def create_params(
     interp_max_polar = interpolator.polar_max * np.pi / 180.0
 
     uncertainty_position_z = 0.1
-    uncertainty_brho = 1.0
+    uncertainty_brho = 0.05
 
     min_brho = guess.brho - uncertainty_brho * 2.0
     if min_brho < interp_min_brho:
@@ -252,9 +252,9 @@ def fit_model_interp(
     ) * 0.5
     # uncertainty due to pad size, treat as box
     xy_error = cluster.data[:, 4] * BIG_PAD_HEIGHT * 0.5
-    # total positional variance per point
-    total_var = 2.0 * (xy_error**2.0) + z_error**2.0
-    weights = 1.0 / total_var
+    # total positional error per point
+    total_error = np.sqrt(2.0 * (xy_error**2.0) + z_error**2.0)
+    weights = 1.0 / total_error
 
     fit_params = create_params(guess, ejectile, interpolator, det_params)
 
@@ -262,7 +262,7 @@ def fit_model_interp(
         objective_function,
         fit_params,
         args=(traj_data, weights, interpolator, ejectile),
-        method="lbfgsb",
+        method="leastsq",
     )
     print(fit_report(result))
 
@@ -314,8 +314,8 @@ def solve_physics_interp(
     # uncertainty due to pad size, treat as box
     xy_error = cluster.data[:, 4] * BIG_PAD_HEIGHT * 0.5
     # total positional variance per point
-    total_var = 2.0 * (xy_error**2.0) + z_error**2.0
-    weights = 1.0 / total_var
+    total_error = np.sqrt(2.0 * (xy_error**2.0) + z_error**2.0)
+    weights = 1.0 / total_error
 
     fit_params = create_params(guess, ejectile, interpolator, det_params)
 
@@ -323,10 +323,12 @@ def solve_physics_interp(
         objective_function,
         fit_params,
         args=(traj_data, weights, interpolator, ejectile),
-        method="lbfgsb",
+        method="leastsq",
     )
 
-    p = best_fit.params["brho"].value * QBRHO_2_P * ejectile.Z  # type: ignore
+    scale_factor = QBRHO_2_P * float(ejectile.Z)
+    brho: float = best_fit.params["brho"].value  # type: ignore
+    p = brho * scale_factor  # type: ignore
     ke = np.sqrt(p**2.0 + ejectile.mass**2.0) - ejectile.mass
 
     results["event"].append(cluster.event)
@@ -342,11 +344,28 @@ def solve_physics_interp(
     results["azimuthal"].append(best_fit.params["azimuthal"].value)  # type: ignore
     results["redchisq"].append(best_fit.redchi)
 
-    # This method cannot quantify uncertainties
-    results["sigma_vx"].append(1.0e6)
-    results["sigma_vy"].append(1.0e6)
-    results["sigma_vz"].append(1.0e6)
-    results["sigma_brho"].append(1.0e6)
-    results["sigma_ke"].append(1.0e6)
-    results["sigma_polar"].append(1.0e6)
-    results["sigma_azimuthal"].append(1.0e6)
+    if hasattr(best_fit, "uvars"):
+        results["sigma_vx"].append(best_fit.uvars["vertex_x"].std_dev)  # type: ignore
+        results["sigma_vy"].append(best_fit.uvars["vertex_y"].std_dev)  # type: ignore
+        results["sigma_vz"].append(best_fit.uvars["vertex_z"].std_dev)  # type: ignore
+        results["sigma_brho"].append(best_fit.uvars["brho"].std_dev)  # type: ignore
+
+        # sigma_f = sqrt((df/dx)^2*sigma_x^2 + ...)
+        ke_std_dev = np.fabs(
+            scale_factor**2.0
+            * brho
+            / np.sqrt((brho * scale_factor) ** 2.0 + ejectile.mass**2.0)
+            * best_fit.uvars["brho"].std_dev  # type: ignore
+        )
+        results["sigma_ke"].append(ke_std_dev)
+
+        results["sigma_polar"].append(best_fit.uvars["polar"].std_dev)  # type: ignore
+        results["sigma_azimuthal"].append(best_fit.uvars["azimuthal"].std_dev)  # type: ignore
+    else:
+        results["sigma_vx"].append(1.0e6)
+        results["sigma_vy"].append(1.0e6)
+        results["sigma_vz"].append(1.0e6)
+        results["sigma_brho"].append(1.0e6)
+        results["sigma_ke"].append(1.0e6)
+        results["sigma_polar"].append(1.0e6)
+        results["sigma_azimuthal"].append(1.0e6)

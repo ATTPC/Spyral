@@ -14,7 +14,7 @@ from ..interpolate.track_interpolator import (
     create_interpolator_from_array,
 )
 from ..solvers.guess import Guess
-from ..solvers.solver_interp import solve_physics_interp
+from ..solvers.solver_interp_leastsq import solve_physics_interp
 from .schema import ESTIMATE_SCHEMA, INTERP_SOLVER_SCHEMA
 
 from spyral_utils.nuclear.target import load_target, GasTarget
@@ -33,7 +33,7 @@ DEFAULT_PID_XAXIS = "dEdx"
 DEFAULT_PID_YAXIS = "brho"
 
 
-class InterpSolverError(Exception):
+class InterpLeastSqSolverError(Exception):
     pass
 
 
@@ -58,7 +58,7 @@ def form_physics_file_name(run_number: int, particle: ParticleID) -> str:
     return f"{form_run_string(run_number)}_{particle.nucleus.isotopic_symbol}.parquet"
 
 
-class InterpSolverPhase(PhaseLike):
+class InterpLeastSqSolverPhase(PhaseLike):
     """The default Spyral solver phase, inheriting from PhaseLike
 
     The goal of the solver phase is to get exact (or as exact as possible) values
@@ -88,7 +88,7 @@ class InterpSolverPhase(PhaseLike):
 
     def __init__(self, solver_params: SolverParameters, det_params: DetectorParameters):
         super().__init__(
-            "InterpSolver",
+            "InterpLeastSqSolver",
             incoming_schema=ESTIMATE_SCHEMA,
             outgoing_schema=INTERP_SOLVER_SCHEMA,
         )
@@ -106,11 +106,11 @@ class InterpSolverPhase(PhaseLike):
             Path(self.solver_params.particle_id_filename), self.nuclear_map
         )
         if pid is None:
-            raise InterpSolverError(
+            raise InterpLeastSqSolverError(
                 "Could not create trajectory mesh, particle ID is not formatted correctly!"
             )
         if not isinstance(target, GasTarget):
-            raise InterpSolverError(
+            raise InterpLeastSqSolverError(
                 "Could not create trajectory mesh, target is not a GasTarget!"
             )
         mesh_params = MeshParameters(
@@ -270,7 +270,7 @@ class InterpSolverPhase(PhaseLike):
         count = 0
 
         msg = StatusMessage(
-            "Interp. Solver", 1, total, payload.run_number
+            "Interp. LS Solver", 1, total, payload.run_number
         )  # We always increment by 1
 
         # Result storage

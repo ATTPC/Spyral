@@ -6,7 +6,7 @@ See the [API docs](api/index.md) for API level documentation.
 
 ## How can I contriubte to Spyral?
 
-See [For Developers](for_devs.md)
+See [For Developers](CONTRIBUTING.md)
 
 ## I just installed Spyral and nothing is working
 
@@ -15,6 +15,10 @@ See the [User Guide](user_guide/getting_started.md)
 ## What do all these configuration parameters mean?
 
 See [Configuration](user_guide/config/about.md)
+
+## Which solver should I use?
+
+See [Solving](user_guide/phases/solve.md)
 
 ## I have some old data I want to analyze, can I use Spyral?
 

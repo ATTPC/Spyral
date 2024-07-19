@@ -26,7 +26,7 @@ There are several parameters to HDBSCAN that are exposed in the [configuration](
 
 ## Joining of Clusters
 
-The core method of joining is relatively simple: each initial cluster is fit with a circle in the X-Y plane. If the circles overlap significantly they are taken to be from the same trajectory. The required amount of overlap is a [configuration](../config/cluster.md) parameter to be tuned for each experiment. Joining is repeated until clusters can no longer be joined together. These clusters are then taken to represent the complete detected particle trajectories for that event.
+The core method of joining is relatively simple: each initial cluster is fit with a circle in the X-Y plane. If the circles overlap significantly they are taken to be from the same trajectory. The required amount of overlap is a [configuration](../config/cluster.md) parameter to be tuned for each experiment. Additionally, to avoid having noise clusters be joined, a minimum size parameter is used such that clusters below the minimum size requirement are not evaluated in the joining. Joining is repeated until clusters can no longer be joined together. These clusters are then taken to represent the complete detected particle trajectories for that event.
 
 ## Cleanup of the Final Clusters
 

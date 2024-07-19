@@ -38,7 +38,7 @@ from spyral import (
     PointcloudPhase,
     ClusterPhase,
     EstimationPhase,
-    InterpSolverPhase,
+    InterpLeastSqSolverPhase,
 )
 from spyral import (
     PadParameters,
@@ -48,7 +48,8 @@ from spyral import (
     ClusterParameters,
     SolverParameters,
     EstimateParameters,
-    INVALID_PATH,
+    DEFAULT_MAP,
+    DEFAULT_LEGACY_MAP,
 )
 
 from pathlib import Path
@@ -62,12 +63,10 @@ run_max = 94
 n_processes = 4
 
 pad_params = PadParameters(
-    is_default=True,
-    is_default_legacy=False,
-    pad_geometry_path=INVALID_PATH,
-    pad_time_path=INVALID_PATH,
-    pad_electronics_path=INVALID_PATH,
-    pad_scale_path=INVALID_PATH,
+    pad_geometry_path=DEFAULT_MAP,
+    pad_time_path=DEFAULT_MAP,
+    pad_electronics_path=DEFAULT_MAP,
+    pad_scale_path=DEFAULT_MAP,
 )
 
 get_params = GetParameters(
@@ -107,7 +106,8 @@ cluster_params = ClusterParameters(
     min_size_scale_factor=0.05,
     min_size_lower_cutoff=10,
     cluster_selection_epsilon=10.0,
-    circle_overlap_ratio=0.5,
+    min_cluster_size_join=15,
+    circle_overlap_ratio=0.25,
     outlier_scale_factor=0.05,
 )
 
@@ -139,7 +139,7 @@ pipe = Pipeline(
         ),
         ClusterPhase(cluster_params, det_params),
         EstimationPhase(estimate_params, det_params),
-        InterpSolverPhase(solver_params, det_params),
+        InterpLeastSqSolverPhase(solver_params, det_params),
     ],
     [True, True, True, True],
     workspace_path,
@@ -181,4 +181,4 @@ See the [spyral_notebooks](https://github.com/attpc/spyral_notebooks) repository
 
 ## Contributing
 
-Please see the [For Developers](https://attpc.github.io/Spyral/for_devs) section of our documentation.
+Please see the [For Developers](https://attpc.github.io/Spyral/CONTRIBUTING) section of our documentation.

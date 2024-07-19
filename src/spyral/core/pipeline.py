@@ -250,7 +250,7 @@ def start_pipeline(
     """
     # Setup
     # Note the manager exists outside the pipeline
-    shared_manager = SharedMemoryManager(("", 50000))
+    shared_manager = SharedMemoryManager()
     shared_manager.start()
 
     print(SPLASH)
@@ -295,6 +295,7 @@ def start_pipeline(
     processes: list[Process] = []
     pbars: list[tqdm] = []
     active_phases: list[str] = []
+    active_runs: list[int] = []
     seeds = seq.spawn(len(stacks))
 
     print("Running Spyral...")
@@ -319,6 +320,7 @@ def start_pipeline(
             tqdm(total=0, disable=disable_display, miniters=1, mininterval=0.001)
         )
         active_phases.append("Waiting")  # put something here
+        active_runs.append(-1)
         pbars[-1].set_description(f"| Process {s} | Waiting |")
 
     for process in processes:
@@ -343,10 +345,11 @@ def start_pipeline(
                 continue
 
             msg: StatusMessage = q.get()
-            if msg.phase != active_phases[idx]:
+            if msg.phase != active_phases[idx] or msg.run != active_runs[idx]:
                 pbars[idx].reset(total=msg.total)
                 pbars[idx].set_description(f"| Process {idx} | {msg}")
                 active_phases[idx] = msg.phase
+                active_runs[idx] = msg.run
             pbars[idx].update(msg.increment)
 
     # Shutdown

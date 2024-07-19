@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-INVALID_PATH: Path = Path("IllegalPath")
+DEFAULT_MAP: Path = Path("DefaultPath")
+DEFAULT_LEGACY_MAP: Path = Path("DefaultLegacyPath")
 
 
 @dataclass
@@ -11,17 +12,19 @@ class PadParameters:
     Attributes
     ----------
     pad_geometry_path: Path
-        Path to the csv file containing the pad geometry
+        Path to the csv file containing the pad geometry. If set to DEFAULT_MAP
+        or DEFAULT_LEGACY_MAP uses the packaged maps.
     pad_gain_path: Path
-        Path to the csv file containing the relative pad gains
+        Path to the csv file containing the relative pad gains. If set to DEFAULT_MAP
+        or DEFAULT_LEGACY_MAP uses the packaged maps.
     pad_time_path: Path
-        Path to the csv file containing the pad time corrections
+        Path to the csv file containing the pad time corrections. If set to DEFAULT_MAP
+        or DEFAULT_LEGACY_MAP uses the packaged maps.
     pad_electronics_path: Path
-        Path to the csv file containing the pad electronics ids
+        Path to the csv file containing the pad electronics ids. If set to DEFAULT_MAP
+        or DEFAULT_LEGACY_MAP uses the packaged maps.
     """
 
-    is_default: bool
-    is_default_legacy: bool
     pad_geometry_path: Path
     pad_time_path: Path
     pad_electronics_path: Path
@@ -143,6 +146,8 @@ class ClusterParameters:
     cluster_selection_epsilon: float
         cluster_selection_epsilon parameter in scikit-learn's HDBSCAN algorithm. Clusters less than this distance apart
         are merged in the hierarchy
+    min_cluster_size_join: int
+        The minimum size of a cluster for it to be included in the joining algorithm
     circle_overlap_ratio: float
         minimum overlap ratio between two circles in the cluster joining algorithm
     outlier_scale_factor: float
@@ -155,6 +160,7 @@ class ClusterParameters:
     min_size_scale_factor: float
     min_size_lower_cutoff: int
     cluster_selection_epsilon: float
+    min_cluster_size_join: int
     circle_overlap_ratio: float
     outlier_scale_factor: float
 

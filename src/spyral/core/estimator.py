@@ -22,9 +22,9 @@ class Direction(Enum):
         Trajectory traveling in the negative z-direction (1)
     """
 
-    NONE: int = -1  # type: ignore
-    FORWARD: int = 0  # type: ignore
-    BACKWARD: int = 1  # type: ignore
+    NONE = -1  # type: ignore
+    FORWARD = 0  # type: ignore
+    BACKWARD = 1  # type: ignore
 
 
 def estimate_physics(
@@ -221,7 +221,8 @@ def estimate_physics_pass(
     # test_index = 10
     fit = linregress(cluster_data[:test_index, 2], rho_to_vertex[:test_index])
     vertex_rho = np.linalg.norm(vertex[:2])
-    vertex[2] = (vertex_rho - fit.intercept) / fit.slope  # type: ignore
+    # Since we fit to rho_to_vertex, just find intercept point
+    vertex[2] = -1.0 * fit.intercept / fit.slope  # type: ignore
     center[2] = vertex[2]
 
     # Toss tracks whose verticies are not close to the origin in x,y
@@ -294,6 +295,10 @@ def estimate_physics_pass(
     results["azimuthal"].append(azimuthal)
     results["brho"].append(brho)
     results["dEdx"].append(dEdx)
+    if dEdx != 0.0:
+        results["log_dEdx"].append(np.log(dEdx))
+    else:
+        results["log_dEdx"].append(0.0)
     results["dE"].append(charge_deposited)
     results["arclength"].append(arclength)
     results["direction"].append(direction.value)

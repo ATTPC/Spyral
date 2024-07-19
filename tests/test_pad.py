@@ -1,16 +1,14 @@
 from spyral.core.pad_map import PadMap
-from spyral.core.config import INVALID_PATH
+from spyral.core.config import DEFAULT_MAP, DEFAULT_LEGACY_MAP
 from spyral import PadParameters
 
 
 def test_default_pads():
     params = PadParameters(
-        is_default=True,
-        is_default_legacy=False,
-        pad_geometry_path=INVALID_PATH,
-        pad_time_path=INVALID_PATH,
-        pad_electronics_path=INVALID_PATH,
-        pad_scale_path=INVALID_PATH,
+        pad_geometry_path=DEFAULT_MAP,
+        pad_time_path=DEFAULT_MAP,
+        pad_electronics_path=DEFAULT_MAP,
+        pad_scale_path=DEFAULT_MAP,
     )
 
     default_pmap = PadMap(params)
@@ -32,12 +30,10 @@ def test_default_pads():
 
 def test_default_legacy_pads():
     params = PadParameters(
-        is_default=False,
-        is_default_legacy=True,
-        pad_geometry_path=INVALID_PATH,
-        pad_time_path=INVALID_PATH,
-        pad_electronics_path=INVALID_PATH,
-        pad_scale_path=INVALID_PATH,
+        pad_geometry_path=DEFAULT_LEGACY_MAP,
+        pad_time_path=DEFAULT_LEGACY_MAP,
+        pad_electronics_path=DEFAULT_LEGACY_MAP,
+        pad_scale_path=DEFAULT_LEGACY_MAP,
     )
 
     default_pmap = PadMap(params)

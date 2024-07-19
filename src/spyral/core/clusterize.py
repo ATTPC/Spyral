@@ -45,8 +45,9 @@ def join_clusters_step(
 ) -> tuple[list[LabeledCloud], np.ndarray]:
     """A single step of joining clusters
 
-    Combine clusters based on the center around which they orbit. This is necessary because often times tracks are
-    fractured or contain regions of varying density which causes clustering algorithms to separate them.
+    Combine clusters based on the amount of overlap between circles fit to their x-y (pad plane) projection.
+    This is necessary because often times tracks are fractured or contain regions of varying density
+    which causes clustering algorithms to separate them.
 
     Parameters
     ----------
@@ -89,7 +90,12 @@ def join_clusters_step(
     for idx, center in enumerate(centers):
         cluster = clusters[idx]
         # Reject noise
-        if cluster.label == NOISE_LABEL or np.isnan(center[0]) or center[2] < 10.0:
+        if (
+            cluster.label == NOISE_LABEL
+            or np.isnan(center[0])
+            or center[2] < 10.0
+            or len(cluster.point_cloud.cloud) < params.min_cluster_size_join
+        ):
             continue
         radius = center[2]
         area = np.pi * radius**2.0
@@ -103,6 +109,7 @@ def join_clusters_step(
                 or np.isnan(comp_center[0])
                 or center[2] < 10.0
                 or cidx == idx
+                or len(comp_cluster.point_cloud.cloud) < params.min_cluster_size_join
             ):
                 continue
 
@@ -191,6 +198,9 @@ def cleanup_clusters(
 ) -> tuple[list[Cluster], np.ndarray]:
     """Converts the LabeledClouds to Clusters
 
+    In this conversion, the LocalOutlierFactor algorithm is applied to the data
+    to remove any spurious points.
+
     Parameters
     ----------
     clusters: list[LabeledCloud]
@@ -226,11 +236,13 @@ def form_clusters(
 ) -> tuple[list[LabeledCloud], np.ndarray]:
     """Apply the HDBSCAN clustering algorithm to a PointCloud
 
-    Analyze a point cloud, and group the points into clusters which in principle should correspond to particle trajectories. This analysis contains several steps,
-    and revolves around the HDBSCAN clustering algorithm implemented in scikit-learn (see [their description](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html) for details)
-    First the point cloud is smoothed by averaging over nearest neighbors (defined by the smoothing_neighbor_distance parameter) to remove small deviations.
-    The data is then scaled where each coordinate (x,y,z,int) is centered to its mean and then scaled to its std deviation using the scikit-learn StandardScaler. This data is then
-    clustered by HDBSCAN and the clusters are returned.
+    Analyze a point cloud, and group the points into clusters which in principle should correspond to particle trajectories.
+    This analysis revolves around the HDBSCAN clustering algorithm implemented in scikit-learn
+    See [their description](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.HDBSCAN.html) for details. We trim
+    illegal (out-of-bounds) points from the point cloud, and cluster on spatial dimensions (x,y,z). Z is rescaled to match the X-Y
+    scale to avoid over-emphasizing separation in Z in the clustering algorithm. The minimum size of a cluster is scaled off of the
+    size of the original point cloud.
+
 
     Parameters
     ----------
@@ -247,7 +259,7 @@ def form_clusters(
         that point's label.
     """
 
-    # Smooth out the point cloud by averaging over neighboring points within a distance, droping any duplicate points
+    # Remove any points outside the legal detector bounds
     pc.remove_illegal_points()
     if len(pc.cloud) < params.min_cloud_size:
         return ([], np.empty(0))
@@ -257,17 +269,16 @@ def form_clusters(
     if min_size < params.min_size_lower_cutoff:
         min_size = params.min_size_lower_cutoff
 
-    # Use spatial dimensions and integrated charge
+    # Use spatial dimensions
     cluster_data = np.empty(shape=(len(pc.cloud), 3))
     cluster_data[:, :] = pc.cloud[:, :3]
 
-    # Unfiy feature ranges to their means and have standard variance (1)
+    # Rescale z to have same dims as x,y. Otherwise clusters too likely to break on z
     cluster_data[:, 2] *= 584.0 / 1000.0
 
     clusterizer = skcluster.HDBSCAN(  # type: ignore
         min_cluster_size=min_size,
         min_samples=params.min_points,
-        allow_single_cluster=True,
         cluster_selection_epsilon=params.cluster_selection_epsilon,
     )
 
@@ -276,11 +287,11 @@ def form_clusters(
 
     # Select out data into clusters
     clusters: list[LabeledCloud] = []
-    for idx, label in enumerate(labels):
+    for label in labels:
         clusters.append(LabeledCloud(label, PointCloud(), np.empty(0)))
         mask = fitted_clusters.labels_ == label
-        clusters[idx].point_cloud.cloud = pc.cloud[mask]
-        clusters[idx].point_cloud.event_number = pc.event_number
-        clusters[idx].clustered_data = cluster_data[mask]
-        clusters[idx].parent_indicies = np.flatnonzero(mask)
+        clusters[-1].point_cloud.cloud = pc.cloud[mask]
+        clusters[-1].point_cloud.event_number = pc.event_number
+        clusters[-1].clustered_data = cluster_data[fitted_clusters.labels_ == label]
+        clusters[-1].parent_indicies = np.flatnonzero(mask)
     return (clusters, fitted_clusters.labels_)
