@@ -263,8 +263,7 @@ class TrackInterpolator:
             if (
                 element[2] > 1.0
                 or element[2] < 0.0
-                or (np.fabs(element[1]) - 0.292) < 0.001
-                or (np.fabs(element[0]) - 0.292) < 0.001
+                or (np.linalg.norm(element[:2]) - 0.292) < 0.0001
             ):
                 break
             else:
