@@ -147,17 +147,19 @@ class InterpSolverPhase(PhaseLike):
         # Note that we don't have a lock on the shared memory as the mesh is
         # used read-only
         mesh_data: np.ndarray = np.load(self.track_path)
-        memory = manager.SharedMemory(mesh_data.nbytes)
+        self.memory = manager.SharedMemory(
+            mesh_data.nbytes
+        )  # Stored as class member for windows reasons, simply a keep-alive
         spyral_info(
             __name__,
             f"Allocated {mesh_data.nbytes * 1.0e-9:.2} GB of memory for shared mesh.",
         )
         memory_array = np.ndarray(
-            mesh_data.shape, dtype=mesh_data.dtype, buffer=memory.buf
+            mesh_data.shape, dtype=mesh_data.dtype, buffer=self.memory.buf
         )
         memory_array[:, :, :, :] = mesh_data[:, :, :, :]
         # The name allows us to access later, shape and dtype are for casting to numpy
-        self.shared_mesh_name = memory.name
+        self.shared_mesh_name = self.memory.name
         self.shared_mesh_shape = memory_array.shape
         self.shared_mesh_type = memory_array.dtype
 
