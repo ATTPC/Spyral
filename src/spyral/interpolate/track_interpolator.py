@@ -254,7 +254,20 @@ class TrackInterpolator:
             if np.all(previous_element[:] == element[:]):
                 removal[idx] = False
             previous_element = element
-
+        trajectory = trajectory[removal]
+        # Remove all points after you leave the legal bounds
+        removal = np.full(len(trajectory), False)
+        for idx, element in enumerate(trajectory):
+            # If leaves legal bounds, everything after is false
+            # else is good
+            if (
+                element[2] > 1.0
+                or element[2] < 0.0
+                or np.linalg.norm(element[:2]) > 0.292
+            ):
+                break
+            else:
+                removal[idx] = True
         trajectory = trajectory[removal]
         if len(trajectory) < 2:
             return None

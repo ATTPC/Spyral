@@ -28,7 +28,7 @@ ESTIMATE_SCHEMA = ArtifactSchema(
         "azimuthal",
         "brho",
         "dEdx",
-        "log_dEdx",
+        "sqrt_dEdx",
         "dE",
         "arclength",
         "direction",

@@ -295,10 +295,7 @@ def estimate_physics_pass(
     results["azimuthal"].append(azimuthal)
     results["brho"].append(brho)
     results["dEdx"].append(dEdx)
-    if dEdx != 0.0:
-        results["log_dEdx"].append(np.log(dEdx))
-    else:
-        results["log_dEdx"].append(0.0)
+    results["sqrt_dEdx"].append(np.sqrt(np.fabs(dEdx)))
     results["dE"].append(charge_deposited)
     results["arclength"].append(arclength)
     results["direction"].append(direction.value)
