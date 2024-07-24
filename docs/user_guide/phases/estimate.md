@@ -62,7 +62,7 @@ The output of the estimation phase is a set of dataframes saved to parquet files
 - azimuthal: the estimated trajectory azimuthal angle (radians)
 - brho: the estimated trajectory total B&rho; (Tm)
 - dEdx: the estimated trajectory stopping power (average energy loss) (arb.)
-- log_dEdx: the natural log of dEdx
+- sqrt_dEdx: the square root of dEdx, useful for making particle ID gates with brho (arb.)
 - dE: the total integrated charge sum over the length of the first arc (arb.)
 - arclength: the length of the first arc (mm)
 - direction: indicates the detected direction of the trajectory (forward or backward)
