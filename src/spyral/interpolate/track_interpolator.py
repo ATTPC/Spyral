@@ -254,7 +254,6 @@ class TrackInterpolator:
             if np.all(previous_element[:] == element[:]):
                 removal[idx] = False
             previous_element = element
-
         trajectory = trajectory[removal]
         if len(trajectory) < 2:
             return None
