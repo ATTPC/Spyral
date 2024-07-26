@@ -159,6 +159,16 @@ run_max = 94
 
 These values are inclusive, so in this case our range covers exactly one run, run 94. The range can have gaps; say you have runs 54, 55, 57, 59 you can put the range to 54 to 59 and Spyral will just skip the runs that don't exist.
 
+Spyral can also support skipping specific run numbers in the range. For example, you may want to do something like:
+
+```python
+run_min = 54
+run_max = 59
+runs_to_skip = [57, 55]
+```
+
+Note that the runs to skip must be in a list.
+
 Next we set the number of processors. Spyral will analyze the runs in parallel, dividing up the tasks amongst a set of independent parallel processes. For more details on how this works and how to determine a good number of processes, see the [Parallel](parallel.md) docs. In the example we set it as
 
 ```python
@@ -203,6 +213,13 @@ Finally we define a main function for our script
 ```python
 def main():
     start_pipeline(pipe, run_min, run_max, n_processes)
+```
+
+If you want to skip some runs like we mentioned before, pass the skip list like
+
+```python
+def main():
+    start_pipeline(pipe, run_min, run_max, runs_to_skip=runs_to_skip)
 ```
 
 And set this up as an entry point

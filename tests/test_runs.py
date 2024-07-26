@@ -7,6 +7,9 @@ from spyral.core.run_stacks import (
 
 from pathlib import Path
 
+RUNS_TO_SKIP_DEFAULT = []
+RUNS_TO_SKIP = [1]
+
 
 def test_form_run_string():
     expected = "run_0001"
@@ -23,7 +26,7 @@ def test_size_path():
 
 def test_collect():
     fake_trace_path = Path(__file__).parent
-    collected = collect_runs(fake_trace_path, 0, 1)
+    collected = collect_runs(fake_trace_path, 0, 1, RUNS_TO_SKIP_DEFAULT)
     assert len(collected) == 2
     assert collected[0] != 0
     assert collected[1] != 0
@@ -32,7 +35,9 @@ def test_collect():
 def test_tall_create_run_stack():
     n_stacks = 1
     fake_trace_path = Path(__file__).parent
-    tall_stack, load = create_run_stacks(fake_trace_path, 0, 1, n_stacks)
+    tall_stack, load = create_run_stacks(
+        fake_trace_path, 0, 1, n_stacks, RUNS_TO_SKIP_DEFAULT
+    )
 
     assert len(tall_stack) == 1
     assert tall_stack[0][0] == 1
@@ -42,8 +47,19 @@ def test_tall_create_run_stack():
 def test_wide_create_run_stack():
     n_stacks = 2
     fake_trace_path = Path(__file__).parent
-    wide_stack, load = create_run_stacks(fake_trace_path, 0, 1, n_stacks)
+    wide_stack, load = create_run_stacks(
+        fake_trace_path, 0, 1, n_stacks, RUNS_TO_SKIP_DEFAULT
+    )
 
     assert len(wide_stack) == 2
     assert wide_stack[0][0] == 1
     assert wide_stack[1][0] == 0
+
+
+def test_skip():
+    n_stacks = 2
+    fake_trace_path = Path(__file__).parent
+    wide_stack, load = create_run_stacks(fake_trace_path, 0, 1, n_stacks, RUNS_TO_SKIP)
+
+    assert len(wide_stack) == 1
+    assert wide_stack[0][0] == 0

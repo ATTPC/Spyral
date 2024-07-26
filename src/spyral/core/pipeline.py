@@ -226,6 +226,7 @@ def start_pipeline(
     run_max: int,
     n_procs: int = 1,
     disable_display: bool = False,
+    runs_to_skip: list[int] | None = None,
 ) -> None:
     """Function from which a Pipeline should be run
 
@@ -246,12 +247,19 @@ def start_pipeline(
     disable_display: bool, default=False
         Option to turn off terminal display. Default is False,
         i.e. terminal interface will be displayed.
+    runs_to_skip: list[int] | None, default=None
+        Option to specifiy a list of run numbers to skip. These runs
+        should be within the range run_min, run_max. By default, no
+        runs are skipped.
 
     """
     # Setup
     # Note the manager exists outside the pipeline
     shared_manager = SharedMemoryManager()
     shared_manager.start()
+    # handle None-ness
+    if runs_to_skip is None:
+        runs_to_skip = []
 
     print(SPLASH)
     print(f"Creating workspace: {pipeline.workspace} ...", end=" ")
@@ -275,7 +283,9 @@ def start_pipeline(
         return
     print("Pipeline successfully validated.")
 
-    stacks, stack_load = create_run_stacks(pipeline.traces, run_min, run_max, n_procs)
+    stacks, stack_load = create_run_stacks(
+        pipeline.traces, run_min, run_max, n_procs, runs_to_skip
+    )
     stack_count = 0
     for stack in stacks:
         stack_count += len(stack)

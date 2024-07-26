@@ -37,7 +37,9 @@ def get_size_path(path: Path) -> int:
         return path.stat().st_size
 
 
-def collect_runs(trace_path: Path, run_min: int, run_max: int) -> dict[int, int]:
+def collect_runs(
+    trace_path: Path, run_min: int, run_max: int, runs_to_skip: list[int]
+) -> dict[int, int]:
     """Make dict of runs with the size of the raw data file
 
     Using the Workspace and the Config run_min and run_max, get a dict of run numbers to be processed
@@ -53,6 +55,8 @@ def collect_runs(trace_path: Path, run_min: int, run_max: int) -> dict[int, int]
         the first run, inclusive
     run_max: int
         the last run, inclusive
+    runs_to_skip: list[int]
+        list of run numbers to skip (if any)
 
     Returns
     -------
@@ -63,14 +67,15 @@ def collect_runs(trace_path: Path, run_min: int, run_max: int) -> dict[int, int]
     run_dict = {
         run: get_size_path(trace_path / f"{form_run_string(run)}.h5")
         for run in range(run_min, run_max + 1)
-        if get_size_path(trace_path / f"{form_run_string(run)}.h5") != 0
+        if (get_size_path(trace_path / f"{form_run_string(run)}.h5") != 0)
+        and (not run in runs_to_skip)
     }
     run_dict = dict(sorted(run_dict.items(), key=lambda item: item[1], reverse=True))
     return run_dict
 
 
 def create_run_stacks(
-    trace_path: Path, run_min: int, run_max: int, n_stacks: int
+    trace_path: Path, run_min: int, run_max: int, n_stacks: int, runs_to_skip: list[int]
 ) -> tuple[list[list[int]], list[float]]:
     """Create a set of runs to be processed for each stack in n_stacks.
 
@@ -90,6 +95,8 @@ def create_run_stacks(
         The maximum run number, inclusive
     n_stacks: int
         the number of stacks, should be equal to number of processors
+    runs_to_skip: list[int]
+        list of run numbers to skip (if any)
 
     Returns
     -------
@@ -104,7 +111,7 @@ def create_run_stacks(
     stacks = [[] for _ in range(0, n_stacks)]
     total_load = 0
     load_per_stack = [0 for _ in range(0, n_stacks)]
-    sorted_runs = collect_runs(trace_path, run_min, run_max)
+    sorted_runs = collect_runs(trace_path, run_min, run_max, runs_to_skip)
     if len(sorted_runs) == 0:
         return stacks, [0.0 for _ in load_per_stack]
 

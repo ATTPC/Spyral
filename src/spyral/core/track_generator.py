@@ -1,9 +1,11 @@
 from .constants import MEV_2_JOULE, MEV_2_KG, C, E_CHARGE, AMU_2_MEV
 from ..interpolate import LinearInterpolator
+from .spy_log import spyral_warn
 
 from spyral_utils.nuclear import NucleusData
 from spyral_utils.nuclear.target import GasTarget
 
+import psutil
 import math
 import numpy as np
 from dataclasses import dataclass
@@ -12,10 +14,13 @@ from pathlib import Path
 import json
 import pycatima as catima
 
-
 COARSE_TIME_WINDOW: float = 1.0e-6  # 1us window
 RANGE_LIMIT = 0.001  # meters
 DEG2RAD: float = np.pi / 180.0
+
+
+def calculate_mesh_size(ke_bins: int, polar_bins: int, timesteps: int) -> int:
+    return ke_bins * polar_bins * timesteps * 3 * 8
 
 
 @dataclass
@@ -379,6 +384,20 @@ def generate_track_mesh(params: MeshParameters, track_path: Path, meta_path: Pat
     meta_path: pathlib.Path
         where to write the track metadata to
     """
+
+    size_bytes = calculate_mesh_size(
+        params.ke_bins, params.polar_bins, params.n_time_steps
+    )
+    system_mem = psutil.virtual_memory().total
+    if size_bytes > system_mem * 0.5:
+        print(
+            "WARNING - Your mesh is over half your reported physical memory in size, are you sure you've got the space for this?"
+        )
+        spyral_warn(
+            __name__,
+            "Mesh over half physical memory in size. Warning was issued to user.",
+        )
+
     kes = np.linspace(params.ke_min, params.ke_max, params.ke_bins)
     polars = np.linspace(
         params.polar_min * DEG2RAD, params.polar_max * DEG2RAD, params.polar_bins
