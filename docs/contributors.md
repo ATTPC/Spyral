@@ -7,6 +7,8 @@ Below is a list of contributors to Spyral! Thank you to everyone who worked on t
 - Zach Serikow [sigmanotation](https://github.com/sigmanotation)
 - Daniel Bazin [DBazin](https://github.com/dbazin)
 
+We try to keep this list up to date, but sometimes it lags behind a little bit. If your name isn't listed here, but you've provided contributions, please email the current maintainer and your name will be added.
+
 ## Special Thanks
 
 Special shoutout to Nathan Turi ([turinath](https://github.com/turinath)) who developed the the Python predecessor to Spyral (PointCloud-utils) that walked so Spyral could run!
