@@ -350,5 +350,8 @@ class InterpLeastSqSolverPhase(PhaseLike):
         # Write out the results
         physics_df = pl.DataFrame(phys_results)
         physics_df.write_parquet(result.artifact_path)
-        spyral_info(__name__, "Phase 4 complete.")
+        spyral_info(
+            __name__,
+            f"Phase InterpLeastSquaresSolver complete for run {payload.run_number}",
+        )
         return result

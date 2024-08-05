@@ -182,6 +182,6 @@ class EstimationPhase(PhaseLike):
         # Write the results to a DataFrame
         df = pl.DataFrame(data)
         df.write_parquet(result.artifact_path)
-        spyral_info(__name__, "Phase 3 complete.")
+        spyral_info(__name__, f"Phase Estimation complete for run {payload.run_number}")
         # Next step also needs to know where to find the clusters
         return result

@@ -152,5 +152,5 @@ class ClusterPhase(PhaseLike):
                 local_group.attrs["label"] = cluster.label
                 local_group.create_dataset("cloud", data=cluster.data)
 
-        spyral_info(__name__, f"Phase Cluster run {payload.run_number} complete.")
+        spyral_info(__name__, f"Phase Cluster complete for run {payload.run_number}")
         return result

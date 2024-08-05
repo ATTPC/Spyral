@@ -225,5 +225,7 @@ class PointcloudLegacyPhase(PhaseLike):
 
             pc_dataset[:] = pc.cloud
 
-        spyral_info(__name__, "Phase 1 complete")
+        spyral_info(
+            __name__, f"Phase PointcloudLegacy complete for run {payload.run_number}"
+        )
         return result

@@ -319,5 +319,5 @@ class PointcloudPhase(PhaseLike):
                 / f"{form_run_string(payload.run_number)}_scaler.parquet",
             )
 
-        spyral_info(__name__, "Phase 1 complete")
+        spyral_info(__name__, f"Phase Pointcloud complete for run {payload.run_number}")
         return result
