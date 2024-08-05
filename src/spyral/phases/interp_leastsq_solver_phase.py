@@ -206,7 +206,7 @@ class InterpLeastSqSolverPhase(PhaseLike):
             msg_queue.put(StatusMessage("Waiting", 0, 0, payload.run_number))
             spyral_warn(
                 __name__,
-                f"Particle ID {self.solver_params.particle_id_filename} does not exist, Solver will not run!",
+                f"Particle ID {self.solver_params.particle_id_filename} does not exist for run {payload.run_number}, Solver will not run!",
             )
             return PhaseResult.invalid_result(payload.run_number)
 
