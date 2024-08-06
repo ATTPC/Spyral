@@ -37,8 +37,6 @@ class GetLegacyEvent:
         The pad plane traces from the event
     external_traces: list[GetTrace]
         Traces from external (non-pad plane) sources
-    name: str
-        The event name
     number:
         The event number
 
@@ -46,8 +44,6 @@ class GetLegacyEvent:
     -------
     GetEvent(raw_data: h5py.Dataset, event_number: int, params: GetParameters, rng: numpy.random.Generator)
         Construct the event and process traces
-    load_traces(raw_data: h5py.Dataset, event_number: int, params: GetParameters, rng: numpy.random.Generator)
-        Process traces
     is_valid() -> bool
         Check if the event is valid
     """

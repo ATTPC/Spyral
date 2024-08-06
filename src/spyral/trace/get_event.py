@@ -31,8 +31,6 @@ class GetEvent:
     ----------
     traces: list[GetTrace]
         The pad plane traces from the event
-    name: str
-        The event name
     number:
         The event number
 
