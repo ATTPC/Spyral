@@ -1,6 +1,6 @@
 from .get_trace import GetTrace
 from ..core.config import GetParameters
-from ..core.constants import INVALID_EVENT_NAME, INVALID_EVENT_NUMBER
+from ..core.constants import INVALID_EVENT_NUMBER
 from ..core.hardware_id import hardware_id_from_array
 
 import numpy as np
@@ -40,46 +40,18 @@ class GetEvent:
     -------
     GetEvent(raw_data: h5py.Dataset, event_number: int, params: GetParameters, rng: numpy.random.Generator)
         Construct the event and process traces
-    load_traces(raw_data: h5py.Dataset, event_number: int, params: GetParameters, rng: numpy.random.Generator)
-        Process traces
     is_valid() -> bool
         Check if the event is valid
     """
 
     def __init__(
         self,
-        raw_data: h5.Dataset,
+        raw_data: np.ndarray,
         event_number: int,
         params: GetParameters,
         rng: np.random.Generator,
     ):
         self.traces: list[GetTrace] = []
-        self.name: str = INVALID_EVENT_NAME
-        self.number: int = INVALID_EVENT_NUMBER
-        self.load_traces(raw_data, event_number, params, rng)
-
-    def load_traces(
-        self,
-        raw_data: h5.Dataset,
-        event_number: int,
-        params: GetParameters,
-        rng: np.random.Generator,
-    ):
-        """Process the traces
-
-        Parameters
-        ----------
-        raw_data: h5py.Dataset
-            The hdf5 Dataset that contains trace data
-        event_number: int
-            The event number
-        params: GetParameters
-            Configuration parameters controlling the GET signal analysis
-        rng: numpy.random.Generator
-            A random number generator for use with the signal analysis
-
-        """
-        self.name = str(raw_data.name)
         self.number = event_number
         trace_matrix = preprocess_traces(
             raw_data[:, GET_DATA_TRACE_START:GET_DATA_TRACE_STOP].copy(),
@@ -91,7 +63,7 @@ class GetEvent:
         ]
 
     def is_valid(self) -> bool:
-        return self.name != INVALID_EVENT_NAME and self.number != INVALID_EVENT_NUMBER
+        return self.number != INVALID_EVENT_NUMBER
 
 
 @njit

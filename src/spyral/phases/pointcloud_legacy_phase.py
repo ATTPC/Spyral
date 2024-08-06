@@ -189,7 +189,7 @@ class PointcloudLegacyPhase(PhaseLike):
                 event_data = event_group[event_name]  # type: ignore
 
             event = GetLegacyEvent(
-                event_data, idx, self.get_params, self.ic_params, rng
+                event_data[:], idx, self.get_params, self.ic_params, rng
             )
 
             pc = PointCloud()

@@ -1,6 +1,6 @@
 from .get_trace import GetTrace
 from ..core.config import GetParameters
-from ..core.constants import INVALID_EVENT_NAME, INVALID_EVENT_NUMBER
+from ..core.constants import INVALID_EVENT_NUMBER
 from ..core.hardware_id import hardware_id_from_array
 
 import numpy as np
@@ -54,7 +54,7 @@ class GetLegacyEvent:
 
     def __init__(
         self,
-        raw_data: h5.Dataset,
+        raw_data: np.ndarray,
         event_number: int,
         get_params: GetParameters,
         ic_params: GetParameters,
@@ -62,34 +62,6 @@ class GetLegacyEvent:
     ):
         self.traces: list[GetTrace] = []
         self.ic_trace: GetTrace | None = None
-        self.name: str = INVALID_EVENT_NAME
-        self.number: int = INVALID_EVENT_NUMBER
-        self.load_traces(raw_data, event_number, get_params, ic_params, rng)
-
-    def load_traces(
-        self,
-        raw_data: h5.Dataset,
-        event_number: int,
-        get_params: GetParameters,
-        ic_params: GetParameters,
-        rng: np.random.Generator,
-    ):
-        """Process the traces
-
-        Parameters
-        ----------
-        raw_data: h5py.Dataset
-            The hdf5 Dataset that contains trace data
-        event_number: int
-            The event number
-        get_params: GetParameters
-            Configuration parameters controlling the GET signal analysis
-        ic_params: GetParameters
-            Configuration parameters controlling the ion chamber signal analysis
-        rng: numpy.random.Generator
-            A random number generator for use in the signal analysis
-        """
-        self.name = str(raw_data.name)
         self.number = event_number
         trace_matrix = preprocess_traces(
             raw_data[:, GET_DATA_TRACE_START:GET_DATA_TRACE_STOP].copy(),
@@ -116,7 +88,7 @@ class GetLegacyEvent:
         self.traces = [trace for trace in self.traces if trace.hw_id.cobo_id != 10]
 
     def is_valid(self) -> bool:
-        return self.name != INVALID_EVENT_NAME and self.number != INVALID_EVENT_NUMBER
+        return self.number != INVALID_EVENT_NUMBER
 
 
 @njit

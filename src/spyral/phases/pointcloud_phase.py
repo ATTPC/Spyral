@@ -217,7 +217,7 @@ class PointcloudPhase(PhaseLike):
             else:
                 event_data = event_group[event_name]  # type: ignore
 
-            event = GetEvent(event_data, idx, self.get_params, rng)
+            event = GetEvent(event_data[:], idx, self.get_params, rng)
 
             pc = PointCloud()
             pc.load_cloud_from_get_event(event, self.pad_map)
@@ -246,7 +246,7 @@ class PointcloudPhase(PhaseLike):
                 pc_dataset[:] = pc.cloud
                 continue
 
-            frib_event = FribEvent(frib_data, idx, self.frib_params)
+            frib_event = FribEvent(frib_data[:], idx, self.frib_params)
             # Handle IC analysis cases
             # First check if IC correction is not on
             if self.frib_params.correct_ic_time:
