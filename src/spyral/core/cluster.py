@@ -59,13 +59,11 @@ class Cluster:
 
     Methods
     -------
-    Cluster(event: int=-1, label: int=-1, data: ndarray=np.empty(0, type=numpy.float64))
-        Construct a Cluster
-    from_labeled_cloud(cloud: LabeledCloud, params: ClusterParams)
-        load the data from a LabeledCloud
-    copy_cloud(cloud: PointCloud)
-        copy the data from a PointCloud to the Cluster
-    drop_outliers()
+    apply_smoothing_splines(smoothing=1.0)
+        Apply smoothing to the underlying cluster data with smoothing splines
+    create_splines(smoothing=1.0)
+        Create smoothing splines for the x,y,charge dimensions
+    drop_outliers(scale=0.05)
         Use the scikit-learn LocalOutlierFactor to identify and remove outliers in the Cluster
     """
 
