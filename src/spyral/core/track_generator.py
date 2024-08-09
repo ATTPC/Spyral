@@ -420,7 +420,7 @@ def generate_track_mesh(params: MeshParameters, track_path: Path, meta_path: Pat
     total_iters = params.polar_bins * params.ke_bins
     count = 0
     flush_percent = 0.01
-    flush_val = flush_percent * total_iters
+    flush_val = int(flush_percent * total_iters)
     flush_count = 0
 
     longest_time = 0.0

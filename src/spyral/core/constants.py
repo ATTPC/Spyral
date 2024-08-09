@@ -44,8 +44,6 @@ from numpy import pi
 
 INVALID_PEAK_CENTROID: float = -1.0
 
-INVALID_EVENT_NAME: str = "InvalidEvent"
-
 INVALID_EVENT_NUMBER: int = -1
 
 INVALID_PAD_ID: int = -1

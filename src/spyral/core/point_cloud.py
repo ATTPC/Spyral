@@ -175,19 +175,17 @@ class PointCloud:
             if efield_correction is not None:
                 self.cloud[idx] = efield_correction.correct_point(self.cloud[idx])
 
-    def remove_illegal_points(self, detector_length: float = 1000.0):
-        """Remove any points which lie outside the legal detector bounds in z
+    def remove_illegal_points(self):
+        """Remove any points which contain NaNs
 
-        Parameters
-        ----------
-        detector_length: float
-            The length of the detector in the same units as the point cloud data
-            (typically mm)
+        NaNs most commonly occur from the electric (electron) field correction.
+        This correction has finite (unpredictable) bounds that are smaller than
+        the detector and any points which lie outside the correction are evaluated
+        to NaN. These points must be trimmed before clustering. This method modifies
+        the underlying point cloud array.
 
         """
-        mask = np.logical_and(
-            self.cloud[:, 2] < detector_length, self.cloud[:, 2] > 0.0
-        )
+        mask = np.any(np.isnan(self.cloud), axis=1)
         self.cloud = self.cloud[mask]
 
     def sort_in_z(self):

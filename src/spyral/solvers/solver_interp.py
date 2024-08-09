@@ -250,10 +250,13 @@ def fit_model_interp(
         / float(det_params.window_time_bucket - det_params.micromegas_time_bucket)
         * 0.001
     ) * 0.5
-    # uncertainty due to pad size, treat as box
-    xy_error = cluster.data[:, 4] * BIG_PAD_HEIGHT * 0.5
+    # uncertainty due to pad size, treat as bounding rectangle
+    # Note that doesn't matter which side is short/long as we just use
+    # total error (distance)
+    x_error = cluster.data[:, 4] * BIG_PAD_HEIGHT * 0.5
+    y_error = cluster.data[:, 4] * BIG_PAD_HEIGHT / np.sqrt(3.0)
     # total positional variance per point
-    total_var = 2.0 * (xy_error**2.0) + z_error**2.0
+    total_var = x_error**2.0 + y_error**2.0 + z_error**2.0
     weights = 1.0 / total_var
 
     fit_params = create_params(guess, ejectile, interpolator, det_params)
@@ -311,10 +314,13 @@ def solve_physics_interp(
         / float(det_params.window_time_bucket - det_params.micromegas_time_bucket)
         * 0.001
     ) * 0.5
-    # uncertainty due to pad size, treat as box
-    xy_error = cluster.data[:, 4] * BIG_PAD_HEIGHT * 0.5
+    # uncertainty due to pad size, treat as bounding rectangle
+    # Note that doesn't matter which side is short/long as we just use
+    # total error (distance)
+    x_error = cluster.data[:, 4] * BIG_PAD_HEIGHT * 0.5
+    y_error = cluster.data[:, 4] * BIG_PAD_HEIGHT / np.sqrt(3.0)
     # total positional variance per point
-    total_var = 2.0 * (xy_error**2.0) + z_error**2.0
+    total_var = x_error**2.0 + y_error**2.0 + z_error**2.0
     weights = 1.0 / total_var
 
     fit_params = create_params(guess, ejectile, interpolator, det_params)

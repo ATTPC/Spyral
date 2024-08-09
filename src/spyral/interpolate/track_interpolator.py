@@ -247,14 +247,6 @@ class TrackInterpolator:
         trajectory[:, 0] += vx
         trajectory[:, 1] += vy
         trajectory[:, 2] += vz
-        # Trim stopped region
-        removal = np.full(len(trajectory), True)
-        previous_element = np.full(3, -1.0)
-        for idx, element in enumerate(trajectory):
-            if np.all(previous_element[:] == element[:]):
-                removal[idx] = False
-            previous_element = element
-        trajectory = trajectory[removal]
         if len(trajectory) < 2:
             return None
 
