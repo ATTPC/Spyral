@@ -44,8 +44,8 @@ jobs:
                 python-version: '3.11'
             - name: Install deps
               run: pdm install
-            - name: Check format
-              run:  pdm run check ./src
+            - name: Lint Code
+              run:  pdm run ruff check ./src
 
 
                 
