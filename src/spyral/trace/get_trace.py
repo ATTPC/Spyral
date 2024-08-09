@@ -142,7 +142,7 @@ class GetTrace:
             not needed to be modified, but for some legacy data is necessary
         """
 
-        if self.is_valid() == False:
+        if not self.is_valid():
             return
 
         self.peaks.clear()

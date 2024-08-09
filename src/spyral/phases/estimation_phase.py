@@ -163,7 +163,9 @@ class EstimationPhase(PhaseLike):
                     local_cluster = event[cluster_name]  # type: ignore
 
                 cluster = Cluster(
-                    idx, local_cluster.attrs["label"], local_cluster["cloud"][:].copy()  # type: ignore
+                    idx,
+                    local_cluster.attrs["label"],  # type: ignore
+                    local_cluster["cloud"][:].copy(),  # type: ignore
                 )
 
                 # Cluster is loaded do some analysis

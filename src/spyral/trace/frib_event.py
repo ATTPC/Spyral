@@ -2,7 +2,6 @@ from .frib_trace import FribTrace
 from .get_trace import Peak
 from ..core.config import FribParameters
 
-import h5py as h5
 import numpy as np
 from numba import njit
 

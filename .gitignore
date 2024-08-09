@@ -170,3 +170,4 @@ cython_debug/
 tests/test_workspace
 *.h5
 *.parquet
+.ruff_cache

@@ -33,7 +33,19 @@ jobs:
             - name: Install deps
               run: pdm install
             - name: Check format
-              run:  pdm run black ./src/spyral --check
+              run:  pdm run ruff format --check ./src
+    check-lint:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - name: Set up PDM
+              uses: pdm-project/setup-pdm@v4
+              with:
+                python-version: '3.11'
+            - name: Install deps
+              run: pdm install
+            - name: Check format
+              run:  pdm run check ./src
 
 
                 

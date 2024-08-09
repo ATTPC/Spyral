@@ -18,12 +18,12 @@ DEG2RAD: float
     angular degrees -> radians
 FRIB_TRACE_LENGTH: int
     For FRIBDAQ system, 2048
-AMU_2_MEV: float 
+AMU_2_MEV: float
     scipy alias, MeV/c^2/u
 ELECTRON_MASS_U: float
     scipy alias, mass of an electron in u
 MEV_2_JOULE: float
-    scipy alias, J/MeV 
+    scipy alias, J/MeV
 MEV_2_KG: float
     scipy alias, kg/MeV/c^2
 ROOM_TEMPERATURE: float
