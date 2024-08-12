@@ -12,16 +12,14 @@ from ..correction import (
     create_electron_corrector,
     ElectronCorrector,
 )
-from ..core.spy_log import spyral_warn, spyral_error, spyral_info
+from ..core.spy_log import spyral_warn, spyral_info
+from ..trace.trace_reader import TraceReader
 from ..core.pad_map import PadMap
-from ..trace.get_event import GetEvent
-from ..trace.frib_event import FribEvent
-from ..trace.frib_scalers import process_scalers
 from ..core.point_cloud import PointCloud
 from .schema import TRACE_SCHEMA, POINTCLOUD_SCHEMA
 
-import h5py as h5
 import numpy as np
+import h5py as h5
 
 from pathlib import Path
 from multiprocessing import SimpleQueue
@@ -135,58 +133,25 @@ class PointcloudPhase(PhaseLike):
         if not trace_path.exists():
             spyral_warn(
                 __name__,
-                f"Run {payload.run_number} does not exist for phase 1, skipping.",
+                f"Run {payload.run_number} does not exist for PointcloudPhase, skipping.",
             )
             return PhaseResult.invalid_result(payload.run_number)
 
         # Open files
         result = self.construct_artifact(payload, workspace_path)
-        trace_file = h5.File(trace_path, "r")
+        trace_reader = TraceReader(trace_path)
         point_file = h5.File(result.artifact_path, "w")
-
-        min_event, max_event = get_event_range(trace_file)
 
         # Load electric field correction
         corrector: ElectronCorrector | None = None
         if self.det_params.do_garfield_correction:
             corrector = create_electron_corrector(self.electron_correction_path)
 
-        # Some checks for existance
-        event_group: h5.Group = trace_file["get"]  # type: ignore
-        if not isinstance(event_group, h5.Group):
-            spyral_error(
-                __name__,
-                f"GET event group does not exist in run {payload.run_number}, phase 1 cannot be run!",
-            )
-            return PhaseResult.invalid_result(payload.run_number)
-
-        frib_group: h5.Group = trace_file["frib"]  # type: ignore
-        if not isinstance(frib_group, h5.Group):
-            spyral_error(
-                __name__,
-                f"FRIB group does not exist in run {payload.run_number}, phase 1 cannot be run!",
-            )
-            return PhaseResult.invalid_result(payload.run_number)
-        frib_evt_group: h5.Group = frib_group["evt"]  # type: ignore
-        if not isinstance(frib_evt_group, h5.Group):
-            spyral_error(
-                __name__,
-                f"FRIB event data group does not exist in run {payload.run_number}, phase 1 cannot be run!",
-            )
-            return PhaseResult.invalid_result(payload.run_number)
-
-        frib_scaler_group: h5.Group | None = frib_group["scaler"]  # type: ignore
-        if not isinstance(frib_group, h5.Group):
-            spyral_warn(
-                __name__,
-                f"FRIB scaler data group does not exist in run {payload.run_number}. Spyral will continue, but scalers will not exist.",
-            )
-            frib_scaler_group = None
         cloud_group = point_file.create_group("cloud")
-        cloud_group.attrs["min_event"] = min_event
-        cloud_group.attrs["max_event"] = max_event
+        cloud_group.attrs["min_event"] = trace_reader.min_event
+        cloud_group.attrs["max_event"] = trace_reader.max_event
 
-        nevents = max_event - min_event + 1
+        nevents = trace_reader.max_event - trace_reader.min_event + 1
         total: int
         flush_val: int
         if nevents < 100:
@@ -194,7 +159,7 @@ class PointcloudPhase(PhaseLike):
             flush_val = 0
         else:
             flush_percent = 0.01
-            flush_val = int(flush_percent * (max_event - min_event))
+            flush_val = int(flush_percent * (nevents - 1))
             total = 100
 
         count = 0
@@ -204,23 +169,18 @@ class PointcloudPhase(PhaseLike):
         )  # We always increment by 1
 
         # Process the data
-        for idx in range(min_event, max_event + 1):
+        for idx in trace_reader.event_range():
             count += 1
             if count > flush_val:
                 count = 0
                 msg_queue.put(msg)
 
-            event_data: h5.Dataset
-            event_name = f"evt{idx}_data"
-            if event_name not in event_group:
+            event = trace_reader.read_event(idx, self.get_params, self.frib_params, rng)
+            if event.get is None:
                 continue
-            else:
-                event_data = event_group[event_name]  # type: ignore
-
-            event = GetEvent(event_data[:], idx, self.get_params, rng)
 
             pc = PointCloud()
-            pc.load_cloud_from_get_event(event, self.pad_map)
+            pc.load_cloud_from_get_event(event.get, self.pad_map)
 
             pc_dataset = cloud_group.create_dataset(
                 f"cloud_{pc.event_number}", shape=pc.cloud.shape, dtype=np.float64
@@ -233,10 +193,7 @@ class PointcloudPhase(PhaseLike):
             pc_dataset.attrs["ic_multiplicity"] = -1.0
 
             # Now analyze FRIBDAQ data
-            frib_data: h5.Dataset
-            try:
-                frib_data = frib_evt_group[f"evt{idx}_1903"]  # type: ignore
-            except Exception:
+            if event.frib is None:
                 pc.calibrate_z_position(
                     self.det_params.micromegas_time_bucket,
                     self.det_params.window_time_bucket,
@@ -246,12 +203,11 @@ class PointcloudPhase(PhaseLike):
                 pc_dataset[:] = pc.cloud
                 continue
 
-            frib_event = FribEvent(frib_data[:], idx, self.frib_params)
             # Handle IC analysis cases
             # First check if IC correction is not on
             if self.frib_params.correct_ic_time:
                 # IC correction is on, extract good IC peak with Si coincidence imposed
-                good_ic = frib_event.get_good_ic_peak(self.frib_params)
+                good_ic = event.frib.get_good_ic_peak(self.frib_params)
                 if good_ic is None:
                     # There is no good IC peak, skip
                     pc.calibrate_z_position(
@@ -270,7 +226,7 @@ class PointcloudPhase(PhaseLike):
                 pc_dataset.attrs["ic_centroid"] = peak.centroid
                 pc_dataset.attrs["ic_multiplicity"] = mult
 
-                ic_cor = frib_event.correct_ic_time(
+                ic_cor = event.frib.correct_ic_time(
                     peak, self.frib_params, self.det_params.get_frequency
                 )
                 # Apply IC correction to time calibration, if correction is less than the
@@ -299,8 +255,8 @@ class PointcloudPhase(PhaseLike):
                     corrector,
                 )
                 # Get triggering IC, no Si conicidence imposed
-                ic_mult = frib_event.get_ic_multiplicity(self.frib_params)
-                ic_peak = frib_event.get_triggering_ic_peak(self.frib_params)
+                ic_mult = event.frib.get_ic_multiplicity(self.frib_params)
+                ic_peak = event.frib.get_triggering_ic_peak(self.frib_params)
                 # Check multiplicity condition and existence of trigger
                 if ic_mult <= self.frib_params.ic_multiplicity and ic_peak is not None:
                     pc_dataset.attrs["ic_amplitude"] = ic_peak.amplitude
@@ -312,11 +268,15 @@ class PointcloudPhase(PhaseLike):
         # End of event data
 
         # Process scaler data if it exists
-        if frib_scaler_group is not None:
-            process_scalers(
-                frib_scaler_group,
+        scalers = trace_reader.read_scalers()
+        if scalers is not None:
+            scalers.write_scalers(
                 self.get_artifact_path(workspace_path)
-                / f"{form_run_string(payload.run_number)}_scaler.parquet",
+                / f"{form_run_string(payload.run_number)}_scaler.parquet"
+            )
+        else:
+            spyral_warn(
+                __name__, f"Run {payload.run_number} does not have scaler data!"
             )
 
         spyral_info(__name__, f"Phase Pointcloud complete for run {payload.run_number}")
