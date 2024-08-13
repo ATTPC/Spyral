@@ -306,7 +306,7 @@ class TraceReader:
         scalers = FribScalers()
         if "scaler" not in frib_group:
             return None
-        scaler_group: h5.Group = frib_group["scalers"]  # type: ignore
+        scaler_group: h5.Group = frib_group["scaler"]  # type: ignore
 
         # We don't store any metadata about the number of scaler events,
         # so we have to scan to failure. This is annoying and slow, and
