@@ -346,6 +346,7 @@ class InterpSolverPhase(PhaseLike):
                 pid.nucleus,
                 interpolator,
                 self.det_params,
+                self.solver_params,
                 phys_results,
             )
 

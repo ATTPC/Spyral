@@ -223,3 +223,6 @@ class SolverParameters:
     interp_polar_min: float
     interp_polar_max: float
     interp_polar_bins: int
+    fit_vertex_rho: bool
+    fit_vertex_phi: bool
+    fit_azimuthal: bool
