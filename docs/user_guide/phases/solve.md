@@ -21,12 +21,6 @@ When a trajectory is requested, the full energy, polar angle, azimuthal angle, a
 
 In general, it has been found that 0.5 degree steps in polar angle are best, while 200 keV steps in energy are acceptable. However, this may need tuning from experiment to experiment.
 
-## Fitting to Data
-
-Spyral uses the L-BFGS-B quasi-Newton minimization scheme to minimize the average error between the data and the trajectory. The average error is computed by looping over the data and the trajectory and calculating the smallest distance between the given data point and a point on the trajectory. These minimum distances are then averaged.
-
-The best fit parameters and their uncertainties (when possible) are written to disk in an Apache parquet file. The reduced &chi;<sup>2</sup> is also written.
-
 ## Output
 
 The output of the solver phase is a dataframe written to a parquet file in the workspace. Files are named by run and the particle species from the particle ID gate. The available values in the data frame are as follows:
@@ -59,6 +53,10 @@ Spyral has two solving phases available: `InterpSolverPhase` and `InterpLeastSqS
 - In general, when testing least-squares, it was observed to determine at the same conclusion as our L-BFGS-B solution *except* in the case of low-energy data near 90 degrees in the lab polar angle. This is data where we have always suspected we perform poorly, but if this region is critical for your analysis, it may be best to use L-BFGS-B, which is less rejective.
 
 In general, the offical Spyral recommendation is to use `InterpLeastSqSolverPhase`; reporting errors is a critical part of understanding a fit to data, and provides a more robust understanding of the analysis performance. But given the wide range of datasets and configurations of the AT-TPC, we can not say that this is the correct method for *every* dataset.
+
+## Control over Fit parameters
+
+In general, 6 parameters completely describe a trajectory for a given particle species: particle kinetic energy (mass and momentum magnitude), polar angle, azimuthal angle, vertex x,y,z. Both solver types are set up to fit each of these parameters. However, in testing against simulated values it was found that there was little improvement relative to truth values when fitting vertex x, y, and the azimuthal angle. It is possible that for some data sets, including these parameters could be an overfit relative to the amount of information available. As a result, the solver configuration [parameters](../config/solver.md) exposes switches to turn these parameters on and off. It is up to the user to determine if these parameters are appropriate to use or not for a given dataset. Feedback is welcome on experiences using these paraemters, this is an active area of research for Spryal! Note that turning off parameters will generally also make the solving phase run faster.
 
 ## Final Thoughts
 

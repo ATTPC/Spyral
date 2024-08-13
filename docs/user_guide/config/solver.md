@@ -15,6 +15,9 @@ solver_params = SolverParameters(
     interp_polar_min=2.0,
     interp_polar_max=88.0,
     interp_polar_bins=166,
+    fit_vertex_rho=True,
+    fit_vertex_phi=True,
+    fit_azimuthal=True,
 )
 ```
 
@@ -115,3 +118,15 @@ Maximum polar angle (degrees) of the ODE mesh for the solver. This is the maximu
 ## interp_polar_bins
 
 Number of polar angle bins of the ODE mesh for the solver. This is the coarseness/fineness of the mesh in polar angle.
+
+## fit_vertex_rho
+
+A boolean switch telling the solver whether or not the vertex &rho; should be included in the fit. In testing the simulation has indicated that the poisition of the vertex in the x-y plane (for the fit we use rho and phi because they are easier to define bounds for) is not well constrained and may cause overfitting. Data analysis has indicated *somewhat* the other direction, that it does seem to have some impact. User discretion should be used to determine if this parameter is important for your data. True turns on this variable for the fit, False holds it constant.
+
+## fit_vertex_phi
+
+A boolean switch telling the solver whether or not the vertex &phi; should be included in the fit. In testing the simulation has indicated that the poisition of the vertex in the x-y plane (for the fit we use rho and phi because they are easier to define bounds for) is not well constrained and may cause overfitting. Data analysis has indicated *somewhat* the other direction, that it does seem to have some impact. User discretion should be used to determine if this parameter is important for your data. True turns on this variable for the fit, False holds it constant.
+
+## fit_azimuthal
+
+A boolean switch telling the solver whether or not the trajectory azimuthal angle; should be included in the fit. In testing the simulation has indicated that the azimuthal angle is not impacted by the fit and may cause overfitting. Data analysis has indicated *somewhat* the other direction, that it does seem to have some impact. User discretion should be used to determine if this parameter is important for your data. True turns on this variable for the fit, False holds it constant.
