@@ -4,7 +4,6 @@ from ..core.constants import INVALID_EVENT_NUMBER
 from ..core.hardware_id import hardware_id_from_array
 
 import numpy as np
-import h5py as h5
 from numba import njit
 
 GET_DATA_TRACE_START: int = 5

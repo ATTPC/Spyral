@@ -186,7 +186,7 @@ class PointCloud:
 
         """
         mask = np.any(np.isnan(self.cloud), axis=1)
-        self.cloud = self.cloud[mask]
+        self.cloud = self.cloud[~mask]  # Invert the mask to reject the NaNs
 
     def sort_in_z(self):
         """Sort the internal point cloud array by the z-coordinate"""

@@ -85,7 +85,7 @@ class PadMap:
             params.pad_geometry_path == DEFAULT_MAP
             or params.pad_geometry_path == DEFAULT_LEGACY_MAP
         ):
-            geom_handle = directory.joinpath(f"padxy.csv")
+            geom_handle = directory.joinpath("padxy.csv")
             with resources.as_file(geom_handle) as geopath:
                 geofile = open(geopath, "r")
                 geofile.readline()  # Remove header
@@ -130,7 +130,7 @@ class PadMap:
 
         # Electronics
         if params.pad_electronics_path == DEFAULT_MAP:
-            elec_handle = directory.joinpath(f"pad_electronics.csv")
+            elec_handle = directory.joinpath("pad_electronics.csv")
             with resources.as_file(elec_handle) as elecpath:
                 elecfile = open(elecpath, "r")
                 elecfile.readline()
@@ -148,7 +148,7 @@ class PadMap:
                     self.elec_map[generate_electronics_id(hardware)] = hardware.pad_id
                 elecfile.close()
         elif params.pad_electronics_path == DEFAULT_LEGACY_MAP:
-            elec_handle = directory.joinpath(f"pad_electronics_legacy.csv")
+            elec_handle = directory.joinpath("pad_electronics_legacy.csv")
             with resources.as_file(elec_handle) as elecpath:
                 elecfile = open(elecpath, "r")
                 elecfile.readline()
@@ -221,7 +221,7 @@ class PadMap:
             The associated PadData, or None if the pad number is invalid
 
         """
-        if (pad_number == INVALID_PAD_ID) or not (pad_number in self.map.keys()):
+        if (pad_number == INVALID_PAD_ID) or pad_number not in self.map.keys():
             return None
 
         return self.map[pad_number]

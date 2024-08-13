@@ -238,7 +238,10 @@ def stop_condition(
     mass_u = ejectile.mass / AMU_2_MEV
     proj = catima.Projectile(mass_u, ejectile.Z)  # type: ignore
     proj.T(kinetic_energy / mass_u)
-    return catima.calculate(proj, target.material).range / target.density * 0.01 - RANGE_LIMIT  # type: ignore
+    return (
+        catima.calculate(proj, target.material).range / target.density * 0.01
+        - RANGE_LIMIT
+    )  # type: ignore
 
 
 # These function sigs must match the ODE function
@@ -439,8 +442,8 @@ def generate_track_mesh(params: MeshParameters, track_path: Path, meta_path: Pat
     print("Optimizing time range...")
 
     # First narrow the time range to the relevant size for the problem
-    for eidx, e in enumerate(kes):
-        for pidx, p in enumerate(polars):
+    for e in kes:
+        for p in polars:
             count += 1
             if count == flush_val:
                 count = 0
