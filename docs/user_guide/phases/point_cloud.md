@@ -84,6 +84,8 @@ Some additional discussion needs to be had about the behavior of the ion chamber
 
 In the past, the AT-TPC was not run with a split DAQ. That is, all signals were recorded using the GET data aquisition, including auxilary detectors like the ion chamber. To support this older data Spyral also provides a `PointcloudLegacyPhase`. If this phase is used Spyral assumes that any data in CoBo 10 is exclusively from auxilary detectors. Legacy pad mappings and corrections are also bundled in the package. Legacy IC data is analyzed for peaks using an additional `GetParameters` instance. Legacy analysis is an advanced feature, and requires some experience with using Spyral. This phase is the only phase significantly impacted by legacy analysis.
 
+Warning: Legacy Data support will be removed in the next release. In general we don't support everything needed for Legacy analysis, and a more complete example is given by Z. Serkiow [here](https://github.com/sigmanotation/e20009_analysis)
+
 ## Scalers
 
 The FRIBDAQ data does not only contain auxilary detectors. It also contains scalers, or counters. These scalers are readout independently from the main acquisition and represent statistics of the experiment. The most common scaler to use is the downscaled ion chamber trigger, which is a measurement of the total beam count over the course of the experiment. Scalers are read out run by run and are written to the `scaler` directory of the workspace as dataframes in parquet files. The available columns in the dataframe are:

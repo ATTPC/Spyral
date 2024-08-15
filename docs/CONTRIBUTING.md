@@ -38,7 +38,7 @@ In some places in the code you may notice the comment `# type: ignore`. The Spyr
 
 ### Formatting
 
-Spyral uses the black formatter. The appropriate version of black is included in the requirements.txt file, so simply install and everything should be good to go.
+Spyral uses the ruff for linting and formatting, with the configuration defined in the pyproject.toml.
 
 ### Files
 

@@ -98,6 +98,9 @@ solver_params = SolverParameters(
     interp_polar_min=2.0,
     interp_polar_max=88.0,
     interp_polar_bins=166,
+    fit_vertex_rho=True,
+    fit_vertex_phi=True,
+    fit_azimuthal=True,
 )
 
 pipe = Pipeline(

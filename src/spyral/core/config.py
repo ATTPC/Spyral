@@ -210,6 +210,12 @@ class SolverParameters:
         The maximum value of polar angle used in the interpolation scheme in degrees
     interp_polar_bins: int
         The number of polar angle bins used in the interpolation scheme
+    fit_vertex_rho: bool
+        Control whether or not the vertex rho position is fitted (True=fitted, False=fixed)
+    fit_vertex_phi: bool
+        Control whether or not the vertex phi position is fitted (True=fitted, False=fixed)
+    fit_azimuthal: bool
+        Control whether or not the trajectory azimuthal angle is fitted (True=fitted, False=fixed)
     """
 
     gas_data_path: Path
