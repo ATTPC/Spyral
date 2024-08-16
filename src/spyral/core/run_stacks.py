@@ -68,7 +68,7 @@ def collect_runs(
         run: get_size_path(trace_path / f"{form_run_string(run)}.h5")
         for run in range(run_min, run_max + 1)
         if (get_size_path(trace_path / f"{form_run_string(run)}.h5") != 0)
-        and (not run in runs_to_skip)
+        and run not in runs_to_skip
     }
     run_dict = dict(sorted(run_dict.items(), key=lambda item: item[1], reverse=True))
     return run_dict

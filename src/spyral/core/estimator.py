@@ -222,6 +222,9 @@ def estimate_physics_pass(
     fit = linregress(cluster_data[:test_index, 2], rho_to_vertex[:test_index])
     vertex_rho = np.linalg.norm(vertex[:2])
     # Since we fit to rho_to_vertex, just find intercept point
+    # Check to see if slope is zero, as this can lead to NaN's
+    if fit.slope == 0.0:  # type: ignore
+        return (False, Direction.NONE)
     vertex[2] = -1.0 * fit.intercept / fit.slope  # type: ignore
     center[2] = vertex[2]
 

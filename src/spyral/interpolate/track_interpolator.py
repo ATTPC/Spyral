@@ -1,12 +1,10 @@
 from ..core.constants import DEG2RAD
-from ..core.track_generator import MeshParameters
 from .bilinear import BilinearInterpolator
 from .linear import LinearInterpolator
 
 import numpy as np
 from pathlib import Path
 import json
-from typing import Any
 
 from numba import float64, int32
 from numba.types import string, ListType  # type: ignore
@@ -247,14 +245,6 @@ class TrackInterpolator:
         trajectory[:, 0] += vx
         trajectory[:, 1] += vy
         trajectory[:, 2] += vz
-        # Trim stopped region
-        removal = np.full(len(trajectory), True)
-        previous_element = np.full(3, -1.0)
-        for idx, element in enumerate(trajectory):
-            if np.all(previous_element[:] == element[:]):
-                removal[idx] = False
-            previous_element = element
-        trajectory = trajectory[removal]
         if len(trajectory) < 2:
             return None
 

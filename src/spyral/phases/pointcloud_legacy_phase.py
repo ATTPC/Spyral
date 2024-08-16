@@ -189,7 +189,7 @@ class PointcloudLegacyPhase(PhaseLike):
                 event_data = event_group[event_name]  # type: ignore
 
             event = GetLegacyEvent(
-                event_data, idx, self.get_params, self.ic_params, rng
+                event_data[:], idx, self.get_params, self.ic_params, rng
             )
 
             pc = PointCloud()
@@ -225,5 +225,7 @@ class PointcloudLegacyPhase(PhaseLike):
 
             pc_dataset[:] = pc.cloud
 
-        spyral_info(__name__, "Phase 1 complete")
+        spyral_info(
+            __name__, f"Phase PointcloudLegacy complete for run {payload.run_number}"
+        )
         return result

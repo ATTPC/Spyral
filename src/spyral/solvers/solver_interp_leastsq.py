@@ -2,7 +2,7 @@ from .guess import Guess
 from ..core.cluster import Cluster
 from ..interpolate.track_interpolator import TrackInterpolator
 from ..core.constants import QBRHO_2_P, BIG_PAD_HEIGHT
-from ..core.config import DetectorParameters
+from ..core.config import DetectorParameters, SolverParameters
 
 from spyral_utils.nuclear import NucleusData
 
@@ -125,6 +125,7 @@ def create_params(
     ejectile: NucleusData,
     interpolator: TrackInterpolator,
     det_params: DetectorParameters,
+    solver_params: SolverParameters,
 ) -> Parameters:
     """Create the lmfit parameters with appropriate bounds
 
@@ -140,6 +141,8 @@ def create_params(
         the interpolation scheme to be used
     det_params: DetectorParameters
         Configuration parameters for detector characteristics
+    solver_params: SolverParameters
+        Configuration parameters for the solver
 
     Returns
     -------
@@ -200,13 +203,26 @@ def create_params(
         value=vert_rho,
         min=0.0,
         max=det_params.beam_region_radius * 0.001,
-        vary=True,
+        vary=solver_params.fit_vertex_rho,
     )
-    fit_params.add("vertex_phi", value=vert_phi, min=0.0, max=np.pi * 2.0, vary=True)
+    fit_params.add(
+        "vertex_phi",
+        value=vert_phi,
+        min=0.0,
+        max=np.pi * 2.0,
+        vary=solver_params.fit_vertex_phi,
+    )
+    fit_params.add(
+        "azimuthal",
+        value=guess.azimuthal,
+        min=0.0,
+        max=2.0 * np.pi,
+        vary=solver_params.fit_azimuthal,
+    )
     fit_params.add("vertex_x", expr="vertex_rho * cos(vertex_phi)")
     fit_params.add("vertex_y", expr="vertex_rho * sin(vertex_phi)")
     fit_params.add("vertex_z", guess.vertex_z * 0.001, min=min_z, max=max_z, vary=True)
-    fit_params.add("azimuthal", value=guess.azimuthal, min=0.0, max=2.0 * np.pi)
+
     return fit_params
 
 
@@ -217,6 +233,7 @@ def fit_model_interp(
     ejectile: NucleusData,
     interpolator: TrackInterpolator,
     det_params: DetectorParameters,
+    solver_params: SolverParameters,
 ) -> Parameters | None:
     """Used for jupyter notebooks examining the good-ness of the model
 
@@ -232,6 +249,8 @@ def fit_model_interp(
         the interpolation scheme to be used
     det_params: DetectorParameters
         Configuration parameters for detector characteristics
+    solver_params: SolverParameters
+        Configuration parameters for the solver
 
     Returns
     -------
@@ -250,13 +269,16 @@ def fit_model_interp(
         / float(det_params.window_time_bucket - det_params.micromegas_time_bucket)
         * 0.001
     ) * 0.5
-    # uncertainty due to pad size, treat as box
-    xy_error = cluster.data[:, 4] * BIG_PAD_HEIGHT * 0.5
-    # total positional error per point
-    total_error = np.sqrt(2.0 * (xy_error**2.0) + z_error**2.0)
+    # uncertainty due to pad size, treat as bounding rectangle
+    # Note that doesn't matter which side is short/long as we just use
+    # total error (distance)
+    x_error = cluster.data[:, 4] * BIG_PAD_HEIGHT * 0.5
+    y_error = cluster.data[:, 4] * BIG_PAD_HEIGHT / np.sqrt(3.0)
+    # total positional variance per point
+    total_error = np.sqrt(x_error**2.0 + y_error**2.0 + z_error**2.0)
     weights = 1.0 / total_error
 
-    fit_params = create_params(guess, ejectile, interpolator, det_params)
+    fit_params = create_params(guess, ejectile, interpolator, det_params, solver_params)
 
     result: MinimizerResult = minimize(
         objective_function,
@@ -276,6 +298,7 @@ def solve_physics_interp(
     ejectile: NucleusData,
     interpolator: TrackInterpolator,
     det_params: DetectorParameters,
+    solver_params: SolverParameters,
     results: dict[str, list],
 ):
     """High level function to be called from the application.
@@ -296,6 +319,8 @@ def solve_physics_interp(
         the interpolation scheme to be used
     det_params: DetectorParameters
         Configuration parameters for detector characteristics
+    solver_params: SolverParameters
+        Configuration parameters for the solver
     results: dict[str, list]
         storage for results from the fitting, which will later be written as a dataframe.
     """
@@ -311,13 +336,16 @@ def solve_physics_interp(
         / float(det_params.window_time_bucket - det_params.micromegas_time_bucket)
         * 0.001
     ) * 0.5
-    # uncertainty due to pad size, treat as box
-    xy_error = cluster.data[:, 4] * BIG_PAD_HEIGHT * 0.5
+    # uncertainty due to pad size, treat as bounding rectangle
+    # Note that doesn't matter which side is short/long as we just use
+    # total error (distance)
+    x_error = cluster.data[:, 4] * BIG_PAD_HEIGHT * 0.5
+    y_error = cluster.data[:, 4] * BIG_PAD_HEIGHT / np.sqrt(3.0)
     # total positional variance per point
-    total_error = np.sqrt(2.0 * (xy_error**2.0) + z_error**2.0)
+    total_error = np.sqrt(x_error**2.0 + y_error**2.0 + z_error**2.0)
     weights = 1.0 / total_error
 
-    fit_params = create_params(guess, ejectile, interpolator, det_params)
+    fit_params = create_params(guess, ejectile, interpolator, det_params, solver_params)
 
     best_fit: MinimizerResult = minimize(
         objective_function,

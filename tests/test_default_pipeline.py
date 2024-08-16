@@ -81,12 +81,14 @@ solver_params = SolverParameters(
     interp_polar_min=2.0,
     interp_polar_max=88.0,
     interp_polar_bins=170,
+    fit_vertex_rho=True,
+    fit_vertex_phi=True,
+    fit_azimuthal=True,
 )
 
 
 # Test the default pipeline by validating it
 def test_good_pipeline():
-
     good_pipe = Pipeline(
         [
             PointcloudPhase(
@@ -103,11 +105,10 @@ def test_good_pipeline():
         workspace_path,
         trace_path,
     )
-    assert not False in good_pipe.validate().values()
+    assert False not in good_pipe.validate().values()
 
 
 def test_bad_pipeline():
-
     bad_pipe = Pipeline(
         [
             PointcloudPhase(
@@ -129,7 +130,6 @@ def test_bad_pipeline():
 
 
 def test_create_workspace():
-
     pipe = Pipeline(
         [
             PointcloudPhase(
@@ -172,5 +172,5 @@ def test_pickleable():
         workspace_path,
         trace_path,
     )
-    assert not False in good_pipe.validate().values()
+    assert False not in good_pipe.validate().values()
     assert pickles(good_pipe)
