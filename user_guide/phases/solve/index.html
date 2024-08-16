@@ -687,15 +687,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fitting-to-data" class="md-nav__link">
-    <span class="md-ellipsis">
-      Fitting to Data
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#output" class="md-nav__link">
     <span class="md-ellipsis">
       Output
@@ -708,6 +699,15 @@
   <a href="#choice-of-fitting-method" class="md-nav__link">
     <span class="md-ellipsis">
       Choice of Fitting Method
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#control-over-fit-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Control over Fit parameters
     </span>
   </a>
   
@@ -2124,6 +2124,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/trace/trace_reader/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    trace_reader
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2235,15 +2256,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#fitting-to-data" class="md-nav__link">
-    <span class="md-ellipsis">
-      Fitting to Data
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#output" class="md-nav__link">
     <span class="md-ellipsis">
       Output
@@ -2256,6 +2268,15 @@
   <a href="#choice-of-fitting-method" class="md-nav__link">
     <span class="md-ellipsis">
       Choice of Fitting Method
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#control-over-fit-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Control over Fit parameters
     </span>
   </a>
   
@@ -2302,9 +2323,6 @@
 <p>Finally, when a trajectory is requested, Spyral interpolates on energy and angle to get a trajectory points or fewer (points where the particle stopped are trimmed).</p>
 <p>When a trajectory is requested, the full energy, polar angle, azimuthal angle, and reaction vertex must be given. The azimuthal angle and vertex are used to rotate and translate the trajectory to the proper orientation (this reduces the phase space of the interpolation mesh).</p>
 <p>In general, it has been found that 0.5 degree steps in polar angle are best, while 200 keV steps in energy are acceptable. However, this may need tuning from experiment to experiment.</p>
-<h2 id="fitting-to-data">Fitting to Data</h2>
-<p>Spyral uses the L-BFGS-B quasi-Newton minimization scheme to minimize the average error between the data and the trajectory. The average error is computed by looping over the data and the trajectory and calculating the smallest distance between the given data point and a point on the trajectory. These minimum distances are then averaged.</p>
-<p>The best fit parameters and their uncertainties (when possible) are written to disk in an Apache parquet file. The reduced &chi;<sup>2</sup> is also written.</p>
 <h2 id="output">Output</h2>
 <p>The output of the solver phase is a dataframe written to a parquet file in the workspace. Files are named by run and the particle species from the particle ID gate. The available values in the data frame are as follows:</p>
 <ul>
@@ -2335,6 +2353,8 @@
 <li>In general, when testing least-squares, it was observed to determine at the same conclusion as our L-BFGS-B solution <em>except</em> in the case of low-energy data near 90 degrees in the lab polar angle. This is data where we have always suspected we perform poorly, but if this region is critical for your analysis, it may be best to use L-BFGS-B, which is less rejective.</li>
 </ul>
 <p>In general, the offical Spyral recommendation is to use <code>InterpLeastSqSolverPhase</code>; reporting errors is a critical part of understanding a fit to data, and provides a more robust understanding of the analysis performance. But given the wide range of datasets and configurations of the AT-TPC, we can not say that this is the correct method for <em>every</em> dataset.</p>
+<h2 id="control-over-fit-parameters">Control over Fit parameters</h2>
+<p>In general, 6 parameters completely describe a trajectory for a given particle species: particle kinetic energy (mass and momentum magnitude), polar angle, azimuthal angle, vertex x,y,z. Both solver types are set up to fit each of these parameters. However, in testing against simulated values it was found that there was little improvement relative to truth values when fitting vertex x, y, and the azimuthal angle. It is possible that for some data sets, including these parameters could be an overfit relative to the amount of information available. As a result, the solver configuration <a href="../../config/solver/">parameters</a> exposes switches to turn these parameters on and off. It is up to the user to determine if these parameters are appropriate to use or not for a given dataset. Feedback is welcome on experiences using these paraemters, this is an active area of research for Spryal! Note that turning off parameters will generally also make the solving phase run faster.</p>
 <h2 id="final-thoughts">Final Thoughts</h2>
 <p>Generating a good interpolation mesh is key. If the mesh is too coarse the results will become equally coarse.</p>
 <p>To make performance reasonable <a href="../../numba/">Numba</a> is used to just-in-time compile the interpolation scheme and objective function. Checkout that section of the docs for more details.</p>

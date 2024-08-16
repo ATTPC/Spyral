@@ -2157,6 +2157,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/trace/trace_reader/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    trace_reader
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2411,6 +2432,7 @@
 <p>Some additional discussion needs to be had about the behavior of the ion chamber as it pertains to the trigger (start) of events. The ion chamber recieves a beam particle, which causes a singal to be registered. This ion chamber signal is then delayed by 100 &mu;s. The beam then enters the AT-TPC active volume, electrons are ionized, and the electrons drift toward the mesh. The mesh registers a singal, and this signal generates a 120 &mu;s gate. The coincidence of this mesh gate and the ion chamber delayed signal is then the trigger for an event. This effects the analysis of the ion chamber because the recording window for the module recieving the ion chamber recieves this delayed IC signal, and so can have peaks in the waveform that occured <em>before</em> the event trigger. To compensate for this there is a configuration parameter to set the delay in FRIBDAQ time buckets; all peaks before the delay time bucket are ignored and not used in subsequent ion chamber analysis. See <a href="../../config/traces/">here</a> for more details. (We should probably put a diagram of what is happening here)</p>
 <h2 id="legacy-data">Legacy Data</h2>
 <p>In the past, the AT-TPC was not run with a split DAQ. That is, all signals were recorded using the GET data aquisition, including auxilary detectors like the ion chamber. To support this older data Spyral also provides a <code>PointcloudLegacyPhase</code>. If this phase is used Spyral assumes that any data in CoBo 10 is exclusively from auxilary detectors. Legacy pad mappings and corrections are also bundled in the package. Legacy IC data is analyzed for peaks using an additional <code>GetParameters</code> instance. Legacy analysis is an advanced feature, and requires some experience with using Spyral. This phase is the only phase significantly impacted by legacy analysis.</p>
+<p>Warning: Legacy Data support will be removed in the next release. In general we don't support everything needed for Legacy analysis, and a more complete example is given by Z. Serkiow <a href="https://github.com/sigmanotation/e20009_analysis">here</a></p>
 <h2 id="scalers">Scalers</h2>
 <p>The FRIBDAQ data does not only contain auxilary detectors. It also contains scalers, or counters. These scalers are readout independently from the main acquisition and represent statistics of the experiment. The most common scaler to use is the downscaled ion chamber trigger, which is a measurement of the total beam count over the course of the experiment. Scalers are read out run by run and are written to the <code>scaler</code> directory of the workspace as dataframes in parquet files. The available columns in the dataframe are:</p>
 <ul>

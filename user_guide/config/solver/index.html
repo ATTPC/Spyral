@@ -628,6 +628,33 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#fit_vertex_rho" class="md-nav__link">
+    <span class="md-ellipsis">
+      fit_vertex_rho
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fit_vertex_phi" class="md-nav__link">
+    <span class="md-ellipsis">
+      fit_vertex_phi
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fit_azimuthal" class="md-nav__link">
+    <span class="md-ellipsis">
+      fit_azimuthal
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2178,6 +2205,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/trace/trace_reader/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    trace_reader
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2378,6 +2426,33 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#fit_vertex_rho" class="md-nav__link">
+    <span class="md-ellipsis">
+      fit_vertex_rho
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fit_vertex_phi" class="md-nav__link">
+    <span class="md-ellipsis">
+      fit_vertex_phi
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fit_azimuthal" class="md-nav__link">
+    <span class="md-ellipsis">
+      fit_azimuthal
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2410,7 +2485,10 @@
 </span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">interp_polar_min</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
 </span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="n">interp_polar_max</span><span class="o">=</span><span class="mf">88.0</span><span class="p">,</span>
 </span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="n">interp_polar_bins</span><span class="o">=</span><span class="mi">166</span><span class="p">,</span>
-</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="p">)</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a>    <span class="n">fit_vertex_rho</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="n">fit_vertex_phi</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="n">fit_azimuthal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a><span class="p">)</span>
 </span></code></pre></div>
 <p>Note that these default values <em>will not work</em>. In particular the <code>gas_data_path</code> and <code>particle_id_file</code> parameters must be modified.</p>
 <p>A break down of each parameter:</p>
@@ -2476,6 +2554,12 @@
 <p>Maximum polar angle (degrees) of the ODE mesh for the solver. This is the maximum polar angle of a particle for which this solver will work. In units of degrees.</p>
 <h2 id="interp_polar_bins">interp_polar_bins</h2>
 <p>Number of polar angle bins of the ODE mesh for the solver. This is the coarseness/fineness of the mesh in polar angle.</p>
+<h2 id="fit_vertex_rho">fit_vertex_rho</h2>
+<p>A boolean switch telling the solver whether or not the vertex &rho; should be included in the fit. In testing the simulation has indicated that the poisition of the vertex in the x-y plane (for the fit we use rho and phi because they are easier to define bounds for) is not well constrained and may cause overfitting. Data analysis has indicated <em>somewhat</em> the other direction, that it does seem to have some impact. User discretion should be used to determine if this parameter is important for your data. True turns on this variable for the fit, False holds it constant.</p>
+<h2 id="fit_vertex_phi">fit_vertex_phi</h2>
+<p>A boolean switch telling the solver whether or not the vertex &phi; should be included in the fit. In testing the simulation has indicated that the poisition of the vertex in the x-y plane (for the fit we use rho and phi because they are easier to define bounds for) is not well constrained and may cause overfitting. Data analysis has indicated <em>somewhat</em> the other direction, that it does seem to have some impact. User discretion should be used to determine if this parameter is important for your data. True turns on this variable for the fit, False holds it constant.</p>
+<h2 id="fit_azimuthal">fit_azimuthal</h2>
+<p>A boolean switch telling the solver whether or not the trajectory azimuthal angle; should be included in the fit. In testing the simulation has indicated that the azimuthal angle is not impacted by the fit and may cause overfitting. Data analysis has indicated <em>somewhat</em> the other direction, that it does seem to have some impact. User discretion should be used to determine if this parameter is important for your data. True turns on this variable for the fit, False holds it constant.</p>
 
 
 

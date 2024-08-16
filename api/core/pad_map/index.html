@@ -2148,6 +2148,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../trace/trace_reader/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    trace_reader
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2943,7 +2964,7 @@
 </span><span id="__span-0-85"><a id="__codelineno-0-85" name="__codelineno-0-85"></a>            <span class="n">params</span><span class="o">.</span><span class="n">pad_geometry_path</span> <span class="o">==</span> <span class="n">DEFAULT_MAP</span>
 </span><span id="__span-0-86"><a id="__codelineno-0-86" name="__codelineno-0-86"></a>            <span class="ow">or</span> <span class="n">params</span><span class="o">.</span><span class="n">pad_geometry_path</span> <span class="o">==</span> <span class="n">DEFAULT_LEGACY_MAP</span>
 </span><span id="__span-0-87"><a id="__codelineno-0-87" name="__codelineno-0-87"></a>        <span class="p">):</span>
-</span><span id="__span-0-88"><a id="__codelineno-0-88" name="__codelineno-0-88"></a>            <span class="n">geom_handle</span> <span class="o">=</span> <span class="n">directory</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;padxy.csv&quot;</span><span class="p">)</span>
+</span><span id="__span-0-88"><a id="__codelineno-0-88" name="__codelineno-0-88"></a>            <span class="n">geom_handle</span> <span class="o">=</span> <span class="n">directory</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;padxy.csv&quot;</span><span class="p">)</span>
 </span><span id="__span-0-89"><a id="__codelineno-0-89" name="__codelineno-0-89"></a>            <span class="k">with</span> <span class="n">resources</span><span class="o">.</span><span class="n">as_file</span><span class="p">(</span><span class="n">geom_handle</span><span class="p">)</span> <span class="k">as</span> <span class="n">geopath</span><span class="p">:</span>
 </span><span id="__span-0-90"><a id="__codelineno-0-90" name="__codelineno-0-90"></a>                <span class="n">geofile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">geopath</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
 </span><span id="__span-0-91"><a id="__codelineno-0-91" name="__codelineno-0-91"></a>                <span class="n">geofile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>  <span class="c1"># Remove header</span>
@@ -2988,7 +3009,7 @@
 </span><span id="__span-0-130"><a id="__codelineno-0-130" name="__codelineno-0-130"></a>
 </span><span id="__span-0-131"><a id="__codelineno-0-131" name="__codelineno-0-131"></a>        <span class="c1"># Electronics</span>
 </span><span id="__span-0-132"><a id="__codelineno-0-132" name="__codelineno-0-132"></a>        <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">pad_electronics_path</span> <span class="o">==</span> <span class="n">DEFAULT_MAP</span><span class="p">:</span>
-</span><span id="__span-0-133"><a id="__codelineno-0-133" name="__codelineno-0-133"></a>            <span class="n">elec_handle</span> <span class="o">=</span> <span class="n">directory</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;pad_electronics.csv&quot;</span><span class="p">)</span>
+</span><span id="__span-0-133"><a id="__codelineno-0-133" name="__codelineno-0-133"></a>            <span class="n">elec_handle</span> <span class="o">=</span> <span class="n">directory</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;pad_electronics.csv&quot;</span><span class="p">)</span>
 </span><span id="__span-0-134"><a id="__codelineno-0-134" name="__codelineno-0-134"></a>            <span class="k">with</span> <span class="n">resources</span><span class="o">.</span><span class="n">as_file</span><span class="p">(</span><span class="n">elec_handle</span><span class="p">)</span> <span class="k">as</span> <span class="n">elecpath</span><span class="p">:</span>
 </span><span id="__span-0-135"><a id="__codelineno-0-135" name="__codelineno-0-135"></a>                <span class="n">elecfile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">elecpath</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
 </span><span id="__span-0-136"><a id="__codelineno-0-136" name="__codelineno-0-136"></a>                <span class="n">elecfile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
@@ -3006,7 +3027,7 @@
 </span><span id="__span-0-148"><a id="__codelineno-0-148" name="__codelineno-0-148"></a>                    <span class="bp">self</span><span class="o">.</span><span class="n">elec_map</span><span class="p">[</span><span class="n">generate_electronics_id</span><span class="p">(</span><span class="n">hardware</span><span class="p">)]</span> <span class="o">=</span> <span class="n">hardware</span><span class="o">.</span><span class="n">pad_id</span>
 </span><span id="__span-0-149"><a id="__codelineno-0-149" name="__codelineno-0-149"></a>                <span class="n">elecfile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </span><span id="__span-0-150"><a id="__codelineno-0-150" name="__codelineno-0-150"></a>        <span class="k">elif</span> <span class="n">params</span><span class="o">.</span><span class="n">pad_electronics_path</span> <span class="o">==</span> <span class="n">DEFAULT_LEGACY_MAP</span><span class="p">:</span>
-</span><span id="__span-0-151"><a id="__codelineno-0-151" name="__codelineno-0-151"></a>            <span class="n">elec_handle</span> <span class="o">=</span> <span class="n">directory</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;pad_electronics_legacy.csv&quot;</span><span class="p">)</span>
+</span><span id="__span-0-151"><a id="__codelineno-0-151" name="__codelineno-0-151"></a>            <span class="n">elec_handle</span> <span class="o">=</span> <span class="n">directory</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;pad_electronics_legacy.csv&quot;</span><span class="p">)</span>
 </span><span id="__span-0-152"><a id="__codelineno-0-152" name="__codelineno-0-152"></a>            <span class="k">with</span> <span class="n">resources</span><span class="o">.</span><span class="n">as_file</span><span class="p">(</span><span class="n">elec_handle</span><span class="p">)</span> <span class="k">as</span> <span class="n">elecpath</span><span class="p">:</span>
 </span><span id="__span-0-153"><a id="__codelineno-0-153" name="__codelineno-0-153"></a>                <span class="n">elecfile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">elecpath</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
 </span><span id="__span-0-154"><a id="__codelineno-0-154" name="__codelineno-0-154"></a>                <span class="n">elecfile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
@@ -3079,7 +3100,7 @@
 </span><span id="__span-0-221"><a id="__codelineno-0-221" name="__codelineno-0-221"></a><span class="sd">            The associated PadData, or None if the pad number is invalid</span>
 </span><span id="__span-0-222"><a id="__codelineno-0-222" name="__codelineno-0-222"></a>
 </span><span id="__span-0-223"><a id="__codelineno-0-223" name="__codelineno-0-223"></a><span class="sd">        &quot;&quot;&quot;</span>
-</span><span id="__span-0-224"><a id="__codelineno-0-224" name="__codelineno-0-224"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">pad_number</span> <span class="o">==</span> <span class="n">INVALID_PAD_ID</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="n">pad_number</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+</span><span id="__span-0-224"><a id="__codelineno-0-224" name="__codelineno-0-224"></a>        <span class="k">if</span> <span class="p">(</span><span class="n">pad_number</span> <span class="o">==</span> <span class="n">INVALID_PAD_ID</span><span class="p">)</span> <span class="ow">or</span> <span class="n">pad_number</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
 </span><span id="__span-0-225"><a id="__codelineno-0-225" name="__codelineno-0-225"></a>            <span class="k">return</span> <span class="kc">None</span>
 </span><span id="__span-0-226"><a id="__codelineno-0-226" name="__codelineno-0-226"></a>
 </span><span id="__span-0-227"><a id="__codelineno-0-227" name="__codelineno-0-227"></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">pad_number</span><span class="p">]</span>
@@ -3242,7 +3263,7 @@
 </span><span id="__span-0-221"><a id="__codelineno-0-221" name="__codelineno-0-221"></a><span class="sd">        The associated PadData, or None if the pad number is invalid</span>
 </span><span id="__span-0-222"><a id="__codelineno-0-222" name="__codelineno-0-222"></a>
 </span><span id="__span-0-223"><a id="__codelineno-0-223" name="__codelineno-0-223"></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="__span-0-224"><a id="__codelineno-0-224" name="__codelineno-0-224"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">pad_number</span> <span class="o">==</span> <span class="n">INVALID_PAD_ID</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="n">pad_number</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+</span><span id="__span-0-224"><a id="__codelineno-0-224" name="__codelineno-0-224"></a>    <span class="k">if</span> <span class="p">(</span><span class="n">pad_number</span> <span class="o">==</span> <span class="n">INVALID_PAD_ID</span><span class="p">)</span> <span class="ow">or</span> <span class="n">pad_number</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
 </span><span id="__span-0-225"><a id="__codelineno-0-225" name="__codelineno-0-225"></a>        <span class="k">return</span> <span class="kc">None</span>
 </span><span id="__span-0-226"><a id="__codelineno-0-226" name="__codelineno-0-226"></a>
 </span><span id="__span-0-227"><a id="__codelineno-0-227" name="__codelineno-0-227"></a>    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">map</span><span class="p">[</span><span class="n">pad_number</span><span class="p">]</span>
@@ -3672,7 +3693,7 @@
 </span><span id="__span-0-85"><a id="__codelineno-0-85" name="__codelineno-0-85"></a>        <span class="n">params</span><span class="o">.</span><span class="n">pad_geometry_path</span> <span class="o">==</span> <span class="n">DEFAULT_MAP</span>
 </span><span id="__span-0-86"><a id="__codelineno-0-86" name="__codelineno-0-86"></a>        <span class="ow">or</span> <span class="n">params</span><span class="o">.</span><span class="n">pad_geometry_path</span> <span class="o">==</span> <span class="n">DEFAULT_LEGACY_MAP</span>
 </span><span id="__span-0-87"><a id="__codelineno-0-87" name="__codelineno-0-87"></a>    <span class="p">):</span>
-</span><span id="__span-0-88"><a id="__codelineno-0-88" name="__codelineno-0-88"></a>        <span class="n">geom_handle</span> <span class="o">=</span> <span class="n">directory</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;padxy.csv&quot;</span><span class="p">)</span>
+</span><span id="__span-0-88"><a id="__codelineno-0-88" name="__codelineno-0-88"></a>        <span class="n">geom_handle</span> <span class="o">=</span> <span class="n">directory</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;padxy.csv&quot;</span><span class="p">)</span>
 </span><span id="__span-0-89"><a id="__codelineno-0-89" name="__codelineno-0-89"></a>        <span class="k">with</span> <span class="n">resources</span><span class="o">.</span><span class="n">as_file</span><span class="p">(</span><span class="n">geom_handle</span><span class="p">)</span> <span class="k">as</span> <span class="n">geopath</span><span class="p">:</span>
 </span><span id="__span-0-90"><a id="__codelineno-0-90" name="__codelineno-0-90"></a>            <span class="n">geofile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">geopath</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
 </span><span id="__span-0-91"><a id="__codelineno-0-91" name="__codelineno-0-91"></a>            <span class="n">geofile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>  <span class="c1"># Remove header</span>
@@ -3717,7 +3738,7 @@
 </span><span id="__span-0-130"><a id="__codelineno-0-130" name="__codelineno-0-130"></a>
 </span><span id="__span-0-131"><a id="__codelineno-0-131" name="__codelineno-0-131"></a>    <span class="c1"># Electronics</span>
 </span><span id="__span-0-132"><a id="__codelineno-0-132" name="__codelineno-0-132"></a>    <span class="k">if</span> <span class="n">params</span><span class="o">.</span><span class="n">pad_electronics_path</span> <span class="o">==</span> <span class="n">DEFAULT_MAP</span><span class="p">:</span>
-</span><span id="__span-0-133"><a id="__codelineno-0-133" name="__codelineno-0-133"></a>        <span class="n">elec_handle</span> <span class="o">=</span> <span class="n">directory</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;pad_electronics.csv&quot;</span><span class="p">)</span>
+</span><span id="__span-0-133"><a id="__codelineno-0-133" name="__codelineno-0-133"></a>        <span class="n">elec_handle</span> <span class="o">=</span> <span class="n">directory</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;pad_electronics.csv&quot;</span><span class="p">)</span>
 </span><span id="__span-0-134"><a id="__codelineno-0-134" name="__codelineno-0-134"></a>        <span class="k">with</span> <span class="n">resources</span><span class="o">.</span><span class="n">as_file</span><span class="p">(</span><span class="n">elec_handle</span><span class="p">)</span> <span class="k">as</span> <span class="n">elecpath</span><span class="p">:</span>
 </span><span id="__span-0-135"><a id="__codelineno-0-135" name="__codelineno-0-135"></a>            <span class="n">elecfile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">elecpath</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
 </span><span id="__span-0-136"><a id="__codelineno-0-136" name="__codelineno-0-136"></a>            <span class="n">elecfile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
@@ -3735,7 +3756,7 @@
 </span><span id="__span-0-148"><a id="__codelineno-0-148" name="__codelineno-0-148"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">elec_map</span><span class="p">[</span><span class="n">generate_electronics_id</span><span class="p">(</span><span class="n">hardware</span><span class="p">)]</span> <span class="o">=</span> <span class="n">hardware</span><span class="o">.</span><span class="n">pad_id</span>
 </span><span id="__span-0-149"><a id="__codelineno-0-149" name="__codelineno-0-149"></a>            <span class="n">elecfile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </span><span id="__span-0-150"><a id="__codelineno-0-150" name="__codelineno-0-150"></a>    <span class="k">elif</span> <span class="n">params</span><span class="o">.</span><span class="n">pad_electronics_path</span> <span class="o">==</span> <span class="n">DEFAULT_LEGACY_MAP</span><span class="p">:</span>
-</span><span id="__span-0-151"><a id="__codelineno-0-151" name="__codelineno-0-151"></a>        <span class="n">elec_handle</span> <span class="o">=</span> <span class="n">directory</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;pad_electronics_legacy.csv&quot;</span><span class="p">)</span>
+</span><span id="__span-0-151"><a id="__codelineno-0-151" name="__codelineno-0-151"></a>        <span class="n">elec_handle</span> <span class="o">=</span> <span class="n">directory</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;pad_electronics_legacy.csv&quot;</span><span class="p">)</span>
 </span><span id="__span-0-152"><a id="__codelineno-0-152" name="__codelineno-0-152"></a>        <span class="k">with</span> <span class="n">resources</span><span class="o">.</span><span class="n">as_file</span><span class="p">(</span><span class="n">elec_handle</span><span class="p">)</span> <span class="k">as</span> <span class="n">elecpath</span><span class="p">:</span>
 </span><span id="__span-0-153"><a id="__codelineno-0-153" name="__codelineno-0-153"></a>            <span class="n">elecfile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">elecpath</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
 </span><span id="__span-0-154"><a id="__codelineno-0-154" name="__codelineno-0-154"></a>            <span class="n">elecfile</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>

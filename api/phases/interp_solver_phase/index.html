@@ -2106,6 +2106,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../trace/trace_reader/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    trace_reader
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2695,7 +2716,12 @@ is expected to be run after the EstimationPhase.</p>
 <span class="normal"><a href="#__codelineno-0-351">351</a></span>
 <span class="normal"><a href="#__codelineno-0-352">352</a></span>
 <span class="normal"><a href="#__codelineno-0-353">353</a></span>
-<span class="normal"><a href="#__codelineno-0-354">354</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-61"><a id="__codelineno-0-61" name="__codelineno-0-61"></a><span class="k">class</span> <span class="nc">InterpSolverPhase</span><span class="p">(</span><span class="n">PhaseLike</span><span class="p">):</span>
+<span class="normal"><a href="#__codelineno-0-354">354</a></span>
+<span class="normal"><a href="#__codelineno-0-355">355</a></span>
+<span class="normal"><a href="#__codelineno-0-356">356</a></span>
+<span class="normal"><a href="#__codelineno-0-357">357</a></span>
+<span class="normal"><a href="#__codelineno-0-358">358</a></span>
+<span class="normal"><a href="#__codelineno-0-359">359</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-61"><a id="__codelineno-0-61" name="__codelineno-0-61"></a><span class="k">class</span> <span class="nc">InterpSolverPhase</span><span class="p">(</span><span class="n">PhaseLike</span><span class="p">):</span>
 </span><span id="__span-0-62"><a id="__codelineno-0-62" name="__codelineno-0-62"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;The default Spyral solver phase, inheriting from PhaseLike</span>
 </span><span id="__span-0-63"><a id="__codelineno-0-63" name="__codelineno-0-63"></a>
 </span><span id="__span-0-64"><a id="__codelineno-0-64" name="__codelineno-0-64"></a><span class="sd">    The goal of the solver phase is to get exact (or as exact as possible) values</span>
@@ -2938,7 +2964,7 @@ is expected to be run after the EstimationPhase.</p>
 </span><span id="__span-0-301"><a id="__codelineno-0-301" name="__codelineno-0-301"></a>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_mesh_shape</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">shared_mesh_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="__span-0-302"><a id="__codelineno-0-302" name="__codelineno-0-302"></a>            <span class="n">spyral_warn</span><span class="p">(</span>
 </span><span id="__span-0-303"><a id="__codelineno-0-303" name="__codelineno-0-303"></a>                <span class="vm">__name__</span><span class="p">,</span>
-</span><span id="__span-0-304"><a id="__codelineno-0-304" name="__codelineno-0-304"></a>                <span class="sa">f</span><span class="s2">&quot;Could not run the interpolation scheme as there is no shared memory!&quot;</span><span class="p">,</span>
+</span><span id="__span-0-304"><a id="__codelineno-0-304" name="__codelineno-0-304"></a>                <span class="s2">&quot;Could not run the interpolation scheme as there is no shared memory!&quot;</span><span class="p">,</span>
 </span><span id="__span-0-305"><a id="__codelineno-0-305" name="__codelineno-0-305"></a>            <span class="p">)</span>
 </span><span id="__span-0-306"><a id="__codelineno-0-306" name="__codelineno-0-306"></a>            <span class="k">return</span> <span class="n">PhaseResult</span><span class="o">.</span><span class="n">invalid_result</span><span class="p">(</span><span class="n">payload</span><span class="o">.</span><span class="n">run_number</span><span class="p">)</span>
 </span><span id="__span-0-307"><a id="__codelineno-0-307" name="__codelineno-0-307"></a>        <span class="c1"># Ask for the shared memory by name and cast it to a numpy array of the correct shape</span>
@@ -2961,34 +2987,39 @@ is expected to be run after the EstimationPhase.</p>
 </span><span id="__span-0-324"><a id="__codelineno-0-324" name="__codelineno-0-324"></a>            <span class="n">cidx</span> <span class="o">=</span> <span class="n">estimates_gated</span><span class="p">[</span><span class="s2">&quot;cluster_index&quot;</span><span class="p">][</span><span class="n">row</span><span class="p">]</span>
 </span><span id="__span-0-325"><a id="__codelineno-0-325" name="__codelineno-0-325"></a>            <span class="n">local_cluster</span><span class="p">:</span> <span class="n">h5</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">=</span> <span class="n">event_group</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;cluster_</span><span class="si">{</span><span class="n">cidx</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
 </span><span id="__span-0-326"><a id="__codelineno-0-326" name="__codelineno-0-326"></a>            <span class="n">cluster</span> <span class="o">=</span> <span class="n">Cluster</span><span class="p">(</span>
-</span><span id="__span-0-327"><a id="__codelineno-0-327" name="__codelineno-0-327"></a>                <span class="n">event</span><span class="p">,</span> <span class="n">local_cluster</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">],</span> <span class="n">local_cluster</span><span class="p">[</span><span class="s2">&quot;cloud&quot;</span><span class="p">][:]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># type: ignore</span>
-</span><span id="__span-0-328"><a id="__codelineno-0-328" name="__codelineno-0-328"></a>            <span class="p">)</span>
-</span><span id="__span-0-329"><a id="__codelineno-0-329" name="__codelineno-0-329"></a>
-</span><span id="__span-0-330"><a id="__codelineno-0-330" name="__codelineno-0-330"></a>            <span class="c1"># Do the solver</span>
-</span><span id="__span-0-331"><a id="__codelineno-0-331" name="__codelineno-0-331"></a>            <span class="n">guess</span> <span class="o">=</span> <span class="n">Guess</span><span class="p">(</span>
-</span><span id="__span-0-332"><a id="__codelineno-0-332" name="__codelineno-0-332"></a>                <span class="n">estimates_gated</span><span class="p">[</span><span class="s2">&quot;polar&quot;</span><span class="p">][</span><span class="n">row</span><span class="p">],</span>
-</span><span id="__span-0-333"><a id="__codelineno-0-333" name="__codelineno-0-333"></a>                <span class="n">estimates_gated</span><span class="p">[</span><span class="s2">&quot;azimuthal&quot;</span><span class="p">][</span><span class="n">row</span><span class="p">],</span>
-</span><span id="__span-0-334"><a id="__codelineno-0-334" name="__codelineno-0-334"></a>                <span class="n">estimates_gated</span><span class="p">[</span><span class="s2">&quot;brho&quot;</span><span class="p">][</span><span class="n">row</span><span class="p">],</span>
-</span><span id="__span-0-335"><a id="__codelineno-0-335" name="__codelineno-0-335"></a>                <span class="n">estimates_gated</span><span class="p">[</span><span class="s2">&quot;vertex_x&quot;</span><span class="p">][</span><span class="n">row</span><span class="p">],</span>
-</span><span id="__span-0-336"><a id="__codelineno-0-336" name="__codelineno-0-336"></a>                <span class="n">estimates_gated</span><span class="p">[</span><span class="s2">&quot;vertex_y&quot;</span><span class="p">][</span><span class="n">row</span><span class="p">],</span>
-</span><span id="__span-0-337"><a id="__codelineno-0-337" name="__codelineno-0-337"></a>                <span class="n">estimates_gated</span><span class="p">[</span><span class="s2">&quot;vertex_z&quot;</span><span class="p">][</span><span class="n">row</span><span class="p">],</span>
-</span><span id="__span-0-338"><a id="__codelineno-0-338" name="__codelineno-0-338"></a>                <span class="n">Direction</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
-</span><span id="__span-0-339"><a id="__codelineno-0-339" name="__codelineno-0-339"></a>            <span class="p">)</span>
-</span><span id="__span-0-340"><a id="__codelineno-0-340" name="__codelineno-0-340"></a>            <span class="n">solve_physics_interp</span><span class="p">(</span>
-</span><span id="__span-0-341"><a id="__codelineno-0-341" name="__codelineno-0-341"></a>                <span class="n">cidx</span><span class="p">,</span>
-</span><span id="__span-0-342"><a id="__codelineno-0-342" name="__codelineno-0-342"></a>                <span class="n">cluster</span><span class="p">,</span>
-</span><span id="__span-0-343"><a id="__codelineno-0-343" name="__codelineno-0-343"></a>                <span class="n">guess</span><span class="p">,</span>
-</span><span id="__span-0-344"><a id="__codelineno-0-344" name="__codelineno-0-344"></a>                <span class="n">pid</span><span class="o">.</span><span class="n">nucleus</span><span class="p">,</span>
-</span><span id="__span-0-345"><a id="__codelineno-0-345" name="__codelineno-0-345"></a>                <span class="n">interpolator</span><span class="p">,</span>
-</span><span id="__span-0-346"><a id="__codelineno-0-346" name="__codelineno-0-346"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">det_params</span><span class="p">,</span>
-</span><span id="__span-0-347"><a id="__codelineno-0-347" name="__codelineno-0-347"></a>                <span class="n">phys_results</span><span class="p">,</span>
-</span><span id="__span-0-348"><a id="__codelineno-0-348" name="__codelineno-0-348"></a>            <span class="p">)</span>
-</span><span id="__span-0-349"><a id="__codelineno-0-349" name="__codelineno-0-349"></a>
-</span><span id="__span-0-350"><a id="__codelineno-0-350" name="__codelineno-0-350"></a>        <span class="c1"># Write out the results</span>
-</span><span id="__span-0-351"><a id="__codelineno-0-351" name="__codelineno-0-351"></a>        <span class="n">physics_df</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">phys_results</span><span class="p">)</span>
-</span><span id="__span-0-352"><a id="__codelineno-0-352" name="__codelineno-0-352"></a>        <span class="n">physics_df</span><span class="o">.</span><span class="n">write_parquet</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">artifact_path</span><span class="p">)</span>
-</span><span id="__span-0-353"><a id="__codelineno-0-353" name="__codelineno-0-353"></a>        <span class="n">spyral_info</span><span class="p">(</span><span class="vm">__name__</span><span class="p">,</span> <span class="s2">&quot;Phase 4 complete.&quot;</span><span class="p">)</span>
-</span><span id="__span-0-354"><a id="__codelineno-0-354" name="__codelineno-0-354"></a>        <span class="k">return</span> <span class="n">result</span>
+</span><span id="__span-0-327"><a id="__codelineno-0-327" name="__codelineno-0-327"></a>                <span class="n">event</span><span class="p">,</span>
+</span><span id="__span-0-328"><a id="__codelineno-0-328" name="__codelineno-0-328"></a>                <span class="n">local_cluster</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;label&quot;</span><span class="p">],</span>  <span class="c1"># type: ignore</span>
+</span><span id="__span-0-329"><a id="__codelineno-0-329" name="__codelineno-0-329"></a>                <span class="n">local_cluster</span><span class="p">[</span><span class="s2">&quot;cloud&quot;</span><span class="p">][:]</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span>  <span class="c1"># type: ignore</span>
+</span><span id="__span-0-330"><a id="__codelineno-0-330" name="__codelineno-0-330"></a>            <span class="p">)</span>
+</span><span id="__span-0-331"><a id="__codelineno-0-331" name="__codelineno-0-331"></a>
+</span><span id="__span-0-332"><a id="__codelineno-0-332" name="__codelineno-0-332"></a>            <span class="c1"># Do the solver</span>
+</span><span id="__span-0-333"><a id="__codelineno-0-333" name="__codelineno-0-333"></a>            <span class="n">guess</span> <span class="o">=</span> <span class="n">Guess</span><span class="p">(</span>
+</span><span id="__span-0-334"><a id="__codelineno-0-334" name="__codelineno-0-334"></a>                <span class="n">estimates_gated</span><span class="p">[</span><span class="s2">&quot;polar&quot;</span><span class="p">][</span><span class="n">row</span><span class="p">],</span>
+</span><span id="__span-0-335"><a id="__codelineno-0-335" name="__codelineno-0-335"></a>                <span class="n">estimates_gated</span><span class="p">[</span><span class="s2">&quot;azimuthal&quot;</span><span class="p">][</span><span class="n">row</span><span class="p">],</span>
+</span><span id="__span-0-336"><a id="__codelineno-0-336" name="__codelineno-0-336"></a>                <span class="n">estimates_gated</span><span class="p">[</span><span class="s2">&quot;brho&quot;</span><span class="p">][</span><span class="n">row</span><span class="p">],</span>
+</span><span id="__span-0-337"><a id="__codelineno-0-337" name="__codelineno-0-337"></a>                <span class="n">estimates_gated</span><span class="p">[</span><span class="s2">&quot;vertex_x&quot;</span><span class="p">][</span><span class="n">row</span><span class="p">],</span>
+</span><span id="__span-0-338"><a id="__codelineno-0-338" name="__codelineno-0-338"></a>                <span class="n">estimates_gated</span><span class="p">[</span><span class="s2">&quot;vertex_y&quot;</span><span class="p">][</span><span class="n">row</span><span class="p">],</span>
+</span><span id="__span-0-339"><a id="__codelineno-0-339" name="__codelineno-0-339"></a>                <span class="n">estimates_gated</span><span class="p">[</span><span class="s2">&quot;vertex_z&quot;</span><span class="p">][</span><span class="n">row</span><span class="p">],</span>
+</span><span id="__span-0-340"><a id="__codelineno-0-340" name="__codelineno-0-340"></a>                <span class="n">Direction</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
+</span><span id="__span-0-341"><a id="__codelineno-0-341" name="__codelineno-0-341"></a>            <span class="p">)</span>
+</span><span id="__span-0-342"><a id="__codelineno-0-342" name="__codelineno-0-342"></a>            <span class="n">solve_physics_interp</span><span class="p">(</span>
+</span><span id="__span-0-343"><a id="__codelineno-0-343" name="__codelineno-0-343"></a>                <span class="n">cidx</span><span class="p">,</span>
+</span><span id="__span-0-344"><a id="__codelineno-0-344" name="__codelineno-0-344"></a>                <span class="n">cluster</span><span class="p">,</span>
+</span><span id="__span-0-345"><a id="__codelineno-0-345" name="__codelineno-0-345"></a>                <span class="n">guess</span><span class="p">,</span>
+</span><span id="__span-0-346"><a id="__codelineno-0-346" name="__codelineno-0-346"></a>                <span class="n">pid</span><span class="o">.</span><span class="n">nucleus</span><span class="p">,</span>
+</span><span id="__span-0-347"><a id="__codelineno-0-347" name="__codelineno-0-347"></a>                <span class="n">interpolator</span><span class="p">,</span>
+</span><span id="__span-0-348"><a id="__codelineno-0-348" name="__codelineno-0-348"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">det_params</span><span class="p">,</span>
+</span><span id="__span-0-349"><a id="__codelineno-0-349" name="__codelineno-0-349"></a>                <span class="bp">self</span><span class="o">.</span><span class="n">solver_params</span><span class="p">,</span>
+</span><span id="__span-0-350"><a id="__codelineno-0-350" name="__codelineno-0-350"></a>                <span class="n">phys_results</span><span class="p">,</span>
+</span><span id="__span-0-351"><a id="__codelineno-0-351" name="__codelineno-0-351"></a>            <span class="p">)</span>
+</span><span id="__span-0-352"><a id="__codelineno-0-352" name="__codelineno-0-352"></a>
+</span><span id="__span-0-353"><a id="__codelineno-0-353" name="__codelineno-0-353"></a>        <span class="c1"># Write out the results</span>
+</span><span id="__span-0-354"><a id="__codelineno-0-354" name="__codelineno-0-354"></a>        <span class="n">physics_df</span> <span class="o">=</span> <span class="n">pl</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">phys_results</span><span class="p">)</span>
+</span><span id="__span-0-355"><a id="__codelineno-0-355" name="__codelineno-0-355"></a>        <span class="n">physics_df</span><span class="o">.</span><span class="n">write_parquet</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">artifact_path</span><span class="p">)</span>
+</span><span id="__span-0-356"><a id="__codelineno-0-356" name="__codelineno-0-356"></a>        <span class="n">spyral_info</span><span class="p">(</span>
+</span><span id="__span-0-357"><a id="__codelineno-0-357" name="__codelineno-0-357"></a>            <span class="vm">__name__</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Phase InterpSolver complete for run </span><span class="si">{</span><span class="n">payload</span><span class="o">.</span><span class="n">run_number</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span id="__span-0-358"><a id="__codelineno-0-358" name="__codelineno-0-358"></a>        <span class="p">)</span>
+</span><span id="__span-0-359"><a id="__codelineno-0-359" name="__codelineno-0-359"></a>        <span class="k">return</span> <span class="n">result</span>
 </span></code></pre></div></td></tr></table></div>
             </details>
 
