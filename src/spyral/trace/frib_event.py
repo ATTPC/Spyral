@@ -1,9 +1,7 @@
 from .frib_trace import FribTrace
 from .get_trace import Peak
 from ..core.config import FribParameters
-from typing import Callable
 
-import h5py as h5
 import numpy as np
 from numba import njit
 
@@ -33,8 +31,6 @@ class FribEvent:
     ----------
     event_number: int
         The event number
-    event_name: str
-        The event name
     trace_data: list[FribTrace]
         The traces in the event
 
@@ -54,9 +50,8 @@ class FribEvent:
         Calculate the correction to the GET time buckets using the ion chamber signal
     """
 
-    def __init__(self, raw_data: h5.Dataset, event_number: int, params: FribParameters):
+    def __init__(self, raw_data: np.ndarray, event_number: int, params: FribParameters):
         self.event_number = event_number
-        self.event_name = str(raw_data.name)
         trace_data = preprocess_frib_traces(
             raw_data[:].copy(), params.baseline_window_scale
         )

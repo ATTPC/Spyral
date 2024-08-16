@@ -301,7 +301,7 @@ class InterpSolverPhase(PhaseLike):
         if self.shared_mesh_shape is None or self.shared_mesh_name is None:
             spyral_warn(
                 __name__,
-                f"Could not run the interpolation scheme as there is no shared memory!",
+                "Could not run the interpolation scheme as there is no shared memory!",
             )
             return PhaseResult.invalid_result(payload.run_number)
         # Ask for the shared memory by name and cast it to a numpy array of the correct shape
@@ -324,7 +324,9 @@ class InterpSolverPhase(PhaseLike):
             cidx = estimates_gated["cluster_index"][row]
             local_cluster: h5.Dataset = event_group[f"cluster_{cidx}"]  # type: ignore
             cluster = Cluster(
-                event, local_cluster.attrs["label"], local_cluster["cloud"][:].copy()  # type: ignore
+                event,
+                local_cluster.attrs["label"],  # type: ignore
+                local_cluster["cloud"][:].copy(),  # type: ignore
             )
 
             # Do the solver
@@ -344,11 +346,14 @@ class InterpSolverPhase(PhaseLike):
                 pid.nucleus,
                 interpolator,
                 self.det_params,
+                self.solver_params,
                 phys_results,
             )
 
         # Write out the results
         physics_df = pl.DataFrame(phys_results)
         physics_df.write_parquet(result.artifact_path)
-        spyral_info(__name__, "Phase 4 complete.")
+        spyral_info(
+            __name__, f"Phase InterpSolver complete for run {payload.run_number}"
+        )
         return result

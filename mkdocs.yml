@@ -81,6 +81,7 @@ nav:
       - frib_event: api/trace/frib_event.md
       - frib_trace: api/trace/frib_trace.md
       - peak: api/trace/peak.md
+      - trace_reader: api/trace/trace_reader.md
   - FAQ: faq.md
   - For Developers: CONTRIBUTING.md
   - Contributors: contributors.md
