@@ -32,6 +32,9 @@ The documentation for Spyral can be found [here](https://attpc.github.io/Spyral/
 For a full user guide and documentation with examples, see [our docs](https://attpc.github.io/Spyral/). Below is an example script of using Spyral with the default pipeline
 
 ```python
+import dotenv
+dotenv.load_dotenv()
+
 from spyral import (
     Pipeline,
     start_pipeline,
@@ -173,6 +176,7 @@ Some notes about parallel processing:
 - In job environments (SLURM, etc.), you won't want to have the typical progress display provided by Spyral. Set the `disable_display` argument of `start_pipeline` to `False` in this case.
 - In general, it is best if the number of data files to be processed is evenly divisible by the number of processors. Otherwise, by necessity, the work load will be uneven across the processors.
 - Spyral will sometimes run fewer processes than requested. This is usually in the case where the number of requested processors is greater than the number of files to be processed.
+- You will want to limit the number of threads available to BLAS, OpenMP, etc. using environment variables, typically stored in a `.env` file.
 
 ### Logs and Output
 

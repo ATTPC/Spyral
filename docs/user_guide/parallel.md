@@ -41,3 +41,42 @@ In general more processors is more better, but this isn't always the case. The f
 The final consideration is memory. This is mostly important for the solving phase. The interpolation mesh can be quite large (somtimes GBs) will briefly need to be loaded *twice* into memory (from file into the shared memory). This means you should have at least as much RAM as two times the mesh size (leave room to spare fo the rest of the memory we allocate!).
 
 If you are using Spyral in a job environment (SLURM, etc), you can run with the Pipeline with the `no_display` argument in `start_pipeline` set to `True`. This will avoid the overhead of SLURM writting all the progress bar prints to a file.
+
+## Turning off Numpy, Scipy, etc. threads
+
+If you're using all of the CPUs available to you for Spyral processes, you will want to turn off any implicit multithreading done by any of Spyral's dependencies like numpy and scipy, which typically use multithreaded backend libraries like OpenBLAS and OpenMP for things like matrix inversion. The best way to to this is to set the environment variables that control these libraries. The easiest way to do this is to make a file called `.env` in the same folder as your Spyral script and fill it with the following definitions:
+
+```bash
+OMP_NUM_THREADS=1
+OPENBLAS_NUM_THREADS=1
+MKL_NUM_THREADS=1
+VECLIB_MAXIMUM_THREADS=1
+NUMEXPR_NUM_THREADS=1
+POLARS_MAX_THREADS=1
+```
+
+Then you can use the `python-dotenv` library that Spyral ships to load these variables at the start of your script by putting the following lines at the top:
+
+```python
+import dotenv
+dotenv.load_dotenv()
+```
+
+Note that this ***MUST BE DONE BEFORE ANYTHING ELSE IS IMPORTED FOR THIS TO WORK CORRECTLY***. This import and load must be done before *literally* anything else in your script in order to guarantee it works.
+
+Alternatively, you can also set these variables in the script using `os.environ`
+
+```python
+import os
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
+os.environ["POLARS_MAX_THREADS"] = "1"
+```
+
+Again, this must be done before anything else is imported into  your script!
+
+The final way to set these is through your shell session either as part of a parent script or your bashrc (not recommended).
+
+Turning these off can be important to avoid resource oversubscription. If you have spare cores however (not consumed by Spyral), you may also want to set these definitions to values other than one.
