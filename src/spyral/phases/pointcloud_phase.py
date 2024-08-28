@@ -184,7 +184,7 @@ class PointcloudPhase(PhaseLike):
             if event.frib is not None:
                 ic_mult = event.frib.get_ic_multiplicity(self.frib_params)
                 ic_peak = event.frib.get_triggering_ic_peak(self.frib_params)
-                if ic_mult <= self.frib_params.ic_multiplicity: # ugh
+                if ic_mult <= self.frib_params.ic_multiplicity:  # ugh
                     ic_within_mult_count += 1
             if event.get is None:
                 continue
@@ -209,7 +209,9 @@ class PointcloudPhase(PhaseLike):
             pc_dataset.attrs["ic_multiplicity"] = -1.0
 
             # Check multiplicity condition and existence of trigger
-            if (ic_mult > 0.0 and ic_mult <= self.frib_params.ic_multiplicity) and ic_peak is not None:
+            if (
+                ic_mult > 0.0 and ic_mult <= self.frib_params.ic_multiplicity
+            ) and ic_peak is not None:
                 pc_dataset.attrs["ic_amplitude"] = ic_peak.amplitude
                 pc_dataset.attrs["ic_integral"] = ic_peak.integral
                 pc_dataset.attrs["ic_centroid"] = ic_peak.centroid
@@ -230,9 +232,14 @@ class PointcloudPhase(PhaseLike):
                 __name__, f"Run {payload.run_number} does not have scaler data!"
             )
 
-        gated_ic_path = self.get_artifact_path(workspace_path) / f"{form_run_string(payload.run_number)}_gated_ic_scaler.txt"
+        gated_ic_path = (
+            self.get_artifact_path(workspace_path)
+            / f"{form_run_string(payload.run_number)}_gated_ic_scaler.txt"
+        )
         with open(gated_ic_path, "w") as gated_ic_file:
-            gated_ic_file.write(f"IC counts with multiplicity <= {self.frib_params.ic_multiplicity}\n")
+            gated_ic_file.write(
+                f"IC counts with multiplicity <= {self.frib_params.ic_multiplicity}\n"
+            )
             gated_ic_file.write(f"{ic_within_mult_count}")
 
         spyral_info(__name__, f"Phase Pointcloud complete for run {payload.run_number}")
