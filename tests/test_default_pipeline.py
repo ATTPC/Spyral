@@ -43,7 +43,6 @@ frib_params = FribParameters(
     peak_threshold=100.0,
     ic_delay_time_bucket=1100,
     ic_multiplicity=1,
-    correct_ic_time=True,
 )
 det_params = DetectorParameters(
     magnetic_field=2.85,
