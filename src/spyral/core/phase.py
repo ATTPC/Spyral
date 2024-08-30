@@ -198,8 +198,8 @@ class PhaseLike(ABC):
         ----------
         workspace_path: Path
             The path tot he workspace
-        manager: SharedMemoryManager
-            A resource manager for parallel processes
+        handles: dict[str, SharedMemory]
+            A resource manager for interprocess shared memory
         """
         return
 

@@ -133,13 +133,14 @@ class Pipeline:
         """Have each phase create any shared memory
 
         Call each PhaseLike's create_shared_data function.
-        This should be called before running the pipeline with a
-        valid, started SharedMemoryManager.
+        This should be called before running the pipeline.
 
         Parameters
         ----------
-        manager: multiprocessing.manager.SharedMemoryManager
-            The manager of the program's shared memory
+        handles: dict[str, multiprocessing.shared_memory.SharedMemory]
+            An empty dictionary to be filled with handles of all created
+            shared memory. The parent process will use these handles to do
+            cleanup later.
 
         """
         for idx, phase in enumerate(self.phases):
