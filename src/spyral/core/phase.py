@@ -5,7 +5,7 @@ from pathlib import Path
 from multiprocessing import SimpleQueue
 from numpy.random import Generator
 from collections import Counter
-from multiprocessing.managers import SharedMemoryManager
+from multiprocessing.shared_memory import SharedMemory
 
 if sys.version_info < (3, 11):
     from typing_extensions import Self
@@ -183,7 +183,7 @@ class PhaseLike(ABC):
         raise NotImplementedError
 
     def create_shared_data(
-        self, workspace_path: Path, manager: SharedMemoryManager
+        self, workspace_path: Path, handles: dict[str, SharedMemory]
     ) -> None:
         """Create shared-memory data for use across all processes
 

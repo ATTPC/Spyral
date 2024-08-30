@@ -12,7 +12,7 @@ from .spy_log import (
 from tqdm import tqdm
 from pathlib import Path
 from multiprocessing import SimpleQueue, Process
-from multiprocessing.managers import SharedMemoryManager
+from multiprocessing.shared_memory import SharedMemory
 from numpy.random import SeedSequence, default_rng
 import time
 
@@ -129,7 +129,7 @@ class Pipeline:
                 return False
         return True
 
-    def create_shared_data(self, manager: SharedMemoryManager) -> None:
+    def create_shared_data(self, handles: dict[str, SharedMemory]) -> None:
         """Have each phase create any shared memory
 
         Call each PhaseLike's create_shared_data function.
@@ -147,7 +147,7 @@ class Pipeline:
             if not self.active[idx]:
                 continue
             else:
-                phase.create_shared_data(self.workspace, manager)
+                phase.create_shared_data(self.workspace, handles)
 
     def validate(self) -> dict[str, bool]:
         """Validate the pipeline by comparing the schema of the phases.
@@ -255,8 +255,7 @@ def start_pipeline(
     """
     # Setup
     # Note the manager exists outside the pipeline
-    shared_manager = SharedMemoryManager()
-    shared_manager.start()
+    handles: dict[str, SharedMemory] = {}
     # handle None-ness
     if runs_to_skip is None:
         runs_to_skip = []
@@ -272,7 +271,7 @@ def start_pipeline(
     pipeline.create_assets()
     print("Done.")
     print("Initializing shared memory...", end=" ")
-    pipeline.create_shared_data(shared_manager)
+    pipeline.create_shared_data(handles)
     print("Done.")
     print("Validating Pipeline...", end=" ")
     result = pipeline.validate()
@@ -373,7 +372,9 @@ def start_pipeline(
     for process in processes:
         process.join()
 
-    shared_manager.shutdown()
+    for handle in handles.values():
+        handle.close()
+        handle.unlink()
 
     stop = time.time()
     duration = stop - start
