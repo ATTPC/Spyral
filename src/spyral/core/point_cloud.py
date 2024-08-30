@@ -2,7 +2,6 @@ from .pad_map import PadMap
 from .constants import INVALID_EVENT_NUMBER
 from ..correction import ElectronCorrector
 from ..trace.get_event import GetEvent
-from ..trace.get_legacy_event import GetLegacyEvent
 from .spy_log import spyral_warn
 
 import numpy as np
@@ -48,7 +47,7 @@ class PointCloud:
 
     def load_cloud_from_get_event(
         self,
-        event: GetEvent | GetLegacyEvent,
+        event: GetEvent,
         pmap: PadMap,
     ):
         """Load a point cloud from a GetEvent

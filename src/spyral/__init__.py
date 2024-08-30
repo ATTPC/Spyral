@@ -16,10 +16,8 @@ from .core.config import (
     EstimateParameters,
     SolverParameters,
     DEFAULT_MAP,
-    DEFAULT_LEGACY_MAP,
 )
 from .phases.pointcloud_phase import PointcloudPhase
-from .phases.pointcloud_legacy_phase import PointcloudLegacyPhase
 from .phases.cluster_phase import ClusterPhase
 from .phases.estimation_phase import EstimationPhase
 from .phases.interp_solver_phase import InterpSolverPhase
@@ -46,9 +44,7 @@ __all__ = [
     "EstimateParameters",
     "SolverParameters",
     "DEFAULT_MAP",
-    "DEFAULT_LEGACY_MAP",
     "PointcloudPhase",
-    "PointcloudLegacyPhase",
     "ClusterPhase",
     "EstimationPhase",
     "InterpSolverPhase",
