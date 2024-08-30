@@ -70,7 +70,7 @@ The available columns (in order) in a point cloud are:
 
 ## Auxilary Detectors and Corrections
 
-The AT-TPC has at minimum one auxilary detector, the upstream ion chamber. The ion chamber (IC) is used to generate the AT-TPC trigger (in conjunction with the mesh) and identify beam species, and is recorded using the FRIBDAQ framework. Its data is analyzed very similarly to the GET data; baselines are removed and signals are extracted. Users can specify the maximum allowed ion chamber multiplicty to reject data with has an inconsistent trigger. Usually the AT-TPC also has a silicon detector downstream within the hole of the pad plane. This is useful for correcting the time of an event which triggered from the wrong IC signal by examining coincidences between the silicon and IC; only IC events which do not have a silicon coincidence are valid triggers. See the code in `spyral/traces/frib_traces.py` and `spyral/traces/frib_event.py` for details.
+The AT-TPC has at minimum one auxilary detector, the upstream ion chamber. The ion chamber (IC) is used to generate the AT-TPC trigger (in conjunction with the mesh) and identify beam species, and is recorded using the FRIBDAQ framework. Its data is analyzed very similarly to the GET data; baselines are removed and signals are extracted. Users can specify the maximum allowed ion chamber multiplicty to reject data with has an inconsistent trigger. See the code in `spyral/traces/frib_traces.py` and `spyral/traces/frib_event.py` for details.
 
 Additionally, it has been found that in some cases the AT-TPC needs a correction for distortions to the electric field. The correction is calculated using [Garfield++](https://gitlab.cern.ch/garfield/garfieldpp) externally from Spyral. Spyral takes in a correction file containing initial electron positions and final drift positions and times. Spyral generates an interpolation mesh to calculate corrections for each point. The mesh is calculated and stored in a Numpy format file (`.npy`). It is not clear how impactful this correction is anymore; it was seemingly most important early on in the AT-TPC development. This correction is optional, and can be turned off and on using the configuration.
 
@@ -78,7 +78,7 @@ Point clouds are also sorted in z for ease of use later.
 
 ### The Ion Chamber and the Trigger
 
-Some additional discussion needs to be had about the behavior of the ion chamber as it pertains to the trigger (start) of events. The ion chamber recieves a beam particle, which causes a singal to be registered. This ion chamber signal is then delayed by 100 &mu;s. The beam then enters the AT-TPC active volume, electrons are ionized, and the electrons drift toward the mesh. The mesh registers a singal, and this signal generates a 120 &mu;s gate. The coincidence of this mesh gate and the ion chamber delayed signal is then the trigger for an event. This effects the analysis of the ion chamber because the recording window for the module recieving the ion chamber recieves this delayed IC signal, and so can have peaks in the waveform that occured *before* the event trigger. To compensate for this there is a configuration parameter to set the delay in FRIBDAQ time buckets; all peaks before the delay time bucket are ignored and not used in subsequent ion chamber analysis. See [here](../config/traces.md) for more details. (We should probably put a diagram of what is happening here)
+Some additional discussion needs to be had about the behavior of the ion chamber as it pertains to the trigger (start) of events. The ion chamber recieves a beam particle, which causes a signal to be registered. This ion chamber signal is then delayed by 100 &mu;s. The beam then enters the AT-TPC active volume, electrons are ionized, and the electrons drift toward the mesh. The mesh registers a singal, and this signal generates a 120 &mu;s gate. The coincidence of this mesh gate and the ion chamber delayed signal is then the trigger for an event. This effects the analysis of the ion chamber because the recording window for the module recieving the ion chamber recieves this delayed IC signal, and so can have peaks in the waveform that occured *before* the event trigger. To compensate for this there is a configuration parameter to set the delay in FRIBDAQ time buckets; all peaks before the delay time bucket are ignored and not used in subsequent ion chamber analysis. See [here](../config/traces.md) for more details. (We should probably put a diagram of what is happening here)
 
 ## Legacy Data
 
@@ -101,6 +101,8 @@ The FRIBDAQ data does not only contain auxilary detectors. It also contains scal
 - sipm: Unclear
 - ic_ds: The downscaled rate into the ion chamber, typically a factor of 1000
 - ic_cfd: Unclear
+
+Additionally, when using the `ic_multiplicity` parameter, it applies a gate to essentially the trigger of the data that is acutally analyzed. This means that the scalers recorded by FRIBDAQ are now inconsistent with the analysis and cannot be used as a beam normalization without accounting for the effect of the gate. To compensate for this, Spyral will make its own scaler, counting the number of events which have an IC that matches the multiplicity condition. This scaler will be written to a simple text file stored in the Pointcloud directory of the workspace (`run_#_gated_ic_scaler.txt`).
 
 ## Final Thoughts
 
