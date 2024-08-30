@@ -752,6 +752,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#turning-off-numpy-scipy-etc-threads" class="md-nav__link">
+    <span class="md-ellipsis">
+      Turning off Numpy, Scipy, etc. threads
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2253,6 +2262,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#turning-off-numpy-scipy-etc-threads" class="md-nav__link">
+    <span class="md-ellipsis">
+      Turning off Numpy, Scipy, etc. threads
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2297,6 +2315,31 @@
 <p>In general more processors is more better, but this isn't always the case. The first limit is the total number of cores in your machine. You need <code>n_processors</code>+1 physical cores, otherwise things are guaranteed to slow down. Another consideration is your CPU architecture. Intel i-series and Apple ARM use P-core and E-core packages. P-cores are performance cores which hit higher clock speeds and are optimized for expensive tasks. E-cores are efficiency cores, which run slower but are less power hungry, best suited to background tasks. Spyral is best suited to P-cores; as such you should use only P-cores as the number of processors available.</p>
 <p>The final consideration is memory. This is mostly important for the solving phase. The interpolation mesh can be quite large (somtimes GBs) will briefly need to be loaded <em>twice</em> into memory (from file into the shared memory). This means you should have at least as much RAM as two times the mesh size (leave room to spare fo the rest of the memory we allocate!).</p>
 <p>If you are using Spyral in a job environment (SLURM, etc), you can run with the Pipeline with the <code>no_display</code> argument in <code>start_pipeline</code> set to <code>True</code>. This will avoid the overhead of SLURM writting all the progress bar prints to a file.</p>
+<h2 id="turning-off-numpy-scipy-etc-threads">Turning off Numpy, Scipy, etc. threads</h2>
+<p>If you're using all of the CPUs available to you for Spyral processes, you will want to turn off any implicit multithreading done by any of Spyral's dependencies like numpy and scipy, which typically use multithreaded backend libraries like OpenBLAS and OpenMP for things like matrix inversion. The best way to to this is to set the environment variables that control these libraries. The easiest way to do this is to make a file called <code>.env</code> in the same folder as your Spyral script and fill it with the following definitions:</p>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nv">OMP_NUM_THREADS</span><span class="o">=</span><span class="m">1</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nv">OPENBLAS_NUM_THREADS</span><span class="o">=</span><span class="m">1</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nv">MKL_NUM_THREADS</span><span class="o">=</span><span class="m">1</span>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="nv">VECLIB_MAXIMUM_THREADS</span><span class="o">=</span><span class="m">1</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="nv">NUMEXPR_NUM_THREADS</span><span class="o">=</span><span class="m">1</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="nv">POLARS_MAX_THREADS</span><span class="o">=</span><span class="m">1</span>
+</span></code></pre></div>
+<p>Then you can use the <code>python-dotenv</code> library that Spyral ships to load these variables at the start of your script by putting the following lines at the top:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="kn">import</span> <span class="nn">dotenv</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">dotenv</span><span class="o">.</span><span class="n">load_dotenv</span><span class="p">()</span>
+</span></code></pre></div>
+<p>Note that this <strong><em>MUST BE DONE BEFORE ANYTHING ELSE IS IMPORTED FOR THIS TO WORK CORRECTLY</em></strong>. This import and load must be done before <em>literally</em> anything else in your script in order to guarantee it works.</p>
+<p>Alternatively, you can also set these variables in the script using <code>os.environ</code></p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">import</span> <span class="nn">os</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;OMP_NUM_THREADS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;OPENBLAS_NUM_THREADS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;MKL_NUM_THREADS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;VECLIB_MAXIMUM_THREADS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;POLARS_MAX_THREADS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span>
+</span></code></pre></div>
+<p>Again, this must be done before anything else is imported into  your script!</p>
+<p>The final way to set these is through your shell session either as part of a parent script or your bashrc (not recommended).</p>
+<p>Turning these off can be important to avoid resource oversubscription. If you have spare cores however (not consumed by Spyral), you may also want to set these definitions to values other than one.</p>
 
 
 

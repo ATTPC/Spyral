@@ -529,15 +529,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#event_correct_ic_time" class="md-nav__link">
-    <span class="md-ellipsis">
-      event_correct_ic_time
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -2336,15 +2327,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#event_correct_ic_time" class="md-nav__link">
-    <span class="md-ellipsis">
-      event_correct_ic_time
-    </span>
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -2381,8 +2363,7 @@
 </span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>    <span class="n">peak_threshold</span><span class="o">=</span><span class="mf">100.0</span><span class="p">,</span>
 </span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a>    <span class="n">ic_delay_time_bucket</span><span class="o">=</span><span class="mi">1100</span><span class="p">,</span>
 </span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>    <span class="n">ic_multiplicity</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a>    <span class="n">correct_ic_time</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="p">)</span>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="p">)</span>
 </span></code></pre></div>
 <p>A break down of each parameter:</p>
 <h2 id="baseline_window_scale">baseline_window_scale</h2>
@@ -2399,8 +2380,6 @@
 <p>This is the delay to the ion chamber singal in units of FRIBDAQ time buckets. Any peaks in the ion chamber singal before this time bucket are ignored and not included in subsequent ion chamber analysis. The first peak after this time bucket is the triggering ion chamber singal, and all peaks after this time bucket are counted towards the ion chamber multiplicity (except in the case of <code>event_correct_ic_time</code> set to true, where the auxilary silicon detector is used to eliminate some of the peaks). In general, this parameter does not need changed from experiment to experiment, as it is a direct result of the electronic delay in the AT-TPC triggering scheme.</p>
 <h2 id="event_ic_multiplicity">event_ic_multiplicity</h2>
 <p>The maximum allowed ion chamber multiplicity for an event. In general, AT-TPC experiments would only allow for one ion chamber hit per event. This is only available to FRIB data.</p>
-<h2 id="event_correct_ic_time">event_correct_ic_time</h2>
-<p>Turn on/off the ion chamber time correction. Sometimes, the wrong beam triggers the event start in the AT-TPC. This can be corrected using the correlation between downstream silicon and the ion chamber. <code>true</code> turns the correction on, <code>false</code> turns the correction off. Note that the ion chamber-silicon coincidence is <em>only</em> applied when this parameter is set to true. Otherwise, the raw ion chamber signal is analyzed and <em>all</em> peaks found in that signal (after the delay of <code>ic_delay_time_bucket</code>) count towards the ion chamber multiplicity. This is only available to FRIB data.</p>
 
 
 
