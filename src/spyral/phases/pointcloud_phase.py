@@ -184,7 +184,11 @@ class PointcloudPhase(PhaseLike):
             if event.frib is not None:
                 ic_mult = event.frib.get_ic_multiplicity(self.frib_params)
                 ic_peak = event.frib.get_triggering_ic_peak(self.frib_params)
-                if ic_mult <= self.frib_params.ic_multiplicity:  # ugh
+                if (
+                    ic_mult > 0
+                    and ic_mult <= self.frib_params.ic_multiplicity
+                    and ic_peak is not None
+                ):  # ugh
                     ic_within_mult_count += 1
             if event.get is None:
                 continue
