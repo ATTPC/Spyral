@@ -113,8 +113,6 @@ class FribParameters:
         before this TB are ignored when considering IC multiplicity/validity
     ic_multiplicity: int
         The maximum allowed ion chamber multiplicity
-    correct_ic_time: bool
-        If true, the ion chamber time correction is used to correct the GET trace time
     """
 
     baseline_window_scale: float
@@ -124,7 +122,6 @@ class FribParameters:
     peak_threshold: float
     ic_delay_time_bucket: int
     ic_multiplicity: int
-    correct_ic_time: bool
 
 
 @dataclass

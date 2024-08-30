@@ -3,13 +3,16 @@
 With Spyral installed to your environment, we can now get started using Spyral to analyze some data! Below is an example python script that would run the default Spyral analysis Pipeline for data from the a1975 experiment run with AT-TPC at Argonne National Lab.
 
 ```python
+import dotenv
+dotenv.load_dotenv()
+
 from spyral import (
     Pipeline,
     start_pipeline,
     PointcloudPhase,
     ClusterPhase,
     EstimationPhase,
-    InterpLeastSqSolverPhase,
+    InterpSolverPhase,
 )
 from spyral import (
     PadParameters,
@@ -56,7 +59,6 @@ frib_params = FribParameters(
     peak_threshold=100.0,
     ic_delay_time_bucket=1100,
     ic_multiplicity=1,
-    correct_ic_time=True,
 )
 
 det_params = DetectorParameters(
@@ -113,7 +115,7 @@ pipe = Pipeline(
         ),
         ClusterPhase(cluster_params, det_params),
         EstimationPhase(estimate_params, det_params),
-        InterpLeastSqSolverPhase(solver_params, det_params),
+        InterpSolverPhase(solver_params, det_params),
     ],
     [True, True, True, True],
     workspace_path,
@@ -131,7 +133,13 @@ if __name__ == "__main__":
 
 ```
 
-If that looks overwhelming, don't worry, we'll break down each section step by step and explain what is going on here. First let's identify some key ideas. First, we import all the Spyral functionality we need using the `from spyral import ...` statements. We also import the Python standard library `Path` object and a function from `multiprocessing` to make our code compatible with specific flavors of Linux. We then define the paths to the Spyral workspace as well as AT-TPC trace data.
+If that looks overwhelming, don't worry, we'll break down each section step by step and explain what is going on here.
+
+## Imports and environments
+
+The very first import might look kind of weird, we `import dotenv` and then simply call a fuction `load_dotenv` from the library. These lines are important because they're how we control the number of threads that our dependencies can use (numpy, scipy, polars all use multithreading in their backends). `load_dotenv` checks if there is a file named `.env` in the same folder as the script you are running, and loads if it exists. See this [section](./parallel.md#turning-off-numpy-scipy-etc-threads) which goes over how to control the threading of libraries. For now it is only important to say that these lines of code should exist at the top of your script.
+
+Getting to the good stuff, we import all the Spyral functionality we need using the `from spyral import ...` statements. We also import the Python standard library `Path` object and a function from `multiprocessing` to make our code compatible with specific flavors of Linux. We then define the paths to the Spyral workspace as well as AT-TPC trace data.
 
 ## Workspace and Trace Data
 
@@ -197,7 +205,7 @@ pipe = Pipeline(
         ),
         ClusterPhase(cluster_params, det_params),
         EstimationPhase(estimate_params, det_params),
-        InterpLeastSqSolverPhase(solver_params, det_params),
+        InterpSolverPhase(solver_params, det_params),
     ],
     [True, True, True, True],
     workspace_path,
