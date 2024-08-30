@@ -41,7 +41,7 @@ from spyral import (
     PointcloudPhase,
     ClusterPhase,
     EstimationPhase,
-    InterpLeastSqSolverPhase,
+    InterpSolverPhase,
 )
 from spyral import (
     PadParameters,
@@ -88,7 +88,6 @@ frib_params = FribParameters(
     peak_threshold=100.0,
     ic_delay_time_bucket=1100,
     ic_multiplicity=1,
-    correct_ic_time=True,
 )
 
 det_params = DetectorParameters(
@@ -145,7 +144,7 @@ pipe = Pipeline(
         ),
         ClusterPhase(cluster_params, det_params),
         EstimationPhase(estimate_params, det_params),
-        InterpLeastSqSolverPhase(solver_params, det_params),
+        InterpSolverPhase(solver_params, det_params),
     ],
     [True, True, True, True],
     workspace_path,
