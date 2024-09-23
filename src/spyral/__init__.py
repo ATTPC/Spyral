@@ -1,7 +1,10 @@
 from .core.phase import (
-    ArtifactSchema,
-    PhaseResult,
     PhaseLike,
+)
+from .core.schema import (
+    PhaseResult,
+    ResultSchema,
+    ArtifactSchema,
 )
 from .core.pipeline import (
     Pipeline,
@@ -32,6 +35,7 @@ from .phases.schema import (
 
 __all__ = [
     "ArtifactSchema",
+    "ResultSchema",
     "PhaseResult",
     "PhaseLike",
     "Pipeline",

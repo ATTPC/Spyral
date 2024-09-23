@@ -1,6 +1,7 @@
 from .run_stacks import form_run_string, create_run_stacks
 from .status_message import StatusMessage
-from .phase import PhaseLike, PhaseResult
+from .phase import PhaseLike
+from .schema import PhaseResult
 from .spy_log import (
     init_spyral_logger_parent,
     init_spyral_logger_child,
@@ -195,9 +196,13 @@ class Pipeline:
         try:
             for run in run_list:
                 result = PhaseResult(
-                    Path(self.traces / f"{form_run_string(run)}.h5"), True, run
+                    artifacts={
+                        "trace": Path(self.traces / f"{form_run_string(run)}.h5")
+                    },
+                    successful=True,
+                    run_number=run,
                 )
-                if not result.artifact_path.exists():
+                if not result.artifacts["traces"].exists():
                     continue
                 for idx, phase in enumerate(self.phases):
                     if self.active[idx]:

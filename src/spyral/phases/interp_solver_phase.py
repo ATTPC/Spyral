@@ -1,4 +1,5 @@
-from ..core.phase import PhaseLike, PhaseResult
+from ..core.phase import PhaseLike
+from ..core.schema import PhaseResult, ResultSchema
 from ..core.config import SolverParameters, DetectorParameters
 from ..core.status_message import StatusMessage
 from ..core.cluster import Cluster
@@ -88,8 +89,8 @@ class InterpSolverPhase(PhaseLike):
     def __init__(self, solver_params: SolverParameters, det_params: DetectorParameters):
         super().__init__(
             "InterpSolver",
-            incoming_schema=ESTIMATE_SCHEMA,
-            outgoing_schema=INTERP_SOLVER_SCHEMA,
+            incoming_schema=ResultSchema(ESTIMATE_SCHEMA),
+            outgoing_schema=ResultSchema(INTERP_SOLVER_SCHEMA),
         )
         self.solver_params = solver_params
         self.det_params = det_params
@@ -182,8 +183,10 @@ class InterpSolverPhase(PhaseLike):
             return PhaseResult.invalid_result(payload.run_number)
 
         result = PhaseResult(
-            artifact_path=self.get_artifact_path(workspace_path)
-            / form_physics_file_name(payload.run_number, pid),
+            artifacts={
+                "interp_solver": self.get_artifact_path(workspace_path)
+                / form_physics_file_name(payload.run_number, pid)
+            },
             successful=True,
             run_number=payload.run_number,
         )
@@ -209,8 +212,8 @@ class InterpSolverPhase(PhaseLike):
             return PhaseResult.invalid_result(payload.run_number)
 
         # Check the cluster phase and estimate phase data
-        cluster_path: Path = payload.metadata["cluster_path"]
-        estimate_path = payload.artifact_path
+        cluster_path: Path = payload.artifacts["cluster"]
+        estimate_path = payload.artifacts["estimate"]
         if not cluster_path.exists() or not estimate_path.exists():
             msg_queue.put(StatusMessage("Waiting", 0, 0, payload.run_number))
             spyral_warn(
@@ -350,7 +353,7 @@ class InterpSolverPhase(PhaseLike):
 
         # Write out the results
         physics_df = pl.DataFrame(phys_results)
-        physics_df.write_parquet(result.artifact_path)
+        physics_df.write_parquet(result.artifacts["interp_solver"])
         spyral_info(
             __name__, f"Phase InterpSolver complete for run {payload.run_number}"
         )

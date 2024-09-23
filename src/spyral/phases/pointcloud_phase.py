@@ -1,4 +1,5 @@
-from ..core.phase import PhaseLike, PhaseResult
+from ..core.phase import PhaseLike
+from ..core.schema import ResultSchema, PhaseResult
 from ..core.run_stacks import form_run_string
 from ..core.status_message import StatusMessage
 from ..core.config import (
@@ -86,8 +87,8 @@ class PointcloudPhase(PhaseLike):
     ):
         super().__init__(
             "Pointcloud",
-            incoming_schema=TRACE_SCHEMA,
-            outgoing_schema=POINTCLOUD_SCHEMA,
+            incoming_schema=ResultSchema(TRACE_SCHEMA),
+            outgoing_schema=ResultSchema(POINTCLOUD_SCHEMA),
         )
         self.get_params = get_params
         self.frib_params = frib_params
@@ -114,8 +115,10 @@ class PointcloudPhase(PhaseLike):
         self, payload: PhaseResult, workspace_path: Path
     ) -> PhaseResult:
         result = PhaseResult(
-            artifact_path=self.get_artifact_path(workspace_path)
-            / f"{form_run_string(payload.run_number)}.h5",
+            artifacts={
+                "pointclouds": self.get_artifact_path(workspace_path)
+                / f"{form_run_string(payload.run_number)}.h5"
+            },
             successful=True,
             run_number=payload.run_number,
         )
@@ -130,7 +133,7 @@ class PointcloudPhase(PhaseLike):
     ) -> PhaseResult:
         # Copy phase_pointcloud.py here
         # Check that the traces exist
-        trace_path = payload.artifact_path
+        trace_path = payload.artifacts["trace"]
         if not trace_path.exists():
             spyral_warn(
                 __name__,
@@ -141,7 +144,7 @@ class PointcloudPhase(PhaseLike):
         # Open files
         result = self.construct_artifact(payload, workspace_path)
         trace_reader = TraceReader(trace_path)
-        point_file = h5.File(result.artifact_path, "w")
+        point_file = h5.File(result.artifacts["pointcloud"], "w")
 
         # Load electric field correction
         corrector: ElectronCorrector | None = None
