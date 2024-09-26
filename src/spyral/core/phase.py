@@ -1,86 +1,10 @@
-import sys
+from .schema import PhaseResult, ResultSchema
+
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
 from pathlib import Path
 from multiprocessing import SimpleQueue
 from numpy.random import Generator
-from collections import Counter
-from multiprocessing.managers import SharedMemoryManager
-
-if sys.version_info < (3, 11):
-    from typing_extensions import Self
-else:
-    from typing import Self
-from typing import Any
-
-
-@dataclass
-class ArtifactSchema:
-    """Dataclass representing a phase artifact schema
-
-    Used to validate a pipeline
-
-    Attributes
-    ----------
-    extension: str
-        The artifact file extension (i.e. ".h5" or ".parquet")
-    structure: list[str] | dict[str, Any] | None
-        The artifact data structure. Can be a list of strings (dataframe columns),
-        a dictionary (HDF5 groups) or None (not specified)
-
-    """
-
-    extension: str
-    structure: list[str] | dict[str, Any] | None
-
-    def __eq__(self, value: Self) -> bool:
-        """Allow comparison of schemas for equivalency
-
-        Parameters
-        ----------
-        value: ArtifactSchema
-            The schema to compare to
-
-        Returns
-        -------
-        bool
-            True if the schemas are equivalent or False if they are different
-
-        """
-        return self.extension == value.extension and (
-            Counter(self.structure) == Counter(value.structure)
-        )
-
-
-@dataclass
-class PhaseResult:
-    """Dataclass representing the result of a Phase
-
-    Attributes
-    ----------
-    artifact_path: Path
-        Path to the artifact (data) created by this Phase
-    successful: bool
-        True if the Phase was successful or False if it failed
-    run_number: int
-        The run number that was analyzed
-    metadata: dict
-        A dict containing any extra data needed for the next Phase
-
-    Methods
-    -------
-    invalid_result(run_number)
-        Create an invalid PhaseResult
-    """
-
-    artifact_path: Path
-    successful: bool
-    run_number: int
-    metadata: dict = field(default_factory=dict)
-
-    @staticmethod
-    def invalid_result(run_number: int):
-        return PhaseResult(Path("Invalid"), False, run_number)
+from multiprocessing.shared_memory import SharedMemory
 
 
 class PhaseLike(ABC):
@@ -124,8 +48,8 @@ class PhaseLike(ABC):
     def __init__(
         self,
         name: str,
-        incoming_schema: ArtifactSchema | None = None,
-        outgoing_schema: ArtifactSchema | None = None,
+        incoming_schema: ResultSchema | None = None,
+        outgoing_schema: ResultSchema | None = None,
     ):
         self.name = name
         self.incoming_schema = incoming_schema
@@ -183,7 +107,7 @@ class PhaseLike(ABC):
         raise NotImplementedError
 
     def create_shared_data(
-        self, workspace_path: Path, manager: SharedMemoryManager
+        self, workspace_path: Path, handles: dict[str, SharedMemory]
     ) -> None:
         """Create shared-memory data for use across all processes
 
@@ -198,8 +122,8 @@ class PhaseLike(ABC):
         ----------
         workspace_path: Path
             The path tot he workspace
-        manager: SharedMemoryManager
-            A resource manager for parallel processes
+        handles: dict[str, SharedMemory]
+            A resource manager for interprocess shared memory
         """
         return
 
@@ -268,8 +192,8 @@ class PhaseLike(ABC):
         return path
 
     def validate(
-        self, incoming: ArtifactSchema | None
-    ) -> tuple[bool, ArtifactSchema | None]:
+        self, incoming: ResultSchema | None
+    ) -> tuple[bool, ResultSchema | None]:
         """Validate the phase by comparing the given incoming schema to the expected incoming schema.
 
         Parameters
