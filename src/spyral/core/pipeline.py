@@ -202,7 +202,7 @@ class Pipeline:
                     successful=True,
                     run_number=run,
                 )
-                if not result.artifacts["traces"].exists():
+                if not result.artifacts["trace"].exists():
                     continue
                 for idx, phase in enumerate(self.phases):
                     if self.active[idx]:

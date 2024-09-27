@@ -116,7 +116,7 @@ class PointcloudPhase(PhaseLike):
     ) -> PhaseResult:
         result = PhaseResult(
             artifacts={
-                "pointclouds": self.get_artifact_path(workspace_path)
+                "pointcloud": self.get_artifact_path(workspace_path)
                 / f"{form_run_string(payload.run_number)}.h5"
             },
             successful=True,
