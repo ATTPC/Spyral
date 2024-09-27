@@ -58,7 +58,7 @@ class ClusterPhase(PhaseLike):
     ) -> PhaseResult:
         result = PhaseResult(
             artifacts={
-                "clusters": self.get_artifact_path(workspace_path)
+                "cluster": self.get_artifact_path(workspace_path)
                 / f"{form_run_string(payload.run_number)}.h5"
             },
             successful=True,
