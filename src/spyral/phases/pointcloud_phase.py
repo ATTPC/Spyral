@@ -15,6 +15,7 @@ from ..correction import (
 )
 from ..core.spy_log import spyral_warn, spyral_info
 from ..trace.trace_reader import TraceReader
+from ..trace.frib_event import TriggerType
 from ..trace.peak import Peak
 from ..core.pad_map import PadMap
 from ..core.point_cloud import PointCloud
@@ -184,7 +185,10 @@ class PointcloudPhase(PhaseLike):
             event = trace_reader.read_event(idx, self.get_params, self.frib_params, rng)
             ic_mult = -1.0
             ic_peak: None | Peak = None
-            if event.frib is not None:
+            if (
+                event.frib is not None
+                and event.frib.trigger == TriggerType.IC_DOWNSCALE_TRIGGER
+            ):
                 ic_mult = event.frib.get_ic_multiplicity(self.frib_params)
                 ic_peak = event.frib.get_triggering_ic_peak(self.frib_params)
                 if (
@@ -193,6 +197,7 @@ class PointcloudPhase(PhaseLike):
                     and ic_peak is not None
                 ):  # ugh
                     ic_within_mult_count += 1
+                continue
             if event.get is None:
                 continue
 
