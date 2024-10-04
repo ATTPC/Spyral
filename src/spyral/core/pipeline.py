@@ -225,9 +225,10 @@ def _run_pipeline(
     init_spyral_logger_child(pipeline.workspace, process_id)
     pipeline.run(run_list, msg_queue, seed)
 
+
 def generate_assets(pipeline: Pipeline) -> None:
     """Function which will generate a Pipeline's assets
-    
+
     This can be used in lieu of the start_pipeline function if all
     you want to do is generate the required assets to run a pipeline.
     This is useful for cases where Spyral is run with a limited walltime
@@ -245,6 +246,7 @@ def generate_assets(pipeline: Pipeline) -> None:
     print("Creating any phase assets...", end=" ")
     pipeline.create_assets()
     print("Done.")
+
 
 def start_pipeline(
     pipeline: Pipeline,
