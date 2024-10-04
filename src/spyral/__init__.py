@@ -9,6 +9,7 @@ from .core.schema import (
 from .core.pipeline import (
     Pipeline,
     start_pipeline,
+    generate_assets,
 )
 from .core.config import (
     PadParameters,
@@ -40,6 +41,7 @@ __all__ = [
     "PhaseLike",
     "Pipeline",
     "start_pipeline",
+    "generate_assets",
     "PadParameters",
     "GetParameters",
     "FribParameters",
