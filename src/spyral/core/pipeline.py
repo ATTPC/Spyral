@@ -226,6 +226,28 @@ def _run_pipeline(
     pipeline.run(run_list, msg_queue, seed)
 
 
+def generate_assets(pipeline: Pipeline) -> None:
+    """Function which will generate a Pipeline's assets
+
+    This can be used in lieu of the start_pipeline function if all
+    you want to do is generate the required assets to run a pipeline.
+    This is useful for cases where Spyral is run with a limited walltime
+    to avoid the overhead of generating the assets within a job context.
+
+    Parameters
+    ----------
+    pipeline: Pipeline
+        The pipeline whose assets should be generated
+    """
+    print(SPLASH)
+    print(f"Creating workspace: {pipeline.workspace} ...", end=" ")
+    pipeline.create_workspace()
+    print("Done.")
+    print("Creating any phase assets...", end=" ")
+    pipeline.create_assets()
+    print("Done.")
+
+
 def start_pipeline(
     pipeline: Pipeline,
     run_min: int,
