@@ -75,7 +75,7 @@ class ResultSchema:
 
         Parameters
         ----------
-        value: ArtifactSchema
+        other: ArtifactSchema
             The schema to compare to
 
         Returns

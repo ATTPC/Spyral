@@ -43,6 +43,7 @@ nav:
       - pipeline: api/core/pipeline.md
       - point_cloud: api/core/point_cloud.md
       - run_stacks: api/core/run_stacks.md
+      - schema: api/core/schema.md
       - spy_log: api/core/spy_log.md
       - status_message: api/core/status_message.md
       - track_generator: api/core/track_generator.md
