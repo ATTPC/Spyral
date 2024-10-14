@@ -91,6 +91,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://example.com/api/core/schema/</loc>
+         <lastmod>2024-10-14</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://example.com/api/core/spy_log/</loc>
          <lastmod>2024-10-14</lastmod>
          <changefreq>daily</changefreq>
