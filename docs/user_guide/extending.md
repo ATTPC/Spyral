@@ -38,29 +38,50 @@ Easy as that! Obviously, you will want to give your class a good descriptive nam
 
 ## Extending the Schema
 
-Until now, we have not discussed Schema in Spyral and what they are for. When Spyral validates a Pipeline, it does so by examining each Phase's expected incoming and outgoing [`ArtifactSchema`](../api/core/phase.md). ArtifactSchema contain two members, an extension and a schema. The extension is a string of the file extension for the Phase artifact (product). The schema is a model of the structure of the artifact data. In the case of a dataframe it would be a list of the column names. In the case of a HDF5 file it would be a dictionary showing the group heirarchy. We will add a new schema in our `my_phases/schema.py` file, assuming our solver outputs a dataframe in a parquet file format.
+Until now, we have not discussed Schema in Spyral and what they are for. Schema are used to give the Pipeline a way to make sure that the Phases correctly link together (data from the previous phase matches the input of the next phase). Schema are defined through JSON, and have the follwoing structure:
 
-```python
-from spyral import ArtifactSchema
+```json
+{
+    "phase":
+    {
+        "extension": ...,
+        "data": 
+        {
 
-MY_SOLVER_SCHEMA = ArtifactSchema(
-    extension=".parquet",
-    structure=[
-        "value_a",
-        "value_b",
-        "value_c"
-    ]
-)
+        }
+    },
+    "phase2":...
+}
 ```
 
-Still not anything too crazy. But it is important to define schema, otherwise the Pipeline can't make sure that everything is ok! Technically, you don't have to make them though (see the [docs](../api/core/phase.md)).
+The key ideas are the following: a schema can contain artifacts from multiple phases, and describes the format for each artifact. Each artifact describes the file extension (format) that was used and the data format that was stored. You have a lot of flexibility in how to write schemas; this is necessary to cover the range of artifacts produced by the pipeline. Below is an example `schema.py` with a single artifact defined. 
+
+```python
+
+MY_SOLVER_SCHEMA = """
+{
+    "my_solver":
+    {
+        "exetension": ".parquet",
+        "data":
+        {
+            "angle": "float",
+            "radius": "float",
+            "energy": "float"
+        }
+    }
+}
+"""
+```
+
+Still not anything too crazy. But it is important to define schema, otherwise the Pipeline can't make sure that everything is ok! Technically, you don't have to make them though (see the [docs](../api/core/phase.md)). The API documentation for schema can be found [here](../api/core/schema.md).
 
 ## Adding a new Phase
 
 All Phases inherit from the [`PhaseLike`](../api/core/phase.md) abstract base class. As such your Phase will have to adhere to the predefined strutrue of `PhaseLike`. Lets look at what we would put in `my_phases/my_sovler_phase.py`.
 
 ```python
-from spyral import PhaseLike, PhaseResult, ESTIMATE_SCHEMA
+from spyral import PhaseLike, PhaseResult, ResultSchema, ESTIMATE_SCHEMA
 from spyral.core.run_stacks import form_run_string
 
 from .schema import MY_SOLVER_SCHEMA
@@ -80,7 +101,7 @@ def load_asset(path: Path) -> SomeType:
 class MySolverPhase(PhaseLike):
 
     def __init__(self, solver_params: MySolverParameters):
-        super().__init__(name="MySolver", incoming_schema=ESTIMATION_SCHEMA, outgoing_schema=MY_SOLVER_SCHEMA)
+        super().__init__(name="MySolver", incoming_schema=ResultSchema(ESTIMATION_SCHEMA), outgoing_schema=ResultSchema(MY_SOLVER_SCHEMA))
         self.params = solver_params
 
     def create_assets(self, workspace_path: Path) -> bool:
@@ -92,8 +113,10 @@ class MySolverPhase(PhaseLike):
         self, payload: PhaseResult, workspace_path: Path
     ) -> PhaseResult:
         result = PhaseResult(
-            artifact_path=self.get_artifact_path(workspace_path)
+            artifacts={
+                "my_solver": self.get_artifact_path(workspace_path)
             / f"{form_run_string(payload.run_number)}.h5", # form_run_string makes the standard AT-TPC run_#### string
+            },
             successful=True,
             run_number=payload.run_number,
         )
@@ -124,7 +147,7 @@ This is a bit more complicated. There are four methods that **must** be defined 
 
 Next is `create_assets`. This is where we would generate any extra data (interpolation schemes, electric field corrections, etc.) needed by this phase. This is called by the Pipeline before running. Assets can be stored as a memeber variable, or written to disk and loaded on the fly (as shown here).
 
-Next is `construct_artifact`. This is a wrapper around creating a valid [`PhaseResult`](../api/core/phase.md), including a valid artifact path. This function is also what allows us to skip Phases! We can always ask a Phase where it would expect data from a given run to be stored.
+Next is `construct_artifact`. This is a wrapper around creating a valid [`PhaseResult`](../api/core/schema.md), including a valid artifact path. This function is also what allows us to skip Phases! We can always ask a Phase where it would expect data from a given run to be stored.
 
 Finally, the main function `run`. Here we take in the previous Phase's `PhaseResult` (here we're assuming it is the default EstimationPhase). We create an artifact using `self.construct_artifact`, load some assets, and away we go! We then return our artifact, for another phase to use if needed!
 
@@ -147,7 +170,7 @@ from spyral import (
     DetectorParameters,
     ClusterParameters,
     EstimateParameters,
-    INVALID_PATH,
+    DEFAULT_MAP,
 )
 
 from pathlib import Path
@@ -165,13 +188,11 @@ run_max = 94
 n_processes = 4
 
 pad_params = PadParameters(
-    is_default=True,
-    is_default_legacy=False,
-    pad_geometry_path=INVALID_PATH,
-    pad_gain_path=INVALID_PATH,
-    pad_time_path=INVALID_PATH,
-    pad_electronics_path=INVALID_PATH,
-    pad_scale_path=INVALID_PATH,
+    pad_geometry_path=DEFAULT_MAP,
+    pad_gain_path=DEFAULT_MAP,
+    pad_time_path=DEFAULT_MAP,
+    pad_electronics_path=DEFAULT_MAP,
+    pad_scale_path=DEFAULT_MAP,
 )
 
 get_params = GetParameters(
@@ -190,7 +211,6 @@ frib_params = FribParameters(
     peak_threshold=100.0,
     ic_delay_time_bucket=1100,
     ic_multiplicity=1,
-    correct_ic_time=True,
 )
 
 det_params = DetectorParameters(
@@ -211,8 +231,8 @@ cluster_params = ClusterParameters(
     min_size_scale_factor=0.05,
     min_size_lower_cutoff=10,
     cluster_selection_epsilon=0.3,
+    min_cluster_size_join=15,
     circle_overlap_ratio=0.5,
-    fractional_charge_threshold=0.8,
     outlier_scale_factor=0.05,
 )
 
