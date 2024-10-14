@@ -1,4 +1,5 @@
-from ..core.phase import PhaseLike, PhaseResult
+from ..core.phase import PhaseLike
+from ..core.schema import PhaseResult, ResultSchema
 from ..core.config import SolverParameters, DetectorParameters
 from ..core.status_message import StatusMessage
 from ..core.cluster import Cluster
@@ -27,7 +28,6 @@ from multiprocessing import SimpleQueue
 from numpy.random import Generator
 import numpy as np
 from multiprocessing.shared_memory import SharedMemory
-from multiprocessing.managers import SharedMemoryManager
 
 DEFAULT_PID_XAXIS = "dEdx"
 DEFAULT_PID_YAXIS = "brho"
@@ -89,8 +89,8 @@ class InterpLeastSqSolverPhase(PhaseLike):
     def __init__(self, solver_params: SolverParameters, det_params: DetectorParameters):
         super().__init__(
             "InterpLeastSqSolver",
-            incoming_schema=ESTIMATE_SCHEMA,
-            outgoing_schema=INTERP_SOLVER_SCHEMA,
+            incoming_schema=ResultSchema(ESTIMATE_SCHEMA),
+            outgoing_schema=ResultSchema(INTERP_SOLVER_SCHEMA),
         )
         self.solver_params = solver_params
         self.det_params = det_params
@@ -141,25 +141,24 @@ class InterpLeastSqSolverPhase(PhaseLike):
         return True
 
     def create_shared_data(
-        self, workspace_path: Path, manager: SharedMemoryManager
+        self, workspace_path: Path, handles: dict[str, SharedMemory]
     ) -> None:
         # Create a block of shared memory of the same total size as the mesh
         # Note that we don't have a lock on the shared memory as the mesh is
         # used read-only
         mesh_data: np.ndarray = np.load(self.track_path)
-        self.memory = manager.SharedMemory(
-            mesh_data.nbytes
-        )  # Stored as class member for windows reasons, simply a keep-alive
+        handle = SharedMemory(create=True, size=mesh_data.nbytes)
+        handles[handle.name] = handle
         spyral_info(
             __name__,
             f"Allocated {mesh_data.nbytes * 1.0e-9:.2} GB of memory for shared mesh.",
         )
         memory_array = np.ndarray(
-            mesh_data.shape, dtype=mesh_data.dtype, buffer=self.memory.buf
+            mesh_data.shape, dtype=mesh_data.dtype, buffer=handle.buf
         )
         memory_array[:, :, :, :] = mesh_data[:, :, :, :]
         # The name allows us to access later, shape and dtype are for casting to numpy
-        self.shared_mesh_name = self.memory.name
+        self.shared_mesh_name = handle.name
         self.shared_mesh_shape = memory_array.shape
         self.shared_mesh_type = memory_array.dtype
 
@@ -184,8 +183,10 @@ class InterpLeastSqSolverPhase(PhaseLike):
             return PhaseResult.invalid_result(payload.run_number)
 
         result = PhaseResult(
-            artifact_path=self.get_artifact_path(workspace_path)
-            / form_physics_file_name(payload.run_number, pid),
+            artifacts={
+                "interp_solver": self.get_artifact_path(workspace_path)
+                / form_physics_file_name(payload.run_number, pid)
+            },
             successful=True,
             run_number=payload.run_number,
         )
@@ -211,8 +212,8 @@ class InterpLeastSqSolverPhase(PhaseLike):
             return PhaseResult.invalid_result(payload.run_number)
 
         # Check the cluster phase and estimate phase data
-        cluster_path: Path = payload.metadata["cluster_path"]
-        estimate_path = payload.artifact_path
+        cluster_path: Path = payload.artifacts["cluster"]
+        estimate_path = payload.artifacts["estimation"]
         if not cluster_path.exists() or not estimate_path.exists():
             msg_queue.put(StatusMessage("Waiting", 0, 0, payload.run_number))
             spyral_warn(
@@ -352,9 +353,10 @@ class InterpLeastSqSolverPhase(PhaseLike):
 
         # Write out the results
         physics_df = pl.DataFrame(phys_results)
-        physics_df.write_parquet(result.artifact_path)
+        physics_df.write_parquet(result.artifacts["interp_solver"])
         spyral_info(
             __name__,
             f"Phase InterpLeastSquaresSolver complete for run {payload.run_number}",
         )
+        mesh_buffer.close()
         return result

@@ -1,11 +1,15 @@
 from .core.phase import (
-    ArtifactSchema,
-    PhaseResult,
     PhaseLike,
+)
+from .core.schema import (
+    PhaseResult,
+    ResultSchema,
+    ArtifactSchema,
 )
 from .core.pipeline import (
     Pipeline,
     start_pipeline,
+    generate_assets,
 )
 from .core.config import (
     PadParameters,
@@ -16,10 +20,8 @@ from .core.config import (
     EstimateParameters,
     SolverParameters,
     DEFAULT_MAP,
-    DEFAULT_LEGACY_MAP,
 )
 from .phases.pointcloud_phase import PointcloudPhase
-from .phases.pointcloud_legacy_phase import PointcloudLegacyPhase
 from .phases.cluster_phase import ClusterPhase
 from .phases.estimation_phase import EstimationPhase
 from .phases.interp_solver_phase import InterpSolverPhase
@@ -34,10 +36,12 @@ from .phases.schema import (
 
 __all__ = [
     "ArtifactSchema",
+    "ResultSchema",
     "PhaseResult",
     "PhaseLike",
     "Pipeline",
     "start_pipeline",
+    "generate_assets",
     "PadParameters",
     "GetParameters",
     "FribParameters",
@@ -46,9 +50,7 @@ __all__ = [
     "EstimateParameters",
     "SolverParameters",
     "DEFAULT_MAP",
-    "DEFAULT_LEGACY_MAP",
     "PointcloudPhase",
-    "PointcloudLegacyPhase",
     "ClusterPhase",
     "EstimationPhase",
     "InterpSolverPhase",

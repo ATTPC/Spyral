@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from pathlib import Path
 
 DEFAULT_MAP: Path = Path("DefaultPath")
-DEFAULT_LEGACY_MAP: Path = Path("DefaultLegacyPath")
 
 
 @dataclass

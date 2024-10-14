@@ -1,6 +1,7 @@
 from .run_stacks import form_run_string, create_run_stacks
 from .status_message import StatusMessage
-from .phase import PhaseLike, PhaseResult
+from .phase import PhaseLike
+from .schema import PhaseResult
 from .spy_log import (
     init_spyral_logger_parent,
     init_spyral_logger_child,
@@ -12,7 +13,7 @@ from .spy_log import (
 from tqdm import tqdm
 from pathlib import Path
 from multiprocessing import SimpleQueue, Process
-from multiprocessing.managers import SharedMemoryManager
+from multiprocessing.shared_memory import SharedMemory
 from numpy.random import SeedSequence, default_rng
 import time
 
@@ -129,17 +130,18 @@ class Pipeline:
                 return False
         return True
 
-    def create_shared_data(self, manager: SharedMemoryManager) -> None:
+    def create_shared_data(self, handles: dict[str, SharedMemory]) -> None:
         """Have each phase create any shared memory
 
         Call each PhaseLike's create_shared_data function.
-        This should be called before running the pipeline with a
-        valid, started SharedMemoryManager.
+        This should be called before running the pipeline.
 
         Parameters
         ----------
-        manager: multiprocessing.manager.SharedMemoryManager
-            The manager of the program's shared memory
+        handles: dict[str, multiprocessing.shared_memory.SharedMemory]
+            An empty dictionary to be filled with handles of all created
+            shared memory. The parent process will use these handles to do
+            cleanup later.
 
         """
         for idx, phase in enumerate(self.phases):
@@ -147,7 +149,7 @@ class Pipeline:
             if not self.active[idx]:
                 continue
             else:
-                phase.create_shared_data(self.workspace, manager)
+                phase.create_shared_data(self.workspace, handles)
 
     def validate(self) -> dict[str, bool]:
         """Validate the pipeline by comparing the schema of the phases.
@@ -194,9 +196,13 @@ class Pipeline:
         try:
             for run in run_list:
                 result = PhaseResult(
-                    Path(self.traces / f"{form_run_string(run)}.h5"), True, run
+                    artifacts={
+                        "trace": Path(self.traces / f"{form_run_string(run)}.h5")
+                    },
+                    successful=True,
+                    run_number=run,
                 )
-                if not result.artifact_path.exists():
+                if not result.artifacts["trace"].exists():
                     continue
                 for idx, phase in enumerate(self.phases):
                     if self.active[idx]:
@@ -218,6 +224,28 @@ def _run_pipeline(
     """A wrapper for multiprocessing. Do not call explicitly!"""
     init_spyral_logger_child(pipeline.workspace, process_id)
     pipeline.run(run_list, msg_queue, seed)
+
+
+def generate_assets(pipeline: Pipeline) -> None:
+    """Function which will generate a Pipeline's assets
+
+    This can be used in lieu of the start_pipeline function if all
+    you want to do is generate the required assets to run a pipeline.
+    This is useful for cases where Spyral is run with a limited walltime
+    to avoid the overhead of generating the assets within a job context.
+
+    Parameters
+    ----------
+    pipeline: Pipeline
+        The pipeline whose assets should be generated
+    """
+    print(SPLASH)
+    print(f"Creating workspace: {pipeline.workspace} ...", end=" ")
+    pipeline.create_workspace()
+    print("Done.")
+    print("Creating any phase assets...", end=" ")
+    pipeline.create_assets()
+    print("Done.")
 
 
 def start_pipeline(
@@ -255,8 +283,7 @@ def start_pipeline(
     """
     # Setup
     # Note the manager exists outside the pipeline
-    shared_manager = SharedMemoryManager()
-    shared_manager.start()
+    handles: dict[str, SharedMemory] = {}
     # handle None-ness
     if runs_to_skip is None:
         runs_to_skip = []
@@ -272,7 +299,7 @@ def start_pipeline(
     pipeline.create_assets()
     print("Done.")
     print("Initializing shared memory...", end=" ")
-    pipeline.create_shared_data(shared_manager)
+    pipeline.create_shared_data(handles)
     print("Done.")
     print("Validating Pipeline...", end=" ")
     result = pipeline.validate()
@@ -373,7 +400,9 @@ def start_pipeline(
     for process in processes:
         process.join()
 
-    shared_manager.shutdown()
+    for handle in handles.values():
+        handle.close()
+        handle.unlink()
 
     stop = time.time()
     duration = stop - start

@@ -206,14 +206,16 @@ class TraceReader:
         frib_evt_group: h5.Group = self.file["frib"]["evt"]  # type: ignore
         event_name = f"evt{event_id}_data"
         frib_event_name = f"evt{event_id}_1903"
+        frib_coinc_name = f"evt{event_id}_977"
 
         event = Event(event_id, None, None)
         if event_name in get_group:
             get_data: h5.Dataset = get_group[event_name]  # type: ignore
             event.get = GetEvent(get_data[:], event_id, get_params, rng)
-        if frib_event_name in frib_evt_group:
+        if frib_event_name in frib_evt_group and frib_coinc_name in frib_evt_group:
             frib_data: h5.Dataset = frib_evt_group[frib_event_name]  # type: ignore
-            event.frib = FribEvent(frib_data[:], event_id, frib_params)
+            frib_coinc: h5.Dataset = frib_evt_group[frib_coinc_name]  # type: ignore
+            event.frib = FribEvent(frib_data[:], frib_coinc[:], event_id, frib_params)
         return event
 
     def read_event_merger_current(
@@ -251,7 +253,10 @@ class TraceReader:
             event.get = GetEvent(get_data[:], event_id, get_params, rng)
             if "frib_physics" in event_data:
                 frib_1903_data: h5.Dataset = events_group["frib_physics"]["1903"]  # type: ignore
-                event.frib = FribEvent(frib_1903_data[:], event_id, frib_params)
+                frib_977_data: h5.Dataset = events_group["frib_physics"]["977"]  # type: ignore
+                event.frib = FribEvent(
+                    frib_1903_data[:], frib_977_data[:], event_id, frib_params
+                )
         return event
 
     def read_scalers(self) -> FribScalers | None:

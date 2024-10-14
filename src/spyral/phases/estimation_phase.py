@@ -1,4 +1,5 @@
-from ..core.phase import PhaseLike, PhaseResult
+from ..core.phase import PhaseLike
+from ..core.schema import PhaseResult, ResultSchema
 from ..core.config import EstimateParameters, DetectorParameters
 from ..core.status_message import StatusMessage
 from ..core.cluster import Cluster
@@ -43,8 +44,8 @@ class EstimationPhase(PhaseLike):
     ):
         super().__init__(
             "Estimation",
-            incoming_schema=CLUSTER_SCHEMA,
-            outgoing_schema=ESTIMATE_SCHEMA,
+            incoming_schema=ResultSchema(CLUSTER_SCHEMA),
+            outgoing_schema=ResultSchema(ESTIMATE_SCHEMA),
         )
         self.estimate_params = estimate_params
         self.det_params = det_params
@@ -56,11 +57,13 @@ class EstimationPhase(PhaseLike):
         self, payload: PhaseResult, workspace_path: Path
     ) -> PhaseResult:
         result = PhaseResult(
-            artifact_path=self.get_artifact_path(workspace_path)
-            / f"{form_run_string(payload.run_number)}.parquet",
+            artifacts={
+                "estimation": self.get_artifact_path(workspace_path)
+                / f"{form_run_string(payload.run_number)}.parquet",
+                "cluster": payload.artifacts["cluster"],
+            },
             successful=True,
             run_number=payload.run_number,
-            metadata={"cluster_path": payload.artifact_path},
         )
         return result
 
@@ -72,7 +75,7 @@ class EstimationPhase(PhaseLike):
         rng: Generator,
     ) -> PhaseResult:
         # Check that clusters exist
-        cluster_path = payload.artifact_path
+        cluster_path = payload.artifacts["cluster"]
         if not cluster_path.exists() or not payload.successful:
             spyral_warn(
                 __name__,
@@ -183,7 +186,7 @@ class EstimationPhase(PhaseLike):
 
         # Write the results to a DataFrame
         df = pl.DataFrame(data)
-        df.write_parquet(result.artifact_path)
+        df.write_parquet(result.artifacts["estimation"])
         spyral_info(__name__, f"Phase Estimation complete for run {payload.run_number}")
         # Next step also needs to know where to find the clusters
         return result

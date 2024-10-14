@@ -1,4 +1,5 @@
-from ..core.phase import PhaseLike, PhaseResult
+from ..core.phase import PhaseLike
+from ..core.schema import ResultSchema, PhaseResult
 from ..core.run_stacks import form_run_string
 from ..core.status_message import StatusMessage
 from ..core.config import (
@@ -14,6 +15,7 @@ from ..correction import (
 )
 from ..core.spy_log import spyral_warn, spyral_info
 from ..trace.trace_reader import TraceReader
+from ..trace.frib_event import TriggerType
 from ..trace.peak import Peak
 from ..core.pad_map import PadMap
 from ..core.point_cloud import PointCloud
@@ -86,8 +88,8 @@ class PointcloudPhase(PhaseLike):
     ):
         super().__init__(
             "Pointcloud",
-            incoming_schema=TRACE_SCHEMA,
-            outgoing_schema=POINTCLOUD_SCHEMA,
+            incoming_schema=ResultSchema(TRACE_SCHEMA),
+            outgoing_schema=ResultSchema(POINTCLOUD_SCHEMA),
         )
         self.get_params = get_params
         self.frib_params = frib_params
@@ -114,8 +116,10 @@ class PointcloudPhase(PhaseLike):
         self, payload: PhaseResult, workspace_path: Path
     ) -> PhaseResult:
         result = PhaseResult(
-            artifact_path=self.get_artifact_path(workspace_path)
-            / f"{form_run_string(payload.run_number)}.h5",
+            artifacts={
+                "pointcloud": self.get_artifact_path(workspace_path)
+                / f"{form_run_string(payload.run_number)}.h5"
+            },
             successful=True,
             run_number=payload.run_number,
         )
@@ -130,7 +134,7 @@ class PointcloudPhase(PhaseLike):
     ) -> PhaseResult:
         # Copy phase_pointcloud.py here
         # Check that the traces exist
-        trace_path = payload.artifact_path
+        trace_path = payload.artifacts["trace"]
         if not trace_path.exists():
             spyral_warn(
                 __name__,
@@ -141,7 +145,7 @@ class PointcloudPhase(PhaseLike):
         # Open files
         result = self.construct_artifact(payload, workspace_path)
         trace_reader = TraceReader(trace_path)
-        point_file = h5.File(result.artifact_path, "w")
+        point_file = h5.File(result.artifacts["pointcloud"], "w")
 
         # Load electric field correction
         corrector: ElectronCorrector | None = None
@@ -181,7 +185,10 @@ class PointcloudPhase(PhaseLike):
             event = trace_reader.read_event(idx, self.get_params, self.frib_params, rng)
             ic_mult = -1.0
             ic_peak: None | Peak = None
-            if event.frib is not None:
+            if (
+                event.frib is not None
+                and event.frib.trigger == TriggerType.IC_DOWNSCALE_TRIGGER
+            ):
                 ic_mult = event.frib.get_ic_multiplicity(self.frib_params)
                 ic_peak = event.frib.get_triggering_ic_peak(self.frib_params)
                 if (
@@ -190,6 +197,7 @@ class PointcloudPhase(PhaseLike):
                     and ic_peak is not None
                 ):  # ugh
                     ic_within_mult_count += 1
+                continue
             if event.get is None:
                 continue
 
@@ -212,14 +220,17 @@ class PointcloudPhase(PhaseLike):
             pc_dataset.attrs["ic_centroid"] = -1.0
             pc_dataset.attrs["ic_multiplicity"] = -1.0
 
-            # Check multiplicity condition and existence of trigger
-            if (
-                ic_mult > 0.0 and ic_mult <= self.frib_params.ic_multiplicity
-            ) and ic_peak is not None:
-                pc_dataset.attrs["ic_amplitude"] = ic_peak.amplitude
-                pc_dataset.attrs["ic_integral"] = ic_peak.integral
-                pc_dataset.attrs["ic_centroid"] = ic_peak.centroid
-                pc_dataset.attrs["ic_multiplicity"] = ic_mult
+            if event.frib is not None:
+                ic_peak = event.frib.get_triggering_ic_peak(self.frib_params)
+                ic_mult = event.frib.get_ic_multiplicity(self.frib_params)
+                # Check multiplicity condition and existence of trigger
+                if (
+                    ic_mult > 0.0 and ic_mult <= self.frib_params.ic_multiplicity
+                ) and ic_peak is not None:
+                    pc_dataset.attrs["ic_amplitude"] = ic_peak.amplitude
+                    pc_dataset.attrs["ic_integral"] = ic_peak.integral
+                    pc_dataset.attrs["ic_centroid"] = ic_peak.centroid
+                    pc_dataset.attrs["ic_multiplicity"] = ic_mult
 
             pc_dataset[:] = pc.cloud
         # End of event data

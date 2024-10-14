@@ -2,6 +2,7 @@ from .frib_trace import FribTrace
 from .get_trace import Peak
 from ..core.config import FribParameters
 
+from enum import Enum
 import numpy as np
 from numba import njit
 
@@ -10,6 +11,13 @@ SI_COLUMN: int = 2  # The column for the silicon in the raw FRIBDAQ data
 MESH_COLUMN: int = 1  # The column for the mesh in the raw FRIBDAQ data
 
 SAMPLING_FREQUENCY: float = 12.5  # MHz, FRIBDAQ module sampling frequency
+
+
+class TriggerType(Enum):
+    MESH_TRIGGER = 1
+    IC_DOWNSCALE_TRIGGER = 2
+    AND_TRIGGER = 3
+    EMPTY_TRIGGER = 0  # how did we get here hahaha
 
 
 class FribEvent:
@@ -36,7 +44,7 @@ class FribEvent:
 
     Methods
     -------
-    FribEvent(self, raw_data: h5.Dataset, event_number: int, params: FribParameters)
+    FribEvent(self, trace_array, coincidence_array, event_number, params)
         Construct the FribEvent and process the traces
     get_ic_trace() -> FribTrace
         Get the ion chamber trace for this event
@@ -44,17 +52,24 @@ class FribEvent:
         Get the silicon trace for this event
     get_mesh_trace() -> FribTrace
         Get the mesh trace for this event
-    get_good_ic_peak(params: FribParameters) -> Peak | None
+    get_good_ic_peak(params) -> Peak | None
         Attempts to retrieve the "good" ion chamber signal.
-    correct_ic_time(good_peak: Peak, get_frequency: float) -> float
+    correct_ic_time(good_peak, get_frequency) -> float
         Calculate the correction to the GET time buckets using the ion chamber signal
     """
 
-    def __init__(self, raw_data: np.ndarray, event_number: int, params: FribParameters):
+    def __init__(
+        self,
+        trace_array: np.ndarray,
+        coincidence_array: np.ndarray,
+        event_number: int,
+        params: FribParameters,
+    ):
         self.event_number = event_number
         trace_data = preprocess_frib_traces(
-            raw_data[:].copy(), params.baseline_window_scale
+            trace_array[:].copy(), params.baseline_window_scale
         )
+        self.trigger = TriggerType(int(coincidence_array[0]))  # bleh
         self.traces = [FribTrace(column, params) for column in trace_data.T]
 
     def get_ic_trace(self) -> FribTrace:

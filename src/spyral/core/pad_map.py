@@ -1,6 +1,6 @@
 from .constants import INVALID_PAD_ID
 from .hardware_id import HardwareID, generate_electronics_id
-from .config import PadParameters, DEFAULT_MAP, DEFAULT_LEGACY_MAP
+from .config import PadParameters, DEFAULT_MAP
 from dataclasses import dataclass, field
 from importlib import resources
 
@@ -81,10 +81,7 @@ class PadMap:
         directory = resources.files("spyral.data")
 
         # Geometry
-        if (
-            params.pad_geometry_path == DEFAULT_MAP
-            or params.pad_geometry_path == DEFAULT_LEGACY_MAP
-        ):
+        if params.pad_geometry_path == DEFAULT_MAP:
             geom_handle = directory.joinpath("padxy.csv")
             with resources.as_file(geom_handle) as geopath:
                 geofile = open(geopath, "r")
@@ -107,10 +104,7 @@ class PadMap:
                     )
 
         # Time
-        if (
-            params.pad_time_path == DEFAULT_MAP
-            or params.pad_time_path == DEFAULT_LEGACY_MAP
-        ):
+        if params.pad_time_path == DEFAULT_MAP:
             time_handle = directory.joinpath("pad_time_correction.csv")
             with resources.as_file(time_handle) as timepath:
                 timefile = open(timepath, "r")
@@ -147,24 +141,6 @@ class PadMap:
                     self.map[hardware.pad_id].hardware = hardware
                     self.elec_map[generate_electronics_id(hardware)] = hardware.pad_id
                 elecfile.close()
-        elif params.pad_electronics_path == DEFAULT_LEGACY_MAP:
-            elec_handle = directory.joinpath("pad_electronics_legacy.csv")
-            with resources.as_file(elec_handle) as elecpath:
-                elecfile = open(elecpath, "r")
-                elecfile.readline()
-                lines = elecfile.readlines()
-                for line in lines:
-                    entries = line.split(",")
-                    hardware = HardwareID(
-                        int(entries[4]),
-                        int(entries[0]),
-                        int(entries[1]),
-                        int(entries[2]),
-                        int(entries[3]),
-                    )
-                    self.map[hardware.pad_id].hardware = hardware
-                    self.elec_map[generate_electronics_id(hardware)] = hardware.pad_id
-                elecfile.close()
         else:
             with open(params.pad_electronics_path, "r") as elecfile:
                 elecfile.readline()
@@ -182,10 +158,7 @@ class PadMap:
                     self.elec_map[generate_electronics_id(hardware)] = hardware.pad_id
 
         # Scale
-        if (
-            params.pad_scale_path == DEFAULT_MAP
-            or params.pad_scale_path == DEFAULT_LEGACY_MAP
-        ):
+        if params.pad_scale_path == DEFAULT_MAP:
             scale_handle = directory.joinpath("pad_scale.csv")
             with resources.as_file(scale_handle) as scalepath:
                 scalefile = open(scalepath, "r")

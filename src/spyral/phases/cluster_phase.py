@@ -1,4 +1,5 @@
-from ..core.phase import PhaseLike, PhaseResult
+from ..core.phase import PhaseLike
+from ..core.schema import PhaseResult, ResultSchema
 from ..core.config import ClusterParameters, DetectorParameters
 from ..core.status_message import StatusMessage
 from ..core.point_cloud import PointCloud
@@ -42,7 +43,9 @@ class ClusterPhase(PhaseLike):
         self, cluster_params: ClusterParameters, det_params: DetectorParameters
     ) -> None:
         super().__init__(
-            "Cluster", incoming_schema=POINTCLOUD_SCHEMA, outgoing_schema=CLUSTER_SCHEMA
+            "Cluster",
+            incoming_schema=ResultSchema(json_string=POINTCLOUD_SCHEMA),
+            outgoing_schema=ResultSchema(json_string=CLUSTER_SCHEMA),
         )
         self.cluster_params = cluster_params
         self.det_params = det_params
@@ -54,8 +57,10 @@ class ClusterPhase(PhaseLike):
         self, payload: PhaseResult, workspace_path: Path
     ) -> PhaseResult:
         result = PhaseResult(
-            artifact_path=self.get_artifact_path(workspace_path)
-            / f"{form_run_string(payload.run_number)}.h5",
+            artifacts={
+                "cluster": self.get_artifact_path(workspace_path)
+                / f"{form_run_string(payload.run_number)}.h5"
+            },
             successful=True,
             run_number=payload.run_number,
         )
@@ -69,7 +74,7 @@ class ClusterPhase(PhaseLike):
         rng: Generator,
     ) -> PhaseResult:
         # Check that point clouds exist
-        point_path = payload.artifact_path
+        point_path = payload.artifacts["pointcloud"]
         if not point_path.exists() or not payload.successful:
             spyral_warn(
                 __name__,
@@ -80,7 +85,7 @@ class ClusterPhase(PhaseLike):
         result = self.construct_artifact(payload, workspace_path)
 
         point_file = h5.File(point_path, "r")
-        cluster_file = h5.File(result.artifact_path, "w")
+        cluster_file = h5.File(result.artifacts["cluster"], "w")
 
         cloud_group: h5.Group = point_file["cloud"]  # type: ignore
         if not isinstance(cloud_group, h5.Group):

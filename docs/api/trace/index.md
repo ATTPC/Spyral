@@ -7,4 +7,3 @@ This module contains the submodules defining the different signal types and anal
 - [frib_event](frib_event.md)
 - [frib_trace](frib_trace.md)
 - [peak](peak.md)
-- [get_legacy_event](get_legacy_event.md)
