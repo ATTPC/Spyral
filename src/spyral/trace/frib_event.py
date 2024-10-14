@@ -28,8 +28,10 @@ class FribEvent:
 
     Parameters
     ----------
-    raw_data: h5py.Dataset
+    trace_array: h5py.Dataset
         The hdf5 dataset containing the FRIBDAQ traces
+    coincidence_array: h5py.Dataset
+        The hdf5 dataset containing the FRIBDAQ coincidence bits
     event_number: int
         The event number
     params: FribParameters
