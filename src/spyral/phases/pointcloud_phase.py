@@ -220,14 +220,17 @@ class PointcloudPhase(PhaseLike):
             pc_dataset.attrs["ic_centroid"] = -1.0
             pc_dataset.attrs["ic_multiplicity"] = -1.0
 
-            # Check multiplicity condition and existence of trigger
-            if (
-                ic_mult > 0.0 and ic_mult <= self.frib_params.ic_multiplicity
-            ) and ic_peak is not None:
-                pc_dataset.attrs["ic_amplitude"] = ic_peak.amplitude
-                pc_dataset.attrs["ic_integral"] = ic_peak.integral
-                pc_dataset.attrs["ic_centroid"] = ic_peak.centroid
-                pc_dataset.attrs["ic_multiplicity"] = ic_mult
+            if event.frib is not None:
+                ic_peak = event.frib.get_triggering_ic_peak(self.frib_params)
+                ic_mult = event.frib.get_ic_multiplicity(self.frib_params)
+                # Check multiplicity condition and existence of trigger
+                if (
+                    ic_mult > 0.0 and ic_mult <= self.frib_params.ic_multiplicity
+                ) and ic_peak is not None:
+                    pc_dataset.attrs["ic_amplitude"] = ic_peak.amplitude
+                    pc_dataset.attrs["ic_integral"] = ic_peak.integral
+                    pc_dataset.attrs["ic_centroid"] = ic_peak.centroid
+                    pc_dataset.attrs["ic_multiplicity"] = ic_mult
 
             pc_dataset[:] = pc.cloud
         # End of event data
