@@ -213,7 +213,7 @@ class InterpSolverPhase(PhaseLike):
 
         # Check the cluster phase and estimate phase data
         cluster_path: Path = payload.artifacts["cluster"]
-        estimate_path = payload.artifacts["estimate"]
+        estimate_path = payload.artifacts["estimation"]
         if not cluster_path.exists() or not estimate_path.exists():
             msg_queue.put(StatusMessage("Waiting", 0, 0, payload.run_number))
             spyral_warn(
