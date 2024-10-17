@@ -144,7 +144,7 @@ class PointcloudPhase(PhaseLike):
 
         # Open files
         result = self.construct_artifact(payload, workspace_path)
-        trace_reader = TraceReader(trace_path)
+        trace_reader = TraceReader(trace_path, payload.run_number)
         point_file = h5.File(result.artifacts["pointcloud"], "w")
 
         # Load electric field correction
@@ -213,7 +213,9 @@ class PointcloudPhase(PhaseLike):
             pc_dataset = cloud_group.create_dataset(
                 f"cloud_{pc.event_number}", shape=pc.cloud.shape, dtype=np.float64
             )
-
+            # Store original run and event info
+            pc_dataset.attrs["orig_run"] = event.original_run
+            pc_dataset.attrs["orig_event"] = event.original_event
             # default IC settings
             pc_dataset.attrs["ic_amplitude"] = -1.0
             pc_dataset.attrs["ic_integral"] = -1.0
@@ -242,7 +244,7 @@ class PointcloudPhase(PhaseLike):
                 self.get_artifact_path(workspace_path)
                 / f"{form_run_string(payload.run_number)}_scaler.parquet"
             )
-        else:
+        elif trace_reader.should_have_scalers():
             spyral_warn(
                 __name__, f"Run {payload.run_number} does not have scaler data!"
             )

@@ -128,6 +128,8 @@ class TraceReader:
         Read a specific event
     read_scalers()
         Read the scalers
+    should_have_scalers()
+        See if the trace file should have scalers
     """
 
     def __init__(self, path: Path, run_number: int):
@@ -345,7 +347,7 @@ class TraceReader:
         return event
 
     def read_scalers(self) -> FribScalers | None:
-        """Read the scalers scalers
+        """Read the scalers
 
         Returns
         -------
@@ -365,7 +367,7 @@ class TraceReader:
                 )
 
     def read_scalers_merger_020(self) -> FribScalers | None:
-        """Read the scalers scalers for trace version MERGER_020
+        """Read the scalers for trace version MERGER_020
 
         Returns
         -------
@@ -387,7 +389,7 @@ class TraceReader:
         return scalers
 
     def read_scalers_merger_010(self) -> FribScalers | None:
-        """Read the scalers scalers for trace version MERGER_010
+        """Read the scalers for trace version MERGER_010
 
         Returns
         -------
@@ -416,3 +418,14 @@ class TraceReader:
             event += 1
 
         return scalers
+
+    def should_have_scalers(self) -> bool:
+        """Returns True if the file should have scalers
+
+        Returns
+        -------
+        bool
+            True if the file should have scalers (i.e. not harmonizer)
+        """
+
+        return self.version != TraceVersion.HARMONIZER_010

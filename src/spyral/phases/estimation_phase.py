@@ -114,6 +114,8 @@ class EstimationPhase(PhaseLike):
             "event": [],
             "cluster_index": [],
             "cluster_label": [],
+            "orig_run": [],
+            "orig_event": [],
             "ic_amplitude": [],
             "ic_centroid": [],
             "ic_integral": [],
@@ -156,6 +158,8 @@ class EstimationPhase(PhaseLike):
             ic_cent = float(event.attrs["ic_centroid"])  # type: ignore
             ic_int = float(event.attrs["ic_integral"])  # type: ignore
             ic_mult = float(event.attrs["ic_multiplicity"])  # type: ignore
+            orig_run = int(event.attrs["orig_run"])  # type: ignore
+            orig_event = int(event.attrs["orig_event"])  # type: ignore
             # Go through every cluster in each event
             for cidx in range(0, nclusters):
                 local_cluster: h5.Group | None = None
@@ -179,6 +183,8 @@ class EstimationPhase(PhaseLike):
                     ic_cent,
                     ic_int,
                     ic_mult,
+                    orig_run,
+                    orig_event,
                     self.estimate_params,
                     self.det_params,
                     data,
