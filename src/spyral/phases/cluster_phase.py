@@ -146,6 +146,8 @@ class ClusterPhase(PhaseLike):
             # Each event can contain many clusters
             cluster_event_group = cluster_group.create_group(f"event_{idx}")
             cluster_event_group.attrs["nclusters"] = len(cleaned)
+            cluster_event_group.attrs["orig_run"] = cloud_data.attrs["orig_run"]
+            cluster_event_group.attrs["orig_event"] = cloud_data.attrs["orig_event"]
             cluster_event_group.attrs["ic_amplitude"] = cloud_data.attrs["ic_amplitude"]
             cluster_event_group.attrs["ic_centroid"] = cloud_data.attrs["ic_centroid"]
             cluster_event_group.attrs["ic_integral"] = cloud_data.attrs["ic_integral"]

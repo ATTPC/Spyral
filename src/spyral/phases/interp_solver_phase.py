@@ -213,7 +213,7 @@ class InterpSolverPhase(PhaseLike):
 
         # Check the cluster phase and estimate phase data
         cluster_path: Path = payload.artifacts["cluster"]
-        estimate_path = payload.artifacts["estimate"]
+        estimate_path = payload.artifacts["estimation"]
         if not cluster_path.exists() or not estimate_path.exists():
             msg_queue.put(StatusMessage("Waiting", 0, 0, payload.run_number))
             spyral_warn(
@@ -281,6 +281,8 @@ class InterpSolverPhase(PhaseLike):
             "event": [],
             "cluster_index": [],
             "cluster_label": [],
+            "orig_run": [],
+            "orig_event": [],
             "vertex_x": [],
             "sigma_vx": [],
             "vertex_y": [],
@@ -329,6 +331,8 @@ class InterpSolverPhase(PhaseLike):
                 local_cluster.attrs["label"],  # type: ignore
                 local_cluster["cloud"][:].copy(),  # type: ignore
             )
+            orig_run = estimates_gated["orig_run"][row]
+            orig_event = estimates_gated["orig_event"][row]
 
             # Do the solver
             guess = Guess(
@@ -342,6 +346,8 @@ class InterpSolverPhase(PhaseLike):
             )
             solve_physics_interp(
                 cidx,
+                orig_run,
+                orig_event,
                 cluster,
                 guess,
                 pid.nucleus,
