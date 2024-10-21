@@ -134,8 +134,7 @@ class ClusterPhase(PhaseLike):
             if cloud_data is None:
                 continue
 
-            cloud = PointCloud()
-            cloud.load_cloud_from_hdf5_data(cloud_data[:].copy(), idx)
+            cloud = PointCloud(idx, cloud_data[:].copy())
 
             # Here we don't need to use the labels array.
             # We just pass it along as needed.

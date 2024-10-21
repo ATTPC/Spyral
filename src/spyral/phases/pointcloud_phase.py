@@ -18,7 +18,11 @@ from ..trace.trace_reader import TraceReader
 from ..trace.frib_event import TriggerType
 from ..trace.peak import Peak
 from ..core.pad_map import PadMap
-from ..core.point_cloud import PointCloud
+from ..core.point_cloud import (
+    point_cloud_from_get,
+    calibrate_point_cloud_z,
+    sort_point_cloud_in_z,
+)
 from .schema import TRACE_SCHEMA, POINTCLOUD_SCHEMA
 
 import numpy as np
@@ -26,25 +30,6 @@ import h5py as h5
 
 from pathlib import Path
 from multiprocessing import SimpleQueue
-
-
-def get_event_range(trace_file: h5.File) -> tuple[int, int]:
-    """
-    The merger doesn't use attributes for legacy reasons, so everything is stored in datasets. Use this to retrieve the min and max event numbers.
-
-    Parameters
-    ----------
-    trace_file: h5py.File
-        File handle to a hdf5 file with AT-TPC traces
-
-    Returns
-    -------
-    tuple[int, int]
-        A pair of integers (first event number, last event number)
-    """
-    meta_group = trace_file.get("meta")
-    meta_data = meta_group.get("meta")  # type: ignore
-    return (int(meta_data[0]), int(meta_data[2]))  # type: ignore
 
 
 class PointcloudPhase(PhaseLike):
@@ -201,17 +186,15 @@ class PointcloudPhase(PhaseLike):
             if event.get is None:
                 continue
 
-            pc = PointCloud()
-            pc.load_cloud_from_get_event(event.get, self.pad_map)
-            pc.calibrate_z_position(
-                self.det_params.micromegas_time_bucket,
-                self.det_params.window_time_bucket,
-                self.det_params.detector_length,
-                corrector,
-            )
+            # Convert traces to pointcloud
+            cloud = point_cloud_from_get(event.get, self.pad_map)
+            # Calibrate the time to z-position
+            calibrate_point_cloud_z(cloud, self.det_params, corrector)
+            # Sort the cloud in z
+            sort_point_cloud_in_z(cloud)
 
             pc_dataset = cloud_group.create_dataset(
-                f"cloud_{pc.event_number}", shape=pc.cloud.shape, dtype=np.float64
+                f"cloud_{cloud.event_number}", cloud.data
             )
             # Store original run and event info
             pc_dataset.attrs["orig_run"] = event.original_run
@@ -234,7 +217,6 @@ class PointcloudPhase(PhaseLike):
                     pc_dataset.attrs["ic_centroid"] = ic_peak.centroid
                     pc_dataset.attrs["ic_multiplicity"] = ic_mult
 
-            pc_dataset[:] = pc.cloud
         # End of event data
 
         # Process scaler data if it exists
