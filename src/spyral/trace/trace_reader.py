@@ -21,17 +21,19 @@ class TraceVersion(Enum):
 
     Attributes
     ----------
-    MERGER_010: int
+    MERGER_LEGACY: int
         The original merger format contaning a meta dataset
-    MERGER_CURRENT: int
-        The current, up-to-date merger format
+    MERGER_1_0: int
+        The 1.0 output libattpc_merger format
+    HARMONIZER_0_1: int
+        The 0.1.0 harmonizer output
     INVALID: int
         An illegal format
     """
 
-    MERGER_010 = 1
-    MERGER_020 = 2
-    HARMONIZER_010 = 3
+    MERGER_LEGACY = 1
+    MERGER_1_0 = 2
+    HARMONIZER_0_1 = 3
     INVALID = -1
 
 
@@ -49,10 +51,10 @@ def version_string_to_enum(version: str) -> TraceVersion:
         The version enum
     """
 
-    if version == "libattpc_merger:0.2.0":
-        return TraceVersion.MERGER_020
+    if version == "libattpc_merger:1.0":
+        return TraceVersion.MERGER_1_0
     elif version == "harmonizer:0.1.0":
-        return TraceVersion.HARMONIZER_010
+        return TraceVersion.HARMONIZER_0_1
     else:
         return TraceVersion.INVALID
 
@@ -148,23 +150,23 @@ class TraceReader:
 
         """
         if "meta" in self.file.keys() and "frib" in self.file.keys():
-            self.version = TraceVersion.MERGER_010
-            self.init_merger_010()
+            self.version = TraceVersion.MERGER_LEGACY
+            self.init_merger_legacy()
         elif "events" in self.file.keys():
             self.version = version_string_to_enum(self.file["events"].attrs["version"])  # type: ignore
-            self.init_merger_current()
+            self.init_merger_modern()
         else:
             self.version = TraceVersion.INVALID
 
-    def init_merger_010(self):
-        """Init the reader for MERGER_010"""
+    def init_merger_legacy(self):
+        """Init the reader for legacy merger format data"""
         meta_group = self.file["meta"]
         meta_data = meta_group["meta"]  # type: ignore
         self.min_event = int(meta_data[0])  # type: ignore
         self.max_event = int(meta_data[2])  # type: ignore
 
-    def init_merger_current(self):
-        """Init the reader for MERGER_CURRENT"""
+    def init_merger_modern(self):
+        """Init the reader for modern merger format data"""
         self.min_event = int(self.file["events"].attrs["min_event"])  # type: ignore
         self.max_event = int(self.file["events"].attrs["max_event"])  # type: ignore
 
@@ -204,16 +206,16 @@ class TraceReader:
             The event data
         """
         match self.version:
-            case TraceVersion.MERGER_010:
-                return self.read_event_merger_010(
+            case TraceVersion.MERGER_LEGACY:
+                return self.read_event_merger_legacy(
                     event_id, get_params, frib_params, rng
                 )
-            case TraceVersion.MERGER_020:
-                return self.read_event_merger_020(
+            case TraceVersion.MERGER_1_0:
+                return self.read_event_merger_1_0(
                     event_id, get_params, frib_params, rng
                 )
-            case TraceVersion.HARMONIZER_010:
-                return self.read_event_harmonizer_010(
+            case TraceVersion.HARMONIZER_0_1:
+                return self.read_event_harmonizer_0_1(
                     event_id, get_params, frib_params, rng
                 )
             case _:
@@ -221,14 +223,14 @@ class TraceReader:
                     f"Cannot read event {event_id} from trace file {self.file_path}, merger version not supported!"
                 )
 
-    def read_event_merger_010(
+    def read_event_merger_legacy(
         self,
         event_id: int,
         get_params: GetParameters,
         frib_params: FribParameters,
         rng: Generator,
     ) -> Event:
-        """Read a specific event for trace version MERGER_010
+        """Read a specific event for trace version MERGER_LEGACY
 
         Parameters
         ----------
@@ -262,14 +264,14 @@ class TraceReader:
             event.frib = FribEvent(frib_data[:], frib_coinc[:], event_id, frib_params)
         return event
 
-    def read_event_merger_020(
+    def read_event_merger_1_0(
         self,
         event_id: int,
         get_params: GetParameters,
         frib_params: FribParameters,
         rng: Generator,
     ) -> Event:
-        """Read a specific event for trace version MERGER_020
+        """Read a specific event for trace version MERGER_1_0
 
         Parameters
         ----------
@@ -303,14 +305,14 @@ class TraceReader:
                 )
         return event
 
-    def read_event_harmonizer_010(
+    def read_event_harmonizer_0_1(
         self,
         event_id: int,
         get_params: GetParameters,
         frib_params: FribParameters,
         rng: Generator,
     ) -> Event:
-        """Read a specific event for trace version HARMONIZER_010
+        """Read a specific event for trace version HARMONIZER_0_1
 
         Parameters
         ----------
@@ -355,19 +357,19 @@ class TraceReader:
             If no scalers are present, returns None. Otherwise returns FribScalers
         """
         match self.version:
-            case TraceVersion.MERGER_010:
-                return self.read_scalers_merger_010()
-            case TraceVersion.MERGER_020:
-                return self.read_scalers_merger_020()
-            case TraceVersion.HARMONIZER_010:
+            case TraceVersion.MERGER_LEGACY:
+                return self.read_scalers_merger_legacy()
+            case TraceVersion.MERGER_1_0:
+                return self.read_scalers_merger_1_0()
+            case TraceVersion.HARMONIZER_0_1:
                 return None
             case _:
                 raise TraceReaderError(
                     f"Cannot read scalers from trace file {self.file_path}, merger version not supported!"
                 )
 
-    def read_scalers_merger_020(self) -> FribScalers | None:
-        """Read the scalers for trace version MERGER_020
+    def read_scalers_merger_1_0(self) -> FribScalers | None:
+        """Read the scalers for trace version MERGER_1_0
 
         Returns
         -------
@@ -388,8 +390,8 @@ class TraceReader:
                 scalers.load_scalers(event, event_data)
         return scalers
 
-    def read_scalers_merger_010(self) -> FribScalers | None:
-        """Read the scalers for trace version MERGER_010
+    def read_scalers_merger_legacy(self) -> FribScalers | None:
+        """Read the scalers for trace version MERGER_LEGACY
 
         Returns
         -------
@@ -428,4 +430,4 @@ class TraceReader:
             True if the file should have scalers (i.e. not harmonizer)
         """
 
-        return self.version != TraceVersion.HARMONIZER_010
+        return self.version != TraceVersion.HARMONIZER_0_1
