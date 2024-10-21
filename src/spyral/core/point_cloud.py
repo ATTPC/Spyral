@@ -1,193 +1,151 @@
 from .pad_map import PadMap
-from .constants import INVALID_EVENT_NUMBER
+from .config import DetectorParameters
 from ..correction import ElectronCorrector
 from ..trace.get_event import GetEvent
 from .spy_log import spyral_warn
-
+from dataclasses import dataclass
 import numpy as np
 
 
+@dataclass
 class PointCloud:
-    """Representation of a AT-TPC event
+    """Geometric representation of an AT-TPC event
 
     A PointCloud is a geometric representation of an event in the AT-TPC
     The GET traces are converted into points in space within the AT-TPC
+
+    Overloads the length (len()) operator with the number of points in the cloud
+    (number of rows in the data matrix)
 
     Attributes
     ----------
     event_number: int
         The event number
-    cloud: ndarray
+    cloud: numpy.ndarray
         The Nx8 array of points in AT-TPC space
         Each row is [x,y,z,amplitude,integral,pad id,time,scale]
-
-    Methods
-    -------
-    PointCloud()
-        Create an empty point cloud
-    load_cloud_from_get_event(event: GetEvent, pmap: PadMap, corrector: ElectronCorrector)
-        Load a point cloud from a GetEvent
-    load_cloud_from_hdf5_data(data: ndarray, event_number: int)
-        Load a point cloud from an hdf5 file dataset
-    is_valid() -> bool
-        Check if the point cloud is valid
-    retrieve_spatial_coordinates() -> ndarray
-        Get the positional data from the point cloud
-    calibrate_z_position(micromegas_tb: float, window_tb: float, detector_length: float, ic_correction: float = 0.0)
-        Calibrate the cloud z-position from the micromegas and window time references
-    remove_illegal_points(detector_length: float)
-        Remove any points which lie outside the legal detector bounds in z
-    sort_in_z()
-        Sort the internal point cloud array by z-position
     """
 
-    def __init__(self):
-        self.event_number: int = INVALID_EVENT_NUMBER
-        self.cloud: np.ndarray = np.empty(0, dtype=np.float64)
+    event_number: int
+    data: np.ndarray
 
-    def load_cloud_from_get_event(
-        self,
-        event: GetEvent,
-        pmap: PadMap,
-    ):
-        """Load a point cloud from a GetEvent
+    def __len__(self) -> int:
+        """Number of points in the cloud
 
-        Loads the points from the signals in the traces and applies
-        the pad relative gain correction and the pad time correction
-
-        Parameters
-        ----------
-        event: GetEvent
-            The GetEvent whose data should be loaded
-        pmap: PadMap
-            The PadMap used to get pad correction values
-        """
-        self.event_number = event.number
-        count = 0
-        for trace in event.traces:
-            count += trace.get_number_of_peaks()
-        self.cloud = np.zeros((count, 8))
-        idx = 0
-        for trace in event.traces:
-            if trace.get_number_of_peaks() == 0 or trace.get_number_of_peaks() > 5:
-                continue
-
-            pid = trace.hw_id.pad_id
-            check = pmap.get_pad_from_hardware(trace.hw_id)
-            if check is None:
-                spyral_warn(
-                    __name__,
-                    f"When checking pad number of hardware: {trace.hw_id}, recieved None!",
-                )
-                continue
-            if (
-                check != pid
-            ):  # This is dangerous! We trust the pad map over the merged data!
-                pid = check
-
-            pad = pmap.get_pad_data(check)
-            if pad is None or pmap.is_beam_pad(check):
-                continue
-            for peak in trace.get_peaks():
-                self.cloud[idx, 0] = pad.x  # X-coordinate, geometry
-                self.cloud[idx, 1] = pad.y  # Y-coordinate, geometry
-                self.cloud[idx, 2] = (
-                    peak.centroid + pad.time_offset
-                )  # Z-coordinate, time with correction until calibrated with calibrate_z_position()
-                self.cloud[idx, 3] = peak.amplitude
-                self.cloud[idx, 4] = peak.integral
-                self.cloud[idx, 5] = trace.hw_id.pad_id
-                self.cloud[idx, 6] = (
-                    peak.centroid + pad.time_offset
-                )  # Time bucket with correction
-                self.cloud[idx, 7] = pad.scale
-                idx += 1
-        self.cloud = self.cloud[self.cloud[:, 3] != 0.0]
-
-    def load_cloud_from_hdf5_data(self, data: np.ndarray, event_number: int):
-        """Load a point cloud from an hdf5 file dataset
-
-        Parameters
-        ----------
-        data: ndarray
-            This should be a copy of the point cloud data from the hdf5 file
-        event_number: int
-            The event number
-        """
-        self.event_number: int = event_number
-        self.cloud = data
-
-    def is_valid(self) -> bool:
-        """Check if the PointCloud is valid
+        AKA number of rows in the data matrix
 
         Returns
         -------
-        bool
-            True if the PointCloud is valid
+        int
+            The number of points in the cloud
         """
-        return self.event_number != INVALID_EVENT_NUMBER
-
-    def retrieve_spatial_coordinates(self) -> np.ndarray:
-        """Get only the spatial data from the point cloud
+        return len(self.data)
 
 
-        Returns
-        -------
-        ndarray
-            An Nx3 array of the spatial data of the PointCloud
-        """
-        return self.cloud[:, 0:3]
+def point_cloud_from_get(event: GetEvent, pad_map: PadMap) -> PointCloud:
+    """Load a point cloud from a GetEvent
 
-    def calibrate_z_position(
-        self,
-        micromegas_tb: float,
-        window_tb: float,
-        detector_length: float,
-        efield_correction: ElectronCorrector | None = None,
-        ic_correction: float = 0.0,
-    ):
-        """Calibrate the cloud z-position from the micromegas and window time references
+    Loads the points from the signals in the traces and applies
+    the pad relative gain correction and the pad time correction
 
-        Also applies the ion chamber time correction and electric field correction if given
-        Trims any points beyond the bounds of the detector (0 to detector length)
+    Parameters
+    ----------
+    event: GetEvent
+        The GetEvent whose data should be loaded
+    pmap: PadMap
+        The PadMap used to get pad correction values
+    """
+    count = 0
+    for trace in event.traces:
+        count += trace.get_number_of_peaks()
+    cloud_matrix = np.zeros((count, 8))
+    idx = 0
+    for trace in event.traces:
+        if trace.get_number_of_peaks() == 0 or trace.get_number_of_peaks() > 5:
+            continue
 
-        Parameters
-        ----------
-        micromegas_tb: float
-            The micromegas time reference in GET Time Buckets
-        window_tb: float
-            The window time reference in GET Time Buckets
-        detector_length: float
-            The detector length in mm
-        efield_correction: ElectronCorrector | None
-            The optional Garfield electric field correction to the electron drift
-        ic_correction: float
-            The ion chamber time correction in GET Time Buckets
-        """
-        # Maybe use mm as the reference because it is more stable?
-        for idx, point in enumerate(self.cloud):
-            self.cloud[idx][2] = (
-                (window_tb - (point[6] - ic_correction))
-                / (window_tb - micromegas_tb)
-                * detector_length
+        pid = trace.hw_id.pad_id
+        check = pad_map.get_pad_from_hardware(trace.hw_id)
+        if check is None:
+            spyral_warn(
+                __name__,
+                f"When checking pad number of hardware: {trace.hw_id}, recieved None!",
             )
-            if efield_correction is not None:
-                self.cloud[idx] = efield_correction.correct_point(self.cloud[idx])
+            continue
+        if (
+            check != pid
+        ):  # This is dangerous! We trust the pad map over the merged data!
+            pid = check
 
-    def remove_illegal_points(self):
-        """Remove any points which contain NaNs
+        pad = pad_map.get_pad_data(check)
+        if pad is None or pad_map.is_beam_pad(check):
+            continue
+        for peak in trace.get_peaks():
+            cloud_matrix[idx, 0] = pad.x  # X-coordinate, geometry
+            cloud_matrix[idx, 1] = pad.y  # Y-coordinate, geometry
+            cloud_matrix[idx, 2] = (
+                peak.centroid + pad.time_offset
+            )  # Z-coordinate, time with correction until calibrated with calibrate_z_position()
+            cloud_matrix[idx, 3] = peak.amplitude
+            cloud_matrix[idx, 4] = peak.integral
+            cloud_matrix[idx, 5] = trace.hw_id.pad_id
+            cloud_matrix[idx, 6] = (
+                peak.centroid + pad.time_offset
+            )  # Time bucket with correction
+            cloud_matrix[idx, 7] = pad.scale
+            idx += 1
+    cloud_matrix = cloud_matrix[cloud_matrix[:, 3] != 0.0]
+    return PointCloud(event.number, cloud_matrix)
 
-        NaNs most commonly occur from the electric (electron) field correction.
-        This correction has finite (unpredictable) bounds that are smaller than
-        the detector and any points which lie outside the correction are evaluated
-        to NaN. These points must be trimmed before clustering. This method modifies
-        the underlying point cloud array.
 
-        """
-        mask = np.any(np.isnan(self.cloud), axis=1)
-        self.cloud = self.cloud[~mask]  # Invert the mask to reject the NaNs
+def calibrate_point_cloud_z(
+    cloud: PointCloud,
+    detector_params: DetectorParameters,
+    efield_correction: ElectronCorrector | None = None,
+):
+    """Calibrate the cloud z-position from the micromegas and window time references
 
-    def sort_in_z(self):
-        """Sort the internal point cloud array by the z-coordinate"""
-        indicies = np.argsort(self.cloud[:, 2])
-        self.cloud = self.cloud[indicies]
+    Also applies the ion chamber time correction and electric field correction if given
+    Any points which were invalidated (NaN'ed) by this operation are removed.
+
+    WARNING: This modifies the point cloud data, including removing points from the
+    point cloud which were invalidated (NaN'ed).
+
+    Parameters
+    ----------
+    cloud: PointCloud
+        The point cloud to calibrate
+    detector_params: DetectorParameters
+        The detector parameters
+    efield_correction: ElectronCorrector | None
+        The optional Garfield electric field correction to the electron drift
+    """
+    # Maybe use mm as the reference because it is more stable?
+    for idx, point in enumerate(cloud.data):
+        cloud.data[idx][2] = (
+            (detector_params.window_time_bucket - point[6])
+            / (
+                detector_params.window_time_bucket
+                - detector_params.micromegas_time_bucket
+            )
+            * detector_params.detector_length
+        )
+        if efield_correction is not None:
+            cloud.data[idx] = efield_correction.correct_point(cloud.data[idx])
+    # Remove any invalid data after the calibration
+    mask = np.any(np.isnan(cloud.data), axis=1)
+    cloud.data = cloud.data[~mask]  # Invert the mask to reject the NaNs
+
+
+def sort_point_cloud_in_z(cloud: PointCloud):
+    """Sort the point cloud array by the z-coordinate
+
+    Note: This modifies the underlying data in the point cloud
+
+    Parameters
+    ----------
+    cloud: PointCloud
+        The point cloud to sort
+    """
+    indicies = np.argsort(cloud.data[:, 2])
+    cloud.data = cloud.data[indicies]

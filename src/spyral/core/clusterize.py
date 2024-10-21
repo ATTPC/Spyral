@@ -75,7 +75,7 @@ def join_clusters_step(
     centers = np.zeros((len(clusters), 3))
     for idx, cluster in enumerate(clusters):
         centers[idx, 0], centers[idx, 1], centers[idx, 2], _ = least_squares_circle(
-            cluster.point_cloud.cloud[:, 0], cluster.point_cloud.cloud[:, 1]
+            cluster.point_cloud.data[:, 0], cluster.point_cloud.data[:, 1]
         )
 
     # Make a dictionary of center groups, label groups
@@ -94,7 +94,7 @@ def join_clusters_step(
             cluster.label == NOISE_LABEL
             or np.isnan(center[0])
             or center[2] < 10.0
-            or len(cluster.point_cloud.cloud) < params.min_cluster_size_join
+            or len(cluster.point_cloud) < params.min_cluster_size_join
         ):
             continue
         radius = center[2]
@@ -109,7 +109,7 @@ def join_clusters_step(
                 or np.isnan(comp_center[0])
                 or center[2] < 10.0
                 or cidx == idx
-                or len(comp_cluster.point_cloud.cloud) < params.min_cluster_size_join
+                or len(comp_cluster.point_cloud) < params.min_cluster_size_join
             ):
                 continue
 
@@ -168,12 +168,12 @@ def join_clusters_step(
         if g == NOISE_LABEL:
             continue
 
-        new_cluster = LabeledCloud(g, PointCloud())
-        new_cluster.point_cloud.event_number = event_number
-        new_cluster.point_cloud.cloud = np.zeros((0, 8))
+        new_cluster = LabeledCloud(
+            g, PointCloud(event_number, np.zeros((0, 8))), np.empty(0)
+        )
         for idx in groups_index[g]:
-            new_cluster.point_cloud.cloud = np.concatenate(
-                (new_cluster.point_cloud.cloud, clusters[idx].point_cloud.cloud), axis=0
+            new_cluster.point_cloud.data = np.concatenate(
+                (new_cluster.point_cloud.data, clusters[idx].point_cloud.data), axis=0
             )
             # Merge the indicies
             new_cluster.parent_indicies = np.concatenate(
@@ -220,7 +220,7 @@ def cleanup_clusters(
     cleaned = []
     for cluster in clusters:
         # Cluster must have more than two points to have outlier test applied
-        if cluster.label == NOISE_LABEL or len(cluster.point_cloud.cloud) < 2:
+        if cluster.label == NOISE_LABEL or len(cluster.point_cloud) < 2:
             continue
         cleaned_cluster, outliers = convert_labeled_to_cluster(cluster, params)
         cleaned.append(cleaned_cluster)
@@ -259,19 +259,17 @@ def form_clusters(
         that point's label.
     """
 
-    # Remove any points outside the legal detector bounds
-    pc.remove_illegal_points()
-    if len(pc.cloud) < params.min_cloud_size:
+    if len(pc) < params.min_cloud_size:
         return ([], np.empty(0))
 
-    n_points = len(pc.cloud)
+    n_points = len(pc)
     min_size = int(params.min_size_scale_factor * n_points)
     if min_size < params.min_size_lower_cutoff:
         min_size = params.min_size_lower_cutoff
 
     # Use spatial dimensions
-    cluster_data = np.empty(shape=(len(pc.cloud), 3))
-    cluster_data[:, :] = pc.cloud[:, :3]
+    cluster_data = np.empty(shape=(len(pc), 3))
+    cluster_data[:, :] = pc.data[:, :3]
 
     # Rescale z to have same dims as x,y. Otherwise clusters too likely to break on z
     cluster_data[:, 2] *= 584.0 / 1000.0
@@ -288,10 +286,12 @@ def form_clusters(
     # Select out data into clusters
     clusters: list[LabeledCloud] = []
     for label in labels:
-        clusters.append(LabeledCloud(label, PointCloud(), np.empty(0)))
         mask = fitted_clusters.labels_ == label
-        clusters[-1].point_cloud.cloud = pc.cloud[mask]
-        clusters[-1].point_cloud.event_number = pc.event_number
-        clusters[-1].clustered_data = cluster_data[fitted_clusters.labels_ == label]
-        clusters[-1].parent_indicies = np.flatnonzero(mask)
+        clusters.append(
+            LabeledCloud(
+                label,
+                PointCloud(pc.event_number, pc.data[mask]),
+                np.flatnonzero(mask),
+            )
+        )
     return (clusters, fitted_clusters.labels_)
