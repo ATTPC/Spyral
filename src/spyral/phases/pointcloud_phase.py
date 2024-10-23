@@ -196,7 +196,7 @@ class PointcloudPhase(PhaseLike):
             sort_point_cloud_in_z(cloud)
 
             pc_dataset = cloud_group.create_dataset(
-                f"cloud_{cloud.event_number}", cloud.data
+                f"cloud_{cloud.event_number}", data=cloud.data
             )
             # Store original run and event info
             pc_dataset.attrs["orig_run"] = event.original_run
