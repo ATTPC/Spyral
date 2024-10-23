@@ -14,7 +14,7 @@ from ..correction import (
     ElectronCorrector,
 )
 from ..core.spy_log import spyral_warn, spyral_info
-from ..trace.trace_reader import TraceReader
+from ..trace.trace_reader import create_reader
 from ..trace.frib_event import TriggerType
 from ..trace.peak import Peak
 from ..core.pad_map import PadMap
@@ -129,7 +129,9 @@ class PointcloudPhase(PhaseLike):
 
         # Open files
         result = self.construct_artifact(payload, workspace_path)
-        trace_reader = TraceReader(trace_path, payload.run_number)
+        trace_reader = create_reader(trace_path, payload.run_number)
+        if trace_reader is None:
+            return PhaseResult.invalid_result(payload.run_number)
         point_file = h5.File(result.artifacts["pointcloud"], "w")
 
         # Load electric field correction
@@ -138,10 +140,10 @@ class PointcloudPhase(PhaseLike):
             corrector = create_electron_corrector(self.electron_correction_path)
 
         cloud_group = point_file.create_group("cloud")
-        cloud_group.attrs["min_event"] = trace_reader.min_event
-        cloud_group.attrs["max_event"] = trace_reader.max_event
+        cloud_group.attrs["min_event"] = trace_reader.first_event()
+        cloud_group.attrs["max_event"] = trace_reader.last_event()
 
-        nevents = trace_reader.max_event - trace_reader.min_event + 1
+        nevents = len(trace_reader)
         total: int
         flush_val: int
         if nevents < 100:
@@ -226,10 +228,8 @@ class PointcloudPhase(PhaseLike):
                 self.get_artifact_path(workspace_path)
                 / f"{form_run_string(payload.run_number)}_scaler.parquet"
             )
-        elif trace_reader.should_have_scalers():
-            spyral_warn(
-                __name__, f"Run {payload.run_number} does not have scaler data!"
-            )
+        else:
+            spyral_info(__name__, f"Run {payload.run_number} does not have scaler data")
 
         gated_ic_path = (
             self.get_artifact_path(workspace_path)
