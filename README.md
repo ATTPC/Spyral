@@ -52,7 +52,6 @@ from spyral import (
     SolverParameters,
     EstimateParameters,
     DEFAULT_MAP,
-    DEFAULT_LEGACY_MAP,
 )
 
 from pathlib import Path

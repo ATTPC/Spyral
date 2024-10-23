@@ -281,6 +281,8 @@ class InterpLeastSqSolverPhase(PhaseLike):
             "event": [],
             "cluster_index": [],
             "cluster_label": [],
+            "orig_run": [],
+            "orig_event": [],
             "vertex_x": [],
             "sigma_vx": [],
             "vertex_y": [],
@@ -329,6 +331,8 @@ class InterpLeastSqSolverPhase(PhaseLike):
                 local_cluster.attrs["label"],  # type: ignore
                 local_cluster["cloud"][:].copy(),  # type: ignore
             )
+            orig_run = estimates_gated["orig_run"][row]
+            orig_event = estimates_gated["orig_event"][row]
 
             # Do the solver
             guess = Guess(
@@ -342,6 +346,8 @@ class InterpLeastSqSolverPhase(PhaseLike):
             )
             solve_physics_interp(
                 cidx,
+                orig_run,
+                orig_event,
                 cluster,
                 guess,
                 pid.nucleus,

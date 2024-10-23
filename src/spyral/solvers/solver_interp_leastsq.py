@@ -293,6 +293,8 @@ def fit_model_interp(
 
 def solve_physics_interp(
     cluster_index: int,
+    orig_run: int,
+    orig_event: int,
     cluster: Cluster,
     guess: Guess,
     ejectile: NucleusData,
@@ -309,6 +311,10 @@ def solve_physics_interp(
     ----------
     cluster_index: int
         Index of the cluster in the hdf5 scheme. Used only for debugging
+    orig_run: int
+        The original run number
+    orig_event: int
+        The original event number
     cluster: Cluster
         the data to be fit
     guess: Guess
@@ -362,6 +368,8 @@ def solve_physics_interp(
     results["event"].append(cluster.event)
     results["cluster_index"].append(cluster_index)
     results["cluster_label"].append(cluster.label)
+    results["orig_run"].append(orig_run)
+    results["orig_event"].append(orig_event)
     # Best fit values and uncertainties
     results["vertex_x"].append(best_fit.params["vertex_x"].value)  # type: ignore
     results["vertex_y"].append(best_fit.params["vertex_y"].value)  # type: ignore

@@ -134,8 +134,7 @@ class ClusterPhase(PhaseLike):
             if cloud_data is None:
                 continue
 
-            cloud = PointCloud()
-            cloud.load_cloud_from_hdf5_data(cloud_data[:].copy(), idx)
+            cloud = PointCloud(idx, cloud_data[:].copy())
 
             # Here we don't need to use the labels array.
             # We just pass it along as needed.
@@ -146,6 +145,8 @@ class ClusterPhase(PhaseLike):
             # Each event can contain many clusters
             cluster_event_group = cluster_group.create_group(f"event_{idx}")
             cluster_event_group.attrs["nclusters"] = len(cleaned)
+            cluster_event_group.attrs["orig_run"] = cloud_data.attrs["orig_run"]
+            cluster_event_group.attrs["orig_event"] = cloud_data.attrs["orig_event"]
             cluster_event_group.attrs["ic_amplitude"] = cloud_data.attrs["ic_amplitude"]
             cluster_event_group.attrs["ic_centroid"] = cloud_data.attrs["ic_centroid"]
             cluster_event_group.attrs["ic_integral"] = cloud_data.attrs["ic_integral"]

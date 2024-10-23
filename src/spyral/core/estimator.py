@@ -34,6 +34,8 @@ def estimate_physics(
     ic_centroid: float,
     ic_integral: float,
     ic_multiplicity: float,
+    orig_run: int,
+    orig_event: int,
     estimate_params: EstimateParameters,
     detector_params: DetectorParameters,
     results: dict[str, list],
@@ -56,6 +58,10 @@ def estimate_physics(
         The ion chamber centroid for this cluster
     ic_integral:
         The ion chamber integral for this cluster
+    orig_run:
+        The original event run number
+    orig_event:
+        The original event number
     detector_params:
         Configuration parameters for the physical detector properties
     results: dict[str, int]
@@ -87,6 +93,8 @@ def estimate_physics(
         ic_centroid,
         ic_integral,
         ic_multiplicity,
+        orig_run,
+        orig_event,
         detector_params,
         results,
     )
@@ -103,6 +111,8 @@ def estimate_physics(
             ic_centroid,
             ic_integral,
             ic_multiplicity,
+            orig_run,
+            orig_event,
             detector_params,
             results,
             Direction.BACKWARD,
@@ -115,6 +125,8 @@ def estimate_physics(
             ic_centroid,
             ic_integral,
             ic_multiplicity,
+            orig_run,
+            orig_event,
             detector_params,
             results,
             Direction.FORWARD,
@@ -149,6 +161,8 @@ def estimate_physics_pass(
     ic_centroid: float,
     ic_integral: float,
     ic_multiplicity: float,
+    orig_run: int,
+    orig_event: int,
     detector_params: DetectorParameters,
     results: dict[str, list],
     chosen_direction: Direction = Direction.NONE,
@@ -164,13 +178,19 @@ def estimate_physics_pass(
         The cluster index in the HDF5 file.
     cluster: Cluster
         The cluster to estimate
-    ic_amplitude:
+    ic_amplitude: float
         The ion chamber amplitude for this cluster
-    ic_centroid:
+    ic_centroid: float
         The ion chamber centroid for this cluster
-    ic_integral:
+    ic_integral: float
         The ion chamber integral for this cluster
-    detector_params:
+    ic_multiplicity: float
+        The ion chamber multiplicity for this cluster
+    orig_run: int
+        The original run number
+    orig_event: int
+        The original event number
+    detector_params: DetectorParameters
         Configuration parameters for the physical detector properties
     results: dict[str, int]
         Dictionary to store estimation results in
@@ -284,6 +304,8 @@ def estimate_physics_pass(
     results["event"].append(cluster.event)
     results["cluster_index"].append(cluster_index)
     results["cluster_label"].append(cluster.label)
+    results["orig_run"].append(orig_run)
+    results["orig_event"].append(orig_event)
     results["ic_amplitude"].append(ic_amplitude)
     results["ic_centroid"].append(ic_centroid)
     results["ic_integral"].append(ic_integral)

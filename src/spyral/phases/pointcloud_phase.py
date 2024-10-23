@@ -14,11 +14,15 @@ from ..correction import (
     ElectronCorrector,
 )
 from ..core.spy_log import spyral_warn, spyral_info
-from ..trace.trace_reader import TraceReader
+from ..trace.trace_reader import create_reader
 from ..trace.frib_event import TriggerType
 from ..trace.peak import Peak
 from ..core.pad_map import PadMap
-from ..core.point_cloud import PointCloud
+from ..core.point_cloud import (
+    point_cloud_from_get,
+    calibrate_point_cloud_z,
+    sort_point_cloud_in_z,
+)
 from .schema import TRACE_SCHEMA, POINTCLOUD_SCHEMA
 
 import numpy as np
@@ -26,25 +30,6 @@ import h5py as h5
 
 from pathlib import Path
 from multiprocessing import SimpleQueue
-
-
-def get_event_range(trace_file: h5.File) -> tuple[int, int]:
-    """
-    The merger doesn't use attributes for legacy reasons, so everything is stored in datasets. Use this to retrieve the min and max event numbers.
-
-    Parameters
-    ----------
-    trace_file: h5py.File
-        File handle to a hdf5 file with AT-TPC traces
-
-    Returns
-    -------
-    tuple[int, int]
-        A pair of integers (first event number, last event number)
-    """
-    meta_group = trace_file.get("meta")
-    meta_data = meta_group.get("meta")  # type: ignore
-    return (int(meta_data[0]), int(meta_data[2]))  # type: ignore
 
 
 class PointcloudPhase(PhaseLike):
@@ -144,7 +129,9 @@ class PointcloudPhase(PhaseLike):
 
         # Open files
         result = self.construct_artifact(payload, workspace_path)
-        trace_reader = TraceReader(trace_path)
+        trace_reader = create_reader(trace_path, payload.run_number)
+        if trace_reader is None:
+            return PhaseResult.invalid_result(payload.run_number)
         point_file = h5.File(result.artifacts["pointcloud"], "w")
 
         # Load electric field correction
@@ -153,10 +140,10 @@ class PointcloudPhase(PhaseLike):
             corrector = create_electron_corrector(self.electron_correction_path)
 
         cloud_group = point_file.create_group("cloud")
-        cloud_group.attrs["min_event"] = trace_reader.min_event
-        cloud_group.attrs["max_event"] = trace_reader.max_event
+        cloud_group.attrs["min_event"] = trace_reader.first_event()
+        cloud_group.attrs["max_event"] = trace_reader.last_event()
 
-        nevents = trace_reader.max_event - trace_reader.min_event + 1
+        nevents = len(trace_reader)
         total: int
         flush_val: int
         if nevents < 100:
@@ -201,19 +188,19 @@ class PointcloudPhase(PhaseLike):
             if event.get is None:
                 continue
 
-            pc = PointCloud()
-            pc.load_cloud_from_get_event(event.get, self.pad_map)
-            pc.calibrate_z_position(
-                self.det_params.micromegas_time_bucket,
-                self.det_params.window_time_bucket,
-                self.det_params.detector_length,
-                corrector,
-            )
+            # Convert traces to pointcloud
+            cloud = point_cloud_from_get(event.get, self.pad_map)
+            # Calibrate the time to z-position
+            calibrate_point_cloud_z(cloud, self.det_params, corrector)
+            # Sort the cloud in z
+            sort_point_cloud_in_z(cloud)
 
             pc_dataset = cloud_group.create_dataset(
-                f"cloud_{pc.event_number}", shape=pc.cloud.shape, dtype=np.float64
+                f"cloud_{cloud.event_number}", data=cloud.data
             )
-
+            # Store original run and event info
+            pc_dataset.attrs["orig_run"] = event.original_run
+            pc_dataset.attrs["orig_event"] = event.original_event
             # default IC settings
             pc_dataset.attrs["ic_amplitude"] = -1.0
             pc_dataset.attrs["ic_integral"] = -1.0
@@ -232,7 +219,6 @@ class PointcloudPhase(PhaseLike):
                     pc_dataset.attrs["ic_centroid"] = ic_peak.centroid
                     pc_dataset.attrs["ic_multiplicity"] = ic_mult
 
-            pc_dataset[:] = pc.cloud
         # End of event data
 
         # Process scaler data if it exists
@@ -243,9 +229,7 @@ class PointcloudPhase(PhaseLike):
                 / f"{form_run_string(payload.run_number)}_scaler.parquet"
             )
         else:
-            spyral_warn(
-                __name__, f"Run {payload.run_number} does not have scaler data!"
-            )
+            spyral_info(__name__, f"Run {payload.run_number} does not have scaler data")
 
         gated_ic_path = (
             self.get_artifact_path(workspace_path)
