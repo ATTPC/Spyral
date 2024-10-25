@@ -1,7 +1,7 @@
-from .point_cloud import PointCloud
+from .point_cloud import PointCloud, sort_point_cloud_in_z
 from .config import ClusterParameters
 import numpy as np
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from sklearn.neighbors import LocalOutlierFactor
 from scipy.interpolate import BSpline, make_smoothing_spline
 
@@ -18,16 +18,13 @@ class LabeledCloud:
         The label from the clustering algorithm
     point_cloud:
         The cluster data in original point cloud coordinates
-    clustered_data:
-        The acutal data clustering was perfomed on, in transformed coordinates
     parent_indicies:
         The incidies of this cluster's data in the original parent point cloud
     """
 
-    label: int = -1  # default is noise label
-    point_cloud: PointCloud = field(default_factory=PointCloud)
-    clustered_data: np.ndarray = field(default_factory=lambda: np.zeros(0))
-    parent_indicies: np.ndarray = field(default_factory=lambda: np.zeros(0))
+    label: int  # default is noise label
+    point_cloud: PointCloud
+    parent_indicies: np.ndarray
 
 
 class Cluster:
@@ -172,11 +169,12 @@ def convert_labeled_to_cluster(
         and second a list of indicies in the preciding
         cloud that were labeled as noise.
     """
-    cloud.point_cloud.sort_in_z()
-    data = np.zeros((len(cloud.point_cloud.cloud), 5))
-    data[:, :3] = cloud.point_cloud.cloud[:, :3]  # position
-    data[:, 3] = cloud.point_cloud.cloud[:, 4]  # peak integral
-    data[:, 4] = cloud.point_cloud.cloud[:, 7]  # scale (big or small)
+    # Joining can make point cloud unsorted
+    sort_point_cloud_in_z(cloud.point_cloud)
+    data = np.zeros((len(cloud.point_cloud), 5))
+    data[:, :3] = cloud.point_cloud.data[:, :3]  # position
+    data[:, 3] = cloud.point_cloud.data[:, 4]  # peak integral
+    data[:, 4] = cloud.point_cloud.data[:, 7]  # scale (big or small)
     cluster = Cluster(cloud.point_cloud.event_number, cloud.label, data)
     outliers = cluster.drop_outliers(params.outlier_scale_factor)
     return (cluster, outliers)
