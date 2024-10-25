@@ -1,4 +1,4 @@
-from .point_cloud import PointCloud
+from .point_cloud import PointCloud, sort_point_cloud_in_z
 from .config import ClusterParameters
 import numpy as np
 from dataclasses import dataclass
@@ -169,6 +169,8 @@ def convert_labeled_to_cluster(
         and second a list of indicies in the preciding
         cloud that were labeled as noise.
     """
+    # Joining can make point cloud unsorted
+    sort_point_cloud_in_z(cloud.point_cloud)
     data = np.zeros((len(cloud.point_cloud), 5))
     data[:, :3] = cloud.point_cloud.data[:, :3]  # position
     data[:, 3] = cloud.point_cloud.data[:, 4]  # peak integral
