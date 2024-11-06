@@ -1,4 +1,4 @@
-from .guess import Guess, SolverResult
+from .guess import Guess, SolverResult, create_params
 from ..core.cluster import Cluster
 from ..interpolate.track_interpolator import TrackInterpolator
 from ..core.constants import QBRHO_2_P, BIG_PAD_HEIGHT
@@ -120,112 +120,6 @@ def objective_function(
     return distances(trajectory, x, weights)
 
 
-def create_params(
-    guess: Guess,
-    ejectile: NucleusData,
-    interpolator: TrackInterpolator,
-    det_params: DetectorParameters,
-    solver_params: SolverParameters,
-) -> Parameters:
-    """Create the lmfit parameters with appropriate bounds
-
-    Convert all values to correct units (meters, radians, etc.) as well
-
-    Parameters
-    ----------
-    guess: Guess
-        the initial values of the parameters
-    ejectile: spyral_utils.nuclear.NucleusData
-        the data for the particle being tracked
-    interpolator: TrackInterpolator
-        the interpolation scheme to be used
-    det_params: DetectorParameters
-        Configuration parameters for detector characteristics
-    solver_params: SolverParameters
-        Configuration parameters for the solver
-
-    Returns
-    -------
-    lmfit.Parameters
-        the lmfit parameters with bounds
-    """
-    interp_min_momentum = np.sqrt(
-        interpolator.ke_min * (interpolator.ke_min + 2.0 * ejectile.mass)
-    )
-    interp_max_momentum = np.sqrt(
-        interpolator.ke_max * (interpolator.ke_max + 2.0 * ejectile.mass)
-    )
-    interp_min_brho = (interp_min_momentum / QBRHO_2_P) / ejectile.Z
-    interp_max_brho = (interp_max_momentum / QBRHO_2_P) / ejectile.Z
-    interp_min_polar = interpolator.polar_min * np.pi / 180.0
-    interp_max_polar = interpolator.polar_max * np.pi / 180.0
-
-    uncertainty_position_z = 0.1
-    uncertainty_brho = 0.05
-
-    min_brho = guess.brho - uncertainty_brho * 2.0
-    if min_brho < interp_min_brho:
-        min_brho = interp_min_brho
-    max_brho = guess.brho + uncertainty_brho * 2.0
-    if max_brho > interp_max_brho:
-        max_brho = interp_max_brho
-
-    min_polar = interp_min_polar
-    max_polar = interp_max_polar
-    if guess.polar > np.pi * 0.5 and min_polar < np.pi * 0.5:
-        min_polar = np.pi * 0.5
-    elif guess.polar < np.pi * 0.5 and max_polar > np.pi * 0.5:
-        max_polar = np.pi * 0.5
-
-    min_z = guess.vertex_z * 0.001 - uncertainty_position_z * 2.0
-    max_z = guess.vertex_z * 0.001 + uncertainty_position_z * 2.0
-    if min_z < 0.0:
-        min_z = 0.0
-    if max_z > det_params.detector_length * 0.001:
-        max_z = det_params.detector_length * 0.001
-
-    vert_phi = np.arctan2(guess.vertex_y, guess.vertex_x)
-    if vert_phi < 0.0:
-        vert_phi += np.pi * 2.0
-    vert_rho = np.sqrt(guess.vertex_x**2.0 + guess.vertex_y**2.0) * 0.001
-
-    fit_params = Parameters()
-    fit_params.add(
-        "brho",
-        guess.brho,
-        min=min_brho,
-        max=max_brho,
-        vary=True,
-    )
-    fit_params.add("polar", guess.polar, min=min_polar, max=max_polar, vary=True)
-    fit_params.add(
-        "vertex_rho",
-        value=vert_rho,
-        min=0.0,
-        max=det_params.beam_region_radius * 0.001,
-        vary=solver_params.fit_vertex_rho,
-    )
-    fit_params.add(
-        "vertex_phi",
-        value=vert_phi,
-        min=0.0,
-        max=np.pi * 2.0,
-        vary=solver_params.fit_vertex_phi,
-    )
-    fit_params.add(
-        "azimuthal",
-        value=guess.azimuthal,
-        min=0.0,
-        max=2.0 * np.pi,
-        vary=solver_params.fit_azimuthal,
-    )
-    fit_params.add("vertex_x", expr="vertex_rho * cos(vertex_phi)")
-    fit_params.add("vertex_y", expr="vertex_rho * sin(vertex_phi)")
-    fit_params.add("vertex_z", guess.vertex_z * 0.001, min=min_z, max=max_z, vary=True)
-
-    return fit_params
-
-
 # For testing, not for use in production
 def fit_model_interp(
     cluster: Cluster,
@@ -278,7 +172,7 @@ def fit_model_interp(
     total_error = np.sqrt(x_error**2.0 + y_error**2.0 + z_error**2.0)
     weights = 1.0 / total_error
 
-    fit_params = create_params(guess, ejectile, interpolator, det_params, solver_params)
+    fit_params = create_params(guess, ejectile, det_params, solver_params)
 
     result: MinimizerResult = minimize(
         objective_function,
@@ -291,7 +185,7 @@ def fit_model_interp(
     return result.params  # type: ignore
 
 
-def solve_physics_interp(
+def solve_physics_interp_leastsq(
     cluster_index: int,
     orig_run: int,
     orig_event: int,
@@ -353,7 +247,7 @@ def solve_physics_interp(
     total_error = np.sqrt(x_error**2.0 + y_error**2.0 + z_error**2.0)
     weights = 1.0 / total_error
 
-    fit_params = create_params(guess, ejectile, interpolator, det_params, solver_params)
+    fit_params = create_params(guess, ejectile, det_params, solver_params)
 
     best_fit: MinimizerResult = minimize(
         objective_function,
@@ -386,7 +280,7 @@ def solve_physics_interp(
         sigma_polar=1.0e6,
         azimuthal=best_fit.params["azimuthal"].value,  # type: ignore
         sigma_azimuthal=1.0e6,
-        redchisq=best_fit.redchisq,  # type: ignore
+        redchisq=best_fit.redchi,  # type: ignore
     )
 
     if hasattr(best_fit, "uvars"):

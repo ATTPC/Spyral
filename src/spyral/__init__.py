@@ -25,7 +25,6 @@ from .phases.pointcloud_phase import PointcloudPhase
 from .phases.cluster_phase import ClusterPhase
 from .phases.estimation_phase import EstimationPhase
 from .phases.interp_solver_phase import InterpSolverPhase
-from .phases.interp_leastsq_solver_phase import InterpLeastSqSolverPhase
 from .phases.schema import (
     TRACE_SCHEMA,
     POINTCLOUD_SCHEMA,
@@ -54,7 +53,6 @@ __all__ = [
     "ClusterPhase",
     "EstimationPhase",
     "InterpSolverPhase",
-    "InterpLeastSqSolverPhase",
     "TRACE_SCHEMA",
     "POINTCLOUD_SCHEMA",
     "CLUSTER_SCHEMA",
