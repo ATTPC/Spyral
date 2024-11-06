@@ -277,28 +277,7 @@ class InterpSolverPhase(PhaseLike):
         )  # We always increment by 1
 
         # Result storage
-        phys_results: dict[str, list] = {
-            "event": [],
-            "cluster_index": [],
-            "cluster_label": [],
-            "orig_run": [],
-            "orig_event": [],
-            "vertex_x": [],
-            "sigma_vx": [],
-            "vertex_y": [],
-            "sigma_vy": [],
-            "vertex_z": [],
-            "sigma_vz": [],
-            "brho": [],
-            "sigma_brho": [],
-            "ke": [],
-            "sigma_ke": [],
-            "polar": [],
-            "sigma_polar": [],
-            "azimuthal": [],
-            "sigma_azimuthal": [],
-            "redchisq": [],
-        }
+        phys_results = []
 
         # load the ODE solution interpolator
         if self.shared_mesh_shape is None or self.shared_mesh_name is None:
@@ -344,7 +323,7 @@ class InterpSolverPhase(PhaseLike):
                 estimates_gated["vertex_z"][row],
                 Direction.NONE,  # type: ignore
             )
-            solve_physics_interp(
+            res = solve_physics_interp(
                 cidx,
                 orig_run,
                 orig_event,
@@ -354,8 +333,9 @@ class InterpSolverPhase(PhaseLike):
                 interpolator,
                 self.det_params,
                 self.solver_params,
-                phys_results,
             )
+            if res is not None:
+                phys_results.append(vars(res))
 
         # Write out the results
         physics_df = pl.DataFrame(phys_results)
