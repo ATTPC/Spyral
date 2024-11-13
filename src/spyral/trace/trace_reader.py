@@ -404,8 +404,8 @@ class MergerCurrentReader:
             get_data: h5.Dataset = event_data["get_traces"]  # type: ignore
             event.get = GetEvent(get_data[:], event_id, get_params, rng)
             if "frib_physics" in event_data:
-                frib_1903_data: h5.Dataset = events_group["frib_physics"]["1903"]  # type: ignore
-                frib_977_data: h5.Dataset = events_group["frib_physics"]["977"]  # type: ignore
+                frib_1903_data: h5.Dataset = event_data["frib_physics"]["1903"]  # type: ignore
+                frib_977_data: h5.Dataset = event_data["frib_physics"]["977"]  # type: ignore
                 event.frib = FribEvent(
                     frib_1903_data[:], frib_977_data[:], event_id, frib_params
                 )
@@ -424,7 +424,7 @@ class MergerCurrentReader:
         if event_name in events_group:
             event_data: h5.Group = events_group[event_name]  # type: ignore
             if "frib_physics" in event_data:
-                return events_group["frib_physics"]["1903"][:].copy()  # type: ignore
+                return event_data["frib_physics"]["1903"][:].copy()  # type: ignore
 
     def read_scalers(self) -> FribScalers | None:
         if "scalers" not in self.file:
@@ -496,8 +496,8 @@ class HarmonizerReader:
             get_data: h5.Dataset = event_data["get_traces"]  # type: ignore
             event.get = GetEvent(get_data[:], event_id, get_params, rng)
             if "frib_physics" in event_data:
-                frib_1903_data: h5.Dataset = events_group["frib_physics"]["1903"]  # type: ignore
-                frib_977_data: h5.Dataset = events_group["frib_physics"]["977"]  # type: ignore
+                frib_1903_data: h5.Dataset = event_data["frib_physics"]["1903"]  # type: ignore
+                frib_977_data: h5.Dataset = event_data["frib_physics"]["977"]  # type: ignore
                 event.frib = FribEvent(
                     frib_1903_data[:], frib_977_data[:], event_id, frib_params
                 )
@@ -516,7 +516,7 @@ class HarmonizerReader:
         if event_name in events_group:
             event_data: h5.Group = events_group[event_name]  # type: ignore
             if "frib_physics" in event_data:
-                return events_group["frib_physics"]["1903"][:].copy()  # type: ignore
+                return event_data["frib_physics"]["1903"][:].copy()  # type: ignore
 
     def read_scalers(self) -> FribScalers | None:
         return None
