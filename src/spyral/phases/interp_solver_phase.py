@@ -16,6 +16,7 @@ from ..interpolate.track_interpolator import (
 )
 from ..solvers.guess import Guess
 from ..solvers.solver_interp import solve_physics_interp
+from ..solvers.solver_interp_leastsq import solve_physics_interp_leastsq
 from .schema import ESTIMATE_SCHEMA, INTERP_SOLVER_SCHEMA
 
 from spyral_utils.nuclear.target import load_target, GasTarget
@@ -31,6 +32,8 @@ from multiprocessing.shared_memory import SharedMemory
 
 DEFAULT_PID_XAXIS = "dEdx"
 DEFAULT_PID_YAXIS = "brho"
+METHOD_LBFGSB = "lbfgsb"
+METHOD_LEASTSQ = "leastsq"
 
 
 class InterpSolverError(Exception):
@@ -92,6 +95,16 @@ class InterpSolverPhase(PhaseLike):
             incoming_schema=ResultSchema(ESTIMATE_SCHEMA),
             outgoing_schema=ResultSchema(INTERP_SOLVER_SCHEMA),
         )
+        self.solver_func = None
+        if solver_params.fit_method == METHOD_LBFGSB:
+            self.solver_func = solve_physics_interp
+        elif solver_params.fit_method == METHOD_LEASTSQ:
+            self.solver_func = solve_physics_interp_leastsq
+        else:
+            raise InterpSolverError(
+                f"Fit method {solver_params.fit_method} is not a valid method. Please chose '{METHOD_LBFGSB}' or '{METHOD_LEASTSQ}'"
+            )
+
         self.solver_params = solver_params
         self.det_params = det_params
         self.nuclear_map = NuclearDataMap()
@@ -199,6 +212,10 @@ class InterpSolverPhase(PhaseLike):
         msg_queue: SimpleQueue,
         rng: Generator,
     ) -> PhaseResult:
+        if self.solver_func is None:
+            raise InterpSolverError(
+                "Solver function was not set at Pipeline run for InterpSolverPhase!"
+            )
         # Need particle ID the correct data subset
         pid: ParticleID | None = deserialize_particle_id(
             Path(self.solver_params.particle_id_filename), self.nuclear_map
@@ -277,28 +294,7 @@ class InterpSolverPhase(PhaseLike):
         )  # We always increment by 1
 
         # Result storage
-        phys_results: dict[str, list] = {
-            "event": [],
-            "cluster_index": [],
-            "cluster_label": [],
-            "orig_run": [],
-            "orig_event": [],
-            "vertex_x": [],
-            "sigma_vx": [],
-            "vertex_y": [],
-            "sigma_vy": [],
-            "vertex_z": [],
-            "sigma_vz": [],
-            "brho": [],
-            "sigma_brho": [],
-            "ke": [],
-            "sigma_ke": [],
-            "polar": [],
-            "sigma_polar": [],
-            "azimuthal": [],
-            "sigma_azimuthal": [],
-            "redchisq": [],
-        }
+        phys_results = []
 
         # load the ODE solution interpolator
         if self.shared_mesh_shape is None or self.shared_mesh_name is None:
@@ -344,7 +340,7 @@ class InterpSolverPhase(PhaseLike):
                 estimates_gated["vertex_z"][row],
                 Direction.NONE,  # type: ignore
             )
-            solve_physics_interp(
+            res = self.solver_func(
                 cidx,
                 orig_run,
                 orig_event,
@@ -354,8 +350,9 @@ class InterpSolverPhase(PhaseLike):
                 interpolator,
                 self.det_params,
                 self.solver_params,
-                phys_results,
             )
+            if res is not None:
+                phys_results.append(vars(res))
 
         # Write out the results
         physics_df = pl.DataFrame(phys_results)

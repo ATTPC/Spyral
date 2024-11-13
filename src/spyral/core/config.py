@@ -212,6 +212,8 @@ class SolverParameters:
         Control whether or not the vertex phi position is fitted (True=fitted, False=fixed)
     fit_azimuthal: bool
         Control whether or not the trajectory azimuthal angle is fitted (True=fitted, False=fixed)
+    fit_method: str
+        What type of fitting to use, options are "lbfgsb" or "leastsq"
     """
 
     gas_data_path: Path
@@ -228,3 +230,4 @@ class SolverParameters:
     fit_vertex_rho: bool
     fit_vertex_phi: bool
     fit_azimuthal: bool
+    fit_method: str
