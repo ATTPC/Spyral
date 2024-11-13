@@ -32,6 +32,7 @@ from .phases.schema import (
     ESTIMATE_SCHEMA,
     INTERP_SOLVER_SCHEMA,
 )
+from .trace.trace_reader import TraceReader, create_reader
 
 __all__ = [
     "ArtifactSchema",
@@ -58,4 +59,6 @@ __all__ = [
     "CLUSTER_SCHEMA",
     "ESTIMATE_SCHEMA",
     "INTERP_SOLVER_SCHEMA",
+    "TraceReader",
+    "create_reader",
 ]
