@@ -83,6 +83,7 @@ solver_params = SolverParameters(
     fit_vertex_rho=True,
     fit_vertex_phi=True,
     fit_azimuthal=True,
+    fit_method="lbfgsb",
 )
 
 
