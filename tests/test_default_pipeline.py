@@ -61,8 +61,8 @@ cluster_params = ClusterParameters(
     min_size_scale_factor=0.05,
     min_size_lower_cutoff=10,
     cluster_selection_epsilon=10.0,
-    min_cluster_size_join=15,
-    circle_overlap_ratio=0.5,
+    join_radius_threshold=20.0,
+    join_z_threshold=50.0,
     outlier_scale_factor=0.05,
 )
 estimate_params = EstimateParameters(

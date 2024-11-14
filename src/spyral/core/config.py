@@ -156,8 +156,8 @@ class ClusterParameters:
     min_size_scale_factor: float
     min_size_lower_cutoff: int
     cluster_selection_epsilon: float
-    min_cluster_size_join: int
-    circle_overlap_ratio: float
+    join_radius_threshold: float
+    join_z_threshold: float
     outlier_scale_factor: float
 
 

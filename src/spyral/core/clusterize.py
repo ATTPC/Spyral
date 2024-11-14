@@ -1,7 +1,6 @@
 from .point_cloud import PointCloud
 from .cluster import LabeledCloud, Cluster, convert_labeled_to_cluster
 from .config import ClusterParameters
-from ..geometry.circle import least_squares_circle
 
 import sklearn.cluster as skcluster
 import numpy as np
@@ -30,11 +29,12 @@ def join_clusters(
         the second being an updated list of labels for each point in
         the point cloud
     """
-    jclusters = clusters.copy()
+    jclusters = [cluster for cluster in clusters if cluster.label != NOISE_LABEL]
     before = len(jclusters)
     after = 0
     while before != after and len(jclusters) > 1:
         before = len(jclusters)
+        jclusters = sorted(jclusters, key=lambda x: x.point_cloud.data[0, 2])
         jclusters, labels = join_clusters_step(jclusters, params, labels)
         after = len(jclusters)
     return (jclusters, labels)
@@ -71,15 +71,9 @@ def join_clusters_step(
 
     event_number = clusters[0].point_cloud.event_number
 
-    # Fit the clusters with circles
-    centers = np.zeros((len(clusters), 3))
-    for idx, cluster in enumerate(clusters):
-        centers[idx, 0], centers[idx, 1], centers[idx, 2], _ = least_squares_circle(
-            cluster.point_cloud.data[:, 0], cluster.point_cloud.data[:, 1]
-        )
-
     # Make a dictionary of center groups, label groups
     # First everyone is in their own group
+    used_clusters = {idx: False for idx in range(len(clusters))}
     groups_index: dict[int, list[int]] = {}  # Regroup the actual cluster data
     groups_label: dict[int, list[int]] = {}  # Regroup the label array
     for idx, cluster in enumerate(clusters):
@@ -87,80 +81,43 @@ def join_clusters_step(
         groups_label[cluster.label] = [cluster.label]  # Use labels for ... labels
 
     # Now regroup, searching for clusters whose circles mostly overlap
-    for idx, center in enumerate(centers):
-        cluster = clusters[idx]
+    for idx, cluster in enumerate(clusters):
         # Reject noise
-        if (
-            cluster.label == NOISE_LABEL
-            or np.isnan(center[0])
-            or center[2] < 10.0
-            or len(cluster.point_cloud) < params.min_cluster_size_join
-        ):
+        if cluster.label == NOISE_LABEL or used_clusters[idx]:
             continue
-        radius = center[2]
-        area = np.pi * radius**2.0
-
         for cidx, comp_cluster in enumerate(clusters):
-            comp_center = centers[cidx]
-            comp_radius = comp_center[2]
-            comp_area = np.pi * comp_radius**2.0
+            if comp_cluster.label == NOISE_LABEL or cidx == idx or used_clusters[idx]:
+                continue
+
+            avg_rho = np.median(
+                np.linalg.norm(cluster.point_cloud.data[-3:, :2], axis=1)
+            )  # downstream
+            avg_z = np.median(cluster.point_cloud.data[-3:, 2])  # downstream
+            avg_rho_comp = np.median(
+                np.linalg.norm(comp_cluster.point_cloud.data[:3, :2], axis=1)
+            )  # upstream
+            avg_z_comp = np.median(comp_cluster.point_cloud.data[:3, 2])  # upstream
+            is_near_beam_region = (
+                np.fabs(avg_rho - 25.0) < 5.0 and np.fabs(avg_rho_comp - 25.0) < 5.0
+            )
+            z_diff = np.fabs(avg_z - avg_z_comp)
+            rho_diff = np.fabs(avg_rho - avg_rho_comp)
             if (
-                comp_cluster.label == NOISE_LABEL
-                or np.isnan(comp_center[0])
-                or center[2] < 10.0
-                or cidx == idx
-                or len(comp_cluster.point_cloud) < params.min_cluster_size_join
-            ):
-                continue
-
-            # Calculate area of overlap between the two circles
-            # See Wolfram MathWorld https://mathworld.wolfram.com/Circle-CircleIntersection.html
-            center_distance = np.sqrt(
-                (center[0] - comp_center[0]) ** 2.0
-                + (center[1] - comp_center[1]) ** 2.0
-            )
-            term1 = (center_distance**2.0 + radius**2.0 - comp_radius**2.0) / (
-                2.0 * center_distance * radius
-            )
-            term2 = (center_distance**2.0 + comp_radius**2.0 - radius**2.0) / (
-                2.0 * center_distance * comp_radius
-            )
-            c1 = -center_distance + radius + comp_radius
-            c2 = center_distance + radius - comp_radius
-            c3 = center_distance - radius + comp_radius
-            c4 = center_distance + radius + comp_radius
-            term3 = c1 * c2 * c3 * c4
-            area_overlap = 0.0
-            # term3 cant be negative, inside sqrt.
-            if term3 < 0.0 and c1 < 0.0:
-                # Cannot possibly overlap, too far apart
-                continue
-            elif term3 < 0.0 and (c2 < 0.0 or c3 < 0.0):
-                # Entirely overlap one circle inside of the other
-                area_overlap = min(area, comp_area)
-            else:
-                # Circles only somewhat overlap
-                term1 = min(
-                    1.0, max(-1.0, term1)
-                )  # clamp to arccos range to avoid silly floating point precision errors
-                term2 = min(1.0, max(-1.0, term2))
-                area_overlap = (
-                    radius**2.0 * np.arccos(term1)
-                    + comp_radius**2.0 * np.arccos(term2)
-                    - 0.5 * np.sqrt(term3)
+                is_near_beam_region
+                or (
+                    rho_diff < params.join_radius_threshold
+                    and z_diff < params.join_z_threshold
                 )
-
-            # Apply the condition
-            smaller_area = min(area, comp_area)
-            if (area_overlap > params.circle_overlap_ratio * smaller_area) and (
-                cidx not in groups_index[cluster.label]
-            ):
+            ) and (avg_z < avg_z_comp or z_diff < 1.0):
                 comp_indicies = groups_index.pop(comp_cluster.label)
                 comp_labels = groups_label.pop(comp_cluster.label)
                 for subs in comp_indicies:
                     clusters[subs].label = cluster.label
                 groups_index[cluster.label].extend(comp_indicies)
                 groups_label[cluster.label].extend(comp_labels)
+                used_clusters[idx] = True
+                used_clusters[cidx] = True
+                break
 
     # Now reform the clouds such that there is one cloud per group
     new_clusters: list[LabeledCloud] = []
@@ -175,10 +132,13 @@ def join_clusters_step(
             new_cluster.point_cloud.data = np.concatenate(
                 (new_cluster.point_cloud.data, clusters[idx].point_cloud.data), axis=0
             )
+            indicies = np.argsort(new_cluster.point_cloud.data[:, 2])
+            new_cluster.point_cloud.data = new_cluster.point_cloud.data[indicies]
             # Merge the indicies
             new_cluster.parent_indicies = np.concatenate(
                 (new_cluster.parent_indicies, clusters[idx].parent_indicies)
             )
+            new_cluster.parent_indicies = new_cluster.parent_indicies[indicies]
         new_clusters.append(new_cluster)
 
     # Now replace the labels in the label array with the joined
