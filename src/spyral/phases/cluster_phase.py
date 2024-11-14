@@ -12,6 +12,7 @@ import h5py as h5
 from pathlib import Path
 from multiprocessing import SimpleQueue
 from numpy.random import Generator
+import numpy as np
 
 
 class ClusterPhase(PhaseLike):
@@ -135,6 +136,12 @@ class ClusterPhase(PhaseLike):
                 continue
 
             cloud = PointCloud(idx, cloud_data[:].copy())
+            if np.any(np.diff(cloud.data[:, 2]) < 0.0):
+                spyral_warn(
+                    __name__,
+                    f"Clustering for event {cloud.event_number} failed because point cloud was not sorted in z",
+                )
+                continue
 
             # Here we don't need to use the labels array.
             # We just pass it along as needed.
