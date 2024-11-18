@@ -59,7 +59,7 @@ def version_string_to_enum(version: str) -> TraceVersion:
 
     if version == "libattpc_merger:1.0":
         return TraceVersion.MERGER_1_0
-    elif version == "harmonizer:0.1.0":
+    elif version == "harmonizer:0.1.0" or version == "synchronizer:0.1.0":
         return TraceVersion.HARMONIZER_0_1
     else:
         return TraceVersion.INVALID
