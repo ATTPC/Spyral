@@ -34,7 +34,8 @@ def join_clusters(
     after = 0
     while before != after and len(jclusters) > 1:
         before = len(jclusters)
-        jclusters = sorted(jclusters, key=lambda x: x.point_cloud.data[0, 2])
+        # Prioritize joining big clusters together
+        jclusters = sorted(jclusters, key=lambda x: len(x.point_cloud), reverse=True)
         jclusters, labels = join_clusters_step(jclusters, params, labels)
         after = len(jclusters)
     return (jclusters, labels)
@@ -86,29 +87,31 @@ def join_clusters_step(
         if cluster.label == NOISE_LABEL or used_clusters[idx]:
             continue
         for cidx, comp_cluster in enumerate(clusters):
-            if comp_cluster.label == NOISE_LABEL or cidx == idx or used_clusters[idx]:
+            if comp_cluster.label == NOISE_LABEL or cidx == idx or used_clusters[cidx]:
                 continue
 
-            avg_rho = np.median(
-                np.linalg.norm(cluster.point_cloud.data[-3:, :2], axis=1)
-            )  # downstream
-            avg_z = np.median(cluster.point_cloud.data[-3:, 2])  # downstream
-            avg_rho_comp = np.median(
-                np.linalg.norm(comp_cluster.point_cloud.data[:3, :2], axis=1)
+            avg_pos = np.median(cluster.point_cloud.data[-3:, :3], axis=0)  # downstream
+            avg_rho = np.linalg.norm(avg_pos[:2])
+            avg_phi = np.arctan2(avg_pos[1], avg_pos[0])
+            avg_pos_comp = np.median(
+                comp_cluster.point_cloud.data[:3, :3], axis=0
             )  # upstream
-            avg_z_comp = np.median(comp_cluster.point_cloud.data[:3, 2])  # upstream
+            avg_rho_comp = np.linalg.norm(avg_pos_comp[:2])
+            avg_phi_comp = np.arctan2(avg_pos_comp[1], avg_pos_comp[0])
             is_near_beam_region = (
                 np.fabs(avg_rho - 25.0) < 5.0 and np.fabs(avg_rho_comp - 25.0) < 5.0
             )
-            z_diff = np.fabs(avg_z - avg_z_comp)
+            z_diff = np.fabs(avg_pos[2] - avg_pos_comp[2])
             rho_diff = np.fabs(avg_rho - avg_rho_comp)
+            phi_diff = np.fabs(avg_phi - avg_phi_comp)
             if (
                 is_near_beam_region
                 or (
                     rho_diff < params.join_radius_threshold
                     and z_diff < params.join_z_threshold
+                    and phi_diff < np.pi * 0.5
                 )
-            ) and (avg_z < avg_z_comp or z_diff < 1.0):
+            ) and (avg_pos[2] < avg_pos_comp[2] or z_diff < 10.0):
                 comp_indicies = groups_index.pop(comp_cluster.label)
                 comp_labels = groups_label.pop(comp_cluster.label)
                 for subs in comp_indicies:
