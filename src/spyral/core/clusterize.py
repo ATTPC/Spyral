@@ -34,8 +34,8 @@ def join_clusters(
     after = 0
     while before != after and len(jclusters) > 1:
         before = len(jclusters)
-        # Prioritize joining big clusters together
-        jclusters = sorted(jclusters, key=lambda x: len(x.point_cloud), reverse=True)
+        # Order clusters by start time
+        jclusters = sorted(jclusters, key=lambda x: x.point_cloud.data[0, 2])
         jclusters, labels = join_clusters_step(jclusters, params, labels)
         after = len(jclusters)
     return (jclusters, labels)
@@ -93,23 +93,30 @@ def join_clusters_step(
             avg_pos = np.median(cluster.point_cloud.data[-3:, :3], axis=0)  # downstream
             avg_rho = np.linalg.norm(avg_pos[:2])
             avg_phi = np.arctan2(avg_pos[1], avg_pos[0])
+            if avg_phi < 0.0:
+                avg_phi += 2.0 * np.pi
             avg_pos_comp = np.median(
                 comp_cluster.point_cloud.data[:3, :3], axis=0
             )  # upstream
             avg_rho_comp = np.linalg.norm(avg_pos_comp[:2])
             avg_phi_comp = np.arctan2(avg_pos_comp[1], avg_pos_comp[0])
+            if avg_phi_comp < 0.0:
+                avg_phi_comp += 2.0 * np.pi
             is_near_beam_region = (
-                np.fabs(avg_rho - 25.0) < 5.0 and np.fabs(avg_rho_comp - 25.0) < 5.0
+                np.fabs(avg_rho - 25.0) < 7.0 and np.fabs(avg_rho_comp - 25.0) < 7.0
             )
             z_diff = np.fabs(avg_pos[2] - avg_pos_comp[2])
             rho_diff = np.fabs(avg_rho - avg_rho_comp)
             phi_diff = np.fabs(avg_phi - avg_phi_comp)
+            if phi_diff > np.pi:
+                phi_diff = 2.0 * np.pi - phi_diff
+
             if (
-                is_near_beam_region
+                (is_near_beam_region and z_diff < 500.0)
                 or (
                     rho_diff < params.join_radius_threshold
                     and z_diff < params.join_z_threshold
-                    and phi_diff < np.pi * 0.5
+                    and phi_diff < np.pi * 0.25
                 )
             ) and (avg_pos[2] < avg_pos_comp[2] or z_diff < 10.0):
                 comp_indicies = groups_index.pop(comp_cluster.label)
@@ -121,6 +128,9 @@ def join_clusters_step(
                 used_clusters[idx] = True
                 used_clusters[cidx] = True
                 break
+        # GWM: TODO make this less gross, optimize lower part
+        if used_clusters[idx]:
+            break
 
     # Now reform the clouds such that there is one cloud per group
     new_clusters: list[LabeledCloud] = []
