@@ -1,6 +1,6 @@
 [project]
 name = "attpc_spyral"
-version = "0.16.0rc2"
+version = "0.16.0rc3"
 description = "AT-TPC analysis pipeline"
 authors = [
     {name = "gwm17", email = "gordonmccann215@gmail.com"},
