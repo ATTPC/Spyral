@@ -35,7 +35,9 @@ def join_clusters(
     while before != after and len(jclusters) > 1:
         before = len(jclusters)
         # Order clusters by start time
-        jclusters = sorted(jclusters, key=lambda x: x.point_cloud.data[0, 2])
+        jclusters = sorted(
+            jclusters, key=lambda x: x.point_cloud.data[0, 2] / len(x.point_cloud)
+        )
         jclusters, labels = join_clusters_step(jclusters, params, labels)
         after = len(jclusters)
     return (jclusters, labels)
@@ -112,7 +114,7 @@ def join_clusters_step(
                 phi_diff = 2.0 * np.pi - phi_diff
 
             if (
-                (is_near_beam_region and z_diff < 500.0)
+                (is_near_beam_region and z_diff < 300.0)
                 or (
                     rho_diff < params.join_radius_threshold
                     and z_diff < params.join_z_threshold
