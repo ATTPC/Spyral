@@ -19,7 +19,7 @@ from ..solvers.solver_interp import solve_physics_interp
 from ..solvers.solver_interp_leastsq import solve_physics_interp_leastsq
 from .schema import ESTIMATE_SCHEMA, INTERP_SOLVER_SCHEMA
 
-from spyral_utils.nuclear.target import load_target, GasTarget
+from spyral_utils.nuclear.target import load_target, GasTarget, GasMixtureTarget
 from spyral_utils.nuclear.particle_id import deserialize_particle_id, ParticleID
 from spyral_utils.nuclear.nuclear_map import NuclearDataMap
 import h5py as h5
@@ -122,9 +122,9 @@ class InterpSolverPhase(PhaseLike):
             raise InterpSolverError(
                 "Could not create trajectory mesh, particle ID is not formatted correctly!"
             )
-        if not isinstance(target, GasTarget):
+        if not isinstance(target, GasTarget | GasMixtureTarget):
             raise InterpSolverError(
-                "Could not create trajectory mesh, target is not a GasTarget!"
+                "Could not create trajectory mesh, target is not a GasTarget | GasMixtureTarget!"
             )
         mesh_params = MeshParameters(
             target,

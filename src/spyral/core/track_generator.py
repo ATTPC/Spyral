@@ -3,7 +3,7 @@ from ..interpolate import LinearInterpolator
 from .spy_log import spyral_warn
 
 from spyral_utils.nuclear import NucleusData
-from spyral_utils.nuclear.target import GasTarget
+from spyral_utils.nuclear.target import GasTarget, GasMixtureTarget
 
 import psutil
 import math
@@ -33,7 +33,7 @@ class MeshParameters:
 
     Attributes
     ----------
-    target: spyral_utils.nuclear.target.GasTarget
+    target: spyral_utils.nuclear.target.GasTarget | GasMixtureTarget
         The target material
     particle: spyral_utils.nuclear.NucleusData
         The projectile
@@ -62,7 +62,7 @@ class MeshParameters:
         Serialize the class to a JSON string
     """
 
-    target: GasTarget
+    target: GasTarget | GasMixtureTarget
     particle: NucleusData
     bfield: float  # T
     efield: float  # V/m
@@ -101,10 +101,10 @@ class MeshParameters:
         )
 
     def get_track_file_name(self) -> str:
-        return f"{self.particle.isotopic_symbol}_in_{self.target.ugly_string.replace('(Gas)', '')}_{self.target.data.pressure}Torr.npy"
+        return f"{self.particle.isotopic_symbol}_in_{self.target.ugly_string.replace('(Gas)', '')}_{self.target.pressure}Torr.npy"
 
     def get_track_meta_file_name(self) -> str:
-        return f"{self.particle.isotopic_symbol}_in_{self.target.ugly_string.replace('(Gas)', '')}_{self.target.data.pressure}Torr.json"
+        return f"{self.particle.isotopic_symbol}_in_{self.target.ugly_string.replace('(Gas)', '')}_{self.target.pressure}Torr.json"
 
 
 def check_mesh_needs_generation(track_path: Path, params: MeshParameters) -> bool:
@@ -140,7 +140,7 @@ def equation_of_motion(
     state: np.ndarray,
     Bfield: float,
     Efield: float,
-    target: GasTarget,
+    target: GasTarget | GasMixtureTarget,
     ejectile: NucleusData,
 ) -> np.ndarray:
     """The equations of motion for a charged particle in a static electromagnetic field which experiences energy loss through some material.
@@ -200,7 +200,7 @@ def stop_condition(
     state: np.ndarray,
     Bfield: float,
     Efield: float,
-    target: GasTarget,
+    target: GasTarget | GasMixtureTarget,
     ejectile: NucleusData,
 ) -> float:
     """Detect if a solution has reached the low-energy stopping condition
@@ -250,7 +250,7 @@ def forward_z_bound_condition(
     state: np.ndarray,
     Bfield: float,
     Efield: float,
-    target: GasTarget,
+    target: GasTarget | GasMixtureTarget,
     ejectile: NucleusData,
 ) -> float:
     """Detect if a solution has reached the end-of-detector-in-z condition
@@ -290,7 +290,7 @@ def backward_z_bound_condition(
     state: np.ndarray,
     Bfield: float,
     Efield: float,
-    target: GasTarget,
+    target: GasTarget | GasMixtureTarget,
     ejectile: NucleusData,
 ) -> float:
     """Detect if a solution has reached the end-of-detector-in-z condition
@@ -330,7 +330,7 @@ def rho_bound_condition(
     state: np.ndarray,
     Bfield: float,
     Efield: float,
-    target: GasTarget,
+    target: GasTarget | GasMixtureTarget,
     ejectile: NucleusData,
 ) -> float:
     """Detect if a solution has reached the end-of-detector-in-rho condition
@@ -534,7 +534,7 @@ def generate_interpolated_track(
     particle: NucleusData,
     bfield: float,
     efield: float,
-    target: GasTarget,
+    target: GasTarget | GasMixtureTarget,
     n_time_steps: int = 1000,
 ) -> LinearInterpolator | None:
     """Get a single interpolated trajectory given some initial state and system parameters
@@ -559,7 +559,7 @@ def generate_interpolated_track(
         The magnetic field in Tesla
     efield: float
         The electric field in V/m
-    target: GasTarget
+    target: GasTarget | GasMixtureTarget
         The target material
     n_time_steps: int
         The number of timesteps used by the solver

@@ -226,7 +226,7 @@ class SolverParameters:
     Attributes
     ----------
     gas_data_path: str
-        Path to a spyral-utils GasTarget file
+        Path to a spyral-utils GasTarget or GasMixtureTarget file
     particle_id_filename: str
         Name of a particle ID cut file
     ic_min_val: float
