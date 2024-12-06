@@ -5,7 +5,7 @@
 groups = ["default", "doc", "lint", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:0413b82c795b44f350e1207b8a5392bc1d4a03ddf952c601ab2a335fc2f8c48c"
+content_hash = "sha256:268049eef9897863456fcde71164e3a8274b4fe0322a3f9d9ee7bd8a5ed78f60"
 
 [[metadata.targets]]
 requires_python = ">=3.10,<3.13"
@@ -1061,7 +1061,7 @@ files = [
 
 [[package]]
 name = "spyral-utils"
-version = "1.1.0"
+version = "1.2.0"
 requires_python = "<3.13,>=3.10"
 summary = "A collection of useful utilities for the Spyral analysis framework"
 groups = ["default"]
@@ -1074,8 +1074,8 @@ dependencies = [
     "vector>=1.3.0",
 ]
 files = [
-    {file = "spyral_utils-1.1.0-py3-none-any.whl", hash = "sha256:2cd38f77da1e9ba801dfdae702c893f9a6983639d88b06eb837082c099af19c3"},
-    {file = "spyral_utils-1.1.0.tar.gz", hash = "sha256:a21d7791d5340b4f36f6be496f2281fdedab8c109675fdfb98004478ee906b69"},
+    {file = "spyral_utils-1.2.0-py3-none-any.whl", hash = "sha256:50c9f482b15fb2d0bd59f7202d5dcb5910217b555d69352d65dc27a8e4f8d90a"},
+    {file = "spyral_utils-1.2.0.tar.gz", hash = "sha256:a5c8672bdb91cbe108331761eef7691bec5f0833f0242053ac1a2a85517c5e90"},
 ]
 
 [[package]]

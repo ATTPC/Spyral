@@ -52,7 +52,7 @@ def point_cloud_from_get(event: GetEvent, pad_map: PadMap) -> PointCloud:
     ----------
     event: GetEvent
         The GetEvent whose data should be loaded
-    pmap: PadMap
+    pad_map: PadMap
         The PadMap used to get pad correction values
     """
     count = 0

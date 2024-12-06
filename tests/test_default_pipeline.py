@@ -11,6 +11,7 @@ from spyral import (
     FribParameters,
     DetectorParameters,
     ClusterParameters,
+    ContinuityJoinParameters,
     SolverParameters,
     EstimateParameters,
     DEFAULT_MAP,
@@ -61,8 +62,11 @@ cluster_params = ClusterParameters(
     min_size_scale_factor=0.05,
     min_size_lower_cutoff=10,
     cluster_selection_epsilon=10.0,
-    join_radius_threshold=20.0,
-    join_z_threshold=50.0,
+    overlap_join=None,
+    continuity_join=ContinuityJoinParameters(
+        join_radius_fraction=0.3,
+        join_z_fraction=0.2,
+    ),
     outlier_scale_factor=0.05,
 )
 estimate_params = EstimateParameters(
