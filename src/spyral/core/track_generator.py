@@ -148,7 +148,7 @@ def check_mesh_metadata(track_path: Path, params: MeshParameters) -> bool:
                 and params.polar_max == meta_data["polar_max"]
                 and params.polar_bins == meta_data["polar_bins"]
             ):
-                params.shape = meta_data["shape"]
+                params.shape = tuple(meta_data["shape"])
                 params.dtype = meta_data["dtype"]
                 return True
     # Nothing to read, return false
