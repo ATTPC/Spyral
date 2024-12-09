@@ -9,7 +9,25 @@ import numpy as np
 NOISE_LABEL: int = -1
 
 
+class ClusterError(Exception):
+    pass
+
+
 def join_clusters(
+    clusters: list[LabeledCloud], params: ClusterParameters, labels: np.ndarray
+) -> tuple[list[LabeledCloud], np.ndarray]:
+    """Detect which joining algorithm to use and dispatch"""
+    if params.continuity_join is not None:
+        return join_clusters_continuity(clusters, params, labels)
+    elif params.overlap_join is not None:
+        return join_clusters_overlap(clusters, params, labels)
+    else:
+        raise ClusterError(
+            "No joining parameters were given! Clustering cannot proceed."
+        )
+
+
+def join_clusters_overlap(
     clusters: list[LabeledCloud], params: ClusterParameters, labels: np.ndarray
 ) -> tuple[list[LabeledCloud], np.ndarray]:
     """Join clusters until either only one cluster is left or no clusters meet the criteria to be joined together.
@@ -35,12 +53,12 @@ def join_clusters(
     after = 0
     while before != after and len(jclusters) > 1:
         before = len(jclusters)
-        jclusters, labels = join_clusters_step(jclusters, params, labels)
+        jclusters, labels = join_clusters_overlap_step(jclusters, params, labels)
         after = len(jclusters)
     return (jclusters, labels)
 
 
-def join_clusters_step(
+def join_clusters_overlap_step(
     clusters: list[LabeledCloud], params: ClusterParameters, labels: np.ndarray
 ) -> tuple[list[LabeledCloud], np.ndarray]:
     """A single step of joining clusters
@@ -94,7 +112,7 @@ def join_clusters_step(
             cluster.label == NOISE_LABEL
             or np.isnan(center[0])
             or center[2] < 10.0
-            or len(cluster.point_cloud) < params.min_cluster_size_join
+            or len(cluster.point_cloud) < params.overlap_join.min_cluster_size_join  # type: ignore
         ):
             continue
         radius = center[2]
@@ -109,7 +127,10 @@ def join_clusters_step(
                 or np.isnan(comp_center[0])
                 or center[2] < 10.0
                 or cidx == idx
-                or len(comp_cluster.point_cloud) < params.min_cluster_size_join
+                or (
+                    len(comp_cluster.point_cloud)
+                    < params.overlap_join.min_cluster_size_join  # type: ignore
+                )
             ):
                 continue
 
@@ -152,9 +173,9 @@ def join_clusters_step(
 
             # Apply the condition
             smaller_area = min(area, comp_area)
-            if (area_overlap > params.circle_overlap_ratio * smaller_area) and (
-                cidx not in groups_index[cluster.label]
-            ):
+            if (
+                area_overlap > params.overlap_join.circle_overlap_ratio * smaller_area  # type: ignore
+            ) and (cidx not in groups_index[cluster.label]):
                 comp_indicies = groups_index.pop(comp_cluster.label)
                 comp_labels = groups_label.pop(comp_cluster.label)
                 for subs in comp_indicies:
@@ -179,6 +200,190 @@ def join_clusters_step(
             new_cluster.parent_indicies = np.concatenate(
                 (new_cluster.parent_indicies, clusters[idx].parent_indicies)
             )
+        new_clusters.append(new_cluster)
+
+    # Now replace the labels in the label array with the joined
+    # values
+    new_labels = labels
+    for g in groups_label.keys():
+        if g == NOISE_LABEL:
+            continue
+        for label in groups_label[g]:
+            new_labels[labels == label] = g
+
+    return (new_clusters, new_labels)
+
+
+def join_clusters_continuity(
+    clusters: list[LabeledCloud], params: ClusterParameters, labels: np.ndarray
+) -> tuple[list[LabeledCloud], np.ndarray]:
+    """Join clusters until either only one cluster is left or no clusters meet the criteria to be joined together.
+
+    Parameters
+    ----------
+    clusters: list[LabeledCloud]
+        the set of clusters to examine
+    params: ClusterParameters
+        contains parameters controlling the joining algorithm
+    labels: numpy.ndarray
+        The cluster label for each point in the original point cloud
+
+    Returns
+    -------
+    tuple[list[LabeledCloud], numpy.ndarray]
+        A two element tuple, the first the list of joined clusters,
+        the second being an updated list of labels for each point in
+        the point cloud
+    """
+    jclusters = [cluster for cluster in clusters if cluster.label != NOISE_LABEL]
+    before = len(jclusters)
+    after = 0
+    while before != after and len(jclusters) > 1:
+        before = len(jclusters)
+        # Order clusters by start time, scaled by mean charge, pad size
+        jclusters = sorted(
+            jclusters,
+            key=lambda x: x.point_cloud.data[0, 2]
+            * np.mean(x.point_cloud.data[:, 3])
+            * np.mean(x.point_cloud.data[:, 7]),
+        )
+        jclusters, labels = join_clusters_continuity_step(jclusters, params, labels)
+        after = len(jclusters)
+    return (jclusters, labels)
+
+
+def join_clusters_continuity_step(
+    clusters: list[LabeledCloud], params: ClusterParameters, labels: np.ndarray
+) -> tuple[list[LabeledCloud], np.ndarray]:
+    """A single step of joining clusters
+
+    Combine clusters based on the amount of overlap between circles fit to their x-y (pad plane) projection.
+    This is necessary because often times tracks are fractured or contain regions of varying density
+    which causes clustering algorithms to separate them.
+
+    Parameters
+    ----------
+    clusters: list[LabeledCloud]
+        the set of clusters to examine
+    params: ClusterParameters
+        contains the parameters controlling the joining algorithm (max_center_distance)
+    labels: numpy.ndarray
+        The cluster label for each point in the original point cloud
+
+    Returns
+    -------
+    tuple[list[LabeledCloud], numpy.ndarray]
+        A two element tuple, the first the list of joined clusters,
+        the second being an updated list of labels for each point in
+        the point cloud
+    """
+    # Can't join 1 or 0 clusters
+    if len(clusters) < 2:
+        return (clusters, labels)
+
+    event_number = clusters[0].point_cloud.event_number
+
+    # Make a dictionary of center groups, label groups
+    # First everyone is in their own group
+    used_clusters = {idx: False for idx in range(len(clusters))}
+    groups_index: dict[int, list[int]] = {}  # Regroup the actual cluster data
+    groups_label: dict[int, list[int]] = {}  # Regroup the label array
+    for idx, cluster in enumerate(clusters):
+        groups_index[cluster.label] = [idx]  # Use indicies for data
+        groups_label[cluster.label] = [cluster.label]  # Use labels for ... labels
+
+    # Now regroup, searching for clusters whose circles mostly overlap
+    for idx, cluster in enumerate(clusters):
+        # Reject noise
+        if cluster.label == NOISE_LABEL or used_clusters[idx]:
+            continue
+        for cidx, comp_cluster in enumerate(clusters):
+            if comp_cluster.label == NOISE_LABEL or cidx == idx or used_clusters[cidx]:
+                continue
+
+            # downstream
+            avg_pos = np.median(cluster.point_cloud.data[-3:, :3], axis=0)  # downstream
+            rhos = np.linalg.norm(cluster.point_cloud.data[:, :2], axis=1)
+            min_z = np.min(cluster.point_cloud.data[:, 2])
+            max_z = np.max(cluster.point_cloud.data[:, 2])
+            min_rho = np.min(rhos)
+            max_rho = np.max(rhos)
+            avg_rho = np.linalg.norm(avg_pos[:2])
+            avg_phi = np.arctan2(avg_pos[1], avg_pos[0])
+            if avg_phi < 0.0:
+                avg_phi += 2.0 * np.pi
+
+            # upstream
+            avg_pos_comp = np.median(
+                comp_cluster.point_cloud.data[:3, :3], axis=0
+            )  # upstream
+            rhos_comp = np.linalg.norm(comp_cluster.point_cloud.data[:, :2], axis=1)
+            min_z_comp = np.min(comp_cluster.point_cloud.data[:, 2])
+            max_z_comp = np.max(comp_cluster.point_cloud.data[:, 2])
+            min_rho_comp = np.min(rhos_comp)
+            max_rho_comp = np.max(rhos_comp)
+            avg_rho_comp = np.linalg.norm(avg_pos_comp[:2])
+            avg_phi_comp = np.arctan2(avg_pos_comp[1], avg_pos_comp[0])
+            if avg_phi_comp < 0.0:
+                avg_phi_comp += 2.0 * np.pi
+
+            # compare
+            is_near_beam_region = (
+                np.fabs(avg_rho - 25.0) < 10.0 and np.fabs(avg_rho_comp - 25.0) < 10.0
+            )
+            z_thresh = (
+                max(max_z, max_z_comp) - min(min_z, min_z_comp)
+            ) * params.continuity_join.join_z_fraction  # type: ignore
+            rho_thresh = (
+                max(max_rho, max_rho_comp) - min(min_rho, min_rho_comp)
+            ) * params.continuity_join.join_radius_fraction  # type: ignore
+            z_diff = np.fabs(avg_pos[2] - avg_pos_comp[2])
+            rho_diff = np.fabs(avg_rho - avg_rho_comp)
+            phi_diff = np.fabs(avg_phi - avg_phi_comp)
+            if phi_diff > np.pi:
+                phi_diff = 2.0 * np.pi - phi_diff
+
+            if (
+                (is_near_beam_region and z_diff < z_thresh)
+                or (
+                    rho_diff < rho_thresh
+                    and z_diff < z_thresh
+                    and phi_diff < np.pi * 0.25
+                )
+            ) and (avg_pos[2] < avg_pos_comp[2] or z_diff < 10.0):
+                comp_indicies = groups_index.pop(comp_cluster.label)
+                comp_labels = groups_label.pop(comp_cluster.label)
+                for subs in comp_indicies:
+                    clusters[subs].label = cluster.label
+                groups_index[cluster.label].extend(comp_indicies)
+                groups_label[cluster.label].extend(comp_labels)
+                used_clusters[idx] = True
+                used_clusters[cidx] = True
+                break
+        # GWM: TODO make this less gross, optimize lower part
+        if used_clusters[idx]:
+            break
+
+    # Now reform the clouds such that there is one cloud per group
+    new_clusters: list[LabeledCloud] = []
+    for g in groups_index.keys():
+        if g == NOISE_LABEL:
+            continue
+
+        new_cluster = LabeledCloud(
+            g, PointCloud(event_number, np.zeros((0, 8))), np.empty(0)
+        )
+        for idx in groups_index[g]:
+            new_cluster.point_cloud.data = np.concatenate(
+                (new_cluster.point_cloud.data, clusters[idx].point_cloud.data), axis=0
+            )
+            indicies = np.argsort(new_cluster.point_cloud.data[:, 2])
+            new_cluster.point_cloud.data = new_cluster.point_cloud.data[indicies]
+            # Merge the indicies
+            new_cluster.parent_indicies = np.concatenate(
+                (new_cluster.parent_indicies, clusters[idx].parent_indicies)
+            )
+            new_cluster.parent_indicies = new_cluster.parent_indicies[indicies]
         new_clusters.append(new_cluster)
 
     # Now replace the labels in the label array with the joined

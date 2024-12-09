@@ -8,7 +8,7 @@ from ..core.run_stacks import form_run_string
 from ..core.track_generator import (
     generate_track_mesh,
     MeshParameters,
-    check_mesh_needs_generation,
+    check_mesh_metadata,
 )
 from ..core.estimator import Direction
 from ..interpolate.track_interpolator import (
@@ -16,9 +16,10 @@ from ..interpolate.track_interpolator import (
 )
 from ..solvers.guess import Guess
 from ..solvers.solver_interp import solve_physics_interp
+from ..solvers.solver_interp_leastsq import solve_physics_interp_leastsq
 from .schema import ESTIMATE_SCHEMA, INTERP_SOLVER_SCHEMA
 
-from spyral_utils.nuclear.target import load_target, GasTarget
+from spyral_utils.nuclear.target import load_target, GasTarget, GasMixtureTarget
 from spyral_utils.nuclear.particle_id import deserialize_particle_id, ParticleID
 from spyral_utils.nuclear.nuclear_map import NuclearDataMap
 import h5py as h5
@@ -31,6 +32,8 @@ from multiprocessing.shared_memory import SharedMemory
 
 DEFAULT_PID_XAXIS = "dEdx"
 DEFAULT_PID_YAXIS = "brho"
+METHOD_LBFGSB = "lbfgsb"
+METHOD_LEASTSQ = "leastsq"
 
 
 class InterpSolverError(Exception):
@@ -92,15 +95,24 @@ class InterpSolverPhase(PhaseLike):
             incoming_schema=ResultSchema(ESTIMATE_SCHEMA),
             outgoing_schema=ResultSchema(INTERP_SOLVER_SCHEMA),
         )
+        self.solver_func = None
+        if solver_params.fit_method == METHOD_LBFGSB:
+            self.solver_func = solve_physics_interp
+        elif solver_params.fit_method == METHOD_LEASTSQ:
+            self.solver_func = solve_physics_interp_leastsq
+        else:
+            raise InterpSolverError(
+                f"Fit method {solver_params.fit_method} is not a valid method. Please chose '{METHOD_LBFGSB}' or '{METHOD_LEASTSQ}'"
+            )
+
         self.solver_params = solver_params
         self.det_params = det_params
         self.nuclear_map = NuclearDataMap()
         self.shared_mesh_shape: tuple | None = None
-        self.shared_mesh_name: str | None = None
+        self.shared_mesh_name: str = "interp_shared_mesh"
         self.shared_mesh_type: np.dtype | None = None
 
     def create_assets(self, workspace_path: Path) -> bool:
-        global manager
         target = load_target(Path(self.solver_params.gas_data_path), self.nuclear_map)
         pid = deserialize_particle_id(
             Path(self.solver_params.particle_id_filename), self.nuclear_map
@@ -109,9 +121,9 @@ class InterpSolverPhase(PhaseLike):
             raise InterpSolverError(
                 "Could not create trajectory mesh, particle ID is not formatted correctly!"
             )
-        if not isinstance(target, GasTarget):
+        if not isinstance(target, GasTarget | GasMixtureTarget):
             raise InterpSolverError(
-                "Could not create trajectory mesh, target is not a GasTarget!"
+                "Could not create trajectory mesh, target is not a GasTarget | GasMixtureTarget!"
             )
         mesh_params = MeshParameters(
             target,
@@ -134,20 +146,36 @@ class InterpSolverPhase(PhaseLike):
             self.get_asset_storage_path(workspace_path)
             / mesh_params.get_track_meta_file_name()
         )
-        do_gen = check_mesh_needs_generation(self.track_path, mesh_params)
-        if do_gen:
+        matches = check_mesh_metadata(self.track_path, mesh_params)
+        if not matches:
             generate_track_mesh(mesh_params, self.track_path, meta_path)
+        # the shape and type attrs are filled in either by the checked metadata
+        # or during mesh generation
+        # Side-effecty-ness is annoying, but currently unavoidable
+        self.shared_mesh_shape = mesh_params.shape
+        self.shared_mesh_type = np.dtype(mesh_params.dtype)
 
         return True
 
     def create_shared_data(
         self, workspace_path: Path, handles: dict[str, SharedMemory]
     ) -> None:
+        mesh_data: np.ndarray = np.load(self.track_path)
+        # Check expected mesh properties
+        if mesh_data.shape != self.shared_mesh_shape:
+            raise InterpSolverError(
+                f"Mesh shape {mesh_data.shape} did not match metadata shape {self.shared_mesh_shape}!"
+            )
+        if mesh_data.dtype != self.shared_mesh_type:
+            raise InterpSolverError(
+                f"Mesh type {mesh_data.dtype} did not match metadata type {self.shared_mesh_type}!"
+            )
         # Create a block of shared memory of the same total size as the mesh
         # Note that we don't have a lock on the shared memory as the mesh is
         # used read-only
-        mesh_data: np.ndarray = np.load(self.track_path)
-        handle = SharedMemory(create=True, size=mesh_data.nbytes)
+        handle = SharedMemory(
+            name=self.shared_mesh_name, create=True, size=mesh_data.nbytes
+        )
         handles[handle.name] = handle
         spyral_info(
             __name__,
@@ -157,10 +185,6 @@ class InterpSolverPhase(PhaseLike):
             mesh_data.shape, dtype=mesh_data.dtype, buffer=handle.buf
         )
         memory_array[:, :, :, :] = mesh_data[:, :, :, :]
-        # The name allows us to access later, shape and dtype are for casting to numpy
-        self.shared_mesh_name = handle.name
-        self.shared_mesh_shape = memory_array.shape
-        self.shared_mesh_type = memory_array.dtype
 
     def construct_artifact(
         self, payload: PhaseResult, workspace_path: Path
@@ -199,6 +223,10 @@ class InterpSolverPhase(PhaseLike):
         msg_queue: SimpleQueue,
         rng: Generator,
     ) -> PhaseResult:
+        if self.solver_func is None:
+            raise InterpSolverError(
+                "Solver function was not set at Pipeline run for InterpSolverPhase!"
+            )
         # Need particle ID the correct data subset
         pid: ParticleID | None = deserialize_particle_id(
             Path(self.solver_params.particle_id_filename), self.nuclear_map
@@ -277,28 +305,7 @@ class InterpSolverPhase(PhaseLike):
         )  # We always increment by 1
 
         # Result storage
-        phys_results: dict[str, list] = {
-            "event": [],
-            "cluster_index": [],
-            "cluster_label": [],
-            "orig_run": [],
-            "orig_event": [],
-            "vertex_x": [],
-            "sigma_vx": [],
-            "vertex_y": [],
-            "sigma_vy": [],
-            "vertex_z": [],
-            "sigma_vz": [],
-            "brho": [],
-            "sigma_brho": [],
-            "ke": [],
-            "sigma_ke": [],
-            "polar": [],
-            "sigma_polar": [],
-            "azimuthal": [],
-            "sigma_azimuthal": [],
-            "redchisq": [],
-        }
+        phys_results = []
 
         # load the ODE solution interpolator
         if self.shared_mesh_shape is None or self.shared_mesh_name is None:
@@ -344,7 +351,7 @@ class InterpSolverPhase(PhaseLike):
                 estimates_gated["vertex_z"][row],
                 Direction.NONE,  # type: ignore
             )
-            solve_physics_interp(
+            res = self.solver_func(
                 cidx,
                 orig_run,
                 orig_event,
@@ -354,8 +361,9 @@ class InterpSolverPhase(PhaseLike):
                 interpolator,
                 self.det_params,
                 self.solver_params,
-                phys_results,
             )
+            if res is not None:
+                phys_results.append(vars(res))
 
         # Write out the results
         physics_df = pl.DataFrame(phys_results)

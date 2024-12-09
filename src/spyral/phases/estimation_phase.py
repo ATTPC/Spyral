@@ -109,32 +109,8 @@ class EstimationPhase(PhaseLike):
 
         count = 0
 
-        # estimation results
-        data: dict[str, list] = {
-            "event": [],
-            "cluster_index": [],
-            "cluster_label": [],
-            "orig_run": [],
-            "orig_event": [],
-            "ic_amplitude": [],
-            "ic_centroid": [],
-            "ic_integral": [],
-            "ic_multiplicity": [],
-            "vertex_x": [],
-            "vertex_y": [],
-            "vertex_z": [],
-            "center_x": [],
-            "center_y": [],
-            "center_z": [],
-            "polar": [],
-            "azimuthal": [],
-            "brho": [],
-            "dEdx": [],
-            "sqrt_dEdx": [],
-            "dE": [],
-            "arclength": [],
-            "direction": [],
-        }
+        # estimation results, list of dicts
+        results = []
 
         msg = StatusMessage(
             self.name, 1, total, payload.run_number
@@ -176,7 +152,7 @@ class EstimationPhase(PhaseLike):
                 )
 
                 # Cluster is loaded do some analysis
-                estimate_physics(
+                res = estimate_physics(
                     cidx,
                     cluster,
                     ic_amp,
@@ -187,11 +163,12 @@ class EstimationPhase(PhaseLike):
                     orig_event,
                     self.estimate_params,
                     self.det_params,
-                    data,
                 )
+                if res is not None:
+                    results.append(vars(res))
 
         # Write the results to a DataFrame
-        df = pl.DataFrame(data)
+        df = pl.DataFrame(results)
         df.write_parquet(result.artifacts["estimation"])
         spyral_info(__name__, f"Phase Estimation complete for run {payload.run_number}")
         # Next step also needs to know where to find the clusters

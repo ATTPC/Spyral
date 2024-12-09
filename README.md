@@ -3,6 +3,7 @@
 ![CI](https://github.com/ATTPC/Spyral/actions/workflows/ci.yml/badge.svg)
 [![PyPI version shields.io](https://img.shields.io/pypi/v/attpc_spyral.svg)](https://pypi.python.org/pypi/attpc_spyral/)
 [![PyPI license](https://img.shields.io/pypi/l/attpc_spyral.svg)](https://pypi.python.org/pypi/attpc_spyral/)
+[![DOI](https://zenodo.org/badge/528950398.svg)](https://doi.org/10.5281/zenodo.14143006)
 
 Spyral is an analysis library for data from the Active Target Time Projection Chamber (AT-TPC). Spyral provides a flexible analysis pipeline, transforming the raw trace data into physical observables over several tunable steps. The analysis pipeline is also extensible, supporting a diverse array of datasets. Sypral can process multiple data files in parallel, allowing for scalable performance over larger experiment datasets.
 
@@ -49,6 +50,7 @@ from spyral import (
     FribParameters,
     DetectorParameters,
     ClusterParameters,
+    OverlapJoinParameters,
     SolverParameters,
     EstimateParameters,
     DEFAULT_MAP,
@@ -107,8 +109,11 @@ cluster_params = ClusterParameters(
     min_size_scale_factor=0.05,
     min_size_lower_cutoff=10,
     cluster_selection_epsilon=10.0,
-    min_cluster_size_join=15,
-    circle_overlap_ratio=0.25,
+    overlap_join=OverlapJoinParameters(
+        min_cluster_size_join=15.0,
+        circle_overlap_ratio=0.25,
+    ),
+    continuity_join=None,
     outlier_scale_factor=0.05,
 )
 
@@ -131,6 +136,7 @@ solver_params = SolverParameters(
     fit_vertex_rho=True,
     fit_vertex_phi=True,
     fit_azimuthal=True,
+    fit_method="lbfgsb",
 )
 
 pipe = Pipeline(

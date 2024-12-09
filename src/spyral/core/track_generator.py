@@ -3,12 +3,12 @@ from ..interpolate import LinearInterpolator
 from .spy_log import spyral_warn
 
 from spyral_utils.nuclear import NucleusData
-from spyral_utils.nuclear.target import GasTarget
+from spyral_utils.nuclear.target import GasTarget, GasMixtureTarget
 
 import psutil
 import math
 import numpy as np
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from scipy.integrate import solve_ivp
 from pathlib import Path
 import json
@@ -33,7 +33,7 @@ class MeshParameters:
 
     Attributes
     ----------
-    target: spyral_utils.nuclear.target.GasTarget
+    target: spyral_utils.nuclear.target.GasTarget | GasMixtureTarget
         The target material
     particle: spyral_utils.nuclear.NucleusData
         The projectile
@@ -55,6 +55,10 @@ class MeshParameters:
         The maximum polar angle of the mesh in degrees
     polar_bins: int
         The number of polar angle bins in the mesh
+    shape: tuple[int, int, int, int]
+        The shape of the mesh array
+    dtype: str
+        The stringified numpy dtype of the mesh array
 
     Methods
     -------
@@ -62,7 +66,7 @@ class MeshParameters:
         Serialize the class to a JSON string
     """
 
-    target: GasTarget
+    target: GasTarget | GasMixtureTarget
     particle: NucleusData
     bfield: float  # T
     efield: float  # V/m
@@ -73,6 +77,8 @@ class MeshParameters:
     polar_min: float  # deg
     polar_max: float  # deg
     polar_bins: int
+    shape: tuple[int, int, int, int] = field(default_factory=lambda: (-1, -1, -1, -1))
+    dtype: str = ""
 
     def serialize_json(self) -> str:
         """Serialize the class to a JSON string
@@ -96,18 +102,20 @@ class MeshParameters:
                 "polar_min": obj.polar_min,
                 "polar_max": obj.polar_max,
                 "polar_bins": obj.polar_bins,
+                "shape": obj.shape,
+                "dtype": obj.dtype,
             },
             indent=4,
         )
 
     def get_track_file_name(self) -> str:
-        return f"{self.particle.isotopic_symbol}_in_{self.target.ugly_string.replace('(Gas)', '')}_{self.target.data.pressure}Torr.npy"
+        return f"{self.particle.isotopic_symbol}_in_{self.target.ugly_string.replace('(Gas)', '')}_{self.target.pressure}Torr.npy"
 
     def get_track_meta_file_name(self) -> str:
-        return f"{self.particle.isotopic_symbol}_in_{self.target.ugly_string.replace('(Gas)', '')}_{self.target.data.pressure}Torr.json"
+        return f"{self.particle.isotopic_symbol}_in_{self.target.ugly_string.replace('(Gas)', '')}_{self.target.pressure}Torr.json"
 
 
-def check_mesh_needs_generation(track_path: Path, params: MeshParameters) -> bool:
+def check_mesh_metadata(track_path: Path, params: MeshParameters) -> bool:
     """Check if track mesh meta data matches or if track mesh doesn't exist
 
     Parameters
@@ -120,17 +128,35 @@ def check_mesh_needs_generation(track_path: Path, params: MeshParameters) -> boo
     Returns
     -------
     bool
-        Returns True if the mesh needs to be generated
+        Returns False if the given meta data does not match
+        If the metadata matches, the mesh shape and dtype
+        are extracted from the meta file and placed into the
+        parameters
     """
     if track_path.exists():
         meta_path = track_path.parents[0] / params.get_track_meta_file_name()
         if not meta_path.exists():
-            return True
+            return False
         with open(meta_path, "r") as meta_file:
-            meta_str = meta_file.read()
-            return params.serialize_json() != meta_str
-    else:
-        return True
+            meta_data = json.load(meta_file)
+            if (
+                params.particle.isotopic_symbol == meta_data["particle"]
+                and params.target.pretty_string == meta_data["gas"]
+                and params.bfield == meta_data["bfield"]
+                and params.efield == meta_data["efield"]
+                and params.n_time_steps == meta_data["time_steps"]
+                and params.ke_min == meta_data["ke_min"]
+                and params.ke_max == meta_data["ke_max"]
+                and params.ke_bins == meta_data["ke_bins"]
+                and params.polar_min == meta_data["polar_min"]
+                and params.polar_max == meta_data["polar_max"]
+                and params.polar_bins == meta_data["polar_bins"]
+            ):
+                params.shape = tuple(meta_data["shape"])
+                params.dtype = meta_data["dtype"]
+                return True
+    # Nothing to read, return false
+    return False
 
 
 # State = [x, y, z, vx, vy, vz]
@@ -140,7 +166,7 @@ def equation_of_motion(
     state: np.ndarray,
     Bfield: float,
     Efield: float,
-    target: GasTarget,
+    target: GasTarget | GasMixtureTarget,
     ejectile: NucleusData,
 ) -> np.ndarray:
     """The equations of motion for a charged particle in a static electromagnetic field which experiences energy loss through some material.
@@ -200,7 +226,7 @@ def stop_condition(
     state: np.ndarray,
     Bfield: float,
     Efield: float,
-    target: GasTarget,
+    target: GasTarget | GasMixtureTarget,
     ejectile: NucleusData,
 ) -> float:
     """Detect if a solution has reached the low-energy stopping condition
@@ -250,7 +276,7 @@ def forward_z_bound_condition(
     state: np.ndarray,
     Bfield: float,
     Efield: float,
-    target: GasTarget,
+    target: GasTarget | GasMixtureTarget,
     ejectile: NucleusData,
 ) -> float:
     """Detect if a solution has reached the end-of-detector-in-z condition
@@ -290,7 +316,7 @@ def backward_z_bound_condition(
     state: np.ndarray,
     Bfield: float,
     Efield: float,
-    target: GasTarget,
+    target: GasTarget | GasMixtureTarget,
     ejectile: NucleusData,
 ) -> float:
     """Detect if a solution has reached the end-of-detector-in-z condition
@@ -330,7 +356,7 @@ def rho_bound_condition(
     state: np.ndarray,
     Bfield: float,
     Efield: float,
-    target: GasTarget,
+    target: GasTarget | GasMixtureTarget,
     ejectile: NucleusData,
 ) -> float:
     """Detect if a solution has reached the end-of-detector-in-rho condition
@@ -405,9 +431,6 @@ def generate_track_mesh(params: MeshParameters, track_path: Path, meta_path: Pat
     polars = np.linspace(
         params.polar_min * DEG2RAD, params.polar_max * DEG2RAD, params.polar_bins
     )
-
-    with open(meta_path, "w") as metafile:
-        metafile.write(params.serialize_json())
 
     # time x (x, y, z, vx, vy, vz) x ke x polar
     data = np.zeros(
@@ -521,7 +544,14 @@ def generate_track_mesh(params: MeshParameters, track_path: Path, meta_path: Pat
                 # Stopped, so remaining time is just final position
                 data[last_index:, :, eidx, pidx] = trajectory[-1, :3]
     print("")
+
+    # Write out the results and metadata
     np.save(track_path, data)
+    # Get the mesh shape and type
+    params.shape = data.shape  # type: ignore
+    params.dtype = str(data.dtype)
+    with open(meta_path, "w") as metafile:
+        metafile.write(params.serialize_json())
 
 
 def generate_interpolated_track(
@@ -534,7 +564,7 @@ def generate_interpolated_track(
     particle: NucleusData,
     bfield: float,
     efield: float,
-    target: GasTarget,
+    target: GasTarget | GasMixtureTarget,
     n_time_steps: int = 1000,
 ) -> LinearInterpolator | None:
     """Get a single interpolated trajectory given some initial state and system parameters
@@ -559,7 +589,7 @@ def generate_interpolated_track(
         The magnetic field in Tesla
     efield: float
         The electric field in V/m
-    target: GasTarget
+    target: GasTarget | GasMixtureTarget
         The target material
     n_time_steps: int
         The number of timesteps used by the solver
