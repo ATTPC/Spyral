@@ -55,6 +55,10 @@ class MeshParameters:
         The maximum polar angle of the mesh in degrees
     polar_bins: int
         The number of polar angle bins in the mesh
+    shape: tuple[int, int, int, int]
+        The shape of the mesh array
+    dtype: str
+        The stringified numpy dtype of the mesh array
 
     Methods
     -------
@@ -73,7 +77,7 @@ class MeshParameters:
     polar_min: float  # deg
     polar_max: float  # deg
     polar_bins: int
-    shape: tuple[int, int, int] = field(default_factory=lambda: (-1, -1, -1))
+    shape: tuple[int, int, int, int] = field(default_factory=lambda: (-1, -1, -1, -1))
     dtype: str = ""
 
     def serialize_json(self) -> str:
@@ -148,7 +152,7 @@ def check_mesh_metadata(track_path: Path, params: MeshParameters) -> bool:
                 and params.polar_max == meta_data["polar_max"]
                 and params.polar_bins == meta_data["polar_bins"]
             ):
-                params.shape = meta_data["shape"]
+                params.shape = tuple(meta_data["shape"])
                 params.dtype = meta_data["dtype"]
                 return True
     # Nothing to read, return false
