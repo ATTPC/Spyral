@@ -3,7 +3,7 @@ from .spy_log import init_spyral_logger_parent, spyral_warn, spyral_info
 from .run_stacks import create_run_stacks
 from .status_message import StatusMessage
 
-from dragon.native.machine import System, Node, current, cpu_count
+from dragon.native.machine import System, cpu_count
 import multiprocessing as mp
 from numpy.random import SeedSequence
 import time
