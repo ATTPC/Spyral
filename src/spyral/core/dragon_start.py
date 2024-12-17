@@ -44,6 +44,22 @@ def start_pipeline_dragon(
     run_max: int,
     runs_to_skip: list[int] | None = None,
 ) -> None:
+    """ "Start function for high-performance environments using Dragon
+
+    Only use this function in a system where HPE Dragon is installed and
+    properly included in the virtual environment
+
+    Parameters
+    ----------
+    pipeline: Pipeline
+        The analysis pipeline definition
+    run_min: int
+        The first run to analyze (inclusive)
+    run_max: int
+        The last run to analyze (inclusive)
+    runs_to_skip: list[int] | None
+        Optional run numbers which should be skipped (default=None)
+    """
     system = System()
     n_nodes = system.nnodes
     total_cpus = cpu_count()  # logical cpus, use PBS to restrict
