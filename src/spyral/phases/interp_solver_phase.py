@@ -173,9 +173,21 @@ class InterpSolverPhase(PhaseLike):
         # Create a block of shared memory of the same total size as the mesh
         # Note that we don't have a lock on the shared memory as the mesh is
         # used read-only
-        handle = SharedMemory(
-            name=self.shared_mesh_name, create=True, size=mesh_data.nbytes
-        )
+        # Dragon hack: Dragon does not currently implement SharedMemory, so for now
+        # we fall back to the base multiprocessing impl when we receive a
+        # NotImplementedError
+        handle = None
+        try:
+            handle = SharedMemory(
+                name=self.shared_mesh_name, create=True, size=mesh_data.nbytes
+            )
+        except NotImplementedError:
+            # Hacky
+            MultiprocessingSharedMemory = SharedMemory.__bases__[0]
+            handle = MultiprocessingSharedMemory(
+                name=self.shared_mesh_name, create=True, size=mesh_data.nbytes
+            )
+
         handles[handle.name] = handle
         spyral_info(
             __name__,

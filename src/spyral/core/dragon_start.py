@@ -25,7 +25,12 @@ def _run_shared_memory_manager(
         and indicate that all shared memory should be cleaned up.
     """
     handles = {}
-    pipeline.create_shared_data(handles)
+    try:
+        pipeline.create_shared_data(handles)
+    except Exception:
+        # Hack to make sure we don't hang when creation fails
+        ready.set()
+        return
     ready.set()
     shutdown.wait()
     for handle in handles.values():
@@ -39,6 +44,22 @@ def start_pipeline_dragon(
     run_max: int,
     runs_to_skip: list[int] | None = None,
 ) -> None:
+    """ "Start function for high-performance environments using Dragon
+
+    Only use this function in a system where HPE Dragon is installed and
+    properly included in the virtual environment
+
+    Parameters
+    ----------
+    pipeline: Pipeline
+        The analysis pipeline definition
+    run_min: int
+        The first run to analyze (inclusive)
+    run_max: int
+        The last run to analyze (inclusive)
+    runs_to_skip: list[int] | None
+        Optional run numbers which should be skipped (default=None)
+    """
     system = System()
     n_nodes = system.nnodes
     total_cpus = cpu_count()  # logical cpus, use PBS to restrict
@@ -50,6 +71,9 @@ def start_pipeline_dragon(
     worker_cpus = total_cpus - n_nodes - 1
 
     print(SPLASH)
+    print(f"Total cpus available: {total_cpus}")
+    print(f"Number of nodes: {n_nodes}")
+    print(f"Calculated worker cpus: {worker_cpus}")
     print(f"Creating workspace: {pipeline.workspace} ...", end=" ")
     pipeline.create_workspace()
     print("Done.")
