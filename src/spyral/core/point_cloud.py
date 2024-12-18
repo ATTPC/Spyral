@@ -103,10 +103,11 @@ def calibrate_point_cloud_z(
     detector_params: DetectorParameters,
     efield_correction: ElectronCorrector | None = None,
 ):
-    """Calibrate the cloud z-position from the micromegas and window time references
+    """Calibrate the cloud z-position
 
-    Also applies the ion chamber time correction and electric field correction if given
-    Any points which were invalidated (NaN'ed) by this operation are removed.
+    Uses two time references, the micromegas and window. Also applies
+    the electric field correction if given. Any points which were invalidated
+    (NaN'ed) by this operation are removed.
 
     WARNING: This modifies the point cloud data, including removing points from the
     point cloud which were invalidated (NaN'ed).

@@ -12,16 +12,16 @@ class PadParameters:
     ----------
     pad_geometry_path: Path
         Path to the csv file containing the pad geometry. If set to DEFAULT_MAP
-        or DEFAULT_LEGACY_MAP uses the packaged maps.
+        uses the packaged maps.
     pad_gain_path: Path
         Path to the csv file containing the relative pad gains. If set to DEFAULT_MAP
-        or DEFAULT_LEGACY_MAP uses the packaged maps.
+        uses the packaged maps.
     pad_time_path: Path
         Path to the csv file containing the pad time corrections. If set to DEFAULT_MAP
-        or DEFAULT_LEGACY_MAP uses the packaged maps.
+        uses the packaged maps.
     pad_electronics_path: Path
         Path to the csv file containing the pad electronics ids. If set to DEFAULT_MAP
-        or DEFAULT_LEGACY_MAP uses the packaged maps.
+        uses the packaged maps.
     """
 
     pad_geometry_path: Path
@@ -64,6 +64,36 @@ class DetectorParameters:
     get_frequency: float  # MHz
     garfield_file_path: Path
     do_garfield_correction: bool
+
+
+def calculate_window_time(
+    micromegas_time_bucket: float,
+    drift_velocity: float,
+    detector_length: float,
+    get_frequency: float,
+) -> float:
+    """Calculate the window time from a drift velocity
+
+    Given a known micromegas time, drift velocity, detector length, and GET sampling frequency
+    calculate the expected window time.
+
+    Parameters
+    ----------
+    micromegas_time_bucket: float
+        The micromegas time in GET Time Buckets
+    drift_velocity: float
+        The electron drift velocity in mm/us
+    detector_length: float
+        The detector length in mm
+    get_frequency: float
+        The GET electronics sampling frequency
+
+    Returns
+    -------
+    float
+        The window time in GET time buckets
+    """
+    return (detector_length / drift_velocity) * get_frequency + micromegas_time_bucket
 
 
 @dataclass
