@@ -1,6 +1,6 @@
 # Solver Configuration
 
-The Solver parameters control the solving phase of the analysis. The default solver parameters in `config.json` are:
+The Solver parameters control the solving phase of the analysis.
 
 ```python
 solver_params = SolverParameters(
@@ -18,6 +18,7 @@ solver_params = SolverParameters(
     fit_vertex_rho=True,
     fit_vertex_phi=True,
     fit_azimuthal=True,
+    fit_method="lbfgsb",
 )
 ```
 
