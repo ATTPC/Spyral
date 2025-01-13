@@ -16,6 +16,7 @@ from .core.config import (
     GetParameters,
     FribParameters,
     DetectorParameters,
+    calculate_window_time,
     ClusterParameters,
     OverlapJoinParameters,
     ContinuityJoinParameters,
@@ -65,4 +66,5 @@ __all__ = [
     "INTERP_SOLVER_SCHEMA",
     "TraceReader",
     "create_reader",
+    "calculate_window_time",
 ]

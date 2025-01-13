@@ -327,7 +327,14 @@ class InterpSolverPhase(PhaseLike):
             )
             return PhaseResult.invalid_result(payload.run_number)
         # Ask for the shared memory by name and cast it to a numpy array of the correct shape
-        mesh_buffer = SharedMemory(self.shared_mesh_name)
+        # Hacking continues
+        mesh_buffer = None
+        try:
+            mesh_buffer = SharedMemory(self.shared_mesh_name)
+        except NotImplementedError:
+            MultiprocessingSharedMemory = SharedMemory.__bases__[0]
+            mesh_buffer = MultiprocessingSharedMemory(self.shared_mesh_name)
+
         mesh_handle = np.ndarray(
             self.shared_mesh_shape, dtype=self.shared_mesh_type, buffer=mesh_buffer.buf
         )
