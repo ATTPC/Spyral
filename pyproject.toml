@@ -65,5 +65,5 @@ doc = [
 ]
 
 [tool.ruff.lint]
-select = ["E", "F", "B"]
+select = ["E", "F", "B", "NPY201"]
 ignore = ["E501"]
