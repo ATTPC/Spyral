@@ -19,14 +19,10 @@ class PadParameters:
     pad_time_path: Path
         Path to the csv file containing the pad time corrections. If set to DEFAULT_MAP
         uses the packaged maps.
-    pad_electronics_path: Path
-        Path to the csv file containing the pad electronics ids. If set to DEFAULT_MAP
-        uses the packaged maps.
     """
 
     pad_geometry_path: Path
     pad_time_path: Path
-    pad_electronics_path: Path
     pad_scale_path: Path
 
 
