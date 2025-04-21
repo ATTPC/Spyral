@@ -185,11 +185,11 @@ class PointcloudPhase(PhaseLike):
                 ):  # ugh
                     ic_within_mult_count += 1
                 continue
-            if event.get is None:
+            if event.get_pads is None:
                 continue
 
             # Convert traces to pointcloud
-            cloud = point_cloud_from_get(event.get, self.pad_map)
+            cloud = point_cloud_from_get(event.get_pads, self.pad_map)
             # Calibrate the time to z-position
             calibrate_point_cloud_z(cloud, self.det_params, corrector)
             # Sort the cloud in z

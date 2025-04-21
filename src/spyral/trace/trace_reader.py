@@ -34,6 +34,7 @@ class TraceVersion(Enum):
     """
 
     MERGER_1_0 = 2
+    MERGER_2_0 = 4
     HARMONIZER_0_1 = 3
     INVALID = -1
 
@@ -57,10 +58,12 @@ def version_string_to_enum(version: str) -> TraceVersion:
         The version enum
     """
 
-    if version == "libattpc_merger:1.0":
+    if version == "libattpc_merger:1.0" or version == "synchronizer:0.1.0":
         return TraceVersion.MERGER_1_0
-    elif version == "harmonizer:0.1.0" or version == "synchronizer:0.1.0":
+    elif version == "harmonizer:0.1.0":
         return TraceVersion.HARMONIZER_0_1
+    elif version == "libattpc_merger:2.0":
+        return TraceVersion.MERGER_2_0
     else:
         return TraceVersion.INVALID
 
@@ -73,8 +76,16 @@ class Event:
     ----------
     id: int
         The event id number
-    get: GetEvent | None
-        Optional GET trace data
+    get_pads: GetEvent | None
+        Optional GET AT-TPC pad trace data
+    get_si_upstream_front: GetEvent | None
+        Optional GET silicon upstream front trace data
+    get_si_upstream_back: GetEvent | None
+        Optional GET silicon upstream back trace data
+    get_si_downstream_front: GetEvent | None
+        Optional GET silicon downstream front trace data
+    get_si_downstream_back: GetEvent | None
+        Optional GET silicon downstream back trace data
     frib: FribEvent | None
         Optional FRIBDAQ trace data
     original_run: int
@@ -88,7 +99,11 @@ class Event:
     """
 
     id: int
-    get: GetEvent | None
+    get_pads: GetEvent | None
+    get_si_upstream_front: GetEvent | None
+    get_si_upstream_back: GetEvent | None
+    get_si_downstream_front: GetEvent | None
+    get_si_downstream_back: GetEvent | None
     frib: FribEvent | None
     original_run: int
     original_event: int
@@ -305,10 +320,12 @@ class MergerLegacyReader:
         frib_event_name = f"evt{event_id}_1903"
         frib_coinc_name = f"evt{event_id}_977"
 
-        event = Event(event_id, None, None, self.run_number, event_id)
+        event = Event(
+            event_id, None, None, None, None, None, None, self.run_number, event_id
+        )
         if event_name in get_group:
             get_data: h5.Dataset = get_group[event_name]  # type: ignore
-            event.get = GetEvent(get_data[:], event_id, get_params, rng)
+            event.get_pads = GetEvent(get_data[:], event_id, get_params, rng)
         if frib_event_name in frib_evt_group and frib_coinc_name in frib_evt_group:
             frib_data: h5.Dataset = frib_evt_group[frib_event_name]  # type: ignore
             frib_coinc: h5.Dataset = frib_evt_group[frib_coinc_name]  # type: ignore
@@ -352,7 +369,7 @@ class MergerLegacyReader:
         return scalers
 
 
-class MergerCurrentReader:
+class MergerV1Reader:
     """A TraceReader for the current (1.0) libattpc_merger data
 
     Attributes
@@ -398,11 +415,13 @@ class MergerCurrentReader:
         events_group: h5.Group = self.file["events"]  # type: ignore
         event_name = f"event_{event_id}"
 
-        event = Event(event_id, None, None, self.run_number, event_id)
+        event = Event(
+            event_id, None, None, None, None, None, None, self.run_number, event_id
+        )
         if event_name in events_group:
             event_data: h5.Group = events_group[event_name]  # type: ignore
             get_data: h5.Dataset = event_data["get_traces"]  # type: ignore
-            event.get = GetEvent(get_data[:], event_id, get_params, rng)
+            event.get_pads = GetEvent(get_data[:], event_id, get_params, rng)
             if "frib_physics" in event_data:
                 frib_1903_data: h5.Dataset = event_data["frib_physics"]["1903"]  # type: ignore
                 frib_977_data: h5.Dataset = event_data["frib_physics"]["977"]  # type: ignore
@@ -488,13 +507,13 @@ class HarmonizerReader:
         events_group: h5.Group = self.file["events"]  # type: ignore
         event_name = f"event_{event_id}"
 
-        event = Event(event_id, None, None, -1, -1)
+        event = Event(event_id, None, None, None, None, None, None, -1, -1)
         if event_name in events_group:
             event_data: h5.Group = events_group[event_name]  # type: ignore
             event.original_event = event_data.attrs["orig_event"]  # type: ignore
             event.original_run = event_data.attrs["orig_run"]  # type: ignore
             get_data: h5.Dataset = event_data["get_traces"]  # type: ignore
-            event.get = GetEvent(get_data[:], event_id, get_params, rng)
+            event.get_pads = GetEvent(get_data[:], event_id, get_params, rng)
             if "frib_physics" in event_data:
                 frib_1903_data: h5.Dataset = event_data["frib_physics"]["1903"]  # type: ignore
                 frib_977_data: h5.Dataset = event_data["frib_physics"]["977"]  # type: ignore
@@ -520,6 +539,116 @@ class HarmonizerReader:
 
     def read_scalers(self) -> FribScalers | None:
         return None
+
+
+class MergerV2Reader:
+    """A TraceReader for the current (1.0) libattpc_merger data
+
+    Attributes
+    ----------
+    file: h5py.File
+        The hdf5 file
+    run_number: int
+        The run_number
+    version: str
+        The version string
+    min_event: int
+        The first event number
+    max_event: int
+        The last event number
+    """
+
+    def __init__(self, file: h5.File, run_number: int):
+        self.file = file
+        self.run_number: int = run_number
+        self.version: str = self.file["events"].attrs["version"]  # type: ignore
+        self.min_event = int(self.file["events"].attrs["min_event"])  # type: ignore
+        self.max_event = int(self.file["events"].attrs["max_event"])  # type: ignore
+
+    def event_range(self) -> range:
+        return range(self.min_event, self.max_event)
+
+    def __len__(self) -> int:
+        return self.max_event - self.min_event + 1
+
+    def first_event(self) -> int:
+        return self.min_event
+
+    def last_event(self) -> int:
+        return self.max_event
+
+    def read_event(
+        self,
+        event_id: int,
+        get_params: GetParameters,
+        frib_params: FribParameters,
+        rng: Generator,
+    ) -> Event:
+        events_group: h5.Group = self.file["events"]  # type: ignore
+        event_name = f"event_{event_id}"
+
+        event = Event(
+            event_id, None, None, None, None, None, None, self.run_number, event_id
+        )
+        if event_name in events_group:
+            event_data: h5.Group = events_group[event_name]  # type: ignore
+            get_group: h5.Group = event_data["get"]  # type: ignore
+            get_pad_data: h5.Dataset = get_group["pads"]  # type: ignore
+            get_si_upfront_data: h5.Dataset = get_group["silicon_upstream_front"]  # type: ignore
+            get_si_upback_data: h5.Dataset = get_group["silicon_upstream_back"]  # type: ignore
+            get_si_downfront_data: h5.Dataset = get_group["silicon_downstream_front"]  # type: ignore
+            get_si_downback_data: h5.Dataset = get_group["silicon_downstream_back"]  # type: ignore
+            event.get_pads = GetEvent(get_pad_data[:], event_id, get_params, rng)
+            event.get_si_upstream_front = GetEvent(
+                get_si_upfront_data[:], event_id, get_params, rng
+            )
+            event.get_si_upstream_back = GetEvent(
+                get_si_upback_data[:], event_id, get_params, rng
+            )
+            event.get_si_downstream_front = GetEvent(
+                get_si_downfront_data[:], event_id, get_params, rng
+            )
+            event.get_si_downstream_back = GetEvent(
+                get_si_downback_data[:], event_id, get_params, rng
+            )
+            if "frib_physics" in event_data:
+                frib_1903_data: h5.Dataset = event_data["frib_physics"]["1903"]  # type: ignore
+                frib_977_data: h5.Dataset = event_data["frib_physics"]["977"]  # type: ignore
+                event.frib = FribEvent(
+                    frib_1903_data[:], frib_977_data[:], event_id, frib_params
+                )
+        return event
+
+    def read_raw_get_event(self, event_id: int) -> np.ndarray | None:
+        events_group: h5.Group = self.file["events"]  # type: ignore
+        event_name = f"event_{event_id}"
+        if event_name in events_group:
+            event_data: h5.Group = events_group[event_name]  # type: ignore
+            get_group: h5.Group = event_data["get"]  # type: ignore
+            return get_group["pads"][:].copy()  # type: ignore
+
+    def read_raw_frib_event(self, event_id: int) -> np.ndarray | None:
+        events_group: h5.Group = self.file["events"]  # type: ignore
+        event_name = f"event_{event_id}"
+        if event_name in events_group:
+            event_data: h5.Group = events_group[event_name]  # type: ignore
+            if "frib_physics" in event_data:
+                return event_data["frib_physics"]["1903"][:].copy()  # type: ignore
+
+    def read_scalers(self) -> FribScalers | None:
+        if "scalers" not in self.file:
+            return None
+        scaler_group: h5.Group = self.file["scalers"]  # type: ignore
+        scaler_min = int(scaler_group.attrs["min_event"])  # type: ignore
+        scaler_max = int(scaler_group.attrs["min_event"])  # type: ignore
+        scalers = FribScalers()
+
+        for event in range(scaler_min, scaler_max + 1):
+            event_name = f"event_{event}"
+            if event_name in scaler_group:
+                event_data: h5.Dataset = scaler_group[event_name]  # type: ignore
+                scalers.load_scalers(event, event_data)
+        return scalers
 
 
 def create_reader(path: Path, run_number: int) -> TraceReader | None:
@@ -552,9 +681,11 @@ def create_reader(path: Path, run_number: int) -> TraceReader | None:
         version = version_string_to_enum(version_string)
         match version:
             case TraceVersion.MERGER_1_0:
-                return MergerCurrentReader(file, run_number)
+                return MergerV1Reader(file, run_number)
             case TraceVersion.HARMONIZER_0_1:
                 return HarmonizerReader(file, run_number)
+            case TraceVersion.MERGER_2_0:
+                return MergerV2Reader(file, run_number)
             case TraceVersion.INVALID:
                 spyral_error(
                     __name__,

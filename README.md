@@ -69,7 +69,6 @@ n_processes = 4
 pad_params = PadParameters(
     pad_geometry_path=DEFAULT_MAP,
     pad_time_path=DEFAULT_MAP,
-    pad_electronics_path=DEFAULT_MAP,
     pad_scale_path=DEFAULT_MAP,
 )
 
