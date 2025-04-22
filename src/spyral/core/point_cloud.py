@@ -2,7 +2,6 @@ from .pad_map import PadMap
 from .config import DetectorParameters
 from ..correction import ElectronCorrector
 from ..trace.get_event import GetEvent
-from .spy_log import spyral_warn
 from dataclasses import dataclass
 import numpy as np
 
@@ -65,20 +64,8 @@ def point_cloud_from_get(event: GetEvent, pad_map: PadMap) -> PointCloud:
             continue
 
         pid = trace.hw_id.pad_id
-        check = pad_map.get_pad_from_hardware(trace.hw_id)
-        if check is None:
-            spyral_warn(
-                __name__,
-                f"When checking pad number of hardware: {trace.hw_id}, recieved None!",
-            )
-            continue
-        if (
-            check != pid
-        ):  # This is dangerous! We trust the pad map over the merged data!
-            pid = check
-
-        pad = pad_map.get_pad_data(check)
-        if pad is None or pad_map.is_beam_pad(check):
+        pad = pad_map.get_pad_data(pid)
+        if pad is None or pad_map.is_beam_pad(pid):
             continue
         for peak in trace.get_peaks():
             cloud_matrix[idx, 0] = pad.x  # X-coordinate, geometry
