@@ -5,6 +5,7 @@ from ..geometry.circle import least_squares_circle
 
 import sklearn.cluster as skcluster
 import numpy as np
+import tripclust
 
 NOISE_LABEL: int = -1
 
@@ -500,3 +501,65 @@ def form_clusters(
             )
         )
     return (clusters, fitted_clusters.labels_)
+
+def tripclust_clusters(
+    pc: PointCloud, params: ClusterParameters
+) -> tuple[list[LabeledCloud], np.ndarray]:
+    """Apply the tripclust clustering algorithm to a PointCloud
+
+    Parameters
+    ----------
+    pc: PointCloud
+        The point cloud to be clustered
+    params: TripclustParameters
+        Configuration parameters controlling the clustering algorithms
+
+    Returns
+    --------
+    tuple[list[LabeledCloud], numpy.ndarray]
+        Two element tuple, the first being a ist of clusters found by the algorithm with labels
+        the second being an array of length of the point cloud with each element conatining
+        that point's label.
+    """
+
+    if len(pc) < params.min_cloud_size:
+        return ([], np.empty(0))
+
+    # Create class to pass parameters and calls to C++ code
+    tc = tripclust.tripclust()
+    tc.set_r(params.tc_params.r)
+    tc.set_rdnn(params.tc_params.rdnn)
+    tc.set_k(params.tc_params.k)
+    tc.set_n(params.tc_params.n)
+    tc.set_a(params.tc_params.a)
+    tc.set_s(params.tc_params.s)
+    tc.set_sdnn(params.tc_params.sdnn)
+    tc.set_t(params.tc_params.t)
+    tc.set_tauto(params.tc_params.tauto)
+    tc.set_dmax(params.tc_params.dmax)
+    tc.set_dmax_dnn(params.tc_params.dmax_dnn)
+    tc.set_ordered(params.tc_params.ordered)
+    # tc.set_link(params.tc_params.link)
+    tc.set_m(params.tc_params.m)
+    tc.set_postprocess(params.tc_params.postprocess)
+    tc.set_min_depth(params.tc_params.min_depth)
+
+    # Perform tripclust (Dalitz) clustering
+    tc.fill_pointcloud(pc.data)
+    tc.perform_clustering()
+    labels = tc.get_labels()
+
+    # Below is based on a copy from form_clusters to get same output
+    # Select out data into clusters
+    clusters: list[LabeledCloud] = []
+    ulabels = np.unique(labels)
+    for label in ulabels:
+        mask = labels == label
+        clusters.append(
+            LabeledCloud(
+                label,
+                PointCloud(pc.event_number, pc.data[mask]),
+                np.flatnonzero(mask),
+            )
+        )
+    return (clusters, labels)

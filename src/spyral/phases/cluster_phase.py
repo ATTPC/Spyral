@@ -3,7 +3,7 @@ from ..core.schema import PhaseResult, ResultSchema
 from ..core.config import ClusterParameters, DetectorParameters
 from ..core.status_message import StatusMessage
 from ..core.point_cloud import PointCloud
-from ..core.clusterize import form_clusters, join_clusters, cleanup_clusters
+from ..core.clusterize import form_clusters, join_clusters, cleanup_clusters, tripclust_clusters
 from ..core.spy_log import spyral_warn, spyral_error, spyral_info
 from ..core.run_stacks import form_run_string
 from .schema import POINTCLOUD_SCHEMA, CLUSTER_SCHEMA
@@ -145,9 +145,18 @@ class ClusterPhase(PhaseLike):
 
             # Here we don't need to use the labels array.
             # We just pass it along as needed.
-            clusters, labels = form_clusters(cloud, self.cluster_params)
-            joined, labels = join_clusters(clusters, self.cluster_params, labels)
-            cleaned, _ = cleanup_clusters(joined, self.cluster_params, labels)
+            if self.cluster_params.tc_params is not None:
+                clusters, labels = tripclust_clusters(cloud, self.cluster_params) # tripclust clustering
+            else:
+                clusters, labels = form_clusters(cloud, self.cluster_params) # HDBSCAN clustering
+            if joining:
+                joined, labels = join_clusters(clusters, self.cluster_params, labels)
+            else:
+                joined = clusters
+            if cleaning:
+                cleaned, _ = cleanup_clusters(joined, self.cluster_params, labels)
+            else:
+                cleaned = joined
 
             # Each event can contain many clusters
             cluster_event_group = cluster_group.create_group(f"event_{idx}")

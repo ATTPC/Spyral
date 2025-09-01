@@ -191,6 +191,64 @@ class OverlapJoinParameters:
 
 
 @dataclass
+class TripclustParameters:
+    """Parameters for the tripclust (Dalitz) clustering algorithms
+
+    Attributes
+    ----------
+    r: float
+        maximum neighbour distance for smoothing (default 2)
+    rdnn: boolean
+        whether or not compute r with dnn (default true)
+    k: int
+        number of tested neighbours of triplet mid point (default 19)
+    n: int
+        max number of triplets to one mid point (default 2)
+    a: float
+        1 - cos alpha, where alpha is the angle between the two triplet branches (default 0.03)
+    s: float
+        distance scale factor in metric (default 0.3)
+    sdnn: boolean
+        whether or not compute s with dnn (default true)
+    t: float
+        threshold for cdist in clustering (default 0.0)
+    tauto: boolean
+        whether or not auto generate t (default true)
+    dmax: float
+        maximum gap width (default 0.0)
+    dmax_dnn: boolean
+        whether or not use dnn for dmax (default false)
+    ordered: boolean
+        whether or not points are in chronological order (default false)
+    link: int
+        linkage method for clustering (default 0=SINGLE)
+    m: int
+        min number of triplets per cluster (default 5)
+    postprocess: boolean
+        whether or not post processing should be enabled (default false)
+    min_depth: int
+        minimum number of points making a branch in curve in post processing (default 25)
+    """
+
+    r: float
+    rdnn: bool
+    k: int
+    n: int
+    a: float
+    s: float
+    sdnn: bool
+    t: float
+    tauto: bool
+    dmax: float
+    dmax_dnn: bool
+    ordered: bool
+    link: int
+    m: int
+    postprocess: bool
+    min_depth: int
+
+
+@dataclass
 class ClusterParameters:
     """Parameters for clustering, cluster joining, and cluster cleaning
 
@@ -226,6 +284,9 @@ class ClusterParameters:
     overlap_join: OverlapJoinParameters | None
     continuity_join: ContinuityJoinParameters | None
     outlier_scale_factor: float
+    tc_params: TripclustParameters | None
+    joining: bool
+    cleaning: bool
 
 
 @dataclass
