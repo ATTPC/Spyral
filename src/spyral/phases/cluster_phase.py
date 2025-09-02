@@ -145,18 +145,20 @@ class ClusterPhase(PhaseLike):
 
             # Here we don't need to use the labels array.
             # We just pass it along as needed.
+            # Run tripclust algorithm if parameters present
             if self.cluster_params.tc_params is not None:
                 clusters, labels = tripclust_clusters(cloud, self.cluster_params) # tripclust clustering
             else:
                 clusters, labels = form_clusters(cloud, self.cluster_params) # HDBSCAN clustering
-            if joining:
+
+            # Run joining algorithm if either parameters present
+            if self.cluster_params.overlap_join is not None | self.cluster_params.continuity_join is not None:
                 joined, labels = join_clusters(clusters, self.cluster_params, labels)
             else:
                 joined = clusters
-            if cleaning:
-                cleaned, _ = cleanup_clusters(joined, self.cluster_params, labels)
-            else:
-                cleaned = joined
+
+            # Clean up noise points
+            cleaned, _ = cleanup_clusters(joined, self.cluster_params, labels)
 
             # Each event can contain many clusters
             cluster_event_group = cluster_group.create_group(f"event_{idx}")

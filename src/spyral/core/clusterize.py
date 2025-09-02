@@ -511,8 +511,14 @@ def tripclust_clusters(
     ----------
     pc: PointCloud
         The point cloud to be clustered
-    params: TripclustParameters
+    params: ClusterParameters
         Configuration parameters controlling the clustering algorithms
+
+    Analyze a point cloud, and group the points into clusters which in principle should correspond to particle trajectories.
+    This function uses the tripclust (Dalitz) clustering algorithm, which groups points in triplets and does
+    a hierarchical clustering on them to find trajectories that are collinear.
+    For details see the publication from Dalitz et al. (Dalitz et al., Comp. Phys. Comm. 235 (2019), 159,
+    DOI: https://doi.org/10.1016/j.cpc.2018.09.010)
 
     Returns
     --------

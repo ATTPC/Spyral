@@ -285,8 +285,6 @@ class ClusterParameters:
     continuity_join: ContinuityJoinParameters | None
     outlier_scale_factor: float
     tc_params: TripclustParameters | None
-    joining: bool
-    cleaning: bool
 
 
 @dataclass

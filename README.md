@@ -5,7 +5,7 @@
 [![PyPI license](https://img.shields.io/pypi/l/attpc_spyral.svg)](https://pypi.python.org/pypi/attpc_spyral/)
 [![DOI](https://zenodo.org/badge/528950398.svg)](https://doi.org/10.5281/zenodo.14143006)
 
-Spyral is an analysis library for data from the Active Target Time Projection Chamber (AT-TPC). Spyral provides a flexible analysis pipeline, transforming the raw trace data into physical observables over several tunable steps. The analysis pipeline is also extensible, supporting a diverse array of datasets. Sypral can process multiple data files in parallel, allowing for scalable performance over larger experiment datasets.
+Spyral is an analysis library for data from the Active Target Time Projection Chamber (AT-TPC). Spyral provides a flexible analysis pipeline, transforming the raw trace data into physical observables over several tunable steps. The analysis pipeline is also extensible, supporting a diverse array of datasets. Spyral can process multiple data files in parallel, allowing for scalable performance over larger experiment datasets.
 
 ## Installation
 
@@ -120,7 +120,7 @@ cluster_params = ClusterParameters(
         rdnn=True,
         k=19,
         n=2,
-        a=0.01,
+        a=0.03,
         s=0.3,
         sdnn=True,
         t=0.0,
@@ -133,8 +133,6 @@ cluster_params = ClusterParameters(
         postprocess=False,
         min_depth=25,
     ),
-    joining=False,
-    cleaning=False,
 )
 
 estimate_params = EstimateParameters(
@@ -193,7 +191,7 @@ The core of Spyral is the Pipeline. A Pipeline in a complete description of an a
 
 ### Parallel Processing
 
-Spyral is capable of running multiple data files in parallel. This is acheived through the python `multiprocessing` library. In the `start_pipeline` function a parameter named `n_processors` indicates to Spyral the *maximum* number of processors which can be spawned. Spyral will then inspect the data load that was submitted in the configuration and attempt to balance the load across the processors as equally as possible.
+Spyral is capable of running multiple data files in parallel. This is achieved through the python `multiprocessing` library. In the `start_pipeline` function a parameter named `n_processors` indicates to Spyral the *maximum* number of processors which can be spawned. Spyral will then inspect the data load that was submitted in the configuration and attempt to balance the load across the processors as equally as possible.
 
 Some notes about parallel processing:
 
@@ -204,7 +202,7 @@ Some notes about parallel processing:
 
 ### Logs and Output
 
-Spyral creates a set of logfiles when it is run (located in the log directory of the workspace). These logfiles can contain critical information describing the state of Spyral. In particular, if Spyral has a crash, the logfiles can be useful for determining what went wrong. A logfile is created for each process (including the parent process). The files are labeld by process number (or as parent in the case of the parent).
+Spyral creates a set of logfiles when it is run (located in the log directory of the workspace). These logfiles can contain critical information describing the state of Spyral. In particular, if Spyral has a crash, the logfiles can be useful for determining what went wrong. A logfile is created for each process (including the parent process). The files are labeled by process number (or as parent in the case of the parent).
 
 ## Notebooks
 
