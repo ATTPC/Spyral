@@ -156,7 +156,7 @@ class GetTrace:
         )
         for idx, p in enumerate(pks):
             peak = Peak()
-            peak.centroid = float(p) + rng.random()
+            peak.centroid = float(p) # + rng.random()
             peak.amplitude = float(self.trace[p])
             peak.positive_inflection = int(np.floor(props["left_ips"][idx]))
             peak.negative_inflection = int(np.ceil(props["right_ips"][idx]))

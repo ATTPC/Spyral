@@ -152,7 +152,7 @@ class ClusterPhase(PhaseLike):
                 clusters, labels = form_clusters(cloud, self.cluster_params) # HDBSCAN clustering
 
             # Run joining algorithm if either parameters present
-            if self.cluster_params.overlap_join is not None | self.cluster_params.continuity_join is not None:
+            if self.cluster_params.overlap_join is not None or self.cluster_params.continuity_join is not None:
                 joined, labels = join_clusters(clusters, self.cluster_params, labels)
             else:
                 joined = clusters
