@@ -2,7 +2,7 @@ from ..core.phase import PhaseLike
 from ..core.schema import PhaseResult, ResultSchema
 from ..core.config import EstimateParameters, DetectorParameters
 from ..core.status_message import StatusMessage
-from ..core.cluster import Cluster
+from ..core.cluster import Cluster, Direction
 from ..core.estimator import estimate_physics
 from ..core.spy_log import spyral_warn, spyral_error, spyral_info
 from ..core.run_stacks import form_run_string
@@ -148,6 +148,7 @@ class EstimationPhase(PhaseLike):
                 cluster = Cluster(
                     idx,
                     local_cluster.attrs["label"],  # type: ignore
+                    Direction(local_cluster.attrs["direction"]), # type: ignore
                     local_cluster["cloud"][:].copy(),  # type: ignore
                 )
 

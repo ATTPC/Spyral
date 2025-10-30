@@ -4,8 +4,26 @@ import numpy as np
 from dataclasses import dataclass
 from sklearn.neighbors import LocalOutlierFactor
 from scipy.interpolate import BSpline, make_smoothing_spline
+from enum import Enum
 
 EMPTY_DATA = np.empty(0, dtype=float)
+
+class Direction(Enum):
+    """Enum for the direction of a trajectory
+
+    Attributes
+    ----------
+    NONE: int
+        Invalid value (-1)
+    FORWARD: int
+        Trajectory traveling in the positive z-direction (0)
+    BACKWARD: int
+        Trajectory traveling in the negative z-direction (1)
+    """
+
+    NONE = -1  # type: ignore
+    FORWARD = 0  # type: ignore
+    BACKWARD = 1  # type: ignore
 
 
 @dataclass
@@ -23,6 +41,7 @@ class LabeledCloud:
     """
 
     label: int  # default is noise label
+    direction: Direction # default is None
     point_cloud: PointCloud
     parent_indicies: np.ndarray
 
@@ -45,6 +64,8 @@ class Cluster:
         The event number
     label: int
         The cluster label from the algorithm
+    direction: Direction
+        The direction of the cluster
     data: ndarray
         The point cloud data (trimmed down). Contains position, integrated charge
     x_spline: BSpline | None
@@ -68,10 +89,12 @@ class Cluster:
         self,
         event: int = -1,
         label: int = -1,
+        direction: Direction = Direction.NONE,
         data: np.ndarray = EMPTY_DATA,
     ):
         self.event = event
         self.label = label
+        self.direction = direction
         self.data = data
         self.x_spline: BSpline | None = None
         self.y_spline: BSpline | None = None
@@ -175,6 +198,6 @@ def convert_labeled_to_cluster(
     data[:, :3] = cloud.point_cloud.data[:, :3]  # position
     data[:, 3] = cloud.point_cloud.data[:, 4]  # peak integral
     data[:, 4] = cloud.point_cloud.data[:, 7]  # scale (big or small)
-    cluster = Cluster(cloud.point_cloud.event_number, cloud.label, data)
+    cluster = Cluster(cloud.point_cloud.event_number, cloud.label, cloud.direction, data)
     outliers = cluster.drop_outliers(params.outlier_scale_factor)
     return (cluster, outliers)

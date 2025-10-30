@@ -249,13 +249,11 @@ class TripclustParameters:
 
 
 @dataclass
-class ClusterParameters:
-    """Parameters for clustering, cluster joining, and cluster cleaning
+class HdbscanParameters:
+    """Parameters for clustering using the HDBSCAN algorithm
 
     Attributes
     ----------
-    min_cloud_size: int
-        The minimum size for a point cloud to be clustered
     min_points: int
         min_samples parameter in scikit-learns' HDBSCAN algorithm
     min_size_scale_factor: int
@@ -267,24 +265,44 @@ class ClusterParameters:
     cluster_selection_epsilon: float
         cluster_selection_epsilon parameter in scikit-learn's HDBSCAN algorithm. Clusters less than this distance apart
         are merged in the hierarchy
-    min_cluster_size_join: int
-        The minimum size of a cluster for it to be included in the joining algorithm
-    circle_overlap_ratio: float
-        minimum overlap ratio between two circles in the cluster joining algorithm
+    """
+
+    min_points: int
+    min_size_scale_factor: float
+    min_size_lower_cutoff: int
+    cluster_selection_epsilon: float
+
+
+@dataclass
+class ClusterParameters:
+    """Parameters for clustering, cluster joining, and cluster cleaning
+
+    Attributes
+    ----------
+    min_cloud_size: int
+        The minimum size for a point cloud to be clustered
+    hdbscan_parameters: HdbscanParameters
+        Parameters used when selecting the HDBSCAN algorithm
+    tripclust_parameters: TripclustParameters
+        Parameters used when selecting the Tripclust (Dalitz) algorithm
+    overlap_join: OverlapJoinParameters
+        Parameters used when selecting overlap joining
+    continuity_join: ContinuityJoinParameters
+        Parameters used when selecting continuitu joining
+    direction_threshold: float
+        Fraction threshold for the determination of the direction for each cluster
     outlier_scale_factor: float
         Factor which is multiplied by the number of points in a trajectory to set the number of neighbors parameter
         for scikit-learns LocalOutlierFactor test
     """
 
     min_cloud_size: int
-    min_points: int
-    min_size_scale_factor: float
-    min_size_lower_cutoff: int
-    cluster_selection_epsilon: float
+    hdbscan_parameters: HdbscanParameters | None
+    tripclust_parameters: TripclustParameters | None
     overlap_join: OverlapJoinParameters | None
     continuity_join: ContinuityJoinParameters | None
+    direction_threshold: float
     outlier_scale_factor: float
-    tc_params: TripclustParameters | None
 
 
 @dataclass

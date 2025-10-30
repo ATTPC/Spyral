@@ -64,7 +64,7 @@ workspace_path = Path("/some/workspace/path/")
 trace_path = Path("/some/trace/path/")
 
 run_min = 94
-run_max = 94
+run_max = 97
 n_processes = 4
 
 pad_params = PadParameters(
@@ -105,21 +105,29 @@ det_params = DetectorParameters(
 
 cluster_params = ClusterParameters(
     min_cloud_size=50,
-    min_points=3,
-    min_size_scale_factor=0.05,
-    min_size_lower_cutoff=10,
-    cluster_selection_epsilon=10.0,
-    overlap_join=OverlapJoinParameters(
-        min_cluster_size_join=15.0,
-        circle_overlap_ratio=0.25,
-    ),
-    continuity_join=None,
-    outlier_scale_factor=0.05,
-    tc_params=TripclustParameters(
-        r=2,
+    hdbscan_parameters = None,
+    # hdbscan_parameters = HdbscanParameters(
+    #     min_points=3,
+    #     min_size_scale_factor=0.03,
+    #     min_size_lower_cutoff=10,
+    #     cluster_selection_epsilon=10.0),
+    # overlap_join=OverlapJoinParameters(
+    #     min_cluster_size_join=15,
+    #     circle_overlap_ratio=0.25,
+    # ),
+    # continuity_join=None,
+    continuity_join = ContinuityJoinParameters(
+        join_radius_fraction=0.4,
+        join_z_fraction=0.2),
+    overlap_join=None,
+    outlier_scale_factor=0.1,
+    direction_threshold=0.5,
+    # tripclust_parameters=None,
+    tripclust_parameters=TripclustParameters(
+        r=6,
         rdnn=True,
-        k=19,
-        n=2,
+        k=12,
+        n=3,
         a=0.03,
         s=0.3,
         sdnn=True,

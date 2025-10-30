@@ -1,22 +1,69 @@
 from .point_cloud import PointCloud
-from .cluster import LabeledCloud, Cluster, convert_labeled_to_cluster
+from .cluster import LabeledCloud, Cluster, convert_labeled_to_cluster, Direction
 from .config import ClusterParameters
 from ..geometry.circle import least_squares_circle
 
 import sklearn.cluster as skcluster
 import numpy as np
 import tripclust
+from enum import Enum
+from scipy.interpolate import BSpline, make_smoothing_spline
+from sklearn.neighbors import LocalOutlierFactor
+from sklearn.ensemble import IsolationForest
+
 
 NOISE_LABEL: int = -1
-
 
 class ClusterError(Exception):
     pass
 
 
+# Credit Daniela Ramirez-Chavez 2025 ######
+def get_direction(cluster: LabeledCloud, params: ClusterParameters):
+    """Determine the direction of a cluster based on the 
+    differences in angle between adjacent points in z.
+    Smoothing is applied to iron out fluctuations and
+    a statistical determination is based on the fraction
+    of angles greater than a chosen threshold
+
+    Parameters
+    ----------
+    cluster: LabeledCloud
+        the cluster in consideration
+    params: ClusterParameters
+        contains the parameters related to clustering
+    """
+    cluster_data = cluster.point_cloud.data.copy()
+    if len(cluster_data) > 5:
+        x_spline = make_smoothing_spline(cluster_data[:, 2], cluster_data[:, 0], lam=10.0)
+        y_spline = make_smoothing_spline(cluster_data[:, 2], cluster_data[:, 1], lam=10.0)
+        cluster_data[:, 0] = x_spline(cluster_data[:, 2])  # type: ignore
+        cluster_data[:, 1] = y_spline(cluster_data[:, 2])  # type: ignore
+    cx, cy, _, _ = least_squares_circle(cluster_data[:,0], cluster_data[:,1])
+
+    angle_right = np.arctan2(cluster_data[:,1] - cy, cluster_data[:,0] - cx)
+
+    for i in range(0,len(angle_right)):
+        if angle_right[i]<0:
+            angle_right[i]= 2*np.pi + angle_right[i]  
+
+    da_right = np.diff(np.rad2deg(angle_right))
+
+    positive_fraction = sum(1 for num in da_right if num > 0) / len(da_right)
+    negative_fraction = 1 - positive_fraction
+    if positive_fraction > params.direction_threshold:
+        cluster.direction = Direction.FORWARD
+    elif negative_fraction > params.direction_threshold:
+        cluster.direction = Direction.BACKWARD
+    else:
+        cluster.direction = Direction.NONE    
+
 def join_clusters(
     clusters: list[LabeledCloud], params: ClusterParameters, labels: np.ndarray
 ) -> tuple[list[LabeledCloud], np.ndarray]:
+    # First determine direction for each cluster
+    for cluster in clusters:
+        get_direction(cluster, params)
     """Detect which joining algorithm to use and dispatch"""
     if params.continuity_join is not None:
         return join_clusters_continuity(clusters, params, labels)
@@ -176,7 +223,7 @@ def join_clusters_overlap_step(
             smaller_area = min(area, comp_area)
             if (
                 area_overlap > params.overlap_join.circle_overlap_ratio * smaller_area  # type: ignore
-            ) and (cidx not in groups_index[cluster.label]):
+            ) and (cidx not in groups_index[cluster.label]) and (cluster.direction == comp_cluster.direction):
                 comp_indicies = groups_index.pop(comp_cluster.label)
                 comp_labels = groups_label.pop(comp_cluster.label)
                 for subs in comp_indicies:
@@ -241,12 +288,12 @@ def join_clusters_continuity(
     after = 0
     while before != after and len(jclusters) > 1:
         before = len(jclusters)
-        # Order clusters by start time, scaled by mean charge, pad size
+        # Order clusters by start time
         jclusters = sorted(
             jclusters,
-            key=lambda x: x.point_cloud.data[0, 2]
-            * np.mean(x.point_cloud.data[:, 3])
-            * np.mean(x.point_cloud.data[:, 7]),
+            key=lambda x: x.point_cloud.data[0, 2],
+            # * np.mean(x.point_cloud.data[:, 3])
+            # * np.mean(x.point_cloud.data[:, 7]),
         )
         jclusters, labels = join_clusters_continuity_step(jclusters, params, labels)
         after = len(jclusters)
@@ -299,59 +346,38 @@ def join_clusters_continuity_step(
         if cluster.label == NOISE_LABEL or used_clusters[idx]:
             continue
         for cidx, comp_cluster in enumerate(clusters):
-            if comp_cluster.label == NOISE_LABEL or cidx == idx or used_clusters[cidx]:
+            # if clusters have different directions or already used, try the next
+            if comp_cluster.label == NOISE_LABEL or cidx == idx or used_clusters[cidx] or comp_cluster.direction != cluster.direction :
                 continue
 
             # downstream
-            avg_pos = np.median(cluster.point_cloud.data[-3:, :3], axis=0)  # downstream
-            rhos = np.linalg.norm(cluster.point_cloud.data[:, :2], axis=1)
+            # determine center of cluster from circle fit and take positions in that circle ref
+            centered = cluster.point_cloud.data.copy()
+            cx, cy, radius, _ = least_squares_circle(cluster.point_cloud.data[:,0], cluster.point_cloud.data[:,1])
+            centered[:, 0] -= cx
+            centered[:, 1] -= cy
+            avg_pos = np.median(centered[-3:, :3], axis=0)  # downstream
             min_z = np.min(cluster.point_cloud.data[:, 2])
             max_z = np.max(cluster.point_cloud.data[:, 2])
-            min_rho = np.min(rhos)
-            max_rho = np.max(rhos)
             avg_rho = np.linalg.norm(avg_pos[:2])
-            avg_phi = np.arctan2(avg_pos[1], avg_pos[0])
-            if avg_phi < 0.0:
-                avg_phi += 2.0 * np.pi
 
             # upstream
-            avg_pos_comp = np.median(
-                comp_cluster.point_cloud.data[:3, :3], axis=0
-            )  # upstream
-            rhos_comp = np.linalg.norm(comp_cluster.point_cloud.data[:, :2], axis=1)
+            # determine center of cluster from circle fit and take positions in that circle ref
+            centered = comp_cluster.point_cloud.data.copy()
+            cx, cy, comp_radius, _ = least_squares_circle(comp_cluster.point_cloud.data[:,0], comp_cluster.point_cloud.data[:,1])
+            centered[:, 0] -= cx
+            centered[:, 1] -= cy
+            avg_pos_comp = np.median(centered[:3, :3], axis=0)  # upstream
             min_z_comp = np.min(comp_cluster.point_cloud.data[:, 2])
             max_z_comp = np.max(comp_cluster.point_cloud.data[:, 2])
-            min_rho_comp = np.min(rhos_comp)
-            max_rho_comp = np.max(rhos_comp)
             avg_rho_comp = np.linalg.norm(avg_pos_comp[:2])
-            avg_phi_comp = np.arctan2(avg_pos_comp[1], avg_pos_comp[0])
-            if avg_phi_comp < 0.0:
-                avg_phi_comp += 2.0 * np.pi
 
-            # compare
-            is_near_beam_region = (
-                np.fabs(avg_rho - 25.0) < 10.0 and np.fabs(avg_rho_comp - 25.0) < 10.0
-            )
-            z_thresh = (
-                max(max_z, max_z_comp) - min(min_z, min_z_comp)
-            ) * params.continuity_join.join_z_fraction  # type: ignore
-            rho_thresh = (
-                max(max_rho, max_rho_comp) - min(min_rho, min_rho_comp)
-            ) * params.continuity_join.join_radius_fraction  # type: ignore
+           # compare z and rho differences to thresholds
+            z_thresh = (max(max_z, max_z_comp) - min(min_z, min_z_comp)) * params.continuity_join.join_z_fraction  # type: ignore
+            rho_thresh = (radius + comp_radius) / 2.0 * params.continuity_join.join_radius_fraction
             z_diff = np.fabs(avg_pos[2] - avg_pos_comp[2])
             rho_diff = np.fabs(avg_rho - avg_rho_comp)
-            phi_diff = np.fabs(avg_phi - avg_phi_comp)
-            if phi_diff > np.pi:
-                phi_diff = 2.0 * np.pi - phi_diff
-
-            if (
-                (is_near_beam_region and z_diff < z_thresh)
-                or (
-                    rho_diff < rho_thresh
-                    and z_diff < z_thresh
-                    and phi_diff < np.pi * 0.25
-                )
-            ) and (avg_pos[2] < avg_pos_comp[2] or z_diff < 10.0):
+            if (rho_diff < rho_thresh and z_diff < z_thresh ):
                 comp_indicies = groups_index.pop(comp_cluster.label)
                 comp_labels = groups_label.pop(comp_cluster.label)
                 for subs in comp_indicies:
@@ -372,9 +398,10 @@ def join_clusters_continuity_step(
             continue
 
         new_cluster = LabeledCloud(
-            g, PointCloud(event_number, np.zeros((0, 8))), np.empty(0)
+            g, Direction.NONE, PointCloud(event_number, np.zeros((0, 8))), np.empty(0)
         )
         for idx in groups_index[g]:
+            new_cluster.direction = clusters[idx].direction
             new_cluster.point_cloud.data = np.concatenate(
                 (new_cluster.point_cloud.data, clusters[idx].point_cloud.data), axis=0
             )
@@ -437,7 +464,106 @@ def cleanup_clusters(
     return (cleaned, labels)
 
 
+def clean_clusters(clusters: list[LabeledCloud], params: ClusterParameters, labels: np.ndarray
+                   ) -> tuple[list[LabeledCloud], np.ndarray]:
+    """Attempt to clean the clusters using the LocalOutlierFactor algorithm
+    
+    Parameters
+    ----------
+    clusters: list[LabeledCloud]
+        clusters to clean
+    params: ClusterParameters
+        Configuration parameters controlling the clustering algorithms
+    labels: numpy.ndarray
+        The cluster label for each point in the original point cloud
+
+    Returns
+    -------
+    tuple[list[LabeledCloud], numpy.ndarray]
+        A two element tuple, the first the list of cleaned clusters,
+        the second being an updated list of labels for each point in
+        the point cloud
+    
+    """
+    cleaned = []
+    for cluster in clusters:
+        if cluster.label == NOISE_LABEL or len(cluster.point_cloud) < 2:
+            continue
+        cleaned_cluster, outliers = clean_cluster(cluster, params.outlier_scale_factor)
+        cleaned.append(cleaned_cluster)
+        if len(outliers) == 0:
+            continue
+        orig_indicies = (cluster.parent_indicies[outliers]).astype(dtype=np.int32)
+        labels[orig_indicies] = NOISE_LABEL
+    return (cleaned, labels)
+
+def clean_cluster(cluster: LabeledCloud, scale) -> tuple[np.ndarray, np.ndarray]:
+    """Attempt to clean an individual cluster using the LocalOutlierFactor algorithm
+    
+    Parameters
+    ----------
+    cluster: LabeledCloud
+        cluster to clean
+    scale: Float
+        Scale factor applied to the algorithm
+
+    Returns
+    -------
+    tuple[numpy.ndarray, numpy.ndarray]
+        A two element tuple, the first the cleaned cluster,
+        the second being an array of the outliers
+    
+    """
+    neighbors = int(scale * len(cluster.point_cloud.data))  # 0.05 default
+    if neighbors < 2:
+        neighbors = 2
+    test_data = cluster.point_cloud.data[:, :3].copy()
+    # clf = IsolationForest(contamination=0.1, random_state=42)
+    # clf.fit(test_data)
+    # result = clf.predict(test_data)
+    neigh = LocalOutlierFactor(n_neighbors=neighbors)
+    result = neigh.fit_predict(test_data)
+    mask = result > 0
+    cleaned_cluster = LabeledCloud(cluster.label, cluster.direction, cluster.point_cloud, cluster.parent_indicies)
+    cleaned_cluster.point_cloud.data = cleaned_cluster.point_cloud.data[mask]  # label=-1 is an outlier
+    cleaned_cluster.parent_indicies = cleaned_cluster.parent_indicies[mask]
+    outliers = np.flatnonzero(~mask)
+    return (cleaned_cluster, outliers)
+
 def form_clusters(
+    pc: PointCloud, params: ClusterParameters
+) -> tuple[list[LabeledCloud], np.ndarray]:
+    """Apply clustering algorithm based on the values of the parameters
+
+    Parameters
+    ----------
+    pc: PointCloud
+        The point cloud to be clustered
+    params: ClusterParameters
+        Configuration parameters controlling the clustering algorithms
+
+    Returns
+    --------
+    tuple[list[LabeledCloud], numpy.ndarray]
+        Two element tuple, the first being a ist of clusters found by the algorithm with labels
+        the second being an array of length of the point cloud with each element containing
+        that point's label.
+    """
+
+    if len(pc) < params.min_cloud_size:
+        return ([], np.empty(0))
+
+    """Detect which clustering algorithm to use and dispatch"""
+    if params.hdbscan_parameters is not None:
+        return hdbscan_clusters(pc, params)
+    elif params.tripclust_parameters is not None:
+        return tripclust_clusters(pc, params)
+    else:
+        raise ClusterError(
+            "No clustering parameters were given! Clustering cannot proceed."
+        )
+
+def hdbscan_clusters(
     pc: PointCloud, params: ClusterParameters
 ) -> tuple[list[LabeledCloud], np.ndarray]:
     """Apply the HDBSCAN clustering algorithm to a PointCloud
@@ -461,17 +587,14 @@ def form_clusters(
     --------
     tuple[list[LabeledCloud], numpy.ndarray]
         Two element tuple, the first being a ist of clusters found by the algorithm with labels
-        the second being an array of length of the point cloud with each element conatining
+        the second being an array of length of the point cloud with each element containing
         that point's label.
     """
 
-    if len(pc) < params.min_cloud_size:
-        return ([], np.empty(0))
-
     n_points = len(pc)
-    min_size = int(params.min_size_scale_factor * n_points)
-    if min_size < params.min_size_lower_cutoff:
-        min_size = params.min_size_lower_cutoff
+    min_size = int(params.hdbscan_parameters.min_size_scale_factor * n_points)
+    if min_size < params.hdbscan_parameters.min_size_lower_cutoff:
+        min_size = params.hdbscan_parameters.min_size_lower_cutoff
 
     # Use spatial dimensions
     cluster_data = np.empty(shape=(len(pc), 3))
@@ -482,8 +605,8 @@ def form_clusters(
 
     clusterizer = skcluster.HDBSCAN(  # type: ignore
         min_cluster_size=min_size,
-        min_samples=params.min_points,
-        cluster_selection_epsilon=params.cluster_selection_epsilon,
+        min_samples=params.hdbscan_parameters.min_points,
+        cluster_selection_epsilon=params.hdbscan_parameters.cluster_selection_epsilon,
     )
 
     fitted_clusters = clusterizer.fit(cluster_data)
@@ -496,11 +619,13 @@ def form_clusters(
         clusters.append(
             LabeledCloud(
                 label,
+                Direction.NONE,
                 PointCloud(pc.event_number, pc.data[mask]),
                 np.flatnonzero(mask),
             )
         )
     return (clusters, fitted_clusters.labels_)
+
 
 def tripclust_clusters(
     pc: PointCloud, params: ClusterParameters
@@ -533,22 +658,22 @@ def tripclust_clusters(
 
     # Create class to pass parameters and calls to C++ code
     tc = tripclust.tripclust()
-    tc.set_r(params.tc_params.r)
-    tc.set_rdnn(params.tc_params.rdnn)
-    tc.set_k(params.tc_params.k)
-    tc.set_n(params.tc_params.n)
-    tc.set_a(params.tc_params.a)
-    tc.set_s(params.tc_params.s)
-    tc.set_sdnn(params.tc_params.sdnn)
-    tc.set_t(params.tc_params.t)
-    tc.set_tauto(params.tc_params.tauto)
-    tc.set_dmax(params.tc_params.dmax)
-    tc.set_dmax_dnn(params.tc_params.dmax_dnn)
-    tc.set_ordered(params.tc_params.ordered)
-    # tc.set_link(params.tc_params.link)
-    tc.set_m(params.tc_params.m)
-    tc.set_postprocess(params.tc_params.postprocess)
-    tc.set_min_depth(params.tc_params.min_depth)
+    tc.set_r(params.tripclust_parameters.r)
+    tc.set_rdnn(params.tripclust_parameters.rdnn)
+    tc.set_k(params.tripclust_parameters.k)
+    tc.set_n(params.tripclust_parameters.n)
+    tc.set_a(params.tripclust_parameters.a)
+    tc.set_s(params.tripclust_parameters.s)
+    tc.set_sdnn(params.tripclust_parameters.sdnn)
+    tc.set_t(params.tripclust_parameters.t)
+    tc.set_tauto(params.tripclust_parameters.tauto)
+    tc.set_dmax(params.tripclust_parameters.dmax)
+    tc.set_dmax_dnn(params.tripclust_parameters.dmax_dnn)
+    tc.set_ordered(params.tripclust_parameters.ordered)
+    # tc.set_link(params.tripclust_parameters.link)
+    tc.set_m(params.tripclust_parameters.m)
+    tc.set_postprocess(params.tripclust_parameters.postprocess)
+    tc.set_min_depth(params.tripclust_parameters.min_depth)
 
     # Perform tripclust (Dalitz) clustering
     tc.fill_pointcloud(pc.data)
@@ -564,6 +689,7 @@ def tripclust_clusters(
         clusters.append(
             LabeledCloud(
                 label,
+                Direction.NONE,
                 PointCloud(pc.event_number, pc.data[mask]),
                 np.flatnonzero(mask),
             )
