@@ -1,7 +1,8 @@
-from ..core.phase import PhaseLike, PhaseResult
+from ..core.phase import PhaseLike
+from ..core.schema import PhaseResult, ResultSchema
 from ..core.config import EstimateParameters, DetectorParameters
 from ..core.status_message import StatusMessage
-from ..core.cluster import Cluster
+from ..core.cluster import Cluster, Direction
 from ..core.estimator import estimate_physics
 from ..core.spy_log import spyral_warn, spyral_error, spyral_info
 from ..core.run_stacks import form_run_string
@@ -43,8 +44,8 @@ class EstimationPhase(PhaseLike):
     ):
         super().__init__(
             "Estimation",
-            incoming_schema=CLUSTER_SCHEMA,
-            outgoing_schema=ESTIMATE_SCHEMA,
+            incoming_schema=ResultSchema(CLUSTER_SCHEMA),
+            outgoing_schema=ResultSchema(ESTIMATE_SCHEMA),
         )
         self.estimate_params = estimate_params
         self.det_params = det_params
@@ -56,11 +57,13 @@ class EstimationPhase(PhaseLike):
         self, payload: PhaseResult, workspace_path: Path
     ) -> PhaseResult:
         result = PhaseResult(
-            artifact_path=self.get_artifact_path(workspace_path)
-            / f"{form_run_string(payload.run_number)}.parquet",
+            artifacts={
+                "estimation": self.get_artifact_path(workspace_path)
+                / f"{form_run_string(payload.run_number)}.parquet",
+                "cluster": payload.artifacts["cluster"],
+            },
             successful=True,
             run_number=payload.run_number,
-            metadata={"cluster_path": payload.artifact_path},
         )
         return result
 
@@ -72,7 +75,7 @@ class EstimationPhase(PhaseLike):
         rng: Generator,
     ) -> PhaseResult:
         # Check that clusters exist
-        cluster_path = payload.artifact_path
+        cluster_path = payload.artifacts["cluster"]
         if not cluster_path.exists() or not payload.successful:
             spyral_warn(
                 __name__,
@@ -106,30 +109,8 @@ class EstimationPhase(PhaseLike):
 
         count = 0
 
-        # estimation results
-        data: dict[str, list] = {
-            "event": [],
-            "cluster_index": [],
-            "cluster_label": [],
-            "ic_amplitude": [],
-            "ic_centroid": [],
-            "ic_integral": [],
-            "ic_multiplicity": [],
-            "vertex_x": [],
-            "vertex_y": [],
-            "vertex_z": [],
-            "center_x": [],
-            "center_y": [],
-            "center_z": [],
-            "polar": [],
-            "azimuthal": [],
-            "brho": [],
-            "dEdx": [],
-            "sqrt_dEdx": [],
-            "dE": [],
-            "arclength": [],
-            "direction": [],
-        }
+        # estimation results, list of dicts
+        results = []
 
         msg = StatusMessage(
             self.name, 1, total, payload.run_number
@@ -153,6 +134,8 @@ class EstimationPhase(PhaseLike):
             ic_cent = float(event.attrs["ic_centroid"])  # type: ignore
             ic_int = float(event.attrs["ic_integral"])  # type: ignore
             ic_mult = float(event.attrs["ic_multiplicity"])  # type: ignore
+            orig_run = int(event.attrs["orig_run"])  # type: ignore
+            orig_event = int(event.attrs["orig_event"])  # type: ignore
             # Go through every cluster in each event
             for cidx in range(0, nclusters):
                 local_cluster: h5.Group | None = None
@@ -165,25 +148,29 @@ class EstimationPhase(PhaseLike):
                 cluster = Cluster(
                     idx,
                     local_cluster.attrs["label"],  # type: ignore
+                    Direction(local_cluster.attrs["direction"]), # type: ignore
                     local_cluster["cloud"][:].copy(),  # type: ignore
                 )
 
                 # Cluster is loaded do some analysis
-                estimate_physics(
+                res = estimate_physics(
                     cidx,
                     cluster,
                     ic_amp,
                     ic_cent,
                     ic_int,
                     ic_mult,
+                    orig_run,
+                    orig_event,
                     self.estimate_params,
                     self.det_params,
-                    data,
                 )
+                if res is not None:
+                    results.append(vars(res))
 
         # Write the results to a DataFrame
-        df = pl.DataFrame(data)
-        df.write_parquet(result.artifact_path)
+        df = pl.DataFrame(results)
+        df.write_parquet(result.artifacts["estimation"])
         spyral_info(__name__, f"Phase Estimation complete for run {payload.run_number}")
         # Next step also needs to know where to find the clusters
         return result

@@ -43,6 +43,7 @@ nav:
       - pipeline: api/core/pipeline.md
       - point_cloud: api/core/point_cloud.md
       - run_stacks: api/core/run_stacks.md
+      - schema: api/core/schema.md
       - spy_log: api/core/spy_log.md
       - status_message: api/core/status_message.md
       - track_generator: api/core/track_generator.md
@@ -62,7 +63,6 @@ nav:
     - phases:
       - About phases: api/phases/index.md
       - pointcloud_phase: api/phases/pointcloud_phase.md
-      - pointcloud_legacy_phase: api/phases/pointcloud_legacy_phase.md
       - cluster_phase: api/phases/cluster_phase.md
       - estimation_phase: api/phases/estimation_phase.md
       - interp_solver_phase: api/phases/interp_solver_phase.md
@@ -76,7 +76,6 @@ nav:
     - trace:
       - About trace: api/trace/index.md
       - get_event: api/trace/get_event.md
-      - get_legacy_event: api/trace/get_legacy_event.md
       - get_trace: api/trace/get_trace.md
       - frib_event: api/trace/frib_event.md
       - frib_trace: api/trace/frib_trace.md

@@ -67,11 +67,11 @@ def hardware_id_from_array(array: np.ndarray) -> HardwareID:
         The HardwareID object
     """
     hw_id = HardwareID()
-    hw_id.pad_id = array[GET_DATA_PAD_INDEX]
-    hw_id.cobo_id = array[GET_DATA_COBO_INDEX]
-    hw_id.asad_id = array[GET_DATA_ASAD_INDEX]
-    hw_id.aget_id = array[GET_DATA_AGET_INDEX]
-    hw_id.aget_channel = array[GET_DATA_CHANNEL_INDEX]
+    hw_id.pad_id = int((array[GET_DATA_PAD_INDEX]))
+    hw_id.cobo_id = int(array[GET_DATA_COBO_INDEX])
+    hw_id.asad_id = int(array[GET_DATA_ASAD_INDEX])
+    hw_id.aget_id = int(array[GET_DATA_AGET_INDEX])
+    hw_id.aget_channel = int(array[GET_DATA_CHANNEL_INDEX])
     return hw_id
 
 

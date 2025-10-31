@@ -1,4 +1,4 @@
-from .guess import Guess
+from .guess import Guess, SolverResult, create_params
 from ..core.cluster import Cluster
 from ..interpolate.track_interpolator import TrackInterpolator
 from ..core.constants import QBRHO_2_P, BIG_PAD_HEIGHT
@@ -120,112 +120,6 @@ def objective_function(
     return distances(trajectory, x, weights)
 
 
-def create_params(
-    guess: Guess,
-    ejectile: NucleusData,
-    interpolator: TrackInterpolator,
-    det_params: DetectorParameters,
-    solver_params: SolverParameters,
-) -> Parameters:
-    """Create the lmfit parameters with appropriate bounds
-
-    Convert all values to correct units (meters, radians, etc.) as well
-
-    Parameters
-    ----------
-    guess: Guess
-        the initial values of the parameters
-    ejectile: spyral_utils.nuclear.NucleusData
-        the data for the particle being tracked
-    interpolator: TrackInterpolator
-        the interpolation scheme to be used
-    det_params: DetectorParameters
-        Configuration parameters for detector characteristics
-    solver_params: SolverParameters
-        Configuration parameters for the solver
-
-    Returns
-    -------
-    lmfit.Parameters
-        the lmfit parameters with bounds
-    """
-    interp_min_momentum = np.sqrt(
-        interpolator.ke_min * (interpolator.ke_min + 2.0 * ejectile.mass)
-    )
-    interp_max_momentum = np.sqrt(
-        interpolator.ke_max * (interpolator.ke_max + 2.0 * ejectile.mass)
-    )
-    interp_min_brho = (interp_min_momentum / QBRHO_2_P) / ejectile.Z
-    interp_max_brho = (interp_max_momentum / QBRHO_2_P) / ejectile.Z
-    interp_min_polar = interpolator.polar_min * np.pi / 180.0
-    interp_max_polar = interpolator.polar_max * np.pi / 180.0
-
-    uncertainty_position_z = 0.1
-    uncertainty_brho = 0.05
-
-    min_brho = guess.brho - uncertainty_brho * 2.0
-    if min_brho < interp_min_brho:
-        min_brho = interp_min_brho
-    max_brho = guess.brho + uncertainty_brho * 2.0
-    if max_brho > interp_max_brho:
-        max_brho = interp_max_brho
-
-    min_polar = interp_min_polar
-    max_polar = interp_max_polar
-    if guess.polar > np.pi * 0.5 and min_polar < np.pi * 0.5:
-        min_polar = np.pi * 0.5
-    elif guess.polar < np.pi * 0.5 and max_polar > np.pi * 0.5:
-        max_polar = np.pi * 0.5
-
-    min_z = guess.vertex_z * 0.001 - uncertainty_position_z * 2.0
-    max_z = guess.vertex_z * 0.001 + uncertainty_position_z * 2.0
-    if min_z < 0.0:
-        min_z = 0.0
-    if max_z > det_params.detector_length * 0.001:
-        max_z = det_params.detector_length * 0.001
-
-    vert_phi = np.arctan2(guess.vertex_y, guess.vertex_x)
-    if vert_phi < 0.0:
-        vert_phi += np.pi * 2.0
-    vert_rho = np.sqrt(guess.vertex_x**2.0 + guess.vertex_y**2.0) * 0.001
-
-    fit_params = Parameters()
-    fit_params.add(
-        "brho",
-        guess.brho,
-        min=min_brho,
-        max=max_brho,
-        vary=True,
-    )
-    fit_params.add("polar", guess.polar, min=min_polar, max=max_polar, vary=True)
-    fit_params.add(
-        "vertex_rho",
-        value=vert_rho,
-        min=0.0,
-        max=det_params.beam_region_radius * 0.001,
-        vary=solver_params.fit_vertex_rho,
-    )
-    fit_params.add(
-        "vertex_phi",
-        value=vert_phi,
-        min=0.0,
-        max=np.pi * 2.0,
-        vary=solver_params.fit_vertex_phi,
-    )
-    fit_params.add(
-        "azimuthal",
-        value=guess.azimuthal,
-        min=0.0,
-        max=2.0 * np.pi,
-        vary=solver_params.fit_azimuthal,
-    )
-    fit_params.add("vertex_x", expr="vertex_rho * cos(vertex_phi)")
-    fit_params.add("vertex_y", expr="vertex_rho * sin(vertex_phi)")
-    fit_params.add("vertex_z", guess.vertex_z * 0.001, min=min_z, max=max_z, vary=True)
-
-    return fit_params
-
-
 # For testing, not for use in production
 def fit_model_interp(
     cluster: Cluster,
@@ -234,7 +128,7 @@ def fit_model_interp(
     interpolator: TrackInterpolator,
     det_params: DetectorParameters,
     solver_params: SolverParameters,
-) -> Parameters | None:
+) -> tuple[SolverResult, Parameters] | None:
     """Used for jupyter notebooks examining the good-ness of the model
 
     Parameters
@@ -254,7 +148,7 @@ def fit_model_interp(
 
     Returns
     -------
-    lmfit.Parameters | None
+    tuple[SolverResult, lmfit.Parameters] | None
         Returns the best fit Parameters upon success, or None upon failure
     """
     traj_data = cluster.data[:, :3] * 0.001
@@ -278,7 +172,7 @@ def fit_model_interp(
     total_error = np.sqrt(x_error**2.0 + y_error**2.0 + z_error**2.0)
     weights = 1.0 / total_error
 
-    fit_params = create_params(guess, ejectile, interpolator, det_params, solver_params)
+    fit_params = create_params(guess, ejectile, det_params, solver_params)
 
     result: MinimizerResult = minimize(
         objective_function,
@@ -291,16 +185,17 @@ def fit_model_interp(
     return result.params  # type: ignore
 
 
-def solve_physics_interp(
+def solve_physics_interp_leastsq(
     cluster_index: int,
+    orig_run: int,
+    orig_event: int,
     cluster: Cluster,
     guess: Guess,
     ejectile: NucleusData,
     interpolator: TrackInterpolator,
     det_params: DetectorParameters,
     solver_params: SolverParameters,
-    results: dict[str, list],
-):
+) -> SolverResult | None:
     """High level function to be called from the application.
 
     Takes the Cluster and fits a trajectory to it using the initial Guess. It then writes the results to the dictionary.
@@ -309,6 +204,10 @@ def solve_physics_interp(
     ----------
     cluster_index: int
         Index of the cluster in the hdf5 scheme. Used only for debugging
+    orig_run: int
+        The original run number
+    orig_event: int
+        The original event number
     cluster: Cluster
         the data to be fit
     guess: Guess
@@ -321,14 +220,17 @@ def solve_physics_interp(
         Configuration parameters for detector characteristics
     solver_params: SolverParameters
         Configuration parameters for the solver
-    results: dict[str, list]
-        storage for results from the fitting, which will later be written as a dataframe.
+
+    Returns
+    -------
+    SolverResult | None
+        The best-fit result of the solver, or None if it failed
     """
     traj_data = cluster.data[:, :3] * 0.001
     momentum = QBRHO_2_P * (guess.brho * float(ejectile.Z))
     kinetic_energy = np.sqrt(momentum**2.0 + ejectile.mass**2.0) - ejectile.mass
     if not interpolator.check_values_in_range(kinetic_energy, guess.polar):
-        return
+        return None
 
     # Uncertainty due to TB resolution in meters
     z_error = (
@@ -345,7 +247,7 @@ def solve_physics_interp(
     total_error = np.sqrt(x_error**2.0 + y_error**2.0 + z_error**2.0)
     weights = 1.0 / total_error
 
-    fit_params = create_params(guess, ejectile, interpolator, det_params, solver_params)
+    fit_params = create_params(guess, ejectile, det_params, solver_params)
 
     best_fit: MinimizerResult = minimize(
         objective_function,
@@ -358,25 +260,34 @@ def solve_physics_interp(
     brho: float = best_fit.params["brho"].value  # type: ignore
     p = brho * scale_factor  # type: ignore
     ke = np.sqrt(p**2.0 + ejectile.mass**2.0) - ejectile.mass
-
-    results["event"].append(cluster.event)
-    results["cluster_index"].append(cluster_index)
-    results["cluster_label"].append(cluster.label)
-    # Best fit values and uncertainties
-    results["vertex_x"].append(best_fit.params["vertex_x"].value)  # type: ignore
-    results["vertex_y"].append(best_fit.params["vertex_y"].value)  # type: ignore
-    results["vertex_z"].append(best_fit.params["vertex_z"].value)  # type: ignore
-    results["brho"].append(best_fit.params["brho"].value)  # type: ignore
-    results["ke"].append(ke)
-    results["polar"].append(best_fit.params["polar"].value)  # type: ignore
-    results["azimuthal"].append(best_fit.params["azimuthal"].value)  # type: ignore
-    results["redchisq"].append(best_fit.redchi)
+    results = SolverResult(
+        event=cluster.event,
+        cluster_index=cluster_index,
+        cluster_label=cluster.label,
+        orig_run=orig_run,
+        orig_event=orig_event,
+        vertex_x=best_fit.params["vertex_x"].value,  # type: ignore
+        sigma_vx=1.0e6,
+        vertex_y=best_fit.params["vertex_y"].value,  # type: ignore
+        sigma_vy=1.0e6,
+        vertex_z=best_fit.params["vertex_z"].value,  # type: ignore
+        sigma_vz=1.0e6,
+        brho=best_fit.params["brho"].value,  # type: ignore
+        sigma_brho=1.0e6,
+        ke=ke,
+        sigma_ke=1.0e6,
+        polar=best_fit.params["polar"].value,  # type: ignore
+        sigma_polar=1.0e6,
+        azimuthal=best_fit.params["azimuthal"].value,  # type: ignore
+        sigma_azimuthal=1.0e6,
+        redchisq=best_fit.redchi,  # type: ignore
+    )
 
     if hasattr(best_fit, "uvars"):
-        results["sigma_vx"].append(best_fit.uvars["vertex_x"].std_dev)  # type: ignore
-        results["sigma_vy"].append(best_fit.uvars["vertex_y"].std_dev)  # type: ignore
-        results["sigma_vz"].append(best_fit.uvars["vertex_z"].std_dev)  # type: ignore
-        results["sigma_brho"].append(best_fit.uvars["brho"].std_dev)  # type: ignore
+        results.sigma_vx = best_fit.uvars["vertex_x"].std_dev  # type: ignore
+        results.sigma_vy = best_fit.uvars["vertex_y"].std_dev  # type: ignore
+        results.sigma_vz = best_fit.uvars["vertex_z"].std_dev  # type: ignore
+        results.sigma_brho = best_fit.uvars["brho"].std_dev  # type: ignore
 
         # sigma_f = sqrt((df/dx)^2*sigma_x^2 + ...)
         ke_std_dev = np.fabs(
@@ -385,15 +296,9 @@ def solve_physics_interp(
             / np.sqrt((brho * scale_factor) ** 2.0 + ejectile.mass**2.0)
             * best_fit.uvars["brho"].std_dev  # type: ignore
         )
-        results["sigma_ke"].append(ke_std_dev)
+        results.sigma_ke = ke_std_dev
 
-        results["sigma_polar"].append(best_fit.uvars["polar"].std_dev)  # type: ignore
-        results["sigma_azimuthal"].append(best_fit.uvars["azimuthal"].std_dev)  # type: ignore
-    else:
-        results["sigma_vx"].append(1.0e6)
-        results["sigma_vy"].append(1.0e6)
-        results["sigma_vz"].append(1.0e6)
-        results["sigma_brho"].append(1.0e6)
-        results["sigma_ke"].append(1.0e6)
-        results["sigma_polar"].append(1.0e6)
-        results["sigma_azimuthal"].append(1.0e6)
+        results.sigma_polar = best_fit.uvars["polar"].std_dev  # type: ignore
+        results.sigma_azimuthal = best_fit.uvars["azimuthal"].std_dev  # type: ignore
+
+    return results

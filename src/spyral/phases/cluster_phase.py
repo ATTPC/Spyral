@@ -1,8 +1,9 @@
-from ..core.phase import PhaseLike, PhaseResult
+from ..core.phase import PhaseLike
+from ..core.schema import PhaseResult, ResultSchema
 from ..core.config import ClusterParameters, DetectorParameters
 from ..core.status_message import StatusMessage
 from ..core.point_cloud import PointCloud
-from ..core.clusterize import form_clusters, join_clusters, cleanup_clusters
+from ..core.clusterize import form_clusters, join_clusters, cleanup_clusters, tripclust_clusters, clean_clusters
 from ..core.spy_log import spyral_warn, spyral_error, spyral_info
 from ..core.run_stacks import form_run_string
 from .schema import POINTCLOUD_SCHEMA, CLUSTER_SCHEMA
@@ -11,6 +12,7 @@ import h5py as h5
 from pathlib import Path
 from multiprocessing import SimpleQueue
 from numpy.random import Generator
+import numpy as np
 
 
 class ClusterPhase(PhaseLike):
@@ -42,7 +44,9 @@ class ClusterPhase(PhaseLike):
         self, cluster_params: ClusterParameters, det_params: DetectorParameters
     ) -> None:
         super().__init__(
-            "Cluster", incoming_schema=POINTCLOUD_SCHEMA, outgoing_schema=CLUSTER_SCHEMA
+            "Cluster",
+            incoming_schema=ResultSchema(json_string=POINTCLOUD_SCHEMA),
+            outgoing_schema=ResultSchema(json_string=CLUSTER_SCHEMA),
         )
         self.cluster_params = cluster_params
         self.det_params = det_params
@@ -54,8 +58,10 @@ class ClusterPhase(PhaseLike):
         self, payload: PhaseResult, workspace_path: Path
     ) -> PhaseResult:
         result = PhaseResult(
-            artifact_path=self.get_artifact_path(workspace_path)
-            / f"{form_run_string(payload.run_number)}.h5",
+            artifacts={
+                "cluster": self.get_artifact_path(workspace_path)
+                / f"{form_run_string(payload.run_number)}.h5"
+            },
             successful=True,
             run_number=payload.run_number,
         )
@@ -69,7 +75,7 @@ class ClusterPhase(PhaseLike):
         rng: Generator,
     ) -> PhaseResult:
         # Check that point clouds exist
-        point_path = payload.artifact_path
+        point_path = payload.artifacts["pointcloud"]
         if not point_path.exists() or not payload.successful:
             spyral_warn(
                 __name__,
@@ -80,7 +86,7 @@ class ClusterPhase(PhaseLike):
         result = self.construct_artifact(payload, workspace_path)
 
         point_file = h5.File(point_path, "r")
-        cluster_file = h5.File(result.artifact_path, "w")
+        cluster_file = h5.File(result.artifacts["cluster"], "w")
 
         cloud_group: h5.Group = point_file["cloud"]  # type: ignore
         if not isinstance(cloud_group, h5.Group):
@@ -129,18 +135,36 @@ class ClusterPhase(PhaseLike):
             if cloud_data is None:
                 continue
 
-            cloud = PointCloud()
-            cloud.load_cloud_from_hdf5_data(cloud_data[:].copy(), idx)
+            cloud = PointCloud(idx, cloud_data[:].copy())
+            if np.any(np.diff(cloud.data[:, 2]) < 0.0):
+                spyral_warn(
+                    __name__,
+                    f"Clustering for event {cloud.event_number} failed because point cloud was not sorted in z",
+                )
+                continue
 
             # Here we don't need to use the labels array.
             # We just pass it along as needed.
+            # Perform clustering using algorithm of choice
             clusters, labels = form_clusters(cloud, self.cluster_params)
-            joined, labels = join_clusters(clusters, self.cluster_params, labels)
+
+            # Clean our individual clusters before attempting the joining
+            clean, labels = clean_clusters(clusters, self.cluster_params, labels)
+
+            # Run joining algorithm if either parameters present
+            if self.cluster_params.overlap_join is not None or self.cluster_params.continuity_join is not None:
+                joined, labels = join_clusters(clean, self.cluster_params, labels)
+            else:
+                joined = clean
+
+            # Clean up noise points
             cleaned, _ = cleanup_clusters(joined, self.cluster_params, labels)
 
             # Each event can contain many clusters
             cluster_event_group = cluster_group.create_group(f"event_{idx}")
             cluster_event_group.attrs["nclusters"] = len(cleaned)
+            cluster_event_group.attrs["orig_run"] = cloud_data.attrs["orig_run"]
+            cluster_event_group.attrs["orig_event"] = cloud_data.attrs["orig_event"]
             cluster_event_group.attrs["ic_amplitude"] = cloud_data.attrs["ic_amplitude"]
             cluster_event_group.attrs["ic_centroid"] = cloud_data.attrs["ic_centroid"]
             cluster_event_group.attrs["ic_integral"] = cloud_data.attrs["ic_integral"]
@@ -150,6 +174,7 @@ class ClusterPhase(PhaseLike):
             for cidx, cluster in enumerate(cleaned):
                 local_group = cluster_event_group.create_group(f"cluster_{cidx}")
                 local_group.attrs["label"] = cluster.label
+                local_group.attrs["direction"] = cluster.direction.value
                 local_group.create_dataset("cloud", data=cluster.data)
 
         spyral_info(__name__, f"Phase Cluster complete for run {payload.run_number}")

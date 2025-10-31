@@ -1,11 +1,29 @@
-from .point_cloud import PointCloud
+from .point_cloud import PointCloud, sort_point_cloud_in_z
 from .config import ClusterParameters
 import numpy as np
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from sklearn.neighbors import LocalOutlierFactor
 from scipy.interpolate import BSpline, make_smoothing_spline
+from enum import Enum
 
 EMPTY_DATA = np.empty(0, dtype=float)
+
+class Direction(Enum):
+    """Enum for the direction of a trajectory
+
+    Attributes
+    ----------
+    NONE: int
+        Invalid value (-1)
+    FORWARD: int
+        Trajectory traveling in the positive z-direction (0)
+    BACKWARD: int
+        Trajectory traveling in the negative z-direction (1)
+    """
+
+    NONE = -1  # type: ignore
+    FORWARD = 0  # type: ignore
+    BACKWARD = 1  # type: ignore
 
 
 @dataclass
@@ -18,16 +36,14 @@ class LabeledCloud:
         The label from the clustering algorithm
     point_cloud:
         The cluster data in original point cloud coordinates
-    clustered_data:
-        The acutal data clustering was perfomed on, in transformed coordinates
     parent_indicies:
         The incidies of this cluster's data in the original parent point cloud
     """
 
-    label: int = -1  # default is noise label
-    point_cloud: PointCloud = field(default_factory=PointCloud)
-    clustered_data: np.ndarray = field(default_factory=lambda: np.zeros(0))
-    parent_indicies: np.ndarray = field(default_factory=lambda: np.zeros(0))
+    label: int  # default is noise label
+    direction: Direction # default is None
+    point_cloud: PointCloud
+    parent_indicies: np.ndarray
 
 
 class Cluster:
@@ -48,6 +64,8 @@ class Cluster:
         The event number
     label: int
         The cluster label from the algorithm
+    direction: Direction
+        The direction of the cluster
     data: ndarray
         The point cloud data (trimmed down). Contains position, integrated charge
     x_spline: BSpline | None
@@ -71,10 +89,12 @@ class Cluster:
         self,
         event: int = -1,
         label: int = -1,
+        direction: Direction = Direction.NONE,
         data: np.ndarray = EMPTY_DATA,
     ):
         self.event = event
         self.label = label
+        self.direction = direction
         self.data = data
         self.x_spline: BSpline | None = None
         self.y_spline: BSpline | None = None
@@ -172,11 +192,12 @@ def convert_labeled_to_cluster(
         and second a list of indicies in the preciding
         cloud that were labeled as noise.
     """
-    cloud.point_cloud.sort_in_z()
-    data = np.zeros((len(cloud.point_cloud.cloud), 5))
-    data[:, :3] = cloud.point_cloud.cloud[:, :3]  # position
-    data[:, 3] = cloud.point_cloud.cloud[:, 4]  # peak integral
-    data[:, 4] = cloud.point_cloud.cloud[:, 7]  # scale (big or small)
-    cluster = Cluster(cloud.point_cloud.event_number, cloud.label, data)
+    # Joining can make point cloud unsorted
+    sort_point_cloud_in_z(cloud.point_cloud)
+    data = np.zeros((len(cloud.point_cloud), 5))
+    data[:, :3] = cloud.point_cloud.data[:, :3]  # position
+    data[:, 3] = cloud.point_cloud.data[:, 4]  # peak integral
+    data[:, 4] = cloud.point_cloud.data[:, 7]  # scale (big or small)
+    cluster = Cluster(cloud.point_cloud.event_number, cloud.label, cloud.direction, data)
     outliers = cluster.drop_outliers(params.outlier_scale_factor)
     return (cluster, outliers)

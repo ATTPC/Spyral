@@ -3,8 +3,9 @@
 ![CI](https://github.com/ATTPC/Spyral/actions/workflows/ci.yml/badge.svg)
 [![PyPI version shields.io](https://img.shields.io/pypi/v/attpc_spyral.svg)](https://pypi.python.org/pypi/attpc_spyral/)
 [![PyPI license](https://img.shields.io/pypi/l/attpc_spyral.svg)](https://pypi.python.org/pypi/attpc_spyral/)
+[![DOI](https://zenodo.org/badge/528950398.svg)](https://doi.org/10.5281/zenodo.14143006)
 
-Spyral is an analysis library for data from the Active Target Time Projection Chamber (AT-TPC). Spyral provides a flexible analysis pipeline, transforming the raw trace data into physical observables over several tunable steps. The analysis pipeline is also extensible, supporting a diverse array of datasets. Sypral can process multiple data files in parallel, allowing for scalable performance over larger experiment datasets.
+Spyral is an analysis library for data from the Active Target Time Projection Chamber (AT-TPC). Spyral provides a flexible analysis pipeline, transforming the raw trace data into physical observables over several tunable steps. The analysis pipeline is also extensible, supporting a diverse array of datasets. Spyral can process multiple data files in parallel, allowing for scalable performance over larger experiment datasets.
 
 ## Installation
 
@@ -32,13 +33,16 @@ The documentation for Spyral can be found [here](https://attpc.github.io/Spyral/
 For a full user guide and documentation with examples, see [our docs](https://attpc.github.io/Spyral/). Below is an example script of using Spyral with the default pipeline
 
 ```python
+import dotenv
+dotenv.load_dotenv()
+
 from spyral import (
     Pipeline,
     start_pipeline,
     PointcloudPhase,
     ClusterPhase,
     EstimationPhase,
-    InterpLeastSqSolverPhase,
+    InterpSolverPhase,
 )
 from spyral import (
     PadParameters,
@@ -46,10 +50,11 @@ from spyral import (
     FribParameters,
     DetectorParameters,
     ClusterParameters,
+    OverlapJoinParameters,
+    TripclustParameters,
     SolverParameters,
     EstimateParameters,
     DEFAULT_MAP,
-    DEFAULT_LEGACY_MAP,
 )
 
 from pathlib import Path
@@ -59,13 +64,12 @@ workspace_path = Path("/some/workspace/path/")
 trace_path = Path("/some/trace/path/")
 
 run_min = 94
-run_max = 94
+run_max = 97
 n_processes = 4
 
 pad_params = PadParameters(
     pad_geometry_path=DEFAULT_MAP,
     pad_time_path=DEFAULT_MAP,
-    pad_electronics_path=DEFAULT_MAP,
     pad_scale_path=DEFAULT_MAP,
 )
 
@@ -85,7 +89,6 @@ frib_params = FribParameters(
     peak_threshold=100.0,
     ic_delay_time_bucket=1100,
     ic_multiplicity=1,
-    correct_ic_time=True,
 )
 
 det_params = DetectorParameters(
@@ -102,13 +105,42 @@ det_params = DetectorParameters(
 
 cluster_params = ClusterParameters(
     min_cloud_size=50,
-    min_points=3,
-    min_size_scale_factor=0.05,
-    min_size_lower_cutoff=10,
-    cluster_selection_epsilon=10.0,
-    min_cluster_size_join=15,
-    circle_overlap_ratio=0.25,
-    outlier_scale_factor=0.05,
+    hdbscan_parameters = None,
+    # hdbscan_parameters = HdbscanParameters(
+    #     min_points=3,
+    #     min_size_scale_factor=0.03,
+    #     min_size_lower_cutoff=10,
+    #     cluster_selection_epsilon=10.0),
+    # overlap_join=OverlapJoinParameters(
+    #     min_cluster_size_join=15,
+    #     circle_overlap_ratio=0.25,
+    # ),
+    # continuity_join=None,
+    continuity_join = ContinuityJoinParameters(
+        join_radius_fraction=0.4,
+        join_z_fraction=0.2),
+    overlap_join=None,
+    outlier_scale_factor=0.1,
+    direction_threshold=0.5,
+    # tripclust_parameters=None,
+    tripclust_parameters=TripclustParameters(
+        r=6,
+        rdnn=True,
+        k=12,
+        n=3,
+        a=0.03,
+        s=0.3,
+        sdnn=True,
+        t=0.0,
+        tauto=True,
+        dmax=0.0,
+        dmax_dnn=False,
+        ordered=True,
+        link=0,
+        m=50,
+        postprocess=False,
+        min_depth=25,
+    ),
 )
 
 estimate_params = EstimateParameters(
@@ -130,6 +162,7 @@ solver_params = SolverParameters(
     fit_vertex_rho=True,
     fit_vertex_phi=True,
     fit_azimuthal=True,
+    fit_method="lbfgsb",
 )
 
 pipe = Pipeline(
@@ -142,7 +175,7 @@ pipe = Pipeline(
         ),
         ClusterPhase(cluster_params, det_params),
         EstimationPhase(estimate_params, det_params),
-        InterpLeastSqSolverPhase(solver_params, det_params),
+        InterpSolverPhase(solver_params, det_params),
     ],
     [True, True, True, True],
     workspace_path,
@@ -166,17 +199,18 @@ The core of Spyral is the Pipeline. A Pipeline in a complete description of an a
 
 ### Parallel Processing
 
-Spyral is capable of running multiple data files in parallel. This is acheived through the python `multiprocessing` library. In the `start_pipeline` function a parameter named `n_processors` indicates to Spyral the *maximum* number of processors which can be spawned. Spyral will then inspect the data load that was submitted in the configuration and attempt to balance the load across the processors as equally as possible.
+Spyral is capable of running multiple data files in parallel. This is achieved through the python `multiprocessing` library. In the `start_pipeline` function a parameter named `n_processors` indicates to Spyral the *maximum* number of processors which can be spawned. Spyral will then inspect the data load that was submitted in the configuration and attempt to balance the load across the processors as equally as possible.
 
 Some notes about parallel processing:
 
 - In job environments (SLURM, etc.), you won't want to have the typical progress display provided by Spyral. Set the `disable_display` argument of `start_pipeline` to `False` in this case.
 - In general, it is best if the number of data files to be processed is evenly divisible by the number of processors. Otherwise, by necessity, the work load will be uneven across the processors.
 - Spyral will sometimes run fewer processes than requested. This is usually in the case where the number of requested processors is greater than the number of files to be processed.
+- You will want to limit the number of threads available to BLAS, OpenMP, etc. using environment variables, typically stored in a `.env` file.
 
 ### Logs and Output
 
-Spyral creates a set of logfiles when it is run (located in the log directory of the workspace). These logfiles can contain critical information describing the state of Spyral. In particular, if Spyral has a crash, the logfiles can be useful for determining what went wrong. A logfile is created for each process (including the parent process). The files are labeld by process number (or as parent in the case of the parent).
+Spyral creates a set of logfiles when it is run (located in the log directory of the workspace). These logfiles can contain critical information describing the state of Spyral. In particular, if Spyral has a crash, the logfiles can be useful for determining what went wrong. A logfile is created for each process (including the parent process). The files are labeled by process number (or as parent in the case of the parent).
 
 ## Notebooks
 

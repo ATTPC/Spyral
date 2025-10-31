@@ -11,6 +11,7 @@ from spyral import (
     FribParameters,
     DetectorParameters,
     ClusterParameters,
+    ContinuityJoinParameters,
     SolverParameters,
     EstimateParameters,
     DEFAULT_MAP,
@@ -25,7 +26,6 @@ trace_path = Path(__file__).parent
 pad_params = PadParameters(
     pad_geometry_path=DEFAULT_MAP,
     pad_time_path=DEFAULT_MAP,
-    pad_electronics_path=DEFAULT_MAP,
     pad_scale_path=DEFAULT_MAP,
 )
 get_params = GetParameters(
@@ -43,7 +43,6 @@ frib_params = FribParameters(
     peak_threshold=100.0,
     ic_delay_time_bucket=1100,
     ic_multiplicity=1,
-    correct_ic_time=True,
 )
 det_params = DetectorParameters(
     magnetic_field=2.85,
@@ -58,13 +57,42 @@ det_params = DetectorParameters(
 )
 cluster_params = ClusterParameters(
     min_cloud_size=50,
-    min_points=3,
-    min_size_scale_factor=0.05,
-    min_size_lower_cutoff=10,
-    cluster_selection_epsilon=10.0,
-    min_cluster_size_join=15,
-    circle_overlap_ratio=0.5,
-    outlier_scale_factor=0.05,
+    hdbscan_parameters = None,
+    # hdbscan_parameters = HdbscanParameters(
+    #     min_points=3,
+    #     min_size_scale_factor=0.03,
+    #     min_size_lower_cutoff=10,
+    #     cluster_selection_epsilon=10.0),
+    # overlap_join=OverlapJoinParameters(
+    #     min_cluster_size_join=15,
+    #     circle_overlap_ratio=0.25,
+    # ),
+    # continuity_join=None,
+    continuity_join = ContinuityJoinParameters(
+        join_radius_fraction=0.4,
+        join_z_fraction=0.2),
+    overlap_join=None,
+    outlier_scale_factor=0.1,
+    direction_threshold=0.5,
+    # tripclust_parameters=None,
+    tripclust_parameters=TripclustParameters(
+        r=6,
+        rdnn=True,
+        k=12,
+        n=3,
+        a=0.03,
+        s=0.3,
+        sdnn=True,
+        t=0.0,
+        tauto=True,
+        dmax=0.0,
+        dmax_dnn=False,
+        ordered=True,
+        link=0,
+        m=50,
+        postprocess=False,
+        min_depth=25,
+    ),
 )
 estimate_params = EstimateParameters(
     min_total_trajectory_points=30, smoothing_factor=100.0
@@ -84,6 +112,7 @@ solver_params = SolverParameters(
     fit_vertex_rho=True,
     fit_vertex_phi=True,
     fit_azimuthal=True,
+    fit_method="lbfgsb",
 )
 
 

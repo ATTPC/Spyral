@@ -1,4 +1,5 @@
-from ..core.phase import PhaseLike, PhaseResult
+from ..core.phase import PhaseLike
+from ..core.schema import ResultSchema, PhaseResult
 from ..core.run_stacks import form_run_string
 from ..core.status_message import StatusMessage
 from ..core.config import (
@@ -13,9 +14,15 @@ from ..correction import (
     ElectronCorrector,
 )
 from ..core.spy_log import spyral_warn, spyral_info
-from ..trace.trace_reader import TraceReader
+from ..trace.trace_reader import create_reader
+from ..trace.frib_event import TriggerType
+from ..trace.peak import Peak
 from ..core.pad_map import PadMap
-from ..core.point_cloud import PointCloud
+from ..core.point_cloud import (
+    point_cloud_from_get,
+    calibrate_point_cloud_z,
+    sort_point_cloud_in_z,
+)
 from .schema import TRACE_SCHEMA, POINTCLOUD_SCHEMA
 
 import numpy as np
@@ -23,25 +30,6 @@ import h5py as h5
 
 from pathlib import Path
 from multiprocessing import SimpleQueue
-
-
-def get_event_range(trace_file: h5.File) -> tuple[int, int]:
-    """
-    The merger doesn't use attributes for legacy reasons, so everything is stored in datasets. Use this to retrieve the min and max event numbers.
-
-    Parameters
-    ----------
-    trace_file: h5py.File
-        File handle to a hdf5 file with AT-TPC traces
-
-    Returns
-    -------
-    tuple[int, int]
-        A pair of integers (first event number, last event number)
-    """
-    meta_group = trace_file.get("meta")
-    meta_data = meta_group.get("meta")  # type: ignore
-    return (int(meta_data[0]), int(meta_data[2]))  # type: ignore
 
 
 class PointcloudPhase(PhaseLike):
@@ -85,8 +73,8 @@ class PointcloudPhase(PhaseLike):
     ):
         super().__init__(
             "Pointcloud",
-            incoming_schema=TRACE_SCHEMA,
-            outgoing_schema=POINTCLOUD_SCHEMA,
+            incoming_schema=ResultSchema(TRACE_SCHEMA),
+            outgoing_schema=ResultSchema(POINTCLOUD_SCHEMA),
         )
         self.get_params = get_params
         self.frib_params = frib_params
@@ -113,8 +101,10 @@ class PointcloudPhase(PhaseLike):
         self, payload: PhaseResult, workspace_path: Path
     ) -> PhaseResult:
         result = PhaseResult(
-            artifact_path=self.get_artifact_path(workspace_path)
-            / f"{form_run_string(payload.run_number)}.h5",
+            artifacts={
+                "pointcloud": self.get_artifact_path(workspace_path)
+                / f"{form_run_string(payload.run_number)}.h5"
+            },
             successful=True,
             run_number=payload.run_number,
         )
@@ -129,7 +119,7 @@ class PointcloudPhase(PhaseLike):
     ) -> PhaseResult:
         # Copy phase_pointcloud.py here
         # Check that the traces exist
-        trace_path = payload.artifact_path
+        trace_path = payload.artifacts["trace"]
         if not trace_path.exists():
             spyral_warn(
                 __name__,
@@ -139,8 +129,10 @@ class PointcloudPhase(PhaseLike):
 
         # Open files
         result = self.construct_artifact(payload, workspace_path)
-        trace_reader = TraceReader(trace_path)
-        point_file = h5.File(result.artifact_path, "w")
+        trace_reader = create_reader(trace_path, payload.run_number)
+        if trace_reader is None:
+            return PhaseResult.invalid_result(payload.run_number)
+        point_file = h5.File(result.artifacts["pointcloud"], "w")
 
         # Load electric field correction
         corrector: ElectronCorrector | None = None
@@ -148,10 +140,10 @@ class PointcloudPhase(PhaseLike):
             corrector = create_electron_corrector(self.electron_correction_path)
 
         cloud_group = point_file.create_group("cloud")
-        cloud_group.attrs["min_event"] = trace_reader.min_event
-        cloud_group.attrs["max_event"] = trace_reader.max_event
+        cloud_group.attrs["min_event"] = trace_reader.first_event()
+        cloud_group.attrs["max_event"] = trace_reader.last_event()
 
-        nevents = trace_reader.max_event - trace_reader.min_event + 1
+        nevents = len(trace_reader)
         total: int
         flush_val: int
         if nevents < 100:
@@ -168,6 +160,8 @@ class PointcloudPhase(PhaseLike):
             self.name, 1, total, payload.run_number
         )  # We always increment by 1
 
+        ic_within_mult_count = 0
+
         # Process the data
         for idx in trace_reader.event_range():
             count += 1
@@ -176,95 +170,55 @@ class PointcloudPhase(PhaseLike):
                 msg_queue.put(msg)
 
             event = trace_reader.read_event(idx, self.get_params, self.frib_params, rng)
-            if event.get is None:
+            ic_mult = -1.0
+            ic_peak: None | Peak = None
+            if (
+                event.frib is not None
+                and event.frib.trigger == TriggerType.IC_DOWNSCALE_TRIGGER
+            ):
+                ic_mult = event.frib.get_ic_multiplicity(self.frib_params)
+                ic_peak = event.frib.get_triggering_ic_peak(self.frib_params)
+                if (
+                    ic_mult > 0
+                    and ic_mult <= self.frib_params.ic_multiplicity
+                    and ic_peak is not None
+                ):  # ugh
+                    ic_within_mult_count += 1
+                continue
+            if event.get_pads is None:
                 continue
 
-            pc = PointCloud()
-            pc.load_cloud_from_get_event(event.get, self.pad_map)
+            # Convert traces to pointcloud
+            cloud = point_cloud_from_get(event.get_pads, self.pad_map)
+            # Calibrate the time to z-position
+            calibrate_point_cloud_z(cloud, self.det_params, corrector)
+            # Sort the cloud in z
+            sort_point_cloud_in_z(cloud)
 
             pc_dataset = cloud_group.create_dataset(
-                f"cloud_{pc.event_number}", shape=pc.cloud.shape, dtype=np.float64
+                f"cloud_{cloud.event_number}", data=cloud.data
             )
-
+            # Store original run and event info
+            pc_dataset.attrs["orig_run"] = event.original_run
+            pc_dataset.attrs["orig_event"] = event.original_event
             # default IC settings
             pc_dataset.attrs["ic_amplitude"] = -1.0
             pc_dataset.attrs["ic_integral"] = -1.0
             pc_dataset.attrs["ic_centroid"] = -1.0
             pc_dataset.attrs["ic_multiplicity"] = -1.0
 
-            # Now analyze FRIBDAQ data
-            if event.frib is None:
-                pc.calibrate_z_position(
-                    self.det_params.micromegas_time_bucket,
-                    self.det_params.window_time_bucket,
-                    self.det_params.detector_length,
-                    corrector,
-                )
-                pc_dataset[:] = pc.cloud
-                continue
-
-            # Handle IC analysis cases
-            # First check if IC correction is not on
-            if self.frib_params.correct_ic_time:
-                # IC correction is on, extract good IC peak with Si coincidence imposed
-                good_ic = event.frib.get_good_ic_peak(self.frib_params)
-                if good_ic is None:
-                    # There is no good IC peak, skip
-                    pc.calibrate_z_position(
-                        self.det_params.micromegas_time_bucket,
-                        self.det_params.window_time_bucket,
-                        self.det_params.detector_length,
-                        corrector,
-                    )
-                    pc_dataset[:] = pc.cloud
-                    continue
-                # Good IC found, get the peak and multiplicity
-                peak = good_ic[1]
-                mult = good_ic[0]
-                pc_dataset.attrs["ic_amplitude"] = peak.amplitude
-                pc_dataset.attrs["ic_integral"] = peak.integral
-                pc_dataset.attrs["ic_centroid"] = peak.centroid
-                pc_dataset.attrs["ic_multiplicity"] = mult
-
-                ic_cor = event.frib.correct_ic_time(
-                    peak, self.frib_params, self.det_params.get_frequency
-                )
-                # Apply IC correction to time calibration, if correction is less than the
-                # total length of the GET window in TB
-                if ic_cor < 512.0:
-                    pc.calibrate_z_position(
-                        self.det_params.micromegas_time_bucket,
-                        self.det_params.window_time_bucket,
-                        self.det_params.detector_length,
-                        corrector,
-                        ic_cor,
-                    )
-                else:
-                    pc.calibrate_z_position(
-                        self.det_params.micromegas_time_bucket,
-                        self.det_params.window_time_bucket,
-                        self.det_params.detector_length,
-                        corrector,
-                    )
-            else:
-                # No IC correction, so we calibrate z without it
-                pc.calibrate_z_position(
-                    self.det_params.micromegas_time_bucket,
-                    self.det_params.window_time_bucket,
-                    self.det_params.detector_length,
-                    corrector,
-                )
-                # Get triggering IC, no Si conicidence imposed
-                ic_mult = event.frib.get_ic_multiplicity(self.frib_params)
+            if event.frib is not None:
                 ic_peak = event.frib.get_triggering_ic_peak(self.frib_params)
+                ic_mult = event.frib.get_ic_multiplicity(self.frib_params)
                 # Check multiplicity condition and existence of trigger
-                if ic_mult <= self.frib_params.ic_multiplicity and ic_peak is not None:
+                if (
+                    ic_mult > 0.0 and ic_mult <= self.frib_params.ic_multiplicity
+                ) and ic_peak is not None:
                     pc_dataset.attrs["ic_amplitude"] = ic_peak.amplitude
                     pc_dataset.attrs["ic_integral"] = ic_peak.integral
                     pc_dataset.attrs["ic_centroid"] = ic_peak.centroid
                     pc_dataset.attrs["ic_multiplicity"] = ic_mult
 
-            pc_dataset[:] = pc.cloud
         # End of event data
 
         # Process scaler data if it exists
@@ -275,9 +229,17 @@ class PointcloudPhase(PhaseLike):
                 / f"{form_run_string(payload.run_number)}_scaler.parquet"
             )
         else:
-            spyral_warn(
-                __name__, f"Run {payload.run_number} does not have scaler data!"
+            spyral_info(__name__, f"Run {payload.run_number} does not have scaler data")
+
+        gated_ic_path = (
+            self.get_artifact_path(workspace_path)
+            / f"{form_run_string(payload.run_number)}_gated_ic_scaler.txt"
+        )
+        with open(gated_ic_path, "w") as gated_ic_file:
+            gated_ic_file.write(
+                f"IC counts with multiplicity <= {self.frib_params.ic_multiplicity}\n"
             )
+            gated_ic_file.write(f"{ic_within_mult_count}")
 
         spyral_info(__name__, f"Phase Pointcloud complete for run {payload.run_number}")
         return result

@@ -1,4 +1,4 @@
-from .cluster import Cluster
+from .cluster import Cluster, Direction
 from .config import DetectorParameters, EstimateParameters
 from ..geometry.circle import generate_circle_points, least_squares_circle
 from .spy_log import spyral_warn
@@ -6,25 +6,86 @@ from .spy_log import spyral_warn
 import numpy as np
 import math
 from scipy.stats import linregress
-from enum import Enum
+from dataclasses import dataclass
 
 
-class Direction(Enum):
-    """Enum for the direction of a trajectory
+@dataclass
+class EstimateResult:
+    """Container for results of estimation algorithm with metadata
 
     Attributes
     ----------
-    NONE: int
-        Invalid value (-1)
-    FORWARD: int
-        Trajectory traveling in the positive z-direction (0)
-    BACKWARD: int
-        Trajectory traveling in the negative z-direction (1)
+    event: int
+        The event number
+    cluster_index: int
+        The cluster index
+    cluster_label: int
+        The label from the clustering algorithm
+    orig_run: int
+        The original run number
+    orig_event: int
+        The original event number
+    ic_amplitude: float
+        The ion chamber signal amplitude
+    ic_centroid: float
+        The ion chamber signal centroid
+    ic_integral: float
+        The ion chamber signal integral
+    ic_multiplicity: float
+        The ion chamber signal multiplicity
+    vertex_x: float
+        The vertex x position (mm)
+    vertex_y: float
+        The vertex y position (mm)
+    vertex_z: float
+        The vertex z position (mm)
+    center_x: float
+        The center x position (mm)
+    center_y: float
+        The center y position (mm)
+    center_z: float
+        The center z position (mm)
+    polar: float
+        The trajectory polar angle (radians)
+    azimuthal: float
+        The trajectory azimuthal angle (radians)
+    brho: float
+        The magnetic rigidity (Tm)
+    dEdx: float
+        The relative energy loss per mm (arb)
+    sqrt_dEdx: float
+        The square root of the relative energy loss per mm (arb)
+    dE: float
+        The relative energy loss
+    arclength: float
+        The pathlength of the first arc in mm
+    direction: int
+        The direction value
     """
 
-    NONE = -1  # type: ignore
-    FORWARD = 0  # type: ignore
-    BACKWARD = 1  # type: ignore
+    event: int
+    cluster_index: int
+    cluster_label: int
+    orig_run: int
+    orig_event: int
+    ic_amplitude: float
+    ic_centroid: float
+    ic_integral: float
+    ic_multiplicity: float
+    vertex_x: float
+    vertex_y: float
+    vertex_z: float
+    center_x: float
+    center_y: float
+    center_z: float
+    polar: float
+    azimuthal: float
+    brho: float
+    dEdx: float
+    sqrt_dEdx: float
+    dE: float
+    arclength: float
+    direction: int
 
 
 def estimate_physics(
@@ -34,10 +95,11 @@ def estimate_physics(
     ic_centroid: float,
     ic_integral: float,
     ic_multiplicity: float,
+    orig_run: int,
+    orig_event: int,
     estimate_params: EstimateParameters,
     detector_params: DetectorParameters,
-    results: dict[str, list],
-):
+) -> EstimateResult | None:
     """Entry point for estimation
 
     This is the parent function for estimation. It handles checking that the data
@@ -56,15 +118,21 @@ def estimate_physics(
         The ion chamber centroid for this cluster
     ic_integral:
         The ion chamber integral for this cluster
+    orig_run:
+        The original event run number
+    orig_event:
+        The original event number
     detector_params:
         Configuration parameters for the physical detector properties
-    results: dict[str, int]
-        Dictionary to store estimation results in
 
+    Returns
+    -------
+    EstimationResult | None
+        The resulting estimated data, or None if the algorithm failed
     """
     # Check if we have enough points to estimate
     if len(cluster.data) < estimate_params.min_total_trajectory_points:
-        return
+        return None
     # Generate smoothing splines, these will give us better distance measures
     try:
         cluster.apply_smoothing_splines(estimate_params.smoothing_factor)
@@ -77,69 +145,21 @@ def estimate_physics(
             __name__,
             f"Spline creation failed for event {cluster.event} with error: {e}",
         )
-        return
+        return None
 
     # Run estimation where we attempt to guess the right direction
-    is_good, direction = estimate_physics_pass(
+    result = estimate_physics_pass(
         cluster_index,
         cluster,
         ic_amplitude,
         ic_centroid,
         ic_integral,
         ic_multiplicity,
+        orig_run,
+        orig_event,
         detector_params,
-        results,
     )
-
-    # If estimation was consistent or didn't meet valid criteria we're done
-    if is_good or (not is_good and direction == Direction.NONE):
-        return
-    # If we made a bad guess, try the other direction
-    elif direction == Direction.FORWARD:
-        estimate_physics_pass(
-            cluster_index,
-            cluster,
-            ic_amplitude,
-            ic_centroid,
-            ic_integral,
-            ic_multiplicity,
-            detector_params,
-            results,
-            Direction.BACKWARD,
-        )
-    else:
-        estimate_physics_pass(
-            cluster_index,
-            cluster,
-            ic_amplitude,
-            ic_centroid,
-            ic_integral,
-            ic_multiplicity,
-            detector_params,
-            results,
-            Direction.FORWARD,
-        )
-
-
-def choose_direction(cluster_data: np.ndarray) -> Direction:
-    """Choose a direction for the trajectory based on which end of the data is in-spiraling
-
-    Parameters
-    ----------
-    cluster_data: np.ndarray
-        T
-
-    """
-    rhos = np.linalg.norm(cluster_data[:, :2], axis=1)  # cylindrical coordinates rho
-    direction = Direction.NONE
-
-    # See if in-spiraling to the window or microgmegas, sets the direction and guess of z-vertex
-    if rhos[0] < rhos[-1]:
-        direction = Direction.FORWARD
-    else:
-        direction = Direction.BACKWARD
-
-    return direction
+    return result
 
 
 def estimate_physics_pass(
@@ -149,10 +169,10 @@ def estimate_physics_pass(
     ic_centroid: float,
     ic_integral: float,
     ic_multiplicity: float,
+    orig_run: int,
+    orig_event: int,
     detector_params: DetectorParameters,
-    results: dict[str, list],
-    chosen_direction: Direction = Direction.NONE,
-) -> tuple[bool, Direction]:
+) -> EstimateResult:
     """Estimate the physics parameters for a cluster which could represent a particle trajectory
 
     Estimation is an imprecise process (by definition), and as such this algorithm requires a lot of
@@ -164,23 +184,36 @@ def estimate_physics_pass(
         The cluster index in the HDF5 file.
     cluster: Cluster
         The cluster to estimate
-    ic_amplitude:
+    ic_amplitude: float
         The ion chamber amplitude for this cluster
-    ic_centroid:
+    ic_centroid: float
         The ion chamber centroid for this cluster
-    ic_integral:
+    ic_integral: float
         The ion chamber integral for this cluster
-    detector_params:
+    ic_multiplicity: float
+        The ion chamber multiplicity for this cluster
+    orig_run: int
+        The original run number
+    orig_event: int
+        The original event number
+    detector_params: DetectorParameters
         Configuration parameters for the physical detector properties
-    results: dict[str, int]
-        Dictionary to store estimation results in
     chosen_direction: Direction, default=Direction.NONE
         Optional direction for the trajectory. Default
         estimates the direction.
 
+    Returns
+    -------
+    EstimateResult | Direction
+        Returns a the estimated parameters, or Direction if the algorithm failed.
+        The Direction indicates which direction the algorithm attempted to use for
+        estimation
+
     """
 
-    direction = chosen_direction
+    direction = cluster.direction # We already know the direction from the clustering phase
+    if direction == Direction.NONE: # We could not determine the direction of the track
+        return None
     vertex = np.array([0.0, 0.0, 0.0])  # reaction vertex
     center = np.array([0.0, 0.0, 0.0])  # spiral center
     # copy the data so we can modify it without worrying about side-effects
@@ -188,8 +221,8 @@ def estimate_physics_pass(
 
     # If chosen direction is set to NONE, we want to have the algorithm
     # try to decide which direction the trajectory is going
-    if direction == Direction.NONE:
-        direction = choose_direction(cluster_data)
+    # if direction == Direction.NONE:
+    #     direction = choose_direction(cluster_data)
 
     if direction == Direction.BACKWARD:
         cluster_data = np.flip(cluster_data, axis=0)
@@ -224,23 +257,18 @@ def estimate_physics_pass(
     # Since we fit to rho_to_vertex, just find intercept point
     # Check to see if slope is zero, as this can lead to NaN's
     if fit.slope == 0.0:  # type: ignore
-        return (False, Direction.NONE)
+        return None
     vertex[2] = -1.0 * fit.intercept / fit.slope  # type: ignore
     center[2] = vertex[2]
 
     # Toss tracks whose verticies are not close to the origin in x,y
     if vertex_rho > detector_params.beam_region_radius:
-        return (False, Direction.NONE)
+        return None
 
     polar = math.atan(fit.slope)  # type: ignore
     # We have a self consistency case here. Polar should match chosen Direction
-    if (polar > 0.0 and direction == Direction.BACKWARD) or (
-        polar < 0.0 and direction == Direction.FORWARD
-    ):
-        return (
-            False,
-            direction,
-        )  # Our direction guess was bad, we need to try again with the other direction
+    if (polar > 0.0 and direction == Direction.BACKWARD) or (polar < 0.0 and direction == Direction.FORWARD):
+        return None # Our direction guess was bad, we need to try again with the other direction
     elif direction is Direction.BACKWARD:
         polar += math.pi
 
@@ -269,7 +297,7 @@ def estimate_physics_pass(
         # arclength += np.linalg.norm(first_arc[idx + 1, :3] - first_arc[idx, :3])
         charge_deposited += first_arc[idx + 1, 3]
     if charge_deposited == first_arc[0, 3]:
-        return (False, Direction.NONE)
+        return None
 
     # Use the splines to do a fine-grained line integral to calculate the distance
     points = np.empty((1000, 3))
@@ -281,25 +309,28 @@ def estimate_physics_pass(
     dEdx = charge_deposited / arclength
 
     # fill in our map
-    results["event"].append(cluster.event)
-    results["cluster_index"].append(cluster_index)
-    results["cluster_label"].append(cluster.label)
-    results["ic_amplitude"].append(ic_amplitude)
-    results["ic_centroid"].append(ic_centroid)
-    results["ic_integral"].append(ic_integral)
-    results["ic_multiplicity"].append(ic_multiplicity)
-    results["vertex_x"].append(vertex[0])
-    results["vertex_y"].append(vertex[1])
-    results["vertex_z"].append(vertex[2])
-    results["center_x"].append(center[0])
-    results["center_y"].append(center[1])
-    results["center_z"].append(center[2])
-    results["polar"].append(polar)
-    results["azimuthal"].append(azimuthal)
-    results["brho"].append(brho)
-    results["dEdx"].append(dEdx)
-    results["sqrt_dEdx"].append(np.sqrt(np.fabs(dEdx)))
-    results["dE"].append(charge_deposited)
-    results["arclength"].append(arclength)
-    results["direction"].append(direction.value)
-    return (True, direction)
+    return EstimateResult(
+            event=cluster.event,
+            cluster_index=cluster_index,
+            cluster_label=cluster.label,
+            orig_run=orig_run,
+            orig_event=orig_event,
+            ic_amplitude=ic_amplitude,
+            ic_centroid=ic_centroid,
+            ic_integral=ic_integral,
+            ic_multiplicity=ic_multiplicity,
+            vertex_x=vertex[0],
+            vertex_y=vertex[1],
+            vertex_z=vertex[2],
+            center_x=center[0],
+            center_y=center[1],
+            center_z=center[2],
+            polar=polar,
+            azimuthal=azimuthal,
+            brho=brho,
+            dEdx=dEdx,
+            sqrt_dEdx=np.sqrt(np.fabs(dEdx)),
+            dE=charge_deposited,
+            arclength=arclength,
+            direction=direction.value,
+        )

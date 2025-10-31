@@ -6,7 +6,6 @@ The AT-TPC Pad Plane mapping of electronics channel to physical pad is controlle
 pad_params = PadParameters(
     pad_geometry_path=DEFAULT_MAP,
     pad_time_path=DEFAULT_MAP,
-    pad_electronics_path=DEFAULT_MAP,
     pad_scale_path=DEFAULT_MAP,
 )
 ```
@@ -20,10 +19,6 @@ This is the path to a `.csv` file containing the mapping of pad number to X-Y co
 ## pad_time_path
 
 This is the path to a `.csv` file containing the mapping of pad number to a time offset. This corrects for small jitters in the timestamp on a channel by channel basis. This is parameter is currently under investigation for it's impact.
-
-## pad_electronics_path
-
-This is the path to a `.csv` file containing the mapping of pad number to electronics hardware. This file is more of a utility for validating checking data and uses in plotting.
 
 ## pad_scale_path
 

@@ -19,7 +19,6 @@ frib_params = FribParameters(
     peak_threshold=100.0,
     ic_delay_time_bucket=1100,
     ic_multiplicity=1,
-    correct_ic_time=True,
 )
 ```
 
@@ -52,7 +51,3 @@ This is the delay to the ion chamber singal in units of FRIBDAQ time buckets. An
 ## event_ic_multiplicity
 
 The maximum allowed ion chamber multiplicity for an event. In general, AT-TPC experiments would only allow for one ion chamber hit per event. This is only available to FRIB data.
-
-## event_correct_ic_time
-
-Turn on/off the ion chamber time correction. Sometimes, the wrong beam triggers the event start in the AT-TPC. This can be corrected using the correlation between downstream silicon and the ion chamber. `true` turns the correction on, `false` turns the correction off. Note that the ion chamber-silicon coincidence is *only* applied when this parameter is set to true. Otherwise, the raw ion chamber signal is analyzed and *all* peaks found in that signal (after the delay of `ic_delay_time_bucket`) count towards the ion chamber multiplicity. This is only available to FRIB data.

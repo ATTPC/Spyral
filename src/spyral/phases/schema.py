@@ -1,60 +1,132 @@
-from ..core.phase import ArtifactSchema
-
 HDF5_EXTENSION = ".h5"
 PARQUET_EXTENSION = ".parquet"
 
-TRACE_SCHEMA = ArtifactSchema(HDF5_EXTENSION, {"get": "evt", "frib": {"evt", "scaler"}})
+TRACE_SCHEMA = """
+{
+    "trace":
+    {
+        "extension": ".h5",
+        "data":
+        {
+            "get": "array",
+            "frib": "array"
+        }
+    }
+}
+"""
 
-POINTCLOUD_SCHEMA = ArtifactSchema(HDF5_EXTENSION, {"cloud": "cloud"})
+POINTCLOUD_SCHEMA = """
+{
+    "pointcloud":
+    {
+        "extension": ".h5",
+        "data":
+        {
+            "cloud":
+            {
+                "cloud": "array"
+            }
+        }
+    }
+}
+"""
 
-CLUSTER_SCHEMA = ArtifactSchema(HDF5_EXTENSION, {"cluster": {"event": "cluster"}})
+CLUSTER_SCHEMA = """
+{
+    "cluster":
+    {
+        "extension": ".h5",
+        "data":
+        {
+            "cluster":
+            {
+                "event": 
+                {
+                    "cluster": "array"
+                }
+            }
+        }
+    }
+}
+"""
 
-ESTIMATE_SCHEMA = ArtifactSchema(
-    PARQUET_EXTENSION,
-    [
-        "event" "cluster_index",
-        "cluster_label",
-        "ic_amplitude",
-        "ic_centroid",
-        "ic_integral",
-        "ic_multiplicity",
-        "vertex_x",
-        "vertex_y",
-        "vertex_z",
-        "center_x",
-        "center_y",
-        "center_z",
-        "polar",
-        "azimuthal",
-        "brho",
-        "dEdx",
-        "sqrt_dEdx",
-        "dE",
-        "arclength",
-        "direction",
-    ],
-)
+ESTIMATE_SCHEMA = """
+{
+    "estimation": 
+    {
+        "extension": ".parquet",
+        "data":
+        {
+            "event": "int", 
+            "cluster_index": "int",
+            "cluster_label": "int",
+            "orig_run": "int",
+            "orig_event": "int",
+            "ic_amplitude": "float",
+            "ic_centroid": "float",
+            "ic_integral": "float",
+            "ic_multiplicity": "float",
+            "vertex_x": "float",
+            "vertex_y": "float",
+            "vertex_z": "float",
+            "center_x": "float",
+            "center_y": "float",
+            "center_z": "float",
+            "polar": "float",
+            "azimuthal": "float",
+            "brho": "float",
+            "dEdx": "float",
+            "sqrt_dEdx": "float",
+            "dE": "float",
+            "arclength": "float",
+            "direction": "int"
+        }
+    },
+    "cluster":
+    {
+        "extension": ".h5",
+        "data":
+        {
+            "cluster":
+            {
+                "event": 
+                {
+                    "cluster": "array"
+                }
+            }
+        }
+    }
+}
+"""
 
-INTERP_SOLVER_SCHEMA = ArtifactSchema(
-    PARQUET_EXTENSION,
-    [
-        "event",
-        "cluster_index",
-        "cluster_label",
-        "vertex_x",
-        "sigma_vx",
-        "vertex_y",
-        "sigma_vy",
-        "vertex_z",
-        "sigma_vz",
-        "brho",
-        "sigma_brho",
-        "ke",
-        "sigma_ke",
-        "polar",
-        "sigma_polar",
-        "azimuthal",
-        "sigma_azimuthal",
-        "redchisq",
-    ],
-)
+INTERP_SOLVER_SCHEMA = """
+{
+    "interp_solver":
+    {
+        "extension": ".parquet",
+        "data":
+        {
+            "event": "int",
+            "cluster_index": "int",
+            "cluster_label": "int",
+            "orig_run": "int",
+            "orig_event": "int",
+            "vertex_x": "float",
+            "sigma_vx": "float",
+            "vertex_y": "float",
+            "sigma_vy": "float",
+            "vertex_z": "float",
+            "sigma_vz": "float",
+            "brho": "float",
+            "sigma_brho": "float",
+            "ke": "float",
+            "sigma_ke": "float",
+            "polar": "float",
+            "sigma_polar": "float",
+            "azimuthal": "float",
+            "sigma_azimuthal": "float",
+            "redchisq": "float"
+        }
+    }
+}
+"""

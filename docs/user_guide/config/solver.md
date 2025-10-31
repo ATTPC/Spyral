@@ -1,6 +1,6 @@
 # Solver Configuration
 
-The Solver parameters control the solving phase of the analysis. The default solver parameters in `config.json` are:
+The Solver parameters control the solving phase of the analysis.
 
 ```python
 solver_params = SolverParameters(
@@ -18,6 +18,7 @@ solver_params = SolverParameters(
     fit_vertex_rho=True,
     fit_vertex_phi=True,
     fit_azimuthal=True,
+    fit_method="lbfgsb",
 )
 ```
 
@@ -29,58 +30,9 @@ A break down of each parameter:
 
 Path to a JSON file containing the following [spyral-utils](https://attpc.github.io/spyral-utils) format
 
-```json
-{
-    "compound": [
-        [1, 2, 2]
-    ],
-    "pressure(Torr)": 300.0,
-    "thickness(ug/cm^2)": null
-}
-```
-
-`compound` is a list of [Z, A, S] (atomic number, mass number, stoichiometry) specifying the compound of the gas. `pressure(Torr)` is the gas pressure in Torr. `thickness` is not used and should be set to `null`. This completely specifies the active target gas to Spyral. The above data describes <sup>1</sup>H<sub>2</sub> gas at 300 Torr.
-
 ## particle_id_filename
 
 Name of a JSON file containing the following [spyral-utils](https://attpc.github.io/spyral-utils) format
-
-```json
-{
-    "name": "my_pid",
-    "Z": 1,
-    "A": 1,
-    "vertices": [
-        [0.0, 0.0],
-        [1.0, 0.0],
-        [1.0, 1.0],
-        [0.0, 1.0],
-        [0.0, 0.0]
-    ]
-}
-```
-
-`name` is the name of the gate, `Z` is the atomic number of the particle in the gate, `A` is the mass number, and `verticies` is a list of points which form a closed polygon in B&rho;-dEdx. The above data describes protons in a very silly box. Note that the first and last point in verticies should be the same. Additionally, you can specify the xaxis and yaxis of the cut as
-
-```json
-{
-    "name": "my_pid",
-    "Z": 1,
-    "A": 1,
-    "xaxis": "dEdx",
-    "yaxis": "brho",
-    "vertices": [
-        [0.0, 0.0],
-        [1.0, 0.0],
-        [1.0, 1.0],
-        [0.0, 1.0],
-        [0.0, 0.0]
-    ]
-}
-```
-
-This allows you to specify which columns of the estimation dataframe are used to make the cut. The names of the axes should match *exactly* with the names of columns in the data frame (see [here](../phases/estimate.md) for a list of column names). Note that you do not need to specify axes; if not specified the default (dEdx vs. brho) will be used.
-
 Typically gates are made using the [particle ID notebook](https://github.com/ATTPC/spyral_notebooks).
 
 ## ic_min_val
@@ -93,11 +45,13 @@ The maximum value for the ion chamber amplitude. Used to make a gate on beam spe
 
 ## ode_times_steps
 
-The number of timesteps for each individual solution. More timesteps is a finer-grained solution, providing more precision at the cost of higher memory usage.
+The number of timesteps for each individual solution. More timesteps is a finer-grained solution, providing more precision at the cost of higher memory
+usage.
 
 ## interp_ke_min(MeV)
 
-Minimum kinetic energy (MeV) of the ODE mesh for the solver. This is the minimum energy of a particle for which this solver will work. In units of MeV.
+Minimum kinetic energy (MeV) of the ODE mesh for the solver. This is the minimum energy of a particle for which this solver will work. In units of
+MeV.
 
 ## interp_ke_max(MeV)
 
@@ -109,11 +63,13 @@ Number of kinetic energy bins of the ODE mesh for the solver. This is the coarse
 
 ## interp_polar_min
 
-Minimum polar angle (degrees) of the ODE mesh for the solver. This is the minimum polar angle of a particle for which this solver will work. In units of degrees.
+Minimum polar angle (degrees) of the ODE mesh for the solver. This is the minimum polar angle of a particle for which this solver will work. In units
+of degrees.
 
 ## interp_polar_max
 
-Maximum polar angle (degrees) of the ODE mesh for the solver. This is the maximum polar angle of a particle for which this solver will work. In units of degrees.
+Maximum polar angle (degrees) of the ODE mesh for the solver. This is the maximum polar angle of a particle for which this solver will work. In units
+of degrees.
 
 ## interp_polar_bins
 
@@ -121,12 +77,26 @@ Number of polar angle bins of the ODE mesh for the solver. This is the coarsenes
 
 ## fit_vertex_rho
 
-A boolean switch telling the solver whether or not the vertex &rho; should be included in the fit. In testing the simulation has indicated that the poisition of the vertex in the x-y plane (for the fit we use rho and phi because they are easier to define bounds for) is not well constrained and may cause overfitting. Data analysis has indicated *somewhat* the other direction, that it does seem to have some impact. User discretion should be used to determine if this parameter is important for your data. True turns on this variable for the fit, False holds it constant.
+A boolean switch telling the solver whether or not the vertex &rho; should be included in the fit. In testing the simulation has indicated that the
+poisition of the vertex in the x-y plane (for the fit we use rho and phi because they are easier to define bounds for) is not well constrained and may
+cause overfitting. Data analysis has indicated *somewhat* the other direction, that it does seem to have some impact. User discretion should be used to
+determine if this parameter is important for your data. True turns on this variable for the fit, False holds it constant.
 
 ## fit_vertex_phi
 
-A boolean switch telling the solver whether or not the vertex &phi; should be included in the fit. In testing the simulation has indicated that the poisition of the vertex in the x-y plane (for the fit we use rho and phi because they are easier to define bounds for) is not well constrained and may cause overfitting. Data analysis has indicated *somewhat* the other direction, that it does seem to have some impact. User discretion should be used to determine if this parameter is important for your data. True turns on this variable for the fit, False holds it constant.
+A boolean switch telling the solver whether or not the vertex &phi; should be included in the fit. In testing the simulation has indicated that the
+poisition of the vertex in the x-y plane (for the fit we use rho and phi because they are easier to define bounds for) is not well constrained and may
+cause overfitting. Data analysis has indicated *somewhat* the other direction, that it does seem to have some impact. User discretion should be used
+to determine if this parameter is important for your data. True turns on this variable for the fit, False holds it constant.
 
 ## fit_azimuthal
 
-A boolean switch telling the solver whether or not the trajectory azimuthal angle; should be included in the fit. In testing the simulation has indicated that the azimuthal angle is not impacted by the fit and may cause overfitting. Data analysis has indicated *somewhat* the other direction, that it does seem to have some impact. User discretion should be used to determine if this parameter is important for your data. True turns on this variable for the fit, False holds it constant.
+A boolean switch telling the solver whether or not the trajectory azimuthal angle; should be included in the fit. In testing the simulation has
+indicated that the azimuthal angle is not impacted by the fit and may cause overfitting. Data analysis has indicated *somewhat* the other direction,
+that it does seem to have some impact. User discretion should be used to determine if this parameter is important for your data. True turns on this
+variable for the fit, False holds it constant.
+
+## fit_method
+
+Which fit method to use. Options are "lbfgsb" or "leastsq". See the [phase docs](../phases/solve.md) for more details.
+
