@@ -355,6 +355,7 @@ class InterpSolverPhase(PhaseLike):
             cluster = Cluster(
                 event,
                 local_cluster.attrs["label"],  # type: ignore
+                local_cluster.attrs["direction"], # type: ignore
                 local_cluster["cloud"][:].copy(),  # type: ignore
             )
             orig_run = estimates_gated["orig_run"][row]
