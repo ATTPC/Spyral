@@ -285,7 +285,7 @@ class InterpSolverPhase(PhaseLike):
         # Select the particle group data, beam region of ic, convert to dictionary for row-wise operations
         estimates_gated = (
             estimate_df.filter(
-                pl.struct([xaxis, yaxis]).map_batches(pid.cut.is_cols_inside)
+                pl.struct([xaxis, yaxis]).map_batches(pid.cut.is_cols_inside, return_dtype=bool)
                 & (pl.col("ic_amplitude") > self.solver_params.ic_min_val)
                 & (pl.col("ic_amplitude") < self.solver_params.ic_max_val)
             )
@@ -355,6 +355,7 @@ class InterpSolverPhase(PhaseLike):
             cluster = Cluster(
                 event,
                 local_cluster.attrs["label"],  # type: ignore
+                local_cluster.attrs["direction"], # type: ignore
                 local_cluster["cloud"][:].copy(),  # type: ignore
             )
             orig_run = estimates_gated["orig_run"][row]

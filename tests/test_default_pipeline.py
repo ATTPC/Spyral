@@ -57,16 +57,42 @@ det_params = DetectorParameters(
 )
 cluster_params = ClusterParameters(
     min_cloud_size=50,
-    min_points=3,
-    min_size_scale_factor=0.05,
-    min_size_lower_cutoff=10,
-    cluster_selection_epsilon=10.0,
+    hdbscan_parameters = None,
+    # hdbscan_parameters = HdbscanParameters(
+    #     min_points=3,
+    #     min_size_scale_factor=0.03,
+    #     min_size_lower_cutoff=10,
+    #     cluster_selection_epsilon=10.0),
+    # overlap_join=OverlapJoinParameters(
+    #     min_cluster_size_join=15,
+    #     circle_overlap_ratio=0.25,
+    # ),
+    # continuity_join=None,
+    continuity_join = ContinuityJoinParameters(
+        join_radius_fraction=0.4,
+        join_z_fraction=0.2),
     overlap_join=None,
-    continuity_join=ContinuityJoinParameters(
-        join_radius_fraction=0.3,
-        join_z_fraction=0.2,
+    outlier_scale_factor=0.1,
+    direction_threshold=0.5,
+    # tripclust_parameters=None,
+    tripclust_parameters=TripclustParameters(
+        r=6,
+        rdnn=True,
+        k=12,
+        n=3,
+        a=0.03,
+        s=0.3,
+        sdnn=True,
+        t=0.0,
+        tauto=True,
+        dmax=0.0,
+        dmax_dnn=False,
+        ordered=True,
+        link=0,
+        m=50,
+        postprocess=False,
+        min_depth=25,
     ),
-    outlier_scale_factor=0.05,
 )
 estimate_params = EstimateParameters(
     min_total_trajectory_points=30, smoothing_factor=100.0

@@ -191,13 +191,69 @@ class OverlapJoinParameters:
 
 
 @dataclass
-class ClusterParameters:
-    """Parameters for clustering, cluster joining, and cluster cleaning
+class TripclustParameters:
+    """Parameters for the tripclust (Dalitz) clustering algorithms
 
     Attributes
     ----------
-    min_cloud_size: int
-        The minimum size for a point cloud to be clustered
+    r: float
+        maximum neighbour distance for smoothing (default 2)
+    rdnn: boolean
+        whether or not compute r with dnn (default true)
+    k: int
+        number of tested neighbours of triplet mid point (default 19)
+    n: int
+        max number of triplets to one mid point (default 2)
+    a: float
+        1 - cos alpha, where alpha is the angle between the two triplet branches (default 0.03)
+    s: float
+        distance scale factor in metric (default 0.3)
+    sdnn: boolean
+        whether or not compute s with dnn (default true)
+    t: float
+        threshold for cdist in clustering (default 0.0)
+    tauto: boolean
+        whether or not auto generate t (default true)
+    dmax: float
+        maximum gap width (default 0.0)
+    dmax_dnn: boolean
+        whether or not use dnn for dmax (default false)
+    ordered: boolean
+        whether or not points are in chronological order (default false)
+    link: int
+        linkage method for clustering (default 0=SINGLE)
+    m: int
+        min number of triplets per cluster (default 5)
+    postprocess: boolean
+        whether or not post processing should be enabled (default false)
+    min_depth: int
+        minimum number of points making a branch in curve in post processing (default 25)
+    """
+
+    r: float
+    rdnn: bool
+    k: int
+    n: int
+    a: float
+    s: float
+    sdnn: bool
+    t: float
+    tauto: bool
+    dmax: float
+    dmax_dnn: bool
+    ordered: bool
+    link: int
+    m: int
+    postprocess: bool
+    min_depth: int
+
+
+@dataclass
+class HdbscanParameters:
+    """Parameters for clustering using the HDBSCAN algorithm
+
+    Attributes
+    ----------
     min_points: int
         min_samples parameter in scikit-learns' HDBSCAN algorithm
     min_size_scale_factor: int
@@ -209,22 +265,43 @@ class ClusterParameters:
     cluster_selection_epsilon: float
         cluster_selection_epsilon parameter in scikit-learn's HDBSCAN algorithm. Clusters less than this distance apart
         are merged in the hierarchy
-    min_cluster_size_join: int
-        The minimum size of a cluster for it to be included in the joining algorithm
-    circle_overlap_ratio: float
-        minimum overlap ratio between two circles in the cluster joining algorithm
+    """
+
+    min_points: int
+    min_size_scale_factor: float
+    min_size_lower_cutoff: int
+    cluster_selection_epsilon: float
+
+
+@dataclass
+class ClusterParameters:
+    """Parameters for clustering, cluster joining, and cluster cleaning
+
+    Attributes
+    ----------
+    min_cloud_size: int
+        The minimum size for a point cloud to be clustered
+    hdbscan_parameters: HdbscanParameters
+        Parameters used when selecting the HDBSCAN algorithm
+    tripclust_parameters: TripclustParameters
+        Parameters used when selecting the Tripclust (Dalitz) algorithm
+    overlap_join: OverlapJoinParameters
+        Parameters used when selecting overlap joining
+    continuity_join: ContinuityJoinParameters
+        Parameters used when selecting continuitu joining
+    direction_threshold: float
+        Fraction threshold for the determination of the direction for each cluster
     outlier_scale_factor: float
         Factor which is multiplied by the number of points in a trajectory to set the number of neighbors parameter
         for scikit-learns LocalOutlierFactor test
     """
 
     min_cloud_size: int
-    min_points: int
-    min_size_scale_factor: float
-    min_size_lower_cutoff: int
-    cluster_selection_epsilon: float
+    hdbscan_parameters: HdbscanParameters | None
+    tripclust_parameters: TripclustParameters | None
     overlap_join: OverlapJoinParameters | None
     continuity_join: ContinuityJoinParameters | None
+    direction_threshold: float
     outlier_scale_factor: float
 
 

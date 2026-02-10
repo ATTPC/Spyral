@@ -3,7 +3,7 @@ from ..core.schema import PhaseResult, ResultSchema
 from ..core.config import ClusterParameters, DetectorParameters
 from ..core.status_message import StatusMessage
 from ..core.point_cloud import PointCloud
-from ..core.clusterize import form_clusters, join_clusters, cleanup_clusters
+from ..core.clusterize import form_clusters, join_clusters, cleanup_clusters, tripclust_clusters, clean_clusters
 from ..core.spy_log import spyral_warn, spyral_error, spyral_info
 from ..core.run_stacks import form_run_string
 from .schema import POINTCLOUD_SCHEMA, CLUSTER_SCHEMA
@@ -145,8 +145,19 @@ class ClusterPhase(PhaseLike):
 
             # Here we don't need to use the labels array.
             # We just pass it along as needed.
+            # Perform clustering using algorithm of choice
             clusters, labels = form_clusters(cloud, self.cluster_params)
-            joined, labels = join_clusters(clusters, self.cluster_params, labels)
+
+            # Clean our individual clusters before attempting the joining
+            clean, labels = clean_clusters(clusters, self.cluster_params, labels)
+
+            # Run joining algorithm if either parameters present
+            if self.cluster_params.overlap_join is not None or self.cluster_params.continuity_join is not None:
+                joined, labels = join_clusters(clean, self.cluster_params, labels)
+            else:
+                joined = clean
+
+            # Clean up noise points
             cleaned, _ = cleanup_clusters(joined, self.cluster_params, labels)
 
             # Each event can contain many clusters
@@ -163,6 +174,7 @@ class ClusterPhase(PhaseLike):
             for cidx, cluster in enumerate(cleaned):
                 local_group = cluster_event_group.create_group(f"cluster_{cidx}")
                 local_group.attrs["label"] = cluster.label
+                local_group.attrs["direction"] = cluster.direction.value
                 local_group.create_dataset("cloud", data=cluster.data)
 
         spyral_info(__name__, f"Phase Cluster complete for run {payload.run_number}")
