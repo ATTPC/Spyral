@@ -268,7 +268,7 @@ def estimate_physics_pass(
     polar = math.atan(fit.slope)  # type: ignore
     # We have a self consistency case here. Polar should match chosen Direction
     if (polar > 0.0 and direction == Direction.BACKWARD) or (polar < 0.0 and direction == Direction.FORWARD):
-        print("Direction={direction} and polar={polar} not consistent!")
+    #    print("Direction={direction} and polar={polar} not consistent!")
         return None # Our direction guess was bad, we need to try again with the other direction
     elif direction is Direction.BACKWARD:
         polar += math.pi
