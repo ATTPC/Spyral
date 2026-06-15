@@ -208,7 +208,7 @@ class Pipeline:
                     else:
                         result = phase.construct_artifact(result, self.workspace)
             except Exception:
-                spyral_warn(__name__, f"There was a problem with run {run}")
+                spyral_warn(__name__, f"There was a problem with run {run}! Skipping run...")
                 continue
         msg_queue.put(StatusMessage("Complete", 0, 0, -1))
 
