@@ -238,7 +238,7 @@ def join_clusters_overlap_step(
             continue
 
         new_cluster = LabeledCloud(
-            g, PointCloud(event_number, np.zeros((0, 8))), np.empty(0)
+            g, Direction.NONE, PointCloud(event_number, np.zeros((0, 8))), np.empty(0)
         )
         for idx in groups_index[g]:
             new_cluster.point_cloud.data = np.concatenate(
