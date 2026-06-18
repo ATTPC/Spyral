@@ -20,12 +20,12 @@ import time
 # Generated using https://www.asciiart.eu
 SPLASH: str = r"""
 -------------------------------
- ____                        _ 
+ ____                        _
 / ___| _ __  _   _ _ __ __ _| |
 \___ \|  _ \| | | |  __/ _  | |
  ___| | |_| | |_| | | | |_| | |
 |____/|  __/ \__  |_|  \__ _|_|
-      |_|    |___/             
+      |_|    |___/
 -------------------------------
 """
 
@@ -193,8 +193,8 @@ class Pipeline:
         """
 
         rng = default_rng(seed=seed)
-        try:
-            for run in run_list:
+        for run in run_list:
+            try:
                 result = PhaseResult(
                     artifacts={
                         "trace": Path(self.traces / f"{form_run_string(run)}.h5")
@@ -202,15 +202,14 @@ class Pipeline:
                     successful=True,
                     run_number=run,
                 )
-                if not result.artifacts["trace"].exists():
-                    continue
                 for idx, phase in enumerate(self.phases):
                     if self.active[idx]:
                         result = phase.run(result, self.workspace, msg_queue, rng)
                     else:
                         result = phase.construct_artifact(result, self.workspace)
-        except Exception as e:
-            spyral_except(__name__, e)
+            except Exception:
+                spyral_warn(__name__, f"There was a problem with run {run}! Skipping run...")
+                continue
         msg_queue.put(StatusMessage("Complete", 0, 0, -1))
 
 
