@@ -248,6 +248,20 @@ class TrackInterpolator:
         if len(trajectory) < 2:
             return None
 
+        # Trim stopped region
+        # The mesh repeats the last position inside the detector
+        removal = np.full(len(trajectory),True)
+        previous_element = np.full(3, -1.0)
+        for idx, element in enumerate(trajectory): 
+            if np.all(previous_element[:] == element[:]):
+                removal[idx] = False
+            previous_element = element
+
+        trajectory = trajectory[removal]
+        # Confirm the length is still valid 
+        if len(trajectory) < 2: 
+            return None
+
         return trajectory
 
     def check_interpolator(

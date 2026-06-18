@@ -109,6 +109,8 @@ class SolverResult:
     redchisq: float
         The best-fit value of the objective function (in the case of least squares,
         the reduced chi-square)
+    pid_dedx: float 
+        dEdx value from the pid gate, either sqrt_dEdx or dEdx
     """
 
     event: int
@@ -131,6 +133,7 @@ class SolverResult:
     azimuthal: float
     sigma_azimuthal: float
     redchisq: float
+    pid_dedx: float
 
 
 def create_params(

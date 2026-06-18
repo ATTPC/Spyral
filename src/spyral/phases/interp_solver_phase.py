@@ -381,6 +381,7 @@ class InterpSolverPhase(PhaseLike):
                 interpolator,
                 self.det_params,
                 self.solver_params,
+                estimates_gated[xaxis][row], 
             )
             if res is not None:
                 phys_results.append(vars(res))

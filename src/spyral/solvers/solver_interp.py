@@ -26,28 +26,28 @@ def distances(track: np.ndarray, data: np.ndarray, weights: np.ndarray) -> float
     data: numpy.ndarray
         The data to compare to
     weights: numpy.ndarray
-        The weights due to data uncertainty (1/sigma)
+        The weights due to data uncertainty (1/sigma_x, 1/sigma_y, 1/sigma_z)
 
     Returns
     -------
     float
-        The average distance (error) weighted by uncertainty
+        The minimum error of the squared distance (residuals) for each data point  weighted by uncertainty
     """
     assert track.shape[1] == 3
     assert data.shape[1] == 3
-    assert len(data) == len(weights)
+    assert weights.shape[1] == 3
 
     dists = np.zeros((len(data), len(track)))
-    error = 0.0
+    error = np.zeros(len(data))
     for i in prange(len(data)):
         for j in prange(len(track)):
             dists[i, j] = np.sqrt(
-                (track[j, 0] - data[i, 0]) ** 2.0
-                + (track[j, 1] - data[i, 1]) ** 2.0
-                + (track[j, 2] - data[i, 2]) ** 2.0
+                (track[j, 0] - data[i, 0]) ** 2.0 * weights[i,0]
+                + (track[j, 1] - data[i, 1]) ** 2.0 * weights[i,1]
+                + (track[j, 2] - data[i, 2]) ** 2.0 * weights[i,2]
             )
-        error += np.min(dists[i]) * weights[i]
-    return error / np.sum(weights)
+        error[i]= np.min(dists[i])
+    return error
 
 
 def interpolate_trajectory(
@@ -93,7 +93,7 @@ def objective_function(
     weights: np.ndarray,
     interpolator: TrackInterpolator,
     ejectile: NucleusData,
-) -> float:
+) -> np.ndarray:
     """Function to be minimized. Returns errors for data compared to estimated track.
 
     Parameters
@@ -111,12 +111,12 @@ def objective_function(
 
     Returns
     -------
-    float
-        the error between the estimate and the data
+    np.ndarray
+        the residuals error weighted by uncertainty
     """
     trajectory = interpolate_trajectory(fit_params, interpolator, ejectile)
     if trajectory is None:
-        return 1.0e6
+        return np.full(len(x),1.0e6)
     return distances(trajectory, x, weights)
 
 
@@ -168,9 +168,17 @@ def fit_model_interp(
     # total error (distance)
     x_error = cluster.data[:, 4] * BIG_PAD_HEIGHT * 0.5
     y_error = cluster.data[:, 4] * BIG_PAD_HEIGHT / np.sqrt(3.0)
-    # total positional variance per point
-    total_var = x_error**2.0 + y_error**2.0 + z_error**2.0
-    weights = 1.0 / total_var
+    
+    weights = np.zeros((len(x_error),3))
+    weights[:,0] = 1 / x_error**2.0
+    weights[:,1] = 1 / y_error**2.0
+    weights[:,2] = 1 / z_error**2.0
+
+    # flip data array for those "backward events"
+    # notice: the ordering in z should not affect the distances squared function 
+    if cluster.direction == 1: 
+        traj_data = np.flip(traj_data, axis=0)
+        weights = np.flip(weights, axis=0)
 
     fit_params = create_params(guess, ejectile, det_params, solver_params)
 
@@ -195,6 +203,7 @@ def solve_physics_interp(
     interpolator: TrackInterpolator,
     det_params: DetectorParameters,
     solver_params: SolverParameters,
+    pid_dedx: float,
 ) -> SolverResult | None:
     """High level function to be called from the application.
 
@@ -220,6 +229,8 @@ def solve_physics_interp(
         Configuration parameters for detector characteristics
     solver_params: SolverParameters
         Configuration parameters for the solver
+    pid_dedx: float
+        dEdx value from pid gate, either sqrt_dEdx or dEdx
 
     Returns
     -------
@@ -243,9 +254,17 @@ def solve_physics_interp(
     # total error (distance)
     x_error = cluster.data[:, 4] * BIG_PAD_HEIGHT * 0.5
     y_error = cluster.data[:, 4] * BIG_PAD_HEIGHT / np.sqrt(3.0)
-    # total positional variance per point
-    total_var = x_error**2.0 + y_error**2.0 + z_error**2.0
-    weights = 1.0 / total_var
+    
+    weights = np.zeros((len(x_error), 3))
+    weights[:,0] = 1 / x_error**2.0
+    weights[:,1] = 1 / y_error**2.0
+    weights[:,2] = 1 / z_error**2.0
+
+    #flip data array for those "backward events" 
+    # notice: the ordering in z should not affect the distances squared function
+    if cluster.direction == 1: 
+        traj_data = np.flip(traj_data, axis=0)
+        weights = np.flip(weights, axis=0)
 
     fit_params = create_params(guess, ejectile, det_params, solver_params)
 
@@ -280,5 +299,6 @@ def solve_physics_interp(
         azimuthal=best_fit.params["azimuthal"].value,  # type: ignore
         sigma_azimuthal=1.0e6,
         redchisq=best_fit.redchi,  # type: ignore
+        pid_dedx = pid_dedx #type: ignore 
     )
     # This method cannot quantify uncertainties

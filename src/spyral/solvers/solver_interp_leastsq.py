@@ -26,27 +26,27 @@ def distances(track: np.ndarray, data: np.ndarray, weights: np.ndarray) -> np.nd
     data: numpy.ndarray
         The data to compare to
     weights: numpy.ndarray
-        The weights due to data uncertainty (1/sigma)
+        The weights due to data uncertainty (1/sigma_x, 1/sigma_y, 1/sigma_z)
 
     Returns
     -------
     np.ndarray
-        The minimum error for each data point weighted by uncertainty
+        The minimum error of the distance squared for each data point weighted by uncertainty
     """
     assert track.shape[1] == 3
     assert data.shape[1] == 3
-    assert len(data) == len(weights)
+    assert weights.shape[1] == 3
 
     dists = np.zeros((len(data), len(track)))
     error = np.zeros(len(data))
     for i in prange(len(data)):
         for j in prange(len(track)):
             dists[i, j] = np.sqrt(
-                (track[j, 0] - data[i, 0]) ** 2.0
-                + (track[j, 1] - data[i, 1]) ** 2.0
-                + (track[j, 2] - data[i, 2]) ** 2.0
+                (track[j, 0] - data[i, 0]) ** 2.0 * weights[i,0]
+                + (track[j, 1] - data[i, 1]) ** 2.0 * weights[i,1]
+                + (track[j, 2] - data[i, 2]) ** 2.0 * weights[i,2]
             )
-        error[i] = np.min(dists[i]) * weights[i]
+        error[i] = np.min(dists[i])
     return error
 
 
@@ -103,7 +103,7 @@ def objective_function(
     x: numpy.ndarray
         the data to be fit (x,y,z) coordinates in meters
     weights: numpy.ndarray
-        The assoicated weights due uncertainties of the data (1/sigma)
+        The associated weights due uncertainties of the data (1/sigma_x, 1/sigma_y, 1/sigma_z)
     interpolator: TrackInterpolator
         the interpolation scheme to be used
     ejectile: spyral_utils.nuclear.NucleusData
@@ -165,12 +165,20 @@ def fit_model_interp(
     ) * 0.5
     # uncertainty due to pad size, treat as bounding rectangle
     # Note that doesn't matter which side is short/long as we just use
-    # total error (distance)
+    # total error (distance) 
     x_error = cluster.data[:, 4] * BIG_PAD_HEIGHT * 0.5
     y_error = cluster.data[:, 4] * BIG_PAD_HEIGHT / np.sqrt(3.0)
-    # total positional variance per point
-    total_error = np.sqrt(x_error**2.0 + y_error**2.0 + z_error**2.0)
-    weights = 1.0 / total_error
+    
+    weights = np.zeros((len(x_error),3))
+    weights[:,0] = 1 / x_error**2.0
+    weights[:,1] = 1 / y_error**2.0
+    weights[:,2] = 1 / z_error**2.0
+
+    # flip data array for those "backward events" 
+    # notice: the ordering  should not affect the distances squared function 
+    if cluster.direction == 1: 
+        traj_data = np.flip(traj_data, axis=0)
+        weights = np.flip(weights, axis=0)
 
     fit_params = create_params(guess, ejectile, det_params, solver_params)
 
@@ -195,6 +203,7 @@ def solve_physics_interp_leastsq(
     interpolator: TrackInterpolator,
     det_params: DetectorParameters,
     solver_params: SolverParameters,
+    pid_dedx: float,
 ) -> SolverResult | None:
     """High level function to be called from the application.
 
@@ -220,6 +229,8 @@ def solve_physics_interp_leastsq(
         Configuration parameters for detector characteristics
     solver_params: SolverParameters
         Configuration parameters for the solver
+    pid_dedx: float
+        dEdx value from pid gate, either sqrt_dEdx or dEdx
 
     Returns
     -------
@@ -243,9 +254,17 @@ def solve_physics_interp_leastsq(
     # total error (distance)
     x_error = cluster.data[:, 4] * BIG_PAD_HEIGHT * 0.5
     y_error = cluster.data[:, 4] * BIG_PAD_HEIGHT / np.sqrt(3.0)
-    # total positional variance per point
-    total_error = np.sqrt(x_error**2.0 + y_error**2.0 + z_error**2.0)
-    weights = 1.0 / total_error
+    
+    weights = np.zeros((len(x_error),3))
+    weights[:,0] = 1 / x_error**2.0
+    weights[:,1] = 1 / y_error**2.0
+    weights[:,2] = 1 / z_error**2.0
+
+    #flip data array for those "backward events" 
+    # notice: the ordering in z should not affect the distance squared function 
+    if cluster.direction == 1: 
+        traj_data = np.flip(traj_data, axis=0) 
+        weights = np.flip(weights, axis=0)
 
     fit_params = create_params(guess, ejectile, det_params, solver_params)
 
@@ -281,6 +300,7 @@ def solve_physics_interp_leastsq(
         azimuthal=best_fit.params["azimuthal"].value,  # type: ignore
         sigma_azimuthal=1.0e6,
         redchisq=best_fit.redchi,  # type: ignore
+        pid_dedx = pid_dedx
     )
 
     if hasattr(best_fit, "uvars"):
