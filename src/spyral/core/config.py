@@ -98,6 +98,9 @@ class GetParameters:
 
     Attributes
     ----------
+    trace_version: str
+        Indicates the preprocess signal version used to analyze GET traces: 
+        "0" or "default" - original, "1" - artifact: phase offset removal
     baseline_window_scale: float
         The scale factor for the basline correction algorithm
     peak_separation: float
@@ -109,7 +112,7 @@ class GetParameters:
     peak_threshold: float
         The minimum amplitude of a valid peak
     """
-
+    trace_version: str
     baseline_window_scale: float
     peak_separation: float
     peak_prominence: float
