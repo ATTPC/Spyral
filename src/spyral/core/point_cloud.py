@@ -60,7 +60,7 @@ def point_cloud_from_get(event: GetEvent, pad_map: PadMap) -> PointCloud:
     cloud_matrix = np.zeros((count, 8))
     idx = 0
     for trace in event.traces:
-        if trace.get_number_of_peaks() == 0 or trace.get_number_of_peaks() > 5:
+        if trace.get_number_of_peaks() == 0 or trace.get_number_of_peaks() > 10: # increased to 10, original 5
             continue
 
         pid = trace.hw_id.pad_id
@@ -120,6 +120,11 @@ def calibrate_point_cloud_z(
         )
         if efield_correction is not None:
             cloud.data[idx] = efield_correction.correct_point(cloud.data[idx])
+    
+    # Remove events outside detector
+    mask = (cloud.data[:,2] >= 0.0) & (cloud.data[:,2]<=1000.0)
+    cloud.data = cloud.data[mask]
+
     # Remove any invalid data after the calibration
     mask = np.any(np.isnan(cloud.data), axis=1)
     cloud.data = cloud.data[~mask]  # Invert the mask to reject the NaNs
