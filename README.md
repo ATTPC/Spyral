@@ -76,6 +76,7 @@ pad_params = PadParameters(
 )
 
 get_params = GetParameters(
+    trace_version ='v0',
     baseline_window_scale=20.0,
     peak_separation=50.0,
     peak_prominence=20.0,
