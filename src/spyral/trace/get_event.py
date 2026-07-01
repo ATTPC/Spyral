@@ -1,7 +1,7 @@
 from .get_trace import GetTrace
-from ..core.config import GetParameters
+from ..core.config import GetParameters, AVAILABLE_MAPS
 from ..core.constants import INVALID_EVENT_NUMBER
-from ..core.hardware_id import hardware_id_from_array
+from ..core.hardware_id import hardware_id_from_array, validation_merged_padmap,fix_array_with_padmap
 
 import numpy as np
 from numba import njit, objmode
@@ -27,12 +27,15 @@ class GetEvent:
     rng: numpy.random.Generator
         A random number generator for use with the signal analysis
 
+
     Attributes
     ----------
     traces: list[GetTrace]
         The pad plane traces from the event
     number:
         The event number
+    padmap_validated: 
+        Checks if the padmap matches with the merged file. True h5file and map matches. 
 
     Methods
     -------
@@ -40,6 +43,8 @@ class GetEvent:
         Construct the event and process traces
     is_valid() -> bool
         Check if the event is valid
+    is_merged_map_correct() -> bool
+        Checks if the data was merged with the padmap sequence as the predefault Spyral. True - correct
     """
 
     def __init__(
@@ -51,6 +56,7 @@ class GetEvent:
     ):
         self.traces: list[GetTrace] = []
         self.number = event_number
+        # Baseline correction
         if params.trace_version == 'v0' or params.trace_version == 'default':
             trace_matrix = preprocess_traces(
                 raw_data[:, GET_DATA_TRACE_START:GET_DATA_TRACE_STOP].copy(),
@@ -64,6 +70,20 @@ class GetEvent:
             )
         else:
             raise Exception(f"Trace version {params.trace_version} is not valid! Use v0 or v1.")
+        
+        
+        # Fix traces order using the PADMAP from the experiment.
+        path_in_available_maps = False
+        for nmap in AVAILABLE_MAPS:
+            if nmap == params.padmap:
+                self.padmap_validated = validation_merged_padmap(raw_data[:,:5], nmap)
+                raw_data = fix_array_with_padmap(raw_data,nmap) 
+                path_in_available_maps = True
+        # Create an option in case the user has their own map, and it isn't available in the current Spyral version
+        if not path_in_available_maps: 
+            self.padmap_validated = validation_merged_padmap(raw_data[:,:5], params.padmap)
+            raw_data = fix_array_with_padmap(raw_data, params.padmap)
+
         self.traces = [
             GetTrace(trace_matrix[idx], hardware_id_from_array(row[0:5]), params, rng)
             for idx, row in enumerate(raw_data)
@@ -71,7 +91,9 @@ class GetEvent:
 
     def is_valid(self) -> bool:
         return self.number != INVALID_EVENT_NUMBER
-
+    
+    def is_merged_map_correct(self) ->bool:
+        return self.padmap_validated
 
 @njit
 def preprocess_traces(traces: np.ndarray, baseline_window_scale: float) -> np.ndarray:

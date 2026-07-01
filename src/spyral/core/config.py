@@ -1,7 +1,18 @@
 from dataclasses import dataclass
 from pathlib import Path
+from importlib import resources
 
 DEFAULT_MAP: Path = Path("DefaultPath")
+
+# Available Pad Maps
+# Steps for adding a padmap:
+# 1) Save it in folder: spyral.data
+# 2) Write desired name below: ARGONNE2023_MAP
+# 3) Add name to the list of AVAILABLE_MAPS 
+# 4) Open __init__, and import ARGONNE2023_MAP from config. Then, add it to the schema 
+# 5) Import tag into the main.py
+ARGONNE2023_MAP: Path = Path(resources.files("spyral.data").joinpath("ANL2023.csv"))
+AVAILABLE_MAPS: list[Path] = [ARGONNE2023_MAP]
 
 
 @dataclass
@@ -100,7 +111,10 @@ class GetParameters:
     ----------
     trace_version: str
         Indicates the preprocess signal version used to analyze GET traces: 
-        "0" or "default" - original, "1" - artifact: phase offset removal
+        "v0" or "default" - original, "v1" - artifact: phase offset removal
+    padmap: Path 
+        Address to the pad map of the experiment. Default maps are stored in spyral.data.
+        See available options above in this page. 
     baseline_window_scale: float
         The scale factor for the basline correction algorithm
     peak_separation: float
@@ -113,6 +127,7 @@ class GetParameters:
         The minimum amplitude of a valid peak
     """
     trace_version: str
+    padmap: Path
     baseline_window_scale: float
     peak_separation: float
     peak_prominence: float
