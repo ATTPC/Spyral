@@ -60,12 +60,12 @@ def point_cloud_from_get(event: GetEvent, pad_map: PadMap) -> PointCloud:
     cloud_matrix = np.zeros((count, 8))
     idx = 0
     for trace in event.traces:
-        if trace.get_number_of_peaks() == 0 or trace.get_number_of_peaks() > 10: # increased to 10, original 5
+        if trace.get_number_of_peaks() == 0:# or trace.get_number_of_peaks() > 5: 
             continue
 
         pid = trace.hw_id.pad_id
         pad = pad_map.get_pad_data(pid)
-        if pad is None or pad_map.is_beam_pad(pid):
+        if pad is None or pad_map.is_beam_pad(pid) or pad_map.is_pad_disable(pid):
             continue
         for peak in trace.get_peaks():
             cloud_matrix[idx, 0] = pad.x  # X-coordinate, geometry

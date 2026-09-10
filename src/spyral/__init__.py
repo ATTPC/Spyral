@@ -25,7 +25,6 @@ from .core.config import (
     EstimateParameters,
     SolverParameters,
     DEFAULT_MAP,
-    ARGONNE2023_MAP
 )
 from .phases.pointcloud_phase import PointcloudPhase
 from .phases.cluster_phase import ClusterPhase
@@ -60,7 +59,6 @@ __all__ = [
     "EstimateParameters",
     "SolverParameters",
     "DEFAULT_MAP",
-    "ARGONNE2023_MAP",
     "PointcloudPhase",
     "ClusterPhase",
     "EstimationPhase",

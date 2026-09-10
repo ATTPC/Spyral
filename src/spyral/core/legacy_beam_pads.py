@@ -4,6 +4,8 @@ Attributes
 ----------
 LEGACY_BEAM_PADS: list[int]
     list of pad numbers for pads in the beam region for legacy data
+DISABLE_PADS: list[int]
+    list of pads that are disabled by the user. Default is empty.
 """
 
 LEGACY_BEAM_PADS: list[int] = [
@@ -130,3 +132,5 @@ LEGACY_BEAM_PADS: list[int] = [
     5860,
     5861,
 ]
+
+DISABLE_PADS: list[int] = []

@@ -1,7 +1,7 @@
 from .get_trace import GetTrace
-from ..core.config import GetParameters, AVAILABLE_MAPS
+from ..core.config import GetParameters
 from ..core.constants import INVALID_EVENT_NUMBER
-from ..core.hardware_id import hardware_id_from_array, validation_merged_padmap,fix_array_with_padmap
+from ..core.hardware_id import hardware_id_from_array
 
 import numpy as np
 from numba import njit, objmode
@@ -34,8 +34,6 @@ class GetEvent:
         The pad plane traces from the event
     number:
         The event number
-    padmap_validated: 
-        Checks if the padmap matches with the merged file. True h5file and map matches. 
 
     Methods
     -------
@@ -43,8 +41,6 @@ class GetEvent:
         Construct the event and process traces
     is_valid() -> bool
         Check if the event is valid
-    is_merged_map_correct() -> bool
-        Checks if the data was merged with the padmap sequence as the predefault Spyral. True - correct
     """
 
     def __init__(
@@ -56,6 +52,7 @@ class GetEvent:
     ):
         self.traces: list[GetTrace] = []
         self.number = event_number
+
         # Baseline correction
         if params.trace_version == 'v0' or params.trace_version == 'default':
             trace_matrix = preprocess_traces(
@@ -66,23 +63,15 @@ class GetEvent:
             trace_matrix = preprocess_traces_v1(
                 raw_data[:, GET_DATA_TRACE_START:GET_DATA_TRACE_STOP].copy(),
                 params.baseline_window_scale,
+            )
+        elif params.trace_version == 'v2': 
+            trace_matrix = preprocess_traces_v2(
+                raw_data[:, GET_DATA_TRACE_START:GET_DATA_TRACE_STOP].copy(),
+                params.baseline_window_scale,
                 params.peak_threshold,
             )
         else:
             raise Exception(f"Trace version {params.trace_version} is not valid! Use v0 or v1.")
-        
-        
-        # Fix traces order using the PADMAP from the experiment.
-        path_in_available_maps = False
-        for nmap in AVAILABLE_MAPS:
-            if nmap == params.padmap:
-                self.padmap_validated = validation_merged_padmap(raw_data[:,:5], nmap)
-                raw_data = fix_array_with_padmap(raw_data,nmap) 
-                path_in_available_maps = True
-        # Create an option in case the user has their own map, and it isn't available in the current Spyral version
-        if not path_in_available_maps: 
-            self.padmap_validated = validation_merged_padmap(raw_data[:,:5], params.padmap)
-            raw_data = fix_array_with_padmap(raw_data, params.padmap)
 
         self.traces = [
             GetTrace(trace_matrix[idx], hardware_id_from_array(row[0:5]), params, rng)
@@ -92,8 +81,6 @@ class GetEvent:
     def is_valid(self) -> bool:
         return self.number != INVALID_EVENT_NUMBER
     
-    def is_merged_map_correct(self) ->bool:
-        return self.padmap_validated
 
 @njit
 def preprocess_traces(traces: np.ndarray, baseline_window_scale: float) -> np.ndarray:
@@ -140,11 +127,63 @@ def preprocess_traces(traces: np.ndarray, baseline_window_scale: float) -> np.nd
 
     return traces - result
 
+@njit
+def preprocess_traces_v1(traces: np.ndarray, baseline_window_scale: float) -> np.ndarray:
+    """JIT-ed Method Version 1. Main Difference is that the trace smooths the edges by 4 time buckets
+    Method for pre-cleaning the trace data in bulk before doing trace analysis
+
+    These methods are more suited to operating on the entire dataset rather than on a trace by trace basis
+    It includes
+
+    - Removal of edge effects in traces (first and last time buckets can be noisy)
+    - Baseline removal via fourier transform method (see J. Bradt thesis, pytpc library)
+
+    Parameters
+    ----------
+    traces: ndarray
+        A (n, 512) matrix where n is the number of traces and each row corresponds to a trace. This should be a copied
+        array, not a reference to an array in an hdf file
+    baseline_window_scale: float
+        The scale of the baseline filter used to perform a moving average over the basline
+
+    Returns
+    -------
+    ndarray
+        A new (n, 512) matrix which contains the traces with their baselines removed and edges smoothed
+    """
+    # Smooth out the edges of the traces
+    # traces[:, 0] = traces[:, 1]
+    # traces[:, -1] = traces[:, -2]
+    
+
+    # Remove peaks from baselines and replace with average
+    bases: np.ndarray = traces.copy()
+    for row in bases:
+        # Edge Effect: Smooth out the edges of the detector with the surrounding 4 times buckets
+        mean_start = np.mean(row[1:5])
+        mean_end = np.mean(row[-5:-1])
+        for i in range(0,5,1):
+            row[i] = mean_start
+            row[i-5] = mean_end
+        mean = np.mean(row)
+        sigma = np.std(row)
+        mask = row - mean > sigma * 1.5
+        row[mask] = np.mean(row[~mask])
+
+    # Create the filter
+    window = np.arange(-256.0, 256.0, 1.0)
+    fil = np.fft.ifftshift(np.sinc(window / baseline_window_scale))
+    transformed = np.fft.fft2(bases, axes=(1,))
+    baseline = np.real(
+        np.fft.ifft2(transformed * fil, axes=(1,))
+    )  # Apply the filter -> multiply in Fourier = convolve in normal
+
+    return traces - baseline
 
 
 
 @njit
-def preprocess_traces_v1(traces: np.ndarray, baseline_window_scale: float, peak_threshold: float, edge: int = 5) -> np.ndarray:
+def preprocess_traces_v2(traces: np.ndarray, baseline_window_scale: float, peak_threshold: float, edge: int = 5) -> np.ndarray:
     """JIT-ed Method Version 2.
     - Artifact 1 edge effect: Removal of edge effects in traces by a controled by a broaded edge time bucket range 
     - Artifact 2 phase effect: Estimation of the baseline mean with a robust method: median_filter (not JIT-ed)
