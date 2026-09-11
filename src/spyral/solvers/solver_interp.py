@@ -46,7 +46,7 @@ def distances(track: np.ndarray, data: np.ndarray, weights: np.ndarray) -> float
                 + (track[j, 1] - data[i, 1]) ** 2.0 * weights[i,1]
                 + (track[j, 2] - data[i, 2]) ** 2.0 * weights[i,2]
             )
-        error[i]= np.min(dists[i])
+        error[i]= np.nanmin(dists[i])
     return error
 
 

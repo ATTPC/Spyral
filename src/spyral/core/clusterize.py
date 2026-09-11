@@ -360,6 +360,12 @@ def join_clusters_continuity_step(
             min_z = np.min(cluster.point_cloud.data[:, 2])
             max_z = np.max(cluster.point_cloud.data[:, 2])
             avg_rho = np.linalg.norm(avg_pos[:2])
+            # density points per z: avoid joining tracks with the heavy residue
+            length_z = np.fabs(max_z - min_z)
+            if length_z<1e-5: 
+                avg_density = 1000
+            else: 
+                avg_density = cluster.point_cloud.data.shape[0] / length_z
 
             # upstream
             # determine center of cluster from circle fit and take positions in that circle ref
@@ -371,13 +377,29 @@ def join_clusters_continuity_step(
             min_z_comp = np.min(comp_cluster.point_cloud.data[:, 2])
             max_z_comp = np.max(comp_cluster.point_cloud.data[:, 2])
             avg_rho_comp = np.linalg.norm(avg_pos_comp[:2])
+            # density points per z: avoid joining tracks with the heavy residue
+            length_z_comp = np.fabs(max_z_comp - min_z_comp)
+            if length_z_comp<1e-5: 
+                avg_density_comp = 1000
+            else: 
+                avg_density_comp = comp_cluster.point_cloud.data.shape[0] / length_z_comp
 
            # compare z and rho differences to thresholds
             z_thresh = (max(max_z, max_z_comp) - min(min_z, min_z_comp)) * params.continuity_join.join_z_fraction  # type: ignore
             rho_thresh = (radius + comp_radius) / 2.0 * params.continuity_join.join_radius_fraction
             z_diff = np.fabs(avg_pos[2] - avg_pos_comp[2])
             rho_diff = np.fabs(avg_rho - avg_rho_comp)
-            if (rho_diff < rho_thresh and z_diff < z_thresh ):
+            # Take a fraction of the maximum density and check if both have a closer threshold 
+            if avg_density == 1000 or avg_density_comp==1000:
+                # force failure with broad points (min and max has the same value in z)
+                density_thresh = 1
+                density_diff = 0 
+            else: 
+                density_thresh = max(avg_density_comp, avg_density)*params.continuity_join.density_z_fraction
+                density_diff = min(avg_density_comp, avg_density)
+
+            # Conditions needed to join the tracks, and assign their new labels
+            if (rho_diff < rho_thresh and z_diff < z_thresh and density_diff>density_thresh):
                 comp_indicies = groups_index.pop(comp_cluster.label)
                 comp_labels = groups_label.pop(comp_cluster.label)
                 for subs in comp_indicies:

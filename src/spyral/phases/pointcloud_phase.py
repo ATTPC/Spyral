@@ -17,13 +17,15 @@ from ..core.spy_log import spyral_warn, spyral_info
 from ..trace.trace_reader import create_reader
 from ..trace.frib_event import TriggerType
 from ..trace.peak import Peak
-from ..core.pad_map import PadMap
+from ..core.pad_map import PadMap, MergerPadData
 from ..core.point_cloud import (
     point_cloud_from_get,
     calibrate_point_cloud_z,
     sort_point_cloud_in_z,
 )
 from .schema import TRACE_SCHEMA, POINTCLOUD_SCHEMA
+
+from ..core.constants import RIGHT_PAD_ID
 
 import numpy as np
 import h5py as h5
@@ -80,6 +82,10 @@ class PointcloudPhase(PhaseLike):
         self.frib_params = frib_params
         self.det_params = detector_params
         self.pad_map = PadMap(pad_params)
+        merger_pad_map = MergerPadData(pad_params)
+        if merger_pad_map.is_merger_padmap_loaded():
+            RIGHT_PAD_ID = merger_pad_map.load_merger_padmap()
+        # else: right_pad_id = None
 
     def create_assets(self, workspace_path: Path) -> bool:
         asset_path = self.get_asset_storage_path(workspace_path)

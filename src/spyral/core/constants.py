@@ -12,6 +12,9 @@ INVALID_EVENT_NUMBER: int
     Value is -1
 INVALID_PAD_ID: int
     Value is -1
+RIGHT_PAD_ID: None | np.ndarray 
+    This is a global variable that is used if the merger used a different padmap 
+    than the physical one
 NUMBER_OF_TIME_BUCKETS: int
     For the GET system, 512
 DEG2RAD: float
@@ -47,6 +50,8 @@ INVALID_PEAK_CENTROID: float = -1.0
 INVALID_EVENT_NUMBER: int = -1
 
 INVALID_PAD_ID: int = -1
+
+RIGHT_PAD_ID = None # global variable is temporary
 
 NUMBER_OF_TIME_BUCKETS: int = 512
 

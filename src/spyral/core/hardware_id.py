@@ -1,7 +1,10 @@
 from dataclasses import dataclass
 from .constants import INVALID_PAD_ID
+import polars as pl 
+from pathlib import Path
 import numpy as np
-
+from .pad_map import MergerPadData
+from .constants import RIGHT_PAD_ID
 
 GET_DATA_COBO_INDEX: int = 0
 GET_DATA_ASAD_INDEX: int = 1
@@ -9,6 +12,11 @@ GET_DATA_AGET_INDEX: int = 2
 GET_DATA_CHANNEL_INDEX: int = 3
 GET_DATA_PAD_INDEX: int = 4
 
+# Load a single time the Hardware padmap, in case the merger used the wrong padmap. 
+# MergerPadMap = MergerPadData()
+# if MergerPadData.is_merger_padmap_loaded():
+#     right_pad_id = MergerPadData.load_merger_padmap()
+# else: right_pad_id = None
 
 @dataclass
 class HardwareID:
@@ -67,11 +75,14 @@ def hardware_id_from_array(array: np.ndarray) -> HardwareID:
         The HardwareID object
     """
     hw_id = HardwareID()
-    hw_id.pad_id = int((array[GET_DATA_PAD_INDEX]))
     hw_id.cobo_id = int(array[GET_DATA_COBO_INDEX])
     hw_id.asad_id = int(array[GET_DATA_ASAD_INDEX])
     hw_id.aget_id = int(array[GET_DATA_AGET_INDEX])
     hw_id.aget_channel = int(array[GET_DATA_CHANNEL_INDEX])
+    if RIGHT_PAD_ID is not None: 
+        hw_id.pad_id = RIGHT_PAD_ID[hw_id.cobo_id,hw_id.asad_id,hw_id.aget_id,hw_id.aget_channel]
+    else: 
+        hw_id.pad_id = int((array[GET_DATA_PAD_INDEX]))
     return hw_id
 
 

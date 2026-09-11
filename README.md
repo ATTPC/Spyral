@@ -73,10 +73,14 @@ pad_params = PadParameters(
     pad_geometry_path=DEFAULT_MAP,
     pad_time_path=DEFAULT_MAP,
     pad_scale_path=DEFAULT_MAP,
+    merger_padmap_path=DEFAULT_MAP,
+    disable_pads = DEFAULT_MAP
 )
 
 get_params = GetParameters(
+    trace_version ='v0',
     baseline_window_scale=20.0,
+    find_peaks_method = 'scipy',
     peak_separation=50.0,
     peak_prominence=20.0,
     peak_max_width=50.0,
@@ -120,7 +124,8 @@ cluster_params = ClusterParameters(
     # continuity_join=None,
     continuity_join = ContinuityJoinParameters(
         join_radius_fraction=0.4,
-        join_z_fraction=0.2),
+        join_z_fraction=0.2,
+        density_z_fraction = 0.8),
     overlap_join=None,
     outlier_scale_factor=0.1,
     direction_threshold=0.5,

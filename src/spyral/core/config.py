@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from pathlib import Path
+from importlib import resources
 
 DEFAULT_MAP: Path = Path("DefaultPath")
-
 
 @dataclass
 class PadParameters:
@@ -19,11 +19,20 @@ class PadParameters:
     pad_time_path: Path
         Path to the csv file containing the pad time corrections. If set to DEFAULT_MAP
         uses the packaged maps.
+    merger_padmap_path: Path 
+        Path to csv file that contains the merger padmap path, in case the merger used
+        another padmap to the setup. If set to DEFAULT_MAP, it will assume the files
+        are merger with the correct padmap. 
+    disable_pads_path: Path
+        Path to csv file with pads to disable. If set to DEFAULT_MAP, it will assume you 
+        want all pads outside the beam region.
     """
 
     pad_geometry_path: Path
     pad_time_path: Path
     pad_scale_path: Path
+    merger_padmap_path: Path 
+    disable_pads: Path
 
 
 @dataclass
@@ -98,8 +107,17 @@ class GetParameters:
 
     Attributes
     ----------
+    trace_version: str
+        Indicates the preprocess signal version used to analyze GET traces: 
+        "v0" or "default" - original, "v1" - artifact: phase offset removal
+    padmap: Path 
+        Address to the pad map of the experiment. Default maps are stored in spyral.data.
+        See available options above in this page. 
     baseline_window_scale: float
         The scale factor for the basline correction algorithm
+    peak_finding_method: str 
+        Chooses the peak finding method: scipy.signal.find_peaks() option "scipy" or 
+        find_peaks_spyral() "spyral". 
     peak_separation: float
         The peak separation parameter used in scipy.signal.find_peaks
     peak_prominence: float
@@ -109,8 +127,9 @@ class GetParameters:
     peak_threshold: float
         The minimum amplitude of a valid peak
     """
-
+    trace_version: str
     baseline_window_scale: float
+    find_peaks_method: str
     peak_separation: float
     peak_prominence: float
     peak_max_width: float
@@ -165,11 +184,15 @@ class ContinuityJoinParameters:
         z_threshold = join_z_fraction * (max_z - min_z)
         where max_z and min_z are the maximum, minimum z value over both
         clusters being compared
-
+    density_z_fraction: float 
+        The percent allowed for two tracks to match in their density of points 
+        along z. Takes the fraction of the densest track and this must be greater than
+        the difference of the densities. 
     """
 
     join_radius_fraction: float
     join_z_fraction: float
+    density_z_fraction: float
 
 
 @dataclass
