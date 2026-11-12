@@ -220,37 +220,53 @@ class TripclustParameters:
     Attributes
     ----------
     r: float
-        maximum neighbour distance for smoothing (default 2)
+        Maximum neighbour distance for smoothing. 
+        Default is 2.
     rdnn: boolean
-        whether or not compute r with dnn (default true)
+        Whether or not compute r with dnn. 
+        Default is True.
     k: int
-        number of tested neighbours of triplet mid point (default 19)
+        Number of tested neighbours of triplet mid point. 
+        Default is 19.
     n: int
-        max number of triplets to one mid point (default 2)
+        Max number of triplets to one mid point.
+        Default is 2.
     a: float
-        1 - cos alpha, where alpha is the angle between the two triplet branches (default 0.03)
+        1 - cos alpha, where alpha is the angle between the two triplet branches.
+        Default is 0.03.
     s: float
-        distance scale factor in metric (default 0.3)
+        Distance scale factor in metric.
+        Default is 0.3.
     sdnn: boolean
-        whether or not compute s with dnn (default true)
+        Whether or not compute s with dnn.
+        Default is True.
     t: float
-        threshold for cdist in clustering (default 0.0)
+        Threshold for cdist in clustering.
+        Default is 0.0.
     tauto: boolean
-        whether or not auto generate t (default true)
+        Whether or not auto generate t. 
+        Default is True. 
     dmax: float
-        maximum gap width (default 0.0)
+        Maximum gap width (at the moment is not used).
+        Default is 0.0.
     dmax_dnn: boolean
-        whether or not use dnn for dmax (default false)
+        Whether or not use dnn for dmax (at the moment is not used).
+        Default is False.
     ordered: boolean
-        whether or not points are in chronological order (default false)
+        Whether or not points are in chronological order.
+        Default is False.
     link: int
-        linkage method for clustering (default 0=SINGLE)
+        Linkage method for clustering. Valid values are "single", "complete", "average", and "median". 
+        Default is "single".
     m: int
-        min number of triplets per cluster (default 5)
+        Min number of triplets per cluster. 
+        Default is 5. 
     postprocess: boolean
-        whether or not post processing should be enabled (default false)
+        Whether or not post processing should be enabled.
+        Default is False.
     min_depth: int
-        minimum number of points making a branch in curve in post processing (default 25)
+        Minimum number of points making a branch in curve in post processing.
+        Default is 25.
     """
 
     r: float
@@ -268,7 +284,7 @@ class TripclustParameters:
     link: int
     m: int
     postprocess: bool
-    min_depth: int
+    min_depth: int 
 
 
 @dataclass

@@ -29,6 +29,7 @@ from multiprocessing import SimpleQueue
 from numpy.random import Generator
 import numpy as np
 from multiprocessing.shared_memory import SharedMemory
+import os 
 
 DEFAULT_PID_XAXIS = "dEdx"
 DEFAULT_PID_YAXIS = "brho"
@@ -109,7 +110,7 @@ class InterpSolverPhase(PhaseLike):
         self.det_params = det_params
         self.nuclear_map = NuclearDataMap()
         self.shared_mesh_shape: tuple | None = None
-        self.shared_mesh_name: str = "interp_shared_mesh"
+        self.shared_mesh_name: str = f"interp_shared_mesh_{os.getlogin()}"
         self.shared_mesh_type: np.dtype | None = None
 
     def create_assets(self, workspace_path: Path) -> bool:
