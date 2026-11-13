@@ -217,58 +217,58 @@ class OverlapJoinParameters:
 class TripclustParameters:
     """Parameters for the tripclust (Dalitz) clustering algorithms
 
-    Attributes
+    Parameters
     ----------
     r: float
-        maximum neighbour distance for smoothing (default 2)
+        Maximum neighbour distance for smoothing. 
     rdnn: boolean
-        whether or not compute r with dnn (default true)
+        Whether or not compute r with dnn. 
     k: int
-        number of tested neighbours of triplet mid point (default 19)
+        Number of tested neighbours of triplet mid point. 
     n: int
-        max number of triplets to one mid point (default 2)
+        Max number of triplets to one mid point.
     a: float
-        1 - cos alpha, where alpha is the angle between the two triplet branches (default 0.03)
+        1 - cos alpha, where alpha is the angle between the two triplet branches.
     s: float
-        distance scale factor in metric (default 0.3)
+        Distance scale factor in metric.
     sdnn: boolean
-        whether or not compute s with dnn (default true)
+        Whether or not compute s with dnn.
     t: float
-        threshold for cdist in clustering (default 0.0)
+        Threshold for cdist in clustering.
     tauto: boolean
-        whether or not auto generate t (default true)
-    dmax: float
-        maximum gap width (default 0.0)
-    dmax_dnn: boolean
-        whether or not use dnn for dmax (default false)
+        Whether or not auto generate t. 
+    dmax: float, optional
+        Maximum gap width (at the moment is not used).
+    dmax_dnn: boolean, optional
+        Whether or not use dnn for dmax (at the moment is not used).
     ordered: boolean
-        whether or not points are in chronological order (default false)
-    link: int
-        linkage method for clustering (default 0=SINGLE)
+        Whether or not points are in chronological order.
+    link: str, optional
+        Linkage method for clustering. Valid values are "single", "complete", "average", and "median". Default is "single"
     m: int
-        min number of triplets per cluster (default 5)
+        Min number of triplets per cluster. 
     postprocess: boolean
-        whether or not post processing should be enabled (default false)
-    min_depth: int
-        minimum number of points making a branch in curve in post processing (default 25)
+        Whether or not post processing should be enabled.
+    min_depth: int, optional
+        Minimum number of points making a branch in curve in post processing.
     """
 
-    r: float
-    rdnn: bool
-    k: int
-    n: int
-    a: float
-    s: float
-    sdnn: bool
-    t: float
-    tauto: bool
-    dmax: float
-    dmax_dnn: bool
-    ordered: bool
-    link: int
-    m: int
-    postprocess: bool
-    min_depth: int
+    r: float = 2.0
+    rdnn: bool = True
+    k: int = 19
+    n: int = 2
+    a: float =  0.03
+    s: float = 0.3
+    sdnn: bool = True
+    t: float = 0.0
+    tauto: bool = True
+    dmax: float = 0.0
+    dmax_dnn: bool = False
+    ordered: bool = False
+    link: str = "single"
+    m: int = 5
+    postprocess: bool = False
+    min_depth: int = 25
 
 
 @dataclass
