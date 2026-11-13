@@ -654,7 +654,13 @@ def tripclust_clusters(
     pc: PointCloud, params: ClusterParameters
 ) -> tuple[list[LabeledCloud], np.ndarray]:
     """Apply the tripclust clustering algorithm to a PointCloud. 
-    It uses the rust version from https://github.com/gwm17/triplclust_rs. 
+
+    It uses the rust version of triplclust (Dalitz) written by [gwm17 github](https://github.com/gwm17/triplclust_rs). This analyze a point cloud, and group the points into clusters which in principle 
+    should correspond to particle trajectories. This function uses the tripclust (Dalitz) clustering algorithm, which groups points in triplets and does
+    a hierarchical clustering on them to find trajectories that are collinear. For details see the publication from Dalitz et al. 
+    (Dalitz et al., Comp. Phys. Comm. 235 (2019), 159, for parameters applied to the AT-TPC see [DOI link](https://doi.org/10.1016/j.cpc.2018.09.010) and
+    for a broader description see [PDF](https://www.ipol.im/pub/art/2019/234/).
+
 
     Parameters
     ----------
@@ -663,15 +669,8 @@ def tripclust_clusters(
     params: ClusterParameters
         Configuration parameters controlling the clustering algorithms. 
 
-    Analyze a point cloud, and group the points into clusters which in principle should correspond to particle trajectories.
-    This function uses the tripclust (Dalitz) clustering algorithm, which groups points in triplets and does
-    a hierarchical clustering on them to find trajectories that are collinear.
-    For details see the publication from Dalitz et al. (Dalitz et al., Comp. Phys. Comm. 235 (2019), 159,
-    DOI: https://doi.org/10.1016/j.cpc.2018.09.010) and
-    PDF: https://www.ipol.im/pub/art/2019/234/ 
-
     Returns
-    --------
+    -------
     tuple[list[LabeledCloud], numpy.ndarray]
         Two element tuple, the first being a ist of clusters found by the algorithm with labels
         the second being an array of length of the point cloud with each element conatining

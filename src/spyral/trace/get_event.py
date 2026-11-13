@@ -198,11 +198,10 @@ def preprocess_traces_v2(traces: np.ndarray, baseline_window_scale: float, peak_
         array, not a reference to an array in an hdf file
     baseline_window_scale: float
         The scale of the baseline filter used to perform a moving average over the basline
-    peak_treshold: float 
+    peak_threshold: float
         The peak treshold added for the peak finding is now used to estimate the peaks above the baseline. 
     edge: int 
         Accounts N time buckets of the edges to tackle edge effect. 
-
 
     Returns
     -------

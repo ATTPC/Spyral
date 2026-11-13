@@ -18,9 +18,11 @@ def personalized_find_peaks(y_axis : np.ndarray , npeaks: int , peak_separation:
     Author: Daniela Ramirez (FRIB)				 
     ramirezc@frib.msu.edu    
     
-    Preparation for GetTrace.find_spyral that hopefully will replace signal.find_peaks. Please improve this~ 
+    Preparation for a specialized peak finding for AT-TPC data, called GetTrace.find_spyral, it is open to improvement. 
+    It hopefully will replace signal.find_peaks in the long them. 
+    
     The function is jitted and it identifies 10 peaks with the highest amplitude. Without an overlapping 
-    peak separation and peak treshhold  
+    peak separation and peak threshold.
 
     Parameters
     ----------
@@ -33,6 +35,11 @@ def personalized_find_peaks(y_axis : np.ndarray , npeaks: int , peak_separation:
         Note: For jitted functions the value must be input manually.
     peak_threshold : float 
         Minimum peak amplitude that is accepted, value from GetParameters.
+
+    Returns
+    -------
+    tuple[np.ndarray, np.ndarray, np.ndarray]
+        Peaks x and y position and their respective index. Ordered in TB.
 
     """
     # Organize counts by counts descending order
@@ -81,17 +88,24 @@ def find_inflection_points(trace: np.ndarray, idx_peaks: np.ndarray, inflections
     Author: Daniela Ramirez (FRIB)				 
     ramirezc@frib.msu.edu    
     
-    Preparation for GetTrace.find_spyral that hopefully will replace signal.find_peaks. It locates inflection points and expands the 
+    Preparation for GetTrace.find_peaks_spyral() that hopefully will replace signal.find_peaks. It locates inflection points and expands the 
     inflections. Also, it doesn't merge the peaks if there is an overlap. That is inside GetTrace.find_peaks_spyral()
 
     Parameters
     ----------
-    y_axis : np.ndarray
+    trace : np.ndarray
         Array with the amplitude of the peak. 
-    npeaks : float 
-        Restriction with the amount of peaks accepted per trace. 
-    params : GetParameters 
-        Get Electronics parameters 
+    idx_peaks : np.ndarray
+        Index of the found peaks in trace. 
+    inflections_thresholds: int, optional 
+        A baseline restriction to not have inflection points above a certain ADC amplitude. 
+        This parameter is set to avoid having inflection points far away from the baseline.
+        Default is 10. 
+    
+    Returns
+    -------
+    tuple[np.ndarray, np.ndarray]
+        Positive inflection (left side of the peaks' centroid), and negative inflections (right side of the peaks' centroid).
 
     """
     npeaks = idx_peaks.size
@@ -331,8 +345,8 @@ class GetTrace:
             if len(peaks_x) ==0: 
                 return 
             # Find inflections and stretch 
-            inflections_thresholds = 10
-            idx_positive_inflection, idx_negative_inflection = find_inflection_points(self.trace, idx, inflections_thresholds)
+            # inflections_thresholds = 10
+            idx_positive_inflection, idx_negative_inflection = find_inflection_points(self.trace, idx)
             
             # Check if there are two overlaps or the peak is at the edge 
             remove_peaks_idx = []

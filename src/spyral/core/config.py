@@ -217,74 +217,58 @@ class OverlapJoinParameters:
 class TripclustParameters:
     """Parameters for the tripclust (Dalitz) clustering algorithms
 
-    Attributes
+    Parameters
     ----------
     r: float
         Maximum neighbour distance for smoothing. 
-        Default is 2.
     rdnn: boolean
         Whether or not compute r with dnn. 
-        Default is True.
     k: int
         Number of tested neighbours of triplet mid point. 
-        Default is 19.
     n: int
         Max number of triplets to one mid point.
-        Default is 2.
     a: float
         1 - cos alpha, where alpha is the angle between the two triplet branches.
-        Default is 0.03.
     s: float
         Distance scale factor in metric.
-        Default is 0.3.
     sdnn: boolean
         Whether or not compute s with dnn.
-        Default is True.
     t: float
         Threshold for cdist in clustering.
-        Default is 0.0.
     tauto: boolean
         Whether or not auto generate t. 
-        Default is True. 
-    dmax: float
+    dmax: float, optional
         Maximum gap width (at the moment is not used).
-        Default is 0.0.
-    dmax_dnn: boolean
+    dmax_dnn: boolean, optional
         Whether or not use dnn for dmax (at the moment is not used).
-        Default is False.
     ordered: boolean
         Whether or not points are in chronological order.
-        Default is False.
-    link: int
-        Linkage method for clustering. Valid values are "single", "complete", "average", and "median". 
-        Default is "single".
+    link: str, optional
+        Linkage method for clustering. Valid values are "single", "complete", "average", and "median". Default is "single"
     m: int
         Min number of triplets per cluster. 
-        Default is 5. 
     postprocess: boolean
         Whether or not post processing should be enabled.
-        Default is False.
-    min_depth: int
+    min_depth: int, optional
         Minimum number of points making a branch in curve in post processing.
-        Default is 25.
     """
 
-    r: float
-    rdnn: bool
-    k: int
-    n: int
-    a: float
-    s: float
-    sdnn: bool
-    t: float
-    tauto: bool
-    dmax: float
-    dmax_dnn: bool
-    ordered: bool
-    link: int
-    m: int
-    postprocess: bool
-    min_depth: int 
+    r: float = 2.0
+    rdnn: bool = True
+    k: int = 19
+    n: int = 2
+    a: float =  0.03
+    s: float = 0.3
+    sdnn: bool = True
+    t: float = 0.0
+    tauto: bool = True
+    dmax: float = 0.0
+    dmax_dnn: bool = False
+    ordered: bool = False
+    link: str = "single"
+    m: int = 5
+    postprocess: bool = False
+    min_depth: int = 25
 
 
 @dataclass

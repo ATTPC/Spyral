@@ -198,9 +198,6 @@ def estimate_physics_pass(
         The original event number
     detector_params: DetectorParameters
         Configuration parameters for the physical detector properties
-    chosen_direction: Direction, default=Direction.NONE
-        Optional direction for the trajectory. Default
-        estimates the direction.
 
     Returns
     -------
