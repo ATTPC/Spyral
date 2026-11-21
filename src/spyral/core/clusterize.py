@@ -5,7 +5,8 @@ from ..geometry.circle import least_squares_circle
 
 import sklearn.cluster as skcluster
 import numpy as np
-import tripclust
+# import tripclust
+import triplclust_py as tp
 from enum import Enum
 from scipy.interpolate import BSpline, make_smoothing_spline
 from sklearn.neighbors import LocalOutlierFactor
@@ -652,23 +653,24 @@ def hdbscan_clusters(
 def tripclust_clusters(
     pc: PointCloud, params: ClusterParameters
 ) -> tuple[list[LabeledCloud], np.ndarray]:
-    """Apply the tripclust clustering algorithm to a PointCloud
+    """Apply the tripclust clustering algorithm to a PointCloud. 
+
+    It uses the rust version of triplclust (Dalitz) written by [gwm17 github](https://github.com/gwm17/triplclust_rs). This analyze a point cloud, and group the points into clusters which in principle 
+    should correspond to particle trajectories. This function uses the tripclust (Dalitz) clustering algorithm, which groups points in triplets and does
+    a hierarchical clustering on them to find trajectories that are collinear. For details see the publication from Dalitz et al. 
+    (Dalitz et al., Comp. Phys. Comm. 235 (2019), 159, for parameters applied to the AT-TPC see [DOI link](https://doi.org/10.1016/j.cpc.2018.09.010) and
+    for a broader description see [PDF](https://www.ipol.im/pub/art/2019/234/).
+
 
     Parameters
     ----------
     pc: PointCloud
         The point cloud to be clustered
     params: ClusterParameters
-        Configuration parameters controlling the clustering algorithms
-
-    Analyze a point cloud, and group the points into clusters which in principle should correspond to particle trajectories.
-    This function uses the tripclust (Dalitz) clustering algorithm, which groups points in triplets and does
-    a hierarchical clustering on them to find trajectories that are collinear.
-    For details see the publication from Dalitz et al. (Dalitz et al., Comp. Phys. Comm. 235 (2019), 159,
-    DOI: https://doi.org/10.1016/j.cpc.2018.09.010)
+        Configuration parameters controlling the clustering algorithms. 
 
     Returns
-    --------
+    -------
     tuple[list[LabeledCloud], numpy.ndarray]
         Two element tuple, the first being a ist of clusters found by the algorithm with labels
         the second being an array of length of the point cloud with each element conatining
@@ -679,28 +681,59 @@ def tripclust_clusters(
         return ([], np.empty(0))
 
     # Create class to pass parameters and calls to C++ code
-    tc = tripclust.tripclust()
-    tc.set_r(params.tripclust_parameters.r)
-    tc.set_rdnn(params.tripclust_parameters.rdnn)
-    tc.set_k(params.tripclust_parameters.k)
-    tc.set_n(params.tripclust_parameters.n)
-    tc.set_a(params.tripclust_parameters.a)
-    tc.set_s(params.tripclust_parameters.s)
-    tc.set_sdnn(params.tripclust_parameters.sdnn)
-    tc.set_t(params.tripclust_parameters.t)
-    tc.set_tauto(params.tripclust_parameters.tauto)
-    tc.set_dmax(params.tripclust_parameters.dmax)
-    tc.set_dmax_dnn(params.tripclust_parameters.dmax_dnn)
-    tc.set_ordered(params.tripclust_parameters.ordered)
-    # tc.set_link(params.tripclust_parameters.link)
-    tc.set_m(params.tripclust_parameters.m)
-    tc.set_postprocess(params.tripclust_parameters.postprocess)
-    tc.set_min_depth(params.tripclust_parameters.min_depth)
+    # tc = tripclust.tripclust()
+    # tc.set_r(params.tripclust_parameters.r)
+    # tc.set_rdnn(params.tripclust_parameters.rdnn)
+    # tc.set_k(params.tripclust_parameters.k)
+    # tc.set_n(params.tripclust_parameters.n)
+    # tc.set_a(params.tripclust_parameters.a)
+    # tc.set_s(params.tripclust_parameters.s)
+    # tc.set_sdnn(params.tripclust_parameters.sdnn)
+    # tc.set_t(params.tripclust_parameters.t)
+    # tc.set_tauto(params.tripclust_parameters.tauto)
+    # tc.set_dmax(params.tripclust_parameters.dmax)
+    # tc.set_dmax_dnn(params.tripclust_parameters.dmax_dnn)
+    # tc.set_ordered(params.tripclust_parameters.ordered)
+    # # tc.set_link(params.tripclust_parameters.link)
+    # tc.set_m(params.tripclust_parameters.m)
+    # tc.set_postprocess(params.tripclust_parameters.postprocess)
+    # tc.set_min_depth(params.tripclust_parameters.min_depth)
 
     # Perform tripclust (Dalitz) clustering
-    tc.fill_pointcloud(pc.data)
-    tc.perform_clustering()
-    labels = tc.get_labels()
+    # tc.fill_pointcloud(pc.data)
+    # tc.perform_clustering()
+    # labels = tc.get_labels()
+
+    # Use triplclust written in Rust (always calculate dnn)
+    dnn = tp.calculate_dnn(pc.data[:,:3]) 
+
+    # Step 1: Smooth the cloud for triplclust
+    smooth_cloud = tp.smooth_pointcloud(pc.data[:,:3], 
+                                        dnn if params.tripclust_parameters.rdnn else None,  
+                                        neighborhood_radius = params.tripclust_parameters.r, 
+                                        )
+    # Step 2: Cluster the smooth pointcloud and extract the labels (comments with RUST labels)
+    labels, ulabels = tp.triplet_clustering(smooth_cloud,
+                                    dnn if params.tripclust_parameters.sdnn else None, # This dnn is only applied to "s". 
+                                    triplet_neighborhood_size = params.tripclust_parameters.k, 
+                                    triplet_max_candidates = params.tripclust_parameters.n, 
+                                    triplet_error_cutoff = params.tripclust_parameters.a, 
+                                    cluster_scale = params.tripclust_parameters.s, 
+                                    min_cluster_size = params.tripclust_parameters.m, 
+                                    linkage = params.tripclust_parameters.link, 
+                                    cluster_distance_threshold = params.tripclust_parameters.t if params.tripclust_parameters.tauto else None, 
+                                    )
+    # Step 3: Post-processing (optional)
+    if params.tripclust_parameters.postprocess:
+        labels, ulabels = tp.split_clusters(
+            smooth_cloud,
+            labels,
+            ulabels,
+            min_depth = params.tripclust_parameters.min_depth
+            )
+
+    # # Step 3: Assign labels to PointCloud
+    clusters: list[LabeledCloud] = []
 
     # Below is based on a copy from form_clusters to get same output
     # Select out data into clusters

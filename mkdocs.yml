@@ -113,6 +113,7 @@ plugins:
           options:
             allow_inspection: true
             docstring_style: numpy
+            show_attribute_values: true
 
 markdown_extensions:
   - pymdownx.arithmatex:
